@@ -132,6 +132,7 @@ clean: clean-byproducts
 
 clean-deps:
 	rm -f .*.d
+	make -C cli clean-deps
 
 dist: clean clean-deps
 	(cd ..; tar --exclude-from=base/exclude -cvf sr_base.tar base/; gzip sr_base.tar; mv\
