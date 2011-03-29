@@ -49,7 +49,7 @@ netbuf *netbuf_new(void)
 {
   struct netbuf *buf;
 
-  buf = memp_mallocp(MEMP_NETBUF);
+  buf = (struct netbuf *)memp_mallocp(MEMP_NETBUF);
   if(buf != NULL) {
     buf->p = NULL;
     buf->ptr = NULL;
@@ -202,7 +202,7 @@ netconn *netconn_new(enum netconn_type t)
 {
   struct netconn *conn;
 
-  conn = memp_mallocp(MEMP_NETCONN);
+  conn = (struct netconn *)memp_mallocp(MEMP_NETCONN);
   if(conn == NULL) {
     return NULL;
   }
@@ -230,7 +230,7 @@ netconn_delete(struct netconn *conn)
     return ERR_OK;
   }
   
-  if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+  if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
     return ERR_MEM;
   }
   
@@ -335,7 +335,7 @@ netconn_bind(struct netconn *conn, struct ip_addr *addr,
     }
   }
   
-  if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+  if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
     return (conn->err = ERR_MEM);
   }
   msg->type = API_MSG_BIND;
@@ -365,7 +365,7 @@ netconn_connect(struct netconn *conn, struct ip_addr *addr,
     }
   }
   
-  if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+  if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
     return ERR_MEM;
   }
   msg->type = API_MSG_CONNECT;
@@ -394,7 +394,7 @@ netconn_listen(struct netconn *conn)
     }
   }
   
-  if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+  if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
     return (conn->err = ERR_MEM);
   }
   msg->type = API_MSG_LISTEN;
@@ -446,7 +446,7 @@ netconn_recv(struct netconn *conn)
     }
 
 
-    buf = memp_mallocp(MEMP_NETBUF);
+    buf = (struct netbuf *)memp_mallocp(MEMP_NETBUF);
 
     if(buf == NULL) {
       conn->err = ERR_MEM;
@@ -470,7 +470,7 @@ netconn_recv(struct netconn *conn)
     buf->fromaddr = NULL;
 
     /* Let the stack know that we have taken the data. */
-    if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+    if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
       conn->err = ERR_MEM;
       return buf;
     }
@@ -511,7 +511,7 @@ netconn_send(struct netconn *conn, struct netbuf *buf)
     return conn->err;
   }
 
-  if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+  if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
     return (conn->err = ERR_MEM);
   }
 
@@ -548,7 +548,7 @@ netconn_write(struct netconn *conn, void *dataptr, uint16_t size, uint8_t copy)
     }
   }
 
-  if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+  if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
     return (conn->err = ERR_MEM);
   }
   msg->type = API_MSG_WRITE;
@@ -615,7 +615,7 @@ netconn_close(struct netconn *conn)
   if(conn == NULL) {
     return ERR_VAL;
   }
-  if((msg = memp_mallocp(MEMP_API_MSG)) == NULL) {
+  if((msg = (struct api_msg *)memp_mallocp(MEMP_API_MSG)) == NULL) {
     return (conn->err = ERR_MEM);
   }
 
