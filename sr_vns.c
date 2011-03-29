@@ -100,7 +100,7 @@ int sr_vns_connected_to_server(struct sr_instance* sr)
  *---------------------------------------------------------------------------*/
 
 int sr_vns_connect_to_server(struct sr_instance* sr,unsigned short port,
-                             char* server)
+                             const char* server)
 {
     struct hostent *hp;
     c_open command;

@@ -78,7 +78,7 @@ static void sr_destroy_instance(struct sr_instance* sr);
  *
  * @return logfile name (caller responsible for freeing it)
  */
-static char* gen_logfile( unsigned topo, char* host ) {
+static char* gen_logfile( unsigned topo, const char* host ) {
     FILE* fp;
     char str_num[12];
     unsigned num;
@@ -102,7 +102,7 @@ static char* gen_logfile( unsigned topo, char* host ) {
     fclose( fp );
 
     /* create the logfile name */
-    logfile = malloc( 512 * sizeof(char) );
+    logfile = (char*)malloc( 512 * sizeof(char) );
     assert( logfile && "malloc failed" );
     snprintf( logfile, 512, "log/topo%u-%s-%u.log", topo, host, num );
     return logfile;
@@ -124,12 +124,12 @@ static char* gen_logfile( unsigned topo, char* host ) {
 int sr_init_low_level_subystem(int argc, char **argv)
 {
     /* -- VNS default parameters -- */
-    char *auth_key_file = "auth_key";
-    char  *host   = "vrhost";
-    char *user = 0;
-    char  *rtable = "rtable";
-    char  *itable = CPU_HW_FILENAME;
-    char  *server = "171.67.71.19";
+    const char *auth_key_file = "auth_key";
+    const char *host = "vrhost";
+    const char *user = 0;
+    const char *rtable = "rtable";
+    const char *itable = CPU_HW_FILENAME;
+    const char  *server = "171.67.71.19";
     uint16_t port =  3250;
     uint16_t topo =  0;
     int ospf = 0;
