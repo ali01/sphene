@@ -119,7 +119,7 @@ struct thread_start_param {
 static void *
 thread_start(void *arg)
 {
-  struct thread_start_param *tp = arg;
+  struct thread_start_param *tp = (struct thread_start_param *)arg;
   tp->thread->pthread = pthread_self();
   tp->function(tp->arg);
   free(tp);
@@ -131,7 +131,7 @@ void sys_thread_init()
 {
   struct sys_thread *thread;
 
-  thread = malloc(sizeof(struct sys_thread));
+  thread = (struct sys_thread *)malloc(sizeof(struct sys_thread));
   thread->next = threads;
   thread->timeouts.next = NULL;
   thread->pthread = pthread_self();
@@ -144,13 +144,14 @@ sys_thread_new(void (* function)(void *arg), void *arg)
   struct sys_thread *thread;
   struct thread_start_param *thread_param;
 
-  thread = malloc(sizeof(struct sys_thread));
+  thread = (struct sys_thread *)malloc(sizeof(struct sys_thread));
   thread->next = threads;
   thread->timeouts.next = NULL;
   thread->pthread = 0;
   threads = thread;
 
-  thread_param = malloc(sizeof(struct thread_start_param));
+  thread_param =
+    (struct thread_start_param *)malloc(sizeof(struct thread_start_param));
   
   thread_param->function = function;
   thread_param->arg = arg;
@@ -167,7 +168,7 @@ sys_mbox_new()
 {
   struct sys_mbox *mbox;
 
-  mbox = malloc(sizeof(struct sys_mbox));
+  mbox = (struct sys_mbox *)malloc(sizeof(struct sys_mbox));
   mbox->first = mbox->last = 0;
   mbox->mail = sys_sem_new_(0);
   mbox->mutex = sys_sem_new_(1);
@@ -289,7 +290,7 @@ sys_sem_new_(uint8_t count)
 {
   struct sys_sem *sem;
   
-  sem = calloc(1, sizeof(struct sys_sem));
+  sem = (struct sys_sem *)calloc(1, sizeof(struct sys_sem));
   sem->c = count;
   
   pthread_cond_init(&(sem->cond), NULL);
