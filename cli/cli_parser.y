@@ -427,7 +427,7 @@ int cli_parser_handle_client( cli_client_t* client ) {
         memset( cmd_buf + cmd_blen, '\0', 2 );
 
         /* give the buffer to lex (+2 => include NULs) */
-        yystate = yy_scan_buffer( cmd_buf, cmd_blen + 2 );
+        yystate = (YY_BUFFER_STATE)yy_scan_buffer( cmd_buf, cmd_blen + 2 );
         true_or_die( yystate != NULL,
                      "Error: the last 2 bytes are not NUL for flex?" );
 
