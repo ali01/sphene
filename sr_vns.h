@@ -38,7 +38,7 @@ int sr_read_from_server_expect(struct sr_instance*, int);
 
 int  sr_vns_connected_to_server(struct sr_instance* );
 
-int  sr_vns_connect_to_server(struct sr_instance* ,unsigned short , char* );
+int  sr_vns_connect_to_server(struct sr_instance*, unsigned short, const char*);
 
 /**
  * Returns 0 on success or -1 on error.  Will print an error message to stderr
