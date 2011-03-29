@@ -10,7 +10,6 @@
 
 #define MAX_LINE_LEN 256
 #define TAB_SIZE 8
-#define YY_NO_UNISTD_H /* tell flex not to include unistd.h */
 
 /** current col number being scanend */
 static unsigned startCol, endCol;
