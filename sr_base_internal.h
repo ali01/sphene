@@ -83,7 +83,7 @@ struct sr_instance
     char user[32];  /* user name */
     char vhost[32]; /* host name */
     char lhost[32]; /* host name of machine running client */
-    char template[30]; /* template name if any */
+    char template_name[30]; /* template name if any */
     char auth_key_fn[64]; /* auth key filename */
     char rtable[32];/* filename for routing table          */
     char server[32];
@@ -138,6 +138,5 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
                             uint32_t dest, /* nbo */
                             int len);
 uint32_t sr_integ_findsrcip(uint32_t dest /* nbo */);
-
 
 #endif  /* -- SR_BASE_INTERNAL_H -- */

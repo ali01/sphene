@@ -61,6 +61,7 @@ void cli_client_cleanup( cli_client_t* client_to_free ) {
 int cli_client_handle_request( cli_client_t* client ) {
     int ret;
     int ret_grow;
+    int b;
 
     /* search for \n and block until it is found (or socket is closed) */
     ret = read_search( client->fd, "\n", &client->state, 1 );
@@ -96,7 +97,7 @@ int cli_client_handle_request( cli_client_t* client ) {
             /* tell the parser to execute the client's command(s) */
             pthread_mutex_lock( &parser_lock );
             cli_focus_set( client->fd, &client->verbose );
-            int b = cli_parser_handle_client( client );
+            b = cli_parser_handle_client( client );
             pthread_mutex_unlock( &parser_lock );
             return b;
 
@@ -209,7 +210,7 @@ int cli_main( uint16_t port ) {
         /* accepted a new connection client */
 
         /* create a client record */
-        client = malloc_or_die( sizeof(cli_client_t) );
+        client = (cli_client_t*)malloc_or_die( sizeof(cli_client_t) );
         client->fd = clientfd;
         search_state_init( &client->state, CLI_INIT_BUF, CLI_MAX_BUF );
 

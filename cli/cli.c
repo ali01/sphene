@@ -503,7 +503,7 @@ void cli_ping( gross_ip_t* data ) {
 }
 
 void cli_ping_flood( gross_ip_int_t* data ) {
-    int i;
+    unsigned int i;
     char str_ip[STRLEN_IP];
 
     if( cli_ping_handle_self( data->ip ) )

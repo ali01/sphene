@@ -63,7 +63,7 @@ void cli_local_main( void* pport ) {
         }
 
         /* create a client record */
-        client = malloc_or_die( sizeof(cli_client_t) );
+        client = (cli_client_t*)malloc_or_die( sizeof(cli_client_t) );
         client->fd = -clientfd; /* negative means use the real sockets */
         search_state_init( &client->state, CLI_INIT_BUF, CLI_MAX_BUF );
 
@@ -75,7 +75,7 @@ void cli_local_main( void* pport ) {
 }
 
 void cli_local_init( uint16_t port ) {
-    uint16_t* pport = malloc_or_die( sizeof(*pport) );
+    uint16_t* pport = (uint16_t*)malloc_or_die( sizeof(*pport) );
     *pport = port;
     sys_thread_new( cli_local_main, pport );
 }

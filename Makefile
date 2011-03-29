@@ -5,7 +5,7 @@ all : sr
 
 APP = sr
 APP_TPP = sr_tpp
-CC  = gcc
+CC  = g++
 
 # MODE controls whether the router gets/sends packets from/to the NetFPGA or VNS
 MODE_NETFPGA = -D_CPUMODE_

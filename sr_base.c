@@ -212,7 +212,7 @@ int sr_init_low_level_subystem(int argc, char **argv)
 
     /* -- zero out sr instance and set default configurations -- */
     sr_init_instance(sr);
-    sr->template[0] = '\0';
+    sr->template_name[0] = '\0';
     strncpy(sr->auth_key_fn,auth_key_file,64);
 
     strncpy(sr->rtable, rtable, SR_NAMELEN);

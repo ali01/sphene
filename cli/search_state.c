@@ -11,7 +11,7 @@ void search_state_init( search_state_t* state, size_t init_size, size_t max_size
         die( "Error: invalid size" );
     }
 
-    if( (state->chbuf = calloc( 1, init_size )) == NULL ) {
+    if( (state->chbuf = (char*)calloc( 1, init_size )) == NULL ) {
         die( "Error: calloc chbuf failed in search_state_init" );
     }
 
@@ -43,7 +43,7 @@ int search_state_grow_if_full( search_state_t* state ) {
             newsize = state->max_capacity;
         }
 
-        newmem = realloc( state->chbuf, newsize );
+        newmem = (char*)realloc( state->chbuf, newsize );
         if( newmem == NULL ) {
             errno = ENOMEM;
             die( "Error: malloc failed in search_state_grow_if_full" );
