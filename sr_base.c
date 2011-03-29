@@ -46,6 +46,8 @@
 #include <getopt.h>
 #endif /* _LINUX_ */
 
+#include "cli/helper.h"
+
 #include "lwip/tcp.h"
 #include "lwip/memp.h"
 #include "lwip/transport_subsys.h"
