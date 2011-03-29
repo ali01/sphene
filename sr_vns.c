@@ -401,7 +401,7 @@ int sr_read_from_server_expect(struct sr_instance* sr /* borrowed */, int expect
         return -1;
     }
 
-    if((buf = malloc(len)) == 0)
+    if((buf = (unsigned char*)malloc(len)) == 0)
     {
         fprintf(stderr,"Error: out of memory (sr_read_from_server)\n");
         return -1;
