@@ -177,7 +177,11 @@ void get_rest_of_line() {
 
     /* grab the rest of the line */
     do {
+#ifdef __cplusplus
+        c = yyinput();
+#else
         c = input();
+#endif
         if( c=='\0' ) c = '\n';
 
         if( endCol < MAX_LINE_LEN - 1 )
