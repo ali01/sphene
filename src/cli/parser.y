@@ -400,7 +400,7 @@ void parse_error( const char* desc ) {
 }
 
 void cli_parser_init() {
-    yydebug = 0;
+    /*yydebug = 0;*/
     meh_desc = NULL;
     has_error = meh_has_usage = meh_ignore = meh_force = 0;
     token_err[0] = '\0';

@@ -37,7 +37,7 @@ static int skip_next_prompt;
 struct sr_instance* my_get_sr() {
     static struct sr_instance* sr = NULL;
     if( ! sr ) {
-        sr = malloc( sizeof(*sr) );
+        sr = (struct sr_instance*)malloc( sizeof(*sr) );
         true_or_die( sr!=NULL, "malloc falied in my_get_sr" );
 
         fprintf( stderr, "not yet implemented: my_get_sr does not create a value for sr->interface_subsystem\n" );

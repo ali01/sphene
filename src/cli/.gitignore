@@ -3,3 +3,6 @@ test_cli.exe
 y.output
 y.tab.c
 y.tab.h
+parser.c
+parser.h
+scanner.c

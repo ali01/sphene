@@ -22,14 +22,14 @@ LEX_FLAGS = -d -i
 .yy.o : $*.yy.c
 	$(CC) $(CFLAGS) -c -o $@ $*.c
 
-lex.yy.c : cli_scanner.lex cli_parser.y y.tab.h cli_parser.h cli_scanner.h
-	$(LEX) $(LEX_FLAGS) cli_scanner.lex
+lex.yy.c : scanner.l parser.y y.tab.h cli_parser.h cli_scanner.h
+	$(LEX) $(LEX_FLAGS) scanner.l
 
 y.tab.o : y.tab.c
 	$(CC) $(CFLAGS) -c -o y.tab.o y.tab.c
 
-y.tab.h y.tab.c : cli_parser.y cli_parser.h cli_scanner.h
-	$(YACC) -d --verbose --debug --yacc cli_parser.y
+y.tab.h y.tab.c : parser.y cli_parser.h cli_scanner.h
+	$(YACC) -d --verbose --debug --yacc parser.y
 
 socket_helper_to_stderr.o : socket_helper.c socket_helper.h
 	$(CC) $(CFLAGS) -D_PRINT_TO_STDERR_NOT_SOCKET_ -c -o $@ socket_helper.c
