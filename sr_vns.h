@@ -27,7 +27,7 @@
 #include <inttypes.h>
 #endif /* _SOLARIS_ */
 
-struct sr_instance* sr; /* -- forward declare -- */
+struct sr_instance;  /* forward declare */
 
 void sr_vns_init_log(struct sr_instance* sr, char* logfile);
 
