@@ -15,7 +15,7 @@ MODE = $(MODE_VNS)
 include Makefile.common
 DEBUG = -g
 PERF = -O3
-CFLAGS = -Wall -D_GNU_SOURCE $(DEBUG) $(ARCH) -I lwtcp -I cli $(MODE) $(MORE_FLAGS)
+CFLAGS = -m32 -Wall -D_GNU_SOURCE $(DEBUG) $(ARCH) -I lwtcp -I cli $(MODE) $(MORE_FLAGS)
 USER_LIBS=libsr_base.a liblwtcp.a
 
 PFLAGS= -follow-child-processes=yes -cache-dir=/tmp/${USER}
