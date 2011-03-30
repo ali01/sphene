@@ -48,7 +48,7 @@ recv_tcp(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err)
 {
   struct netconn *conn;
 
-  conn = arg;
+  conn = (struct netconn *)arg;
 
   if(conn == NULL) {
     pbuf_free(p);
@@ -69,7 +69,7 @@ recv_udp(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   struct netbuf *buf;
   struct netconn *conn;
 
-  conn = arg;
+  conn = (struct netconn *)arg;
   
   if(conn == NULL) {
     pbuf_free(p);
@@ -77,7 +77,7 @@ recv_udp(void *arg, struct udp_pcb *pcb, struct pbuf *p,
   }
 
   if(conn->recvmbox != SYS_MBOX_NULL) {
-    buf = memp_mallocp(MEMP_NETBUF);
+    buf = (struct netbuf *)memp_mallocp(MEMP_NETBUF);
     if(buf == NULL) {
       pbuf_free(p);
       return;
@@ -97,7 +97,7 @@ poll_tcp(void *arg, struct tcp_pcb *pcb)
 {
   struct netconn *conn;
 
-  conn = arg;
+  conn = (struct netconn *)arg;
   if(conn != NULL &&
      (conn->state == NETCONN_WRITE || conn->state == NETCONN_CLOSE) &&
      conn->sem != SYS_SEM_NULL) {
@@ -111,7 +111,7 @@ sent_tcp(void *arg, struct tcp_pcb *pcb, uint16_t len)
 {
   struct netconn *conn;
 
-  conn = arg;
+  conn = (struct netconn *)arg;
   if(conn != NULL && conn->sem != SYS_SEM_NULL) {
     sys_sem_signal(conn->sem);
   }
@@ -123,7 +123,7 @@ err_tcp(void *arg, err_t err)
 {
   struct netconn *conn;
 
-  conn = arg;
+  conn = (struct netconn *)arg;
 
   conn->pcb.tcp = NULL;
 
@@ -168,7 +168,7 @@ accept_function(void *arg, struct tcp_pcb *newpcb, err_t err)
 #endif /* TCP_DEBUG */
 #endif /* API_MSG_DEBUG */
   mbox = (sys_mbox_t *)arg;
-  newconn = memp_mallocp(MEMP_NETCONN);
+  newconn = (struct netconn *)memp_mallocp(MEMP_NETCONN);
   if(newconn == NULL) {
     return ERR_MEM;
   }
@@ -285,7 +285,7 @@ do_connected(void *arg, struct tcp_pcb *pcb, err_t err)
 {
   struct netconn *conn;
 
-  conn = arg;
+  conn = (struct netconn *)arg;
 
   if(conn == NULL) {
     return ERR_VAL;
