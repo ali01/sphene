@@ -33,7 +33,6 @@ static int readRegNet(struct nf2device *nf2, unsigned reg, unsigned *val);
 static int readRegFile(struct nf2device *nf2, unsigned reg, unsigned *val);
 static int writeRegNet(struct nf2device *nf2, unsigned reg, unsigned val);
 static int writeRegFile(struct nf2device *nf2, unsigned reg, unsigned val);
-static void readStr(struct nf2device *nf2, unsigned regStart, unsigned len, char *dst);
 
 /*
  * readReg - read a register
@@ -88,7 +87,6 @@ static int readRegNet(struct nf2device *nf2, unsigned reg, unsigned *val)
  */
 static int readRegFile(struct nf2device *nf2, unsigned reg, unsigned *val)
 {
-        struct ifreq ifreq;
 	struct nf2reg nf2reg;
 	int ret;
 
@@ -163,7 +161,6 @@ static int writeRegNet(struct nf2device *nf2, unsigned reg, unsigned val)
  */
 static int writeRegFile(struct nf2device *nf2, unsigned reg, unsigned val)
 {
-        struct ifreq ifreq;
 	struct nf2reg nf2reg;
 	int ret;
 
@@ -230,10 +227,6 @@ int openDescriptor(struct nf2device *nf2)
 {
         struct ifreq ifreq;
 	char filename[PATHLEN];
-	struct sockaddr_in address;
-	int i;
-	struct sockaddr_in *sin = (struct sockaddr_in *) &ifreq.ifr_addr;
-	int found = 0;
 
 	if (nf2->net_iface)
 	{
@@ -280,8 +273,6 @@ int openDescriptor(struct nf2device *nf2)
  */
 int closeDescriptor(struct nf2device *nf2)
 {
-        struct ifreq ifreq;
-	char filename[PATHLEN];
 
 	if (nf2->net_iface)
 	{

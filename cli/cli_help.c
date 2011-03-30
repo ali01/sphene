@@ -13,14 +13,14 @@
 #endif
 
 static int cli_send_multi_help( int fd, const char* prefix, int num_args, ... ) {
-    cli_help_t help_type;
+    int help_type;
     int ret;
     va_list args;
     va_start( args, num_args );
 
     ret = (0 == writenstr( fd, prefix ));
     while( ret && num_args-- > 0 ) {
-        help_type = va_arg(args, cli_help_t);
+        help_type = va_arg(args, int);
         ret = cli_send_help_to( fd, help_type );
     }
 
@@ -28,7 +28,7 @@ static int cli_send_multi_help( int fd, const char* prefix, int num_args, ... ) 
     return ret;
 }
 
-int cli_send_help_to( int fd, cli_help_t help_type ) {
+int cli_send_help_to( int fd, int help_type ) {
     switch( help_type ) {
         case HELP_ALL:
             return cli_send_multi_help( fd, "",

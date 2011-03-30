@@ -180,7 +180,7 @@ int sr_vns_connect_to_server(struct sr_instance* sr,unsigned short port,
         buf_len = sizeof(command);
     }
 
-    if(send(sr->sockfd, buf, buf_len, 0) != buf_len)
+    if(send(sr->sockfd, buf, buf_len, 0) != (int32_t)buf_len)
     {
         perror("send(..):sr_client.c::sr_connect_to_server()");
         return -1;

@@ -72,6 +72,6 @@ typedef enum cli_help_t {
  *
  * @return 0 on failure to send, otherwise success
  */
-int cli_send_help_to( int fd, cli_help_t help_type );
+int cli_send_help_to( int fd, int help_type );
 
 #endif /* CLI_HELP_H */
