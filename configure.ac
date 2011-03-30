@@ -1,6 +1,6 @@
-AC_PREREQ(2.61)
+AC_PREREQ(2.59)
 AC_INIT([router], [1.0], msparks@stanford.edu)
-AM_INIT_AUTOMAKE([silent-rules])
+AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CXX

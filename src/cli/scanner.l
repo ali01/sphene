@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "cli_parser.h"
-#include "y.tab.h"
+#include "parser.h"
 
 #define MAX_LINE_LEN 256
 #define TAB_SIZE 8
