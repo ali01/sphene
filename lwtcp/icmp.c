@@ -66,7 +66,7 @@ icmp_input(struct pbuf *p, struct netif *inp)
 #endif /* ICMP_STATS */
 
   
-  iphdr = p->payload;
+  iphdr = (struct ip_hdr *)p->payload;
   hlen = IPH_HL(iphdr) * 4/sizeof(uint8_t);
   pbuf_header(p, -hlen);
 
@@ -94,7 +94,7 @@ icmp_input(struct pbuf *p, struct netif *inp)
 
       return;      
     }
-    iecho = p->payload;    
+    iecho = (struct icmp_echo_hdr *)p->payload;    
     if(inet_chksum_pbuf(p) != 0) {
       DEBUGF(ICMP_DEBUG, ("icmp_input: checksum failed for received ICMP echo\n"));
       pbuf_free(p);
@@ -144,9 +144,9 @@ icmp_dest_unreach(struct pbuf *p, enum icmp_dur_type t)
   q = pbuf_alloc(PBUF_TRANSPORT, 8 + IP_HLEN + 8, PBUF_RAM);
   /* ICMP header + IP header + 8 bytes of data */
 
-  iphdr = p->payload;
+  iphdr = (struct ip_hdr *)p->payload;
   
-  idur = q->payload;
+  idur = (struct icmp_dur_hdr *)q->payload;
   ICMPH_TYPE_SET(idur, ICMP_DUR);
   ICMPH_CODE_SET(idur, t);
 
@@ -172,7 +172,7 @@ icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t)
 
   q = pbuf_alloc(PBUF_TRANSPORT, 8 + IP_HLEN + 8, PBUF_RAM);
 
-  iphdr = p->payload;
+  iphdr = (struct ip_hdr *)p->payload;
 #if ICMP_DEBUG
   DEBUGF(ICMP_DEBUG, ("icmp_time_exceeded from "));
   ip_addr_debug_print(&(iphdr->src));
@@ -181,7 +181,7 @@ icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t)
   DEBUGF(ICMP_DEBUG, ("\n"));
 #endif /* ICMP_DEBNUG */
 
-  tehdr = q->payload;
+  tehdr = (struct icmp_te_hdr *)q->payload;
   ICMPH_TYPE_SET(tehdr, ICMP_TE);
   ICMPH_CODE_SET(tehdr, t);
 
