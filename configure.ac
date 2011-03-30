@@ -1,6 +1,6 @@
 AC_PREREQ(2.61)
 AC_INIT([router], [1.0], msparks@stanford.edu)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([silent-rules])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -8,6 +8,9 @@ AC_PROG_INSTALL
 AC_PROG_YACC
 AM_PROG_LIBTOOL
 AM_PROG_LEX
+
+# Less verbose compiling.
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Option to build the standalone CLI.
 AC_ARG_ENABLE(
