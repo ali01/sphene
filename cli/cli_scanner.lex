@@ -42,6 +42,9 @@ static int string_to_mac( char* str, uint8_t* result_mac );
 
 %}
 
+ /* Don't generate yyunput function */
+%option nounput
+
  /* Definitions (to make rules more readable) */
 DIGIT             ([0-9])
 HEX_DIGIT         ([0-9a-fA-F])
