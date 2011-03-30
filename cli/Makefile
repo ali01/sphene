@@ -5,7 +5,7 @@ all: test
 include ../Makefile.common
 APP = cli
 CC = gcc
-CFLAGS = -g -Wall $(ARCH) -I ../lwtcp -D_STANDALONE_CLI_
+CFLAGS = -m32 -g -Wall $(ARCH) -I ../lwtcp -D_STANDALONE_CLI_
 
 LEX = flex
 YACC = bison
