@@ -147,7 +147,7 @@ udp_input(struct pbuf *p, struct netif *inp)
   ++stats.udp.recv;
 #endif /* UDP_STATS */
 
-  iphdr = p->payload;
+  iphdr = (struct ip_hdr *)p->payload;
 
   pbuf_header(p, -(UDP_HLEN + IPH_HL(iphdr) * 4));
 
@@ -282,7 +282,7 @@ udp_send(struct udp_pcb *pcb, struct pbuf *p)
     p = q;
   }
 
-  udphdr = p->payload;
+  udphdr = (struct udp_hdr *)p->payload;
   udphdr->src = htons(pcb->local_port);
   udphdr->dest = htons(pcb->remote_port);
   udphdr->chksum = 0x0000;
@@ -390,7 +390,7 @@ udp_remove(struct udp_pcb *pcb)
 struct udp_pcb *
 udp_new(void) {
   struct udp_pcb *pcb;
-  pcb = memp_malloc(MEMP_UDP_PCB);
+  pcb = (struct udp_pcb *)memp_malloc(MEMP_UDP_PCB);
   if(pcb != NULL) {
     bzero(pcb, sizeof(struct udp_pcb));
     return pcb;

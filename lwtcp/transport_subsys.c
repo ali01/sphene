@@ -77,7 +77,7 @@ transport_thread(void *arg)
   }
 
   while(1) {                          /* MAIN Loop */
-    sys_mbox_fetch(mbox, (void *)&msg);
+    sys_mbox_fetch(mbox, (void **)&msg);
     switch(msg->type) {
     case TCP_MSG_API:
       DEBUGF(TCP_DEBUG, ("transport_thread: API message %p\n", msg));
@@ -108,7 +108,7 @@ tcp_msg_input(struct pbuf *p, struct netif *inp)
 {
   struct transport_msg *msg;
   
-  msg = memp_mallocp(MEMP_TCP_MSG);
+  msg = (struct transport_msg *)memp_mallocp(MEMP_TCP_MSG);
   if(msg == NULL) {
     pbuf_free(p);    
     return ERR_MEM;  
@@ -127,7 +127,7 @@ transport_subsys_input(struct pbuf *p, struct netif *inp)
 {
   struct transport_msg *msg;
   
-  msg = memp_mallocp(MEMP_TCP_MSG);
+  msg = (struct transport_msg *)memp_mallocp(MEMP_TCP_MSG);
   if(msg == NULL) {
     pbuf_free(p);    
     return ERR_MEM;  
@@ -146,7 +146,7 @@ void
 transport_apimsg(struct api_msg *apimsg)
 {
   struct transport_msg *msg;
-  msg = memp_mallocp(MEMP_TCP_MSG);
+  msg = (struct transport_msg *)memp_mallocp(MEMP_TCP_MSG);
   if(msg == NULL) {
     memp_free(MEMP_TCP_MSG, apimsg);
     return;
@@ -162,7 +162,7 @@ transport_subsys_init(void (* initfunc)(void *), void *arg)
   transport_init_done = initfunc;
   transport_init_done_arg = arg;
   mbox = sys_mbox_new();
-  sys_thread_new((void *)transport_thread, NULL);
+  sys_thread_new(transport_thread, NULL);
 }
 /*-----------------------------------------------------------------------------------*/
 
