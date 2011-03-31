@@ -6,17 +6,13 @@
 #define PTRINTERFACE_H_VGPMQRTI
 
 /* stl includes */
-#include <string>
-
-#include "exception.h"
 #include "ptr.h"
 
 namespace ptr_interface {
 
 template <typename T>
 class PtrInterface {
-  friend class Ptr<T>;
-public:
+ public:
   unsigned long references() const {
     return ref_;
   }
@@ -27,23 +23,23 @@ public:
   }
 
   virtual const PtrInterface * deleteRef() const {
-    if (ref_ == 0) {
-      string msg = "attempt to delete an object with zero references";
-      throw MemoryException(__FILE__, __LINE__, msg);
-    }
-    if( --ref_ == 0 ) {
+    if (--ref_ == 0) {
       onZeroReferences();
       return 0;
     }
+
     return this;
   }
 
-protected:
+ protected:
   PtrInterface() : ref_(0) {}
   virtual ~PtrInterface() {}
   virtual void onZeroReferences() const { delete this; }
 
   mutable unsigned long ref_;
+
+ private:
+  friend class Ptr<T>;
 };
 
 } /* end of namespace ptr_interface */

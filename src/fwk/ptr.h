@@ -9,7 +9,7 @@ namespace Fwk {
 
 template <typename T>
 class Ptr {
-public:
+ public:
   Ptr(T* p = 0) : ptr_(p) {
     if (ptr_)
       ptr_->newRef();
@@ -68,7 +68,7 @@ public:
     return dynamic_cast<TargetD*>(_o.ptr());
   }
 
-protected:
+ protected:
   T *ptr_;
 };
 
@@ -76,8 +76,13 @@ template<class T> Ptr<T>&
 Ptr<T>::operator=( const Ptr<T>& mp ) {
   const T * save = ptr_;
   ptr_ = mp.ptr_;
-  if( ptr_ ) ptr_->newRef();
-  if( save ) save->deleteRef();
+
+  if (ptr_)
+    ptr_->newRef();
+
+  if (save)
+    save->deleteRef();
+
   return *this;
 }
 
@@ -85,8 +90,13 @@ template<class T> Ptr<T>&
 Ptr<T>::operator=( Ptr<T>& mp ) {
   T * save = ptr_;
   ptr_ = mp.ptr_;
-  if( ptr_ ) ptr_->newRef();
-  if( save ) save->deleteRef();
+
+  if (ptr_)
+    ptr_->newRef();
+
+  if (save)
+    save->deleteRef();
+
   return *this;
 }
 
@@ -94,8 +104,13 @@ template<class T> Ptr<T>&
 Ptr<T>::operator=( T* p ) {
   T * save = ptr_;
   ptr_ = p;
-  if( ptr_ ) ptr_->newRef();
-  if( save ) save->deleteRef();
+
+  if (ptr_)
+    ptr_->newRef();
+
+  if (save)
+    save->deleteRef();
+
   return *this;
 }
 
