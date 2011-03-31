@@ -35,16 +35,16 @@ AM_YFLAGS   = -d
 USER_LIBS = libsr_base.a liblwtcp.a
 noinst_LIBRARIES = $(USER_LIBS) libgtest.a
 
-liblwtcp_a_SOURCES = src/lwtcp/tcp.c src/lwtcp/tcp_input.c											\
-                     src/lwtcp/tcp_output.c src/lwtcp/mem.c src/lwtcp/memp.c		\
-                     src/lwtcp/stats.c src/lwtcp/sys.c src/lwtcp/inet.c					\
+liblwtcp_a_SOURCES = src/lwtcp/tcp.c src/lwtcp/tcp_input.c			\
+                     src/lwtcp/tcp_output.c src/lwtcp/mem.c src/lwtcp/memp.c	\
+                     src/lwtcp/stats.c src/lwtcp/sys.c src/lwtcp/inet.c		\
                      src/lwtcp/pbuf.c src/lwtcp/sys_arch.c src/lwtcp/sockets.c	\
-                     src/lwtcp/api_lib.c src/lwtcp/api_msg.c										\
-                     src/lwtcp/transport_subsys.c src/lwtcp/udp.c								\
+                     src/lwtcp/api_lib.c src/lwtcp/api_msg.c			\
+                     src/lwtcp/transport_subsys.c src/lwtcp/udp.c		\
                      src/lwtcp/icmp.c src/lwtcp/ip_addr.c src/lwtcp/err.c
 
-libsr_base_a_SOURCES = src/sr_base.c src/sr_dumper.c src/sr_integration.c		\
-                       src/sr_lwtcp_glue.c src/sr_vns.c											\
+libsr_base_a_SOURCES = src/sr_base.c src/sr_dumper.c src/sr_integration.c	\
+                       src/sr_lwtcp_glue.c src/sr_vns.c				\
                        src/sr_cpu_extension_nf2.c src/real_socket_helper.c	\
                        src/sha1.c
 
@@ -62,8 +62,8 @@ endif
 BUILT_SOURCES = src/cli/scanner.c src/cli/parser.c
 
 # sr
-RESTRICTED_CLI_SRCS = src/cli/cli.c src/cli/cli_help.c src/cli/cli_main.c			\
-                      src/cli/search_state.c src/cli/cli_local.c							\
+RESTRICTED_CLI_SRCS = src/cli/cli.c src/cli/cli_help.c src/cli/cli_main.c	\
+                      src/cli/search_state.c src/cli/cli_local.c		\
                       src/cli/parser.y src/cli/scanner.l src/cli/helper.c
 SR_SRCS_CLI = src/cli/socket_helper.c $(RESTRICTED_CLI_SRCS) src/sr_lwtcp_glue.c
 SR_SRCS_MAIN = src/sr_main.c
