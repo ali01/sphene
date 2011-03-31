@@ -49,7 +49,7 @@ void sr_transport_input(uint8_t* packet /* borrowed */)
      *    initialize netif's with the hw information and pass handles
      *    to them around with the packets
      *                                                            -- */
-    memset(&inp, sizeof(struct netif), 0);
+    memset(&inp, 0, sizeof(struct netif));
 
     struct ip* header = (struct ip*)packet;
 
