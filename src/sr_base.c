@@ -89,9 +89,12 @@ static char* gen_logfile( unsigned topo, const char* host ) {
     if( ! fp )
         die( "Error: could not open file log/.count for read-access" );
 
-    fgets( str_num, 12, fp );
-    sscanf( str_num, "%u", &num );
-    fclose( fp );
+    if (fgets(str_num, 12, fp) == NULL)
+      num = 0;
+    else
+      sscanf(str_num, "%u", &num);
+
+    fclose(fp);
 
     /* write the new count */
     fp = fopen( "log/.count", "w" );
