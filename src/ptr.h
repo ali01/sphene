@@ -5,8 +5,6 @@
 #ifndef PTR_H_M10ZP6RI
 #define PTR_H_M10ZP6RI
 
-namespace Simone {
-
 template <typename T>
 class Ptr {
 public:
@@ -53,7 +51,7 @@ public:
   }
 
   /* enable use with Simone::ConcurrentCollection */
-  template <typename Collection> 
+  template <typename Collection>
   void collectionIs(Collection *_c) const {
     ptr_->collectionIs(_c);
   }
@@ -62,7 +60,7 @@ public:
   static Ptr<TargetS> st_cast(Ptr<SourceS> _o) {
     return static_cast<TargetS*>(_o.ptr());
   }
-  
+
   template <typename TargetD, typename SourceD>
   static Ptr<TargetD> dyn_cast(Ptr<SourceD> _o) {
     return dynamic_cast<TargetD*>(_o.ptr());
@@ -97,8 +95,6 @@ Ptr<T>::operator=( T* p ) {
   if( ptr_ ) ptr_->newRef();
   if( save ) save->deleteRef();
   return *this;
-}
-
 }
 
 #endif
