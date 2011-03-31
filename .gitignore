@@ -3,3 +3,4 @@
 *.a
 sr
 build
+auth_key
