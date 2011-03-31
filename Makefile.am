@@ -22,7 +22,7 @@ if STANDALONE_CLI
 CLI_FLAGS
 endif
 
-AM_CPPFLAGS = -m32 -O3 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
+AM_CPPFLAGS = -m32 -O3 -Wall -Werror -Wno-unused-result -D_GNU_SOURCE_ -ggdb \
               -I src -I src/cli -I src/lwtcp \
               $(ARCH) $(MODE) $(CLI_FLAGS) \
               -fno-strict-aliasing
