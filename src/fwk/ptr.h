@@ -5,6 +5,8 @@
 #ifndef PTR_H_M10ZP6RI
 #define PTR_H_M10ZP6RI
 
+namespace Fwk {
+
 template <typename T>
 class Ptr {
 public:
@@ -96,5 +98,7 @@ Ptr<T>::operator=( T* p ) {
   if( save ) save->deleteRef();
   return *this;
 }
+
+} /* end of namespace Fwk */
 
 #endif

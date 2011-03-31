@@ -11,6 +11,8 @@
 #include "exception.h"
 #include "ptr.h"
 
+namespace ptr_interface {
+
 template <typename T>
 class PtrInterface {
   friend class Ptr<T>;
@@ -43,5 +45,7 @@ protected:
 
   mutable unsigned long ref_;
 };
+
+} /* end of namespace ptr_interface */
 
 #endif
