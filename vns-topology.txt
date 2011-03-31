@@ -1,0 +1,81 @@
+This readme describes your particular setup for the VNS sr assignment.
+
+You have been assigned topology 594 which looks like this:
+
+
+                                            Application Server
+                                        +====================+
+                                        |                    |
+                                        |   10.3.0.29        |
+                                        |                    |
+                                        +====================+
+                                                /
+                                               /
+                                              /
+                    eth0:                    /
+                   10.3.0.24                /     eth1: 10.3.0.28
+                           +============(eth1)==+
+                           |                    |
+  internet =============(eth0)  Your Router     |
+                           |                    |
+                           +============(eth2)==+
+                                            \    eth2: 10.3.0.30
+                                             \
+                                              \
+                                               \
+                                        +====================+
+                                        |                    |
+                                        |  10.3.0.31         |
+                                        |                    |
+                                        +====================+
+                                           Application Server
+
+After extracting the stub code, you'll need to create a file named "auth_key" and place your authentication key in this file.  Your authentication key can be viewed if you click on the "Your Profile" link on the VNS web interface.
+
+To connect to your topology, after compiling the stub code, invoke sr as follows:
+
+>./sr -t 594 -s vns-1.stanford.edu -u <your_vns_user_name>
+
+Please verify that the IP addresses for the interfaces match those in this email!
+
+Your output upon connecting should look like this:
+
+Using VNS sr stub code revised 2010-01-21 (rev 0.23)
+Loading routing table
+---------------------------------------------
+Destination	Gateway		Mask	Iface
+0.0.0.0            172.24.74.17       0.0.0.0            eth0
+10.3.0.29          10.3.0.29          255.255.255.255    eth1
+10.3.0.31          10.3.0.31          255.255.255.255    eth2
+---------------------------------------------
+Client gorden connecting to Server vns-1.stanford.edu:3250
+Requesting topology 594
+successfully authenticated as <your_vns_user_name>
+Router interfaces:
+ Requesting topology 594
+ Router interfaces:
+ eth0    HWaddr70:00:00:eb:00:01
+ inet addr 10.3.0.24
+ eth1    HWaddr70:00:00:eb:00:02
+ inet addr 10.3.0.28
+ eth2    HWaddr70:00:00:eb:00:06
+ inet addr 10.3.0.30
+ <-- Ready to process packets --> 
+**************************************
+VNS Welcome Message
+**************************************
+System status should be normal. Enjoy!
+
+Secondly, please verify that you can see packets arriving to your topology when you try and ping one of your router interfaces.  To do this, connect to your topology as described above and try and ping eth0 (IP: 10.3.0.24).
+
+> ping 10.3.0.24
+
+If you see output from sr that looks like:
+
+ *** -> Received packet of length 60
+ *** -> Received packet of length 60
+ *** -> Received packet of length 60
+
+ everything is working!  If not, please email vns-support@lists.stanford.edu.
+
+Good Luck!
