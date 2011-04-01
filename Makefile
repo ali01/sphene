@@ -1,6 +1,13 @@
 # Output build directoy.
 BUILD = build
 
+# Look for clang++ on the system.
+CLANGPP_PATH = $(shell which clang++)
+ifeq ($(shell if [ -e $(CLANGPP_PATH) ]; then echo "t"; fi), t)
+  CXX_OPTION = CXX=$(CLANGPP_PATH)
+endif
+
+
 .PHONY: default
 default:
 	make -C $(BUILD)
@@ -31,8 +38,11 @@ autoreconf:
 # Run configure script.
 .PHONY: configure
 configure:
+ifdef CXX_OPTION
+	@echo "Using clang++: $(CLANGPP_PATH)"
+endif
 	@echo "Running configure..."
-	cd $(BUILD) && ./configure
+	cd $(BUILD) && ./configure $(CXX_OPTION)
 
 .PHONY: all
 all: builddir symlinks autoreconf configure
