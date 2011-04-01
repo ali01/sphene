@@ -3,25 +3,25 @@
 
 #include "fwk/ptr_interface.h"
 
-class PacketBuffer : public Fwk::PtrInterface<PacketBuffer> {
+class Buffer : public Fwk::PtrInterface<Buffer> {
  public:
-  typedef Fwk::Ptr<const PacketBuffer> PtrConst;
-  typedef Fwk::Ptr<PacketBuffer> Ptr;
+  typedef Fwk::Ptr<const Buffer> PtrConst;
+  typedef Fwk::Ptr<Buffer> Ptr;
 
-  static Ptr PacketBufferNew(void* buffer, size_t len) {
-    return new PacketBuffer(buffer, len);
+  static Ptr BufferNew(void* buffer, size_t len) {
+    return new Buffer(buffer, len);
   }
 
- private:
-  PacketBuffer(void* _buffer, size_t _len) : buffer_(_buffer), len_(_len) {}
+ protected:
+  Buffer(void* buffer, size_t len) : buffer_(buffer), len_(len) {}
 
   /* data members */
   void* buffer_;
   size_t len_;
 
   /* operations disallowed */
-  PacketBuffer(const PacketBuffer&);
-  void operator=(const PacketBuffer&);
+  Buffer(const Buffer&);
+  void operator=(const Buffer&);
 };
 
 #endif
