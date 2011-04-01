@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign color-tests
 ACLOCAL_AMFLAGS = -I m4
 GTEST_DIR = gtest-1.6.0
 
