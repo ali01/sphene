@@ -1,6 +1,4 @@
-*.o
-.*.d
-*.a
-sr
+src/cli/parser.cc
+src/cli/scanner.cc
 build
 auth_key
