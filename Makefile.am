@@ -77,13 +77,16 @@ cli_SOURCES = $(SR_SRCS_CLI)
 cli_LDADD = $(USER_LIBS)
 
 # Unit tests.
-TESTS = sample1_unittest
+TESTS = sample1_unittest packet_unittest
 bin_PROGRAMS += $(TESTS)
 
 sample1_unittest_SOURCES = tests/sample1_unittest.cc tests/sample1.cc
 sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sample1_unittest_LDADD = libgtest.a
 
+packet_unittest_SOURCES = tests/packet_unittest.cc
+packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 .PHONY: all deep-clean
 deep-clean: distclean

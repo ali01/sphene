@@ -8,7 +8,7 @@
 /* stl includes */
 #include "ptr.h"
 
-namespace ptr_interface {
+namespace Fwk {
 
 template <typename T>
 class PtrInterface {
