@@ -15,11 +15,11 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
  protected:
   Buffer(void* buffer, size_t len) : buffer_(buffer), len_(len) {}
 
-  /* data members */
+  /* Data members. */
   void* buffer_;
   size_t len_;
 
-  /* operations disallowed */
+  /* Operations disallowed. */
   Buffer(const Buffer&);
   void operator=(const Buffer&);
 };
