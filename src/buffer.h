@@ -29,18 +29,11 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
     delete [] buffer_;
   }
 
-<<<<<<< HEAD
  private:
   uint8_t* buffer_;
   size_t len_;
 
-=======
-  /* Data members. */
-  void* buffer_;
-  size_t len_;
-
   /* Operations disallowed. */
->>>>>>> 07c49338f8a998f2aa79f88feff3b0c993324724
   Buffer(const Buffer&);
   void operator=(const Buffer&);
 };
