@@ -47,7 +47,7 @@ int main(int argc, char** argv)
      *        clean argv
      *                                            -- */
 
-    sr_init_low_level_subystem(argc, argv);
+    sr_init_low_level_subsystem(argc, argv);
 
     /* start the command-line interface (blocks until the router terminates) */
     if( cli_main( CLI_PORT ) == CLI_ERROR )

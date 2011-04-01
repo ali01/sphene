@@ -11,6 +11,6 @@
 #ifndef SR_BASE_H
 #define SR_BASE_H
 
-int   sr_init_low_level_subystem(int argc, char **argv);
+int   sr_init_low_level_subsystem(int argc, char **argv);
 
 #endif  /* -- SR_BASE_H -- */

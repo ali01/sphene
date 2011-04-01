@@ -13,7 +13,7 @@
  *  - lwip requires that only one instance of the IP stack exist, therefore
  *    at the moment we don't support multiple instances of sr.  However
  *    support for this (given a cooperative tcp stack) would be simple,
- *    simple allow sr_init_low_level_subystem(..) to create new sr_instances
+ *    simple allow sr_init_low_level_subsystem(..) to create new sr_instances
  *    each time they are called and return an identifier.  This identifier
  *    must be passed into sr_global_instance(..) to return the correct
  *    instance.
@@ -112,7 +112,7 @@ static char* gen_logfile( unsigned topo, const char* host ) {
 }
 
 /*----------------------------------------------------------------------------
- * sr_init_low_level_subystem
+ * sr_init_low_level_subsystem
  *
  * Entry method to the sr low level network subsystem. Responsible for
  * managing, connecting to the server, reserving the topology, reading
@@ -124,7 +124,7 @@ static char* gen_logfile( unsigned topo, const char* host ) {
  *
  *---------------------------------------------------------------------------*/
 
-int sr_init_low_level_subystem(int argc, char **argv)
+int sr_init_low_level_subsystem(int argc, char **argv)
 {
     /* -- VNS default parameters -- */
     const char *auth_key_file = "auth_key";
