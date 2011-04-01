@@ -35,20 +35,21 @@ AM_YFLAGS   = -d
 USER_LIBS = libsr_base.a liblwtcp.a
 noinst_LIBRARIES = $(USER_LIBS) libgtest.a
 
-liblwtcp_a_SOURCES = src/lwtcp/tcp.c src/lwtcp/tcp_input.c			\
-                     src/lwtcp/tcp_output.c src/lwtcp/mem.c src/lwtcp/memp.c	\
-                     src/lwtcp/stats.c src/lwtcp/sys.c src/lwtcp/inet.c		\
-                     src/lwtcp/pbuf.c src/lwtcp/sys_arch.c src/lwtcp/sockets.c	\
-                     src/lwtcp/api_lib.c src/lwtcp/api_msg.c			\
-                     src/lwtcp/transport_subsys.c src/lwtcp/udp.c		\
-                     src/lwtcp/icmp.c src/lwtcp/ip_addr.c src/lwtcp/err.c
+liblwtcp_a_SOURCES = src/lwtcp/tcp.cc src/lwtcp/tcp_input.cc			\
+                     src/lwtcp/tcp_output.cc src/lwtcp/mem.cc src/lwtcp/memp.cc	\
+                     src/lwtcp/stats.cc src/lwtcp/sys.cc src/lwtcp/inet.cc	\
+                     src/lwtcp/pbuf.cc src/lwtcp/sys_arch.cc			\
+                     src/lwtcp/sockets.cc src/lwtcp/api_lib.cc			\
+                     src/lwtcp/api_msg.cc src/lwtcp/transport_subsys.cc		\
+                     src/lwtcp/udp.cc src/lwtcp/icmp.cc src/lwtcp/ip_addr.cc	\
+                     src/lwtcp/err.cc
 
 cc_srcs = src/data_plane.cc
 
-libsr_base_a_SOURCES = src/sr_base.c src/sr_dumper.c src/sr_integration.c	\
-                       src/sr_lwtcp_glue.c src/sr_vns.c				\
-                       src/sr_cpu_extension_nf2.c src/real_socket_helper.c	\
-                       src/sha1.c $(cc_srcs)
+libsr_base_a_SOURCES = src/sr_base.cc src/sr_dumper.cc src/sr_integration.cc	\
+                       src/sr_lwtcp_glue.cc src/sr_vns.cc			\
+                       src/sr_cpu_extension_nf2.cc src/real_socket_helper.cc	\
+                       src/sha1.cc $(cc_srcs)
 
 # Google Test library.
 libgtest_a_SOURCES = $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
@@ -61,15 +62,15 @@ if STANDALONE_CLI
 bin_PROGRAMS += cli
 endif
 
-BUILT_SOURCES = src/cli/scanner.c src/cli/parser.c
+BUILT_SOURCES = src/cli/scanner.cc src/cli/parser.cc
 
 # sr
-RESTRICTED_CLI_SRCS = src/cli/cli.c src/cli/cli_help.c src/cli/cli_main.c	\
-                      src/cli/search_state.c src/cli/cli_local.c		\
-                      src/cli/parser.y src/cli/scanner.l src/cli/helper.c
-SR_SRCS_CLI = src/cli/socket_helper.c $(RESTRICTED_CLI_SRCS) src/sr_lwtcp_glue.c
-SR_SRCS_MAIN = src/sr_main.c
-SR_SRCS_BASE = src/nf2util.c
+RESTRICTED_CLI_SRCS = src/cli/cli.cc src/cli/cli_help.cc src/cli/cli_main.cc	\
+                      src/cli/search_state.cc src/cli/cli_local.cc		\
+                      src/cli/parser.yy src/cli/scanner.ll src/cli/helper.cc
+SR_SRCS_CLI = src/cli/socket_helper.cc $(RESTRICTED_CLI_SRCS) src/sr_lwtcp_glue.cc
+SR_SRCS_MAIN = src/sr_main.cc
+SR_SRCS_BASE = src/nf2util.cc
 
 sr_SOURCES = $(SR_SRCS_MAIN) $(SR_SRCS_BASE) $(SR_SRCS_CLI)
 sr_LDADD = $(USER_LIBS)
