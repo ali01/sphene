@@ -1,5 +1,5 @@
-#ifndef PACKET_BUFFER_H_QNX4VITL
-#define PACKET_BUFFER_H_QNX4VITL
+#ifndef BUFFER_H_QNX4VITL
+#define BUFFER_H_QNX4VITL
 
 #include "fwk/ptr_interface.h"
 
