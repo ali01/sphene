@@ -1,13 +1,13 @@
 #include "gtest/gtest.h"
 
 #include "buffer.h"
-#include "packet.h"
+#include "ethernet_packet.h"
 
 
 TEST(PacketTest, Construct) {
   char data[64];
   Buffer::Ptr buf = Buffer::BufferNew(data, sizeof(data));
-  Packet pkt(buf);
+  EthernetPacket pkt(buf, 0);
 
   ASSERT_EQ(buf, pkt.buffer());
 }

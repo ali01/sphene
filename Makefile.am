@@ -43,10 +43,12 @@ liblwtcp_a_SOURCES = src/lwtcp/tcp.c src/lwtcp/tcp_input.c			\
                      src/lwtcp/transport_subsys.c src/lwtcp/udp.c		\
                      src/lwtcp/icmp.c src/lwtcp/ip_addr.c src/lwtcp/err.c
 
+cc_srcs = src/data_plane.cc
+
 libsr_base_a_SOURCES = src/sr_base.c src/sr_dumper.c src/sr_integration.c	\
                        src/sr_lwtcp_glue.c src/sr_vns.c				\
                        src/sr_cpu_extension_nf2.c src/real_socket_helper.c	\
-                       src/sha1.c
+                       src/sha1.c $(cc_srcs)
 
 # Google Test library.
 libgtest_a_SOURCES = $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc

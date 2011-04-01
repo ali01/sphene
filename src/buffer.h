@@ -1,6 +1,8 @@
 #ifndef BUFFER_H_QNX4VITL
 #define BUFFER_H_QNX4VITL
 
+#include <cstdlib>
+
 #include "fwk/ptr_interface.h"
 
 class Buffer : public Fwk::PtrInterface<Buffer> {
