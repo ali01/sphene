@@ -1,8 +1,9 @@
 #ifndef BUFFER_H_QNX4VITL
 #define BUFFER_H_QNX4VITL
 
-#include <inttypes.h>
 #include <cstdlib>
+#include <inttypes.h>
+#include <string.h>
 
 #include "fwk/ptr_interface.h"
 
@@ -22,6 +23,7 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
  protected:
   Buffer(void* buffer, size_t len) {
     buffer_ = new uint8_t[len];
+    memcpy(buffer_, buffer, len);
     len_ = len;
   }
 
