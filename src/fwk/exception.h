@@ -14,7 +14,7 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-namespace Simone {
+namespace Fwk {
 
 /* forward declarations */
 class Exception;
