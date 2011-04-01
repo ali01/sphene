@@ -8,15 +8,15 @@ class PacketBuffer : public Fwk::PtrInterface<PacketBuffer> {
   typedef Fwk::Ptr<const PacketBuffer> PtrConst;
   typedef Fwk::Ptr<PacketBuffer> Ptr;
 
-  static Ptr PacketBufferNew(void *buffer, size_t len) {
+  static Ptr PacketBufferNew(void* buffer, size_t len) {
     return new PacketBuffer(buffer, len);
   }
 
  private:
-  PacketBuffer(void *_buffer, size_t _len) : buffer_(_buffer), len_(_len) {}
+  PacketBuffer(void* _buffer, size_t _len) : buffer_(_buffer), len_(_len) {}
 
   /* data members */
-  void *buffer_;
+  void* buffer_;
   size_t len_;
 
   /* operations disallowed */
