@@ -26,10 +26,10 @@ class DataPlane : public Fwk::PtrInterface<DataPlane> {
 
   class PacketFunctor : public Packet::Functor {
    public:
-    void operator()(ARPPacket *);
-    void operator()(EthernetPacket *);
-    void operator()(ICMPPacket *);
-    void operator()(IPPacket *);
+    void operator()(ARPPacket*);
+    void operator()(EthernetPacket*);
+    void operator()(ICMPPacket*);
+    void operator()(IPPacket*);
   };
 
   /* Operations disallowed. */

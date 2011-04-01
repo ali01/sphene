@@ -7,10 +7,10 @@
 
 DataPlane::DataPlane() { }
 
-void DataPlane::PacketFunctor::operator()(ARPPacket *pkt) { }
+void DataPlane::PacketFunctor::operator()(ARPPacket* pkt) { }
 
-void DataPlane::PacketFunctor::operator()(EthernetPacket *pkt) { }
+void DataPlane::PacketFunctor::operator()(EthernetPacket* pkt) { }
 
-void DataPlane::PacketFunctor::operator()(ICMPPacket *pkt) { }
+void DataPlane::PacketFunctor::operator()(ICMPPacket* pkt) { }
 
-void DataPlane::PacketFunctor::operator()(IPPacket *pkt) { }
+void DataPlane::PacketFunctor::operator()(IPPacket* pkt) { }
