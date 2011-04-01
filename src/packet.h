@@ -15,17 +15,17 @@ class Packet {
   Buffer::Ptr buffer() const { return buffer_; }
 
   class Functor {
-    virtual void operator()(ARPPacket *) { }
-    virtual void operator()(EthernetPacket *) { }
-    virtual void operator()(ICMPPacket *) { }
-    virtual void operator()(IPPacket *) { }
+    virtual void operator()(ARPPacket*) { }
+    virtual void operator()(EthernetPacket*) { }
+    virtual void operator()(ICMPPacket*) { }
+    virtual void operator()(IPPacket*) { }
   };
 
  protected:
   Packet(Buffer::Ptr buffer, unsigned int buffer_offset)
       : buffer_(buffer), buffer_offset_(buffer_offset) { }
 
-  /* Data members */
+  /* Data members. */
   Buffer::Ptr buffer_;
   const unsigned int buffer_offset_;
 };
