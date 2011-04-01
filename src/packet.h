@@ -25,6 +25,8 @@ class Packet {
   Packet(Buffer::Ptr buffer, unsigned int buffer_offset)
       : buffer_(buffer), buffer_offset_(buffer_offset) { }
 
+  uint8_t* offsetAddress(unsigned int offset) const;
+
   /* Data members. */
   Buffer::Ptr buffer_;
   const unsigned int buffer_offset_;

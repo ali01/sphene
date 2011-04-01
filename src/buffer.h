@@ -17,7 +17,7 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
     return new Buffer(buffer, len);
   }
 
-  void* data() const { return buffer_; }
+  uint8_t* data() const { return buffer_; }
   size_t len() const { return len_; }
 
  protected:
