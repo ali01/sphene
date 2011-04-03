@@ -83,6 +83,12 @@ liblwtcp_a_SOURCES = \
                      src/lwtcp/transport_subsys.cc \
                      src/lwtcp/udp.cc
 
+FWK_SRCS = \
+           src/fwk/atomic.h \
+           src/fwk/exception.h \
+           src/fwk/ptr.h \
+           src/fwk/ptr_interface.h
+
 libsr_base_a_SOURCES = \
                        src/arp_packet.h \
                        src/buffer.h \
@@ -113,7 +119,8 @@ libsr_base_a_SOURCES = \
                        src/sr_lwtcp_glue.cc \
                        src/sr_main.cc \
                        src/sr_vns.cc \
-                       src/sr_vns.h
+                       src/sr_vns.h \
+                       $(FWK_SRCS)
 
 # Google Test library.
 libgtest_a_SOURCES = \
@@ -162,7 +169,7 @@ TESTS = \
 
 bin_PROGRAMS += $(TESTS)
 
-atomic_unittest_SOURCES = tests/atomic_unittest.cc
+atomic_unittest_SOURCES = tests/atomic_unittest.cc $(FWK_SRCS)
 atomic_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 
