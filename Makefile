@@ -48,7 +48,8 @@ endif
 .PHONY: ck
 ck:
 	@echo "Building Concurrency Kit..."
-	cd $(BUILD)/src/ck && ./configure && make
+	cd $(BUILD)/src/ck && CC=gcc ./configure --profile=x86 && make
+	rm -f $(BUILD)/src/ck/src/libck.so  # avoid linking with shared library
 
 .PHONY: all
 all: builddir symlinks autoreconf configure ck

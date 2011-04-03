@@ -1,6 +1,7 @@
 AUTOMAKE_OPTIONS = foreign color-tests
 ACLOCAL_AMFLAGS = -I m4
 GTEST_DIR = tests/gtest
+CK_DIR = src/ck
 
 # MODE controls whether the router gets/sends packets from/to the NetFPGA or
 # VNS
@@ -23,10 +24,11 @@ CLI_FLAGS
 endif
 
 AM_CPPFLAGS = -m32 -O3 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
-              -I src -I src/cli -I src/lwtcp \
+              -D__STDC_LIMIT_MACROS \
+              -I src -I src/cli -I src/lwtcp -I $(CK_DIR)/include \
               $(ARCH) $(MODE) $(CLI_FLAGS) \
               -fno-strict-aliasing
-AM_LDFLAGS  = -m32 $(SOCK) -lm -lresolv -lpthread
+AM_LDFLAGS  = -m32 $(SOCK) -lm -lresolv -lpthread -L$(CK_DIR)/src -lck
 AM_LFLAGS   = -d -i
 AM_YFLAGS   = -d
 
@@ -80,12 +82,17 @@ cli_SOURCES = $(SR_SRCS_CLI)
 cli_LDADD = $(USER_LIBS)
 
 # Unit tests.
-TESTS = sample1_unittest packet_unittest
+TESTS = sample1_unittest packet_unittest atomic_unittest
 bin_PROGRAMS += $(TESTS)
 
 sample1_unittest_SOURCES = tests/sample1_unittest.cc tests/sample1.cc
 sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sample1_unittest_LDADD = libgtest.a
+
+atomic_unittest_SOURCES = tests/atomic_unittest.cc
+atomic_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+atomic_unittest_LDFLAGS = $(AM_LDFLAGS)
+atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 
 packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
