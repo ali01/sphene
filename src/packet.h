@@ -19,6 +19,8 @@ class Packet {
     virtual void operator()(EthernetPacket*) { }
     virtual void operator()(ICMPPacket*) { }
     virtual void operator()(IPPacket*) { }
+
+    virtual ~Functor() { }
   };
 
  protected:
