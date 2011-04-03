@@ -44,8 +44,14 @@ endif
 	@echo "Running configure..."
 	cd $(BUILD) && ./configure $(CXX_OPTION)
 
+# Build Concurrency Kit.
+.PHONY: ck
+ck:
+	@echo "Building Concurrency Kit..."
+	cd $(BUILD)/src/ck && ./configure && make
+
 .PHONY: all
-all: builddir symlinks autoreconf configure
+all: builddir symlinks autoreconf configure ck
 	make -C $(BUILD) all
 
 # Run tests.
@@ -56,6 +62,7 @@ check:
 # Clean the build.
 .PHONY: clean
 clean:
+	make -C $(BUILD)/src/ck clean
 	make -C $(BUILD) clean
 
 # Hose everything.
