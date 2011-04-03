@@ -120,13 +120,41 @@ libsr_base_a_SOURCES = \
                        src/sr_main.cc \
                        src/sr_vns.cc \
                        src/sr_vns.h \
+                       src/vnscommand.h \
                        $(FWK_SRCS)
 
 # Google Test library.
 libgtest_a_SOURCES = \
+                     $(GTEST_DIR)/include/gtest/gtest-death-test.h \
                      $(GTEST_DIR)/include/gtest/gtest.h \
+                     $(GTEST_DIR)/include/gtest/gtest-message.h \
+                     $(GTEST_DIR)/include/gtest/gtest-param-test.h \
+                     $(GTEST_DIR)/include/gtest/gtest_pred_impl.h \
+                     $(GTEST_DIR)/include/gtest/gtest-printers.h \
+                     $(GTEST_DIR)/include/gtest/gtest_prod.h \
+                     $(GTEST_DIR)/include/gtest/gtest-spi.h \
+                     $(GTEST_DIR)/include/gtest/gtest-test-part.h \
+                     $(GTEST_DIR)/include/gtest/gtest-typed-test.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-death-test-internal.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-filepath.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-internal.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-linked_ptr.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-param-util-generated.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-param-util.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-port.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-string.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-tuple.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-type-util.h \
                      $(GTEST_DIR)/src/gtest-all.cc \
-                     $(GTEST_DIR)/src/gtest_main.cc
+                     $(GTEST_DIR)/src/gtest.cc \
+                     $(GTEST_DIR)/src/gtest-death-test.cc \
+                     $(GTEST_DIR)/src/gtest-filepath.cc \
+                     $(GTEST_DIR)/src/gtest-internal-inl.h \
+                     $(GTEST_DIR)/src/gtest_main.cc \
+                     $(GTEST_DIR)/src/gtest-port.cc \
+                     $(GTEST_DIR)/src/gtest-printers.cc \
+                     $(GTEST_DIR)/src/gtest-test-part.cc \
+                     $(GTEST_DIR)/src/gtest-typed-test.cc
 libgtest_a_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR) -I $(GTEST_DIR)/include
 
 
@@ -140,15 +168,26 @@ BUILT_SOURCES = src/cli/scanner.cc src/cli/parser.cc
 
 # sr
 RESTRICTED_CLI_SRCS = src/cli/cli.cc \
+                      src/cli/cli.h \
                       src/cli/cli_help.cc \
+                      src/cli/cli_help.h \
                       src/cli/cli_local.cc \
+                      src/cli/cli_local.h \
                       src/cli/cli_main.cc \
+                      src/cli/cli_main.h \
+                      src/cli/cli_parser.h \
+                      src/cli/cli_scanner.h \
+                      src/cli/cli_stubs.h \
                       src/cli/helper.cc \
+                      src/cli/helper.h \
                       src/cli/parser.yy \
                       src/cli/scanner.ll \
-                      src/cli/search_state.cc
+                      src/cli/search_state.cc \
+                      src/cli/search_state.h
 SR_SRCS_CLI = \
+              src/cli/cli_network.h \
               src/cli/socket_helper.cc \
+              src/cli/socket_helper.h \
               $(RESTRICTED_CLI_SRCS) \
               src/sr_lwtcp_glue.cc
 SR_SRCS_MAIN = src/sr_main.cc
