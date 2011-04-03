@@ -116,7 +116,10 @@ libsr_base_a_SOURCES = \
                        src/sr_vns.h
 
 # Google Test library.
-libgtest_a_SOURCES = $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
+libgtest_a_SOURCES = \
+                     $(GTEST_DIR)/include/gtest/gtest.h \
+                     $(GTEST_DIR)/src/gtest-all.cc \
+                     $(GTEST_DIR)/src/gtest_main.cc
 libgtest_a_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR) -I $(GTEST_DIR)/include
 
 
