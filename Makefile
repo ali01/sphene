@@ -54,6 +54,11 @@ ck:
 all: builddir symlinks autoreconf configure ck
 	make -C $(BUILD) all
 
+# Package up the project.
+.PHONY: dist
+dist: configure
+	make -C $(BUILD) dist
+
 # Run tests.
 .PHONY: check
 check:
