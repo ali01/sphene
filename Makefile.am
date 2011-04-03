@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = foreign color-tests
 ACLOCAL_AMFLAGS = -I m4
-GTEST_DIR = gtest-1.6.0
+GTEST_DIR = tests/gtest
 
 # MODE controls whether the router gets/sends packets from/to the NetFPGA or
 # VNS
