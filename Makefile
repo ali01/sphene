@@ -20,7 +20,7 @@ builddir:
 
 # Set up symlinks to necessary files.
 .PHONY: symlinks
-symlinks:
+symlinks: builddir
 	@echo "Making symlinks..."
 	ln -sf ../Makefile.am $(BUILD)
 	ln -sf ../configure.ac $(BUILD)
@@ -30,13 +30,13 @@ symlinks:
 
 # Reconfigure autotools stuff.
 .PHONY: autoreconf
-autoreconf:
+autoreconf: symlinks
 	@echo "Running autoreconf..."
 	cd $(BUILD) && autoreconf -i
 
 # Run configure script.
 .PHONY: configure
-configure:
+configure: autoreconf
 ifdef CXX_OPTION
 	@echo "Using clang++: $(CLANGPP_PATH)"
 endif
