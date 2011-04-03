@@ -497,7 +497,7 @@ tcp_slowtmr(void)
 	  
     /* Check if this PCB has stayed too long in FIN-WAIT-2 */
     if(pcb->state == FIN_WAIT_2) {
-      if((uint32_t)(tcp_ticks - pcb->tmr) >
+      if((int32_t)(tcp_ticks - pcb->tmr) >
 	 TCP_FIN_WAIT_TIMEOUT / TCP_SLOW_INTERVAL) {
         ++pcb_remove;
       }
@@ -508,8 +508,7 @@ tcp_slowtmr(void)
        be retransmitted). */
 #if TCP_QUEUE_OOSEQ    
     if(pcb->ooseq != NULL &&
-       (uint32_t)tcp_ticks - pcb->tmr >=
-       pcb->rto * TCP_OOSEQ_TIMEOUT) {
+       (int32_t)(tcp_ticks - pcb->tmr) >= pcb->rto * TCP_OOSEQ_TIMEOUT) {
       tcp_segs_free(pcb->ooseq);
       pcb->ooseq = NULL;
     }
@@ -517,7 +516,7 @@ tcp_slowtmr(void)
 
     /* Check if this PCB has stayed too long in SYN-RCVD */
     if(pcb->state == SYN_RCVD) {
-      if((uint32_t)(tcp_ticks - pcb->tmr) >
+      if((int32_t)(tcp_ticks - pcb->tmr) >
 	 TCP_SYN_RCVD_TIMEOUT / TCP_SLOW_INTERVAL) {
         ++pcb_remove;
       }

@@ -631,9 +631,9 @@ tcp_receive(struct tcp_pcb *pcb)
                                 ntohl(pcb->unacked->tcphdr->seqno)));
           tcp_rexmit_seg(pcb, pcb->unacked);
           /* Set ssthresh to max (FlightSize / 2, 2*SMSS) */
-          pcb->ssthresh = UMAX((pcb->snd_max -
-                                pcb->lastack) / 2,
-                               2 * pcb->mss);
+          pcb->ssthresh = UMAX(((int32_t)pcb->snd_max -
+                                (int32_t)pcb->lastack) / 2,
+                               (int32_t)(2 * pcb->mss));
 
           pcb->cwnd = pcb->ssthresh + 3 * pcb->mss;
           pcb->flags |= TF_INFR;          
