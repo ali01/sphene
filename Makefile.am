@@ -164,8 +164,8 @@ cli_LDADD = $(USER_LIBS)
 # Unit tests.
 TESTS = \
         atomic_unittest \
-        sample1_unittest \
-        packet_unittest
+        packet_unittest \
+        sample1_unittest
 
 bin_PROGRAMS += $(TESTS)
 
@@ -173,16 +173,16 @@ atomic_unittest_SOURCES = tests/atomic_unittest.cc $(FWK_SRCS)
 atomic_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 
+packet_unittest_SOURCES = tests/packet_unittest.cc
+packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+packet_unittest_LDADD = libgtest.a $(USER_LIBS)
+
 sample1_unittest_SOURCES = \
                            tests/sample1.cc \
                            tests/sample1.h \
                            tests/sample1_unittest.cc
 sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sample1_unittest_LDADD = libgtest.a
-
-packet_unittest_SOURCES = tests/packet_unittest.cc
-packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 .PHONY: all deep-clean
 deep-clean: distclean
