@@ -23,7 +23,7 @@ if STANDALONE_CLI
 CLI_FLAGS
 endif
 
-AM_CPPFLAGS = -m32 -O3 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
+AM_CPPFLAGS = -m32 -march=i586 -O3 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
               -D__STDC_LIMIT_MACROS \
               -I src -I src/cli -I src/lwtcp -I $(CK_DIR)/include \
               $(ARCH) $(MODE) $(CLI_FLAGS) \
