@@ -37,21 +37,58 @@ AM_YFLAGS   = -d
 USER_LIBS = libsr_base.a liblwtcp.a
 noinst_LIBRARIES = $(USER_LIBS) libgtest.a
 
-liblwtcp_a_SOURCES = src/lwtcp/tcp.cc src/lwtcp/tcp_input.cc			\
-                     src/lwtcp/tcp_output.cc src/lwtcp/mem.cc src/lwtcp/memp.cc	\
-                     src/lwtcp/stats.cc src/lwtcp/sys.cc src/lwtcp/inet.cc	\
-                     src/lwtcp/pbuf.cc src/lwtcp/sys_arch.cc			\
-                     src/lwtcp/sockets.cc src/lwtcp/api_lib.cc			\
-                     src/lwtcp/api_msg.cc src/lwtcp/transport_subsys.cc		\
-                     src/lwtcp/udp.cc src/lwtcp/icmp.cc src/lwtcp/ip_addr.cc	\
-                     src/lwtcp/err.cc
+liblwtcp_a_SOURCES = \
+                     src/lwtcp/api_lib.cc \
+                     src/lwtcp/api_msg.cc \
+                     src/lwtcp/err.cc \
+                     src/lwtcp/icmp.cc \
+                     src/lwtcp/inet.cc \
+                     src/lwtcp/ip_addr.cc \
+                     src/lwtcp/lwtcp_sr_integration.h \
+                     src/lwtcp/mem.cc \
+                     src/lwtcp/memp.cc \
+                     src/lwtcp/pbuf.cc \
+                     src/lwtcp/sockets.cc \
+                     src/lwtcp/stats.cc \
+                     src/lwtcp/sys.cc \
+                     src/lwtcp/sys_arch.cc \
+                     src/lwtcp/tcp.cc \
+                     src/lwtcp/tcp_input.cc \
+                     src/lwtcp/tcp_output.cc \
+                     src/lwtcp/transport_subsys.cc \
+                     src/lwtcp/udp.cc
 
-cc_srcs = src/data_plane.cc
-
-libsr_base_a_SOURCES = src/sr_base.cc src/sr_dumper.cc src/sr_integration.cc	\
-                       src/sr_lwtcp_glue.cc src/sr_vns.cc			\
-                       src/sr_cpu_extension_nf2.cc src/real_socket_helper.cc	\
-                       src/sha1.cc $(cc_srcs)
+libsr_base_a_SOURCES = \
+                       src/arp_packet.h \
+                       src/buffer.h \
+                       src/data_plane.cc \
+                       src/data_plane.h \
+                       src/ethernet_packet.h \
+                       src/getarg.cc \
+                       src/icmp_packet.h \
+                       src/ip_packet.h \
+                       src/nf2.h \
+                       src/nf2util.cc \
+                       src/nf2util.h \
+                       src/packet.h \
+                       src/real_socket_helper.cc \
+                       src/real_socket_helper.h \
+                       src/reg_defines.h \
+                       src/sha1.cc \
+                       src/sha1.h \
+                       src/sr_base.cc \
+                       src/sr_base.h \
+                       src/sr_base_internal.h \
+                       src/sr_cpu_extension_nf2.cc \
+                       src/sr_cpu_extension_nf2.h \
+                       src/sr_dumper.cc \
+                       src/sr_dumper.h \
+                       src/sr_integration.cc \
+                       src/sr_integration.h \
+                       src/sr_lwtcp_glue.cc \
+                       src/sr_main.cc \
+                       src/sr_vns.cc \
+                       src/sr_vns.h
 
 # Google Test library.
 libgtest_a_SOURCES = $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
