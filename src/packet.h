@@ -13,7 +13,6 @@ class IPPacket;
 class Packet {
  public:
   Buffer::Ptr buffer() const { return buffer_; }
-  virtual ~Packet() { }
 
   class Functor {
     virtual void operator()(ARPPacket*) { }

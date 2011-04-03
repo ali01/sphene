@@ -23,7 +23,6 @@ class DataPlane : public Fwk::PtrInterface<DataPlane> {
 
  protected:
   DataPlane();
-  virtual ~DataPlane() { }
 
   class PacketFunctor : public Packet::Functor {
    public:
