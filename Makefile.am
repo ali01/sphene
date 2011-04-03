@@ -44,6 +44,31 @@ liblwtcp_a_SOURCES = \
                      src/lwtcp/icmp.cc \
                      src/lwtcp/inet.cc \
                      src/lwtcp/ip_addr.cc \
+                     src/lwtcp/lwip/api.h \
+                     src/lwtcp/lwip/api_msg.h \
+                     src/lwtcp/lwip/arch.h \
+                     src/lwtcp/lwip/cc.h \
+                     src/lwtcp/lwip/debug.h \
+                     src/lwtcp/lwip/def.h \
+                     src/lwtcp/lwip/err.h \
+                     src/lwtcp/lwip/icmp.h \
+                     src/lwtcp/lwip/inet.h \
+                     src/lwtcp/lwip/ip_addr.h \
+                     src/lwtcp/lwip/ip.h \
+                     src/lwtcp/lwip/list.h \
+                     src/lwtcp/lwip/lwipopts.h \
+                     src/lwtcp/lwip/mem.h \
+                     src/lwtcp/lwip/memp.h \
+                     src/lwtcp/lwip/netif.h \
+                     src/lwtcp/lwip/opt.h \
+                     src/lwtcp/lwip/pbuf.h \
+                     src/lwtcp/lwip/sockets.h \
+                     src/lwtcp/lwip/stats.h \
+                     src/lwtcp/lwip/sys.h \
+                     src/lwtcp/lwip/tcp.h \
+                     src/lwtcp/lwip/tcpip.h \
+                     src/lwtcp/lwip/transport_subsys.h \
+                     src/lwtcp/lwip/udp.h \
                      src/lwtcp/lwtcp_sr_integration.h \
                      src/lwtcp/mem.cc \
                      src/lwtcp/memp.cc \
