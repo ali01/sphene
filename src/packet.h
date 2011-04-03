@@ -15,6 +15,7 @@ class Packet {
   Buffer::Ptr buffer() const { return buffer_; }
 
   class Functor {
+   public:
     virtual void operator()(ARPPacket*) { }
     virtual void operator()(EthernetPacket*) { }
     virtual void operator()(ICMPPacket*) { }
