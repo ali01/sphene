@@ -164,7 +164,6 @@ bin_PROGRAMS += $(TESTS)
 
 atomic_unittest_SOURCES = tests/atomic_unittest.cc
 atomic_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-atomic_unittest_LDFLAGS = $(AM_LDFLAGS)
 atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 
 sample1_unittest_SOURCES = \
