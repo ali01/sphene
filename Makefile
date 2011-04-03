@@ -27,7 +27,6 @@ symlinks:
 	ln -sf ../m4 $(BUILD)
 	ln -sf ../src $(BUILD)
 	ln -sf ../tests $(BUILD)
-	ln -sf ../gtest-1.6.0 $(BUILD)
 
 # Reconfigure autotools stuff.
 .PHONY: autoreconf
