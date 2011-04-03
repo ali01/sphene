@@ -2,10 +2,10 @@
 BUILD = build
 
 # Look for clang++ on the system.
-CLANGPP_PATH = $(shell which clang++)
-ifeq ($(shell if [ -e $(CLANGPP_PATH) ]; then echo "t"; fi), t)
-  CXX_OPTION = CXX=$(CLANGPP_PATH)
-endif
+#CLANGPP_PATH = $(shell which clang++)
+#ifeq ($(shell if [ -e $(CLANGPP_PATH) ]; then echo "t"; fi), t)
+#  CXX_OPTION = CXX=$(CLANGPP_PATH)
+#endif
 
 
 .PHONY: default
