@@ -1,7 +1,8 @@
 #ifndef IP_PACKET_H_8CU5IVY3
 #define IP_PACKET_H_8CU5IVY3
 
-#include "buffer.h"
+#include "fwk/buffer.h"
+
 #include "packet.h"
 
 

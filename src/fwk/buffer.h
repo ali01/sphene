@@ -1,11 +1,13 @@
 #ifndef BUFFER_H_QNX4VITL
 #define BUFFER_H_QNX4VITL
 
-#include <inttypes.h>
 #include <cstdlib>
+#include <inttypes.h>
+#include <string.h>
 
 #include "fwk/ptr_interface.h"
 
+namespace Fwk {
 
 class Buffer : public Fwk::PtrInterface<Buffer> {
  public:
@@ -16,12 +18,13 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
     return new Buffer(buffer, len);
   }
 
-  void* data() const { return buffer_; }
+  uint8_t* data() const { return buffer_; }
   size_t len() const { return len_; }
 
  protected:
   Buffer(void* buffer, size_t len) {
     buffer_ = new uint8_t[len];
+    memcpy(buffer_, buffer, len);
     len_ = len;
   }
 
@@ -37,5 +40,7 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
   Buffer(const Buffer&);
   void operator=(const Buffer&);
 };
+
+} /* end of namespace Fwk */
 
 #endif

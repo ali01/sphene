@@ -1,7 +1,9 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
-#include "buffer.h"
+#include "fwk/buffer.h"
+
+using Fwk::Buffer;
 
 /* Forward declarations. */
 class ARPPacket;
@@ -27,6 +29,8 @@ class Packet {
  protected:
   Packet(Buffer::Ptr buffer, unsigned int buffer_offset)
       : buffer_(buffer), buffer_offset_(buffer_offset) { }
+
+  uint8_t* offsetAddress(unsigned int offset) const;
 
   /* Data members. */
   Buffer::Ptr buffer_;

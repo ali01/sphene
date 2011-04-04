@@ -205,6 +205,7 @@ cli_LDADD = $(USER_LIBS)
 # Unit tests.
 TESTS = \
         atomic_unittest \
+        buffer_unittest \
         packet_unittest \
         sample1_unittest \
         sw_data_plane_unittest
@@ -218,6 +219,10 @@ atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 packet_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+buffer_unittest_SOURCES = tests/buffer_unittest.cc
+buffer_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+buffer_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 sample1_unittest_SOURCES = \
                            tests/sample1.cc \
