@@ -120,6 +120,8 @@ libsr_base_a_SOURCES = \
                        src/sr_main.cc \
                        src/sr_vns.cc \
                        src/sr_vns.h \
+                       src/sw_data_plane.cc \
+                       src/sw_data_plane.h \
                        src/vnscommand.h \
                        $(FWK_SRCS)
 
@@ -204,7 +206,8 @@ cli_LDADD = $(USER_LIBS)
 TESTS = \
         atomic_unittest \
         packet_unittest \
-        sample1_unittest
+        sample1_unittest \
+        sw_data_plane_unittest
 
 bin_PROGRAMS += $(TESTS)
 
@@ -222,6 +225,10 @@ sample1_unittest_SOURCES = \
                            tests/sample1_unittest.cc
 sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sample1_unittest_LDADD = libgtest.a
+
+sw_data_plane_unittest_SOURCES = tests/sw_data_plane_unittest.cc $(FWK_SRCS)
+sw_data_plane_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+sw_data_plane_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 .PHONY: all deep-clean
 deep-clean: distclean

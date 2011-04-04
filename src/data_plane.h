@@ -14,12 +14,6 @@ class IPPacket;
 
 class DataPlane : public Fwk::PtrInterface<DataPlane> {
  public:
-  typedef Fwk::Ptr<const DataPlane> PtrConst;
-  typedef Fwk::Ptr<DataPlane> Ptr;
-
-  static Ptr DataPlaneNew() {
-    return new DataPlane();
-  }
 
  protected:
   DataPlane();
