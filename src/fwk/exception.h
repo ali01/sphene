@@ -1,185 +1,69 @@
-/* Copyright (c) 2008-2010. Ali H. Yahya, All rights reserved. */
-/* Adapted from David R. Cheriton's Advanced Object Oriented Programming from a
-   Modeling & Simulation's Perspective ~ Chapter 7: Exceptions & Exception 
-   Handling */
+/** \file exception.h
+ * Exception classes.
+ * \author Matt Sparks
+ */
+#ifndef __FWK__EXCEPTION_H__
+#define __FWK__EXCEPTION_H__
 
-#pragma once
 #include <string>
-#include <iostream>
-#include <sstream>
-#include <stdint.h>
-using std::stringstream;
-using std::ostream;
+#include <cstring>
+#include <cerrno>
+
+#include "named_interface.h"
+
 using std::string;
-using std::cerr;
-using std::endl;
 
 namespace Fwk {
 
-/* forward declarations */
-class Exception;
-ostream& operator<<(ostream& out, const Exception& ex);
-
 class Exception {
 public:
-  virtual ~Exception() {}
-  
-  string filename() const { return filename_; }
-  uint32_t line() const { return line_; }
-
-  string msg() const { return msg_; }
+  Fwk::NamedInterface *entity() const { return entity_; }
+  string funcName() const { return funcName_; }
+  string message() const { return message_; }
 
 protected:
-  Exception(string filename, uint32_t line, string msg) :
-    filename_(filename), line_(line), msg_(msg)
-  {
-    #ifdef __DEBUG__
-      cerr << *this;
-    #endif
-  }
+  Fwk::NamedInterface *entity_;
+  string funcName_;
+  string message_;
 
-private:
-  /* data members */
-  string filename_;
-  uint32_t line_;
+  Exception(const string& funcName, const string& message)
+    : entity_(NULL), funcName_(funcName), message_(message) { }
 
-  string msg_;
-};
-
-class IncompleteInitializationException : public Exception {
-public:
-  IncompleteInitializationException(string filename, uint32_t ln, string msg):
-    Exception(filename, ln, msg) {}
-};
-
-class NoImplementationException : public Exception {
-public:
-  NoImplementationException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
-
-class AttributeNotSupportedException : public NoImplementationException {
-public:
-  AttributeNotSupportedException(string filename, uint32_t line, string msg) :
-    NoImplementationException(filename, line, msg) {}
-};
-
-class UnknownTypeException : public Exception {
-public:
-  UnknownTypeException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
-
-class UnknownAttrException : public Exception {
-public:
-  UnknownAttrException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
-
-class UnknownDelimiterException : public Exception {
-public:
-  UnknownDelimiterException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
-
-class UnknownArgException : public Exception {
-public:
-  UnknownArgException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
+  Exception(Fwk::NamedInterface *entity, const string& funcName,
+            const string& message)
+    : entity_(entity), funcName_(funcName), message_(message) { }
 };
 
 
 class RangeException : public Exception {
 public:
-  RangeException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
+  RangeException(const string& funcName, const string& message)
+    : Exception(funcName, message) { }
+  RangeException(Fwk::NamedInterface *entity, const string& funcName,
+                 const string& message)
+    : Exception(entity, funcName, message) { }
 };
 
-class MemoryException : public Exception {
- public:
-  MemoryException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
 
-class StorageException : public Exception {
- public:
-  StorageException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
-
-class NameInUseException : public Exception {
+class ResourceException : public Exception {
 public:
-  NameInUseException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-
+  ResourceException(const string& funcName, const string& message)
+    : Exception(funcName, message) { }
+  ResourceException(Fwk::NamedInterface *entity, const string& funcName,
+                    const string& message)
+    : Exception(entity, funcName, message) { }
 };
 
-class IllegalNameException: public Exception {
- public:
-  IllegalNameException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
 
-};
-
-class EntityNotFoundException : public Exception {
+class NameInUseException : public ResourceException {
 public:
-  EntityNotFoundException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-
+  NameInUseException(const string& funcName, const string& message)
+    : ResourceException(funcName, message) { }
+  NameInUseException(Fwk::NamedInterface *entity, const string& funcName,
+                     const string& message)
+    : ResourceException(entity, funcName, message) { }
 };
 
-
-class MemoryLimitExceededException : public MemoryException {
-public:
-  MemoryLimitExceededException(string filename, uint32_t line, string msg) :
-    MemoryException(filename, line, msg) {}
-
-};
-
-class ReadOnlyException : public Exception {
-public:
-  ReadOnlyException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-
-};
-
-class NetworkException : public Exception {
-public:
-  NetworkException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
-
-class InvalidFormattingException: public Exception {
-public:
-  InvalidFormattingException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-
-};
-
-class InvalidOperationException: public Exception {
-public:
-  InvalidOperationException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-
-};
-
-class InvalidValueException: public Exception {
-public:
-  InvalidValueException(string filename, uint32_t line, string msg) :
-    Exception(filename, line, msg) {}
-};
-
-class NullPointerException : public InvalidValueException {
-public:
-  NullPointerException(string filename, uint32_t line, string msg) :
-    InvalidValueException(filename, line, msg) {}
-};
-
-inline ostream&
-operator<<(ostream& out, const Exception& ex) {
-  out << "exception thrown at ";
-  out << ex.filename() << ":" << ex.line() << " - " << ex.msg();
-  return out << endl;
 }
 
-} /* end of namespace Simone */
+#endif

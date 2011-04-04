@@ -28,6 +28,9 @@ class SWDataPlane : public DataPlane {
   /* Operations disallowed. */
   SWDataPlane(const SWDataPlane&);
   void operator=(const SWDataPlane&);
+
+ private:
+  Fwk::Log::Ptr log_;
 };
 
 #endif

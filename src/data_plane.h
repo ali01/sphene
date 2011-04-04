@@ -1,7 +1,10 @@
 #ifndef DATA_PLANE_H_6H2UAS6L
 #define DATA_PLANE_H_6H2UAS6L
 
-#include "fwk/ptr_interface.h"
+#include <string>
+
+#include "fwk/log.h"
+#include "fwk/named_interface.h"
 
 #include "packet.h"
 
@@ -12,11 +15,11 @@ class ICMPPacket;
 class IPPacket;
 
 
-class DataPlane : public Fwk::PtrInterface<DataPlane> {
+class DataPlane : public Fwk::NamedInterface {
  public:
 
  protected:
-  DataPlane();
+  DataPlane(const std::string& name);
 
   class PacketFunctor : public Packet::Functor {
    public:
