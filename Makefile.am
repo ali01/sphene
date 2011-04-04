@@ -1,6 +1,7 @@
-AUTOMAKE_OPTIONS = foreign color-tests
+AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
-GTEST_DIR = gtest-1.6.0
+GTEST_DIR = tests/gtest
+CK_DIR = src/ck
 
 # MODE controls whether the router gets/sends packets from/to the NetFPGA or
 # VNS
@@ -22,11 +23,12 @@ if STANDALONE_CLI
 CLI_FLAGS
 endif
 
-AM_CPPFLAGS = -m32 -O3 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
-              -I src -I src/cli -I src/lwtcp \
+AM_CPPFLAGS = -m32 -march=i586 -O3 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
+              -D__STDC_LIMIT_MACROS \
+              -I src -I src/cli -I src/lwtcp -I $(CK_DIR)/include \
               $(ARCH) $(MODE) $(CLI_FLAGS) \
               -fno-strict-aliasing
-AM_LDFLAGS  = -m32 $(SOCK) -lm -lresolv -lpthread
+AM_LDFLAGS  = -m32 $(SOCK) -lm -lresolv -lpthread -L$(CK_DIR)/src -lck
 AM_LFLAGS   = -d -i
 AM_YFLAGS   = -d
 
@@ -35,24 +37,124 @@ AM_YFLAGS   = -d
 USER_LIBS = libsr_base.a liblwtcp.a
 noinst_LIBRARIES = $(USER_LIBS) libgtest.a
 
-liblwtcp_a_SOURCES = src/lwtcp/tcp.cc src/lwtcp/tcp_input.cc			\
-                     src/lwtcp/tcp_output.cc src/lwtcp/mem.cc src/lwtcp/memp.cc	\
-                     src/lwtcp/stats.cc src/lwtcp/sys.cc src/lwtcp/inet.cc	\
-                     src/lwtcp/pbuf.cc src/lwtcp/sys_arch.cc			\
-                     src/lwtcp/sockets.cc src/lwtcp/api_lib.cc			\
-                     src/lwtcp/api_msg.cc src/lwtcp/transport_subsys.cc		\
-                     src/lwtcp/udp.cc src/lwtcp/icmp.cc src/lwtcp/ip_addr.cc	\
-                     src/lwtcp/err.cc
+liblwtcp_a_SOURCES = \
+                     src/lwtcp/api_lib.cc \
+                     src/lwtcp/api_msg.cc \
+                     src/lwtcp/err.cc \
+                     src/lwtcp/icmp.cc \
+                     src/lwtcp/inet.cc \
+                     src/lwtcp/ip_addr.cc \
+                     src/lwtcp/lwip/api.h \
+                     src/lwtcp/lwip/api_msg.h \
+                     src/lwtcp/lwip/arch.h \
+                     src/lwtcp/lwip/cc.h \
+                     src/lwtcp/lwip/debug.h \
+                     src/lwtcp/lwip/def.h \
+                     src/lwtcp/lwip/err.h \
+                     src/lwtcp/lwip/icmp.h \
+                     src/lwtcp/lwip/inet.h \
+                     src/lwtcp/lwip/ip_addr.h \
+                     src/lwtcp/lwip/ip.h \
+                     src/lwtcp/lwip/list.h \
+                     src/lwtcp/lwip/lwipopts.h \
+                     src/lwtcp/lwip/mem.h \
+                     src/lwtcp/lwip/memp.h \
+                     src/lwtcp/lwip/netif.h \
+                     src/lwtcp/lwip/opt.h \
+                     src/lwtcp/lwip/pbuf.h \
+                     src/lwtcp/lwip/sockets.h \
+                     src/lwtcp/lwip/stats.h \
+                     src/lwtcp/lwip/sys.h \
+                     src/lwtcp/lwip/tcp.h \
+                     src/lwtcp/lwip/tcpip.h \
+                     src/lwtcp/lwip/transport_subsys.h \
+                     src/lwtcp/lwip/udp.h \
+                     src/lwtcp/lwtcp_sr_integration.h \
+                     src/lwtcp/mem.cc \
+                     src/lwtcp/memp.cc \
+                     src/lwtcp/pbuf.cc \
+                     src/lwtcp/sockets.cc \
+                     src/lwtcp/stats.cc \
+                     src/lwtcp/sys.cc \
+                     src/lwtcp/sys_arch.cc \
+                     src/lwtcp/tcp.cc \
+                     src/lwtcp/tcp_input.cc \
+                     src/lwtcp/tcp_output.cc \
+                     src/lwtcp/transport_subsys.cc \
+                     src/lwtcp/udp.cc
 
-sr_srcs = src/data_plane.cc src/packet.cc src/ip_packet.cc
+FWK_SRCS = \
+           src/fwk/atomic.h \
+           src/fwk/exception.h \
+           src/fwk/ptr.h \
+           src/fwk/ptr_interface.h
 
-libsr_base_a_SOURCES = src/sr_base.cc src/sr_dumper.cc src/sr_integration.cc	\
-                       src/sr_lwtcp_glue.cc src/sr_vns.cc			\
-                       src/sr_cpu_extension_nf2.cc src/real_socket_helper.cc	\
-                       src/sha1.cc $(sr_srcs)
+libsr_base_a_SOURCES = \
+                       src/arp_packet.h \
+                       src/buffer.h \
+                       src/data_plane.cc \
+                       src/data_plane.h \
+                       src/ethernet_packet.h \
+                       src/getarg.cc \
+                       src/icmp_packet.h \
+                       src/ip_packet.h \
+                       src/nf2.h \
+                       src/nf2util.cc \
+                       src/nf2util.h \
+                       src/packet.h \
+                       src/real_socket_helper.cc \
+                       src/real_socket_helper.h \
+                       src/reg_defines.h \
+                       src/sha1.cc \
+                       src/sha1.h \
+                       src/sr_base.cc \
+                       src/sr_base.h \
+                       src/sr_base_internal.h \
+                       src/sr_cpu_extension_nf2.cc \
+                       src/sr_cpu_extension_nf2.h \
+                       src/sr_dumper.cc \
+                       src/sr_dumper.h \
+                       src/sr_integration.cc \
+                       src/sr_integration.h \
+                       src/sr_lwtcp_glue.cc \
+                       src/sr_main.cc \
+                       src/sr_vns.cc \
+                       src/sr_vns.h \
+                       src/vnscommand.h \
+                       $(FWK_SRCS)
 
 # Google Test library.
-libgtest_a_SOURCES = $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
+libgtest_a_SOURCES = \
+                     $(GTEST_DIR)/include/gtest/gtest-death-test.h \
+                     $(GTEST_DIR)/include/gtest/gtest.h \
+                     $(GTEST_DIR)/include/gtest/gtest-message.h \
+                     $(GTEST_DIR)/include/gtest/gtest-param-test.h \
+                     $(GTEST_DIR)/include/gtest/gtest_pred_impl.h \
+                     $(GTEST_DIR)/include/gtest/gtest-printers.h \
+                     $(GTEST_DIR)/include/gtest/gtest_prod.h \
+                     $(GTEST_DIR)/include/gtest/gtest-spi.h \
+                     $(GTEST_DIR)/include/gtest/gtest-test-part.h \
+                     $(GTEST_DIR)/include/gtest/gtest-typed-test.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-death-test-internal.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-filepath.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-internal.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-linked_ptr.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-param-util-generated.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-param-util.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-port.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-string.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-tuple.h \
+                     $(GTEST_DIR)/include/gtest/internal/gtest-type-util.h \
+                     $(GTEST_DIR)/src/gtest-all.cc \
+                     $(GTEST_DIR)/src/gtest.cc \
+                     $(GTEST_DIR)/src/gtest-death-test.cc \
+                     $(GTEST_DIR)/src/gtest-filepath.cc \
+                     $(GTEST_DIR)/src/gtest-internal-inl.h \
+                     $(GTEST_DIR)/src/gtest_main.cc \
+                     $(GTEST_DIR)/src/gtest-port.cc \
+                     $(GTEST_DIR)/src/gtest-printers.cc \
+                     $(GTEST_DIR)/src/gtest-test-part.cc \
+                     $(GTEST_DIR)/src/gtest-typed-test.cc
 libgtest_a_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR) -I $(GTEST_DIR)/include
 
 
@@ -65,10 +167,29 @@ endif
 BUILT_SOURCES = src/cli/scanner.cc src/cli/parser.cc
 
 # sr
-RESTRICTED_CLI_SRCS = src/cli/cli.cc src/cli/cli_help.cc src/cli/cli_main.cc	\
-                      src/cli/search_state.cc src/cli/cli_local.cc		\
-                      src/cli/parser.yy src/cli/scanner.ll src/cli/helper.cc
-SR_SRCS_CLI = src/cli/socket_helper.cc $(RESTRICTED_CLI_SRCS) src/sr_lwtcp_glue.cc
+RESTRICTED_CLI_SRCS = src/cli/cli.cc \
+                      src/cli/cli.h \
+                      src/cli/cli_help.cc \
+                      src/cli/cli_help.h \
+                      src/cli/cli_local.cc \
+                      src/cli/cli_local.h \
+                      src/cli/cli_main.cc \
+                      src/cli/cli_main.h \
+                      src/cli/cli_parser.h \
+                      src/cli/cli_scanner.h \
+                      src/cli/cli_stubs.h \
+                      src/cli/helper.cc \
+                      src/cli/helper.h \
+                      src/cli/parser.yy \
+                      src/cli/scanner.ll \
+                      src/cli/search_state.cc \
+                      src/cli/search_state.h
+SR_SRCS_CLI = \
+              src/cli/cli_network.h \
+              src/cli/socket_helper.cc \
+              src/cli/socket_helper.h \
+              $(RESTRICTED_CLI_SRCS) \
+              src/sr_lwtcp_glue.cc
 SR_SRCS_MAIN = src/sr_main.cc
 SR_SRCS_BASE = src/nf2util.cc
 
@@ -80,12 +201,16 @@ cli_SOURCES = $(SR_SRCS_CLI)
 cli_LDADD = $(USER_LIBS)
 
 # Unit tests.
-TESTS = sample1_unittest packet_unittest buffer_unittest
+TESTS = \
+        atomic_unittest \
+        packet_unittest \
+        sample1_unittest
+
 bin_PROGRAMS += $(TESTS)
 
-sample1_unittest_SOURCES = tests/sample1_unittest.cc tests/sample1.cc
-sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-sample1_unittest_LDADD = libgtest.a
+atomic_unittest_SOURCES = tests/atomic_unittest.cc $(FWK_SRCS)
+atomic_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 
 packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
@@ -94,6 +219,13 @@ packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 buffer_unittest_SOURCES = tests/buffer_unittest.cc
 buffer_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 buffer_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+sample1_unittest_SOURCES = \
+                           tests/sample1.cc \
+                           tests/sample1.h \
+                           tests/sample1_unittest.cc
+sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+sample1_unittest_LDADD = libgtest.a
 
 .PHONY: all deep-clean
 deep-clean: distclean

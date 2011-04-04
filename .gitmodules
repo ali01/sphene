@@ -1,0 +1,3 @@
+[submodule "src/ck"]
+	path = src/ck
+	url = git://github.com/msparks/ck.git
