@@ -7,6 +7,7 @@
 
 #include "fwk/ptr_interface.h"
 
+namespace Fwk {
 
 class Buffer : public Fwk::PtrInterface<Buffer> {
  public:
@@ -39,5 +40,7 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
   Buffer(const Buffer&);
   void operator=(const Buffer&);
 };
+
+} /* end of namespace Fwk */
 
 #endif

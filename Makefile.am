@@ -203,6 +203,7 @@ cli_LDADD = $(USER_LIBS)
 # Unit tests.
 TESTS = \
         atomic_unittest \
+        buffer_unittest \
         packet_unittest \
         sample1_unittest
 

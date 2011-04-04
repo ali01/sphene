@@ -3,7 +3,8 @@
 #include <cstdlib>
 #include <time.h>
 
-#include "buffer.h"
+#include "fwk/buffer.h"
+using Fwk::Buffer;
 
 #define BUFFER_SIZE 64
 

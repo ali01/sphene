@@ -1,7 +1,9 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
-#include "buffer.h"
+#include "fwk/buffer.h"
+
+using Fwk::Buffer;
 
 /* Forward declarations. */
 class ARPPacket;
