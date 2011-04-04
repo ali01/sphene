@@ -44,7 +44,7 @@ liblwtcp_a_SOURCES = src/lwtcp/tcp.cc src/lwtcp/tcp_input.cc			\
                      src/lwtcp/udp.cc src/lwtcp/icmp.cc src/lwtcp/ip_addr.cc	\
                      src/lwtcp/err.cc
 
-sr_srcs = src/data_plane.cc src/packet.cc
+sr_srcs = src/data_plane.cc src/packet.cc src/ip_packet.cc
 
 libsr_base_a_SOURCES = src/sr_base.cc src/sr_dumper.cc src/sr_integration.cc	\
                        src/sr_lwtcp_glue.cc src/sr_vns.cc			\
