@@ -16,6 +16,11 @@ class ARPPacket : public Packet {
     return new ARPPacket(buffer, buffer_offset);
   }
 
+  /* Functor for double-dispatch. */
+  virtual void operator()(Functor* f) {
+    (*f)(this);
+  }
+
  protected:
   ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : Packet(buffer, buffer_offset) { }

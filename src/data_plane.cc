@@ -29,7 +29,7 @@ DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp)
     : dp_(dp), log_(dp->log_) { }
 
 void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt) {
-
+  (*log_)() << "ARPPacket dispatch in DataPlane";
 }
 
 void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt) {
@@ -37,6 +37,10 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt) {
   (*log_)() << "  src: " << pkt->src();
   (*log_)() << "  dst: " << pkt->dst();
   (*log_)() << "  type: " << pkt->typeName();
+
+  // Dispatch encapsulated packet.
+  Packet::Ptr payload_pkt = pkt->payload();
+  (*payload_pkt)(this);
 }
 
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {
