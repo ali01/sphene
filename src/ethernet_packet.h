@@ -47,6 +47,10 @@ class EthernetPacket : public Packet {
     return (EthernetAddr&)eth_hdr->ether_shost;
   }
 
+  void srcIs(const EthernetAddr& src) {
+    (EthernetAddr&)eth_hdr->ether_shost = src;
+  }
+
   EthernetAddr dst() const {
     return (EthernetAddr&)eth_hdr->ether_dhost;
   }

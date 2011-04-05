@@ -40,6 +40,11 @@ TEST_F(EthernetPacketTest, Addresses) {
   // Compare it with expected source.
   EXPECT_EQ(src_, src);
 
+  // Change the source.
+  uint8_t kNewSrc[] = { 0xDE, 0xAD, 0xC0, 0xFF, 0xEE, 0x00 };
+  pkt.srcIs(EthernetAddr(kNewSrc));
+  EXPECT_EQ(EthernetAddr(kNewSrc), pkt.src());
+
   // Extract the destination address.
   EthernetAddr dst = pkt.dst();
 
