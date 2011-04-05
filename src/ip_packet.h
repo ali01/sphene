@@ -33,12 +33,15 @@ class IPPacket : public Packet {
 
   uint16_t checksum() const;
   void checksumIs(uint16_t ck);
+  void checksumReset();
 
  protected:
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
   struct ip_hdr* ip_hdr_;
+
+  uint16_t compute_cksum() const;
 
   /* IP Header packet struct. */
   struct ip_hdr {

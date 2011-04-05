@@ -45,3 +45,32 @@ void
 IPPacket::checksumIs(uint16_t ck) {
   ip_hdr_->ip_sum = htons(ck);
 }
+
+void
+IPPacket::checksumReset() {
+  checksumIs(0);
+  checksumIs(compute_cksum());
+}
+
+uint16_t
+IPPacket::compute_cksum() const {
+  uint32_t sum;
+  unsigned int len = sizeof(struct ip_hdr);
+  const uint8_t *header = (const uint8_t *)ip_hdr_;
+
+  for (sum = 0; len >= 2; header += 2, len -= 2)
+    sum += header[0] << 8 | header[1];
+
+  if (len > 0)
+    sum += header[0] << 8;
+
+  while (sum > 0xFFFF)
+    sum = (sum >> 16) + (sum & 0xFFFF);
+
+  sum = ~sum;
+
+  if (sum == 0)
+    sum = 0xFFFF;
+
+  return sum;
+}
