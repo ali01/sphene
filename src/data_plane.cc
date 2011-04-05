@@ -13,8 +13,8 @@ using std::string;
 
 
 DataPlane::DataPlane(const std::string& name) : Fwk::NamedInterface(name) {
-  functor_ = new PacketFunctor(this);
   log_ = Fwk::Log::LogNew(name);
+  functor_ = new PacketFunctor(this);
 }
 
 DataPlane::~DataPlane() {
@@ -25,16 +25,18 @@ void DataPlane::packetNew(EthernetPacket::Ptr pkt) {
   (*pkt)(functor_);
 }
 
-DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp) : dp_(dp) { }
+DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp)
+    : dp_(dp), log_(dp->log_) { }
 
 void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt) {
 
 }
 
 void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt) {
-  dp_->log_->entryNew("EthernetPacket dispatch in DataPlane");
-  (*(dp_->log_))() << "  src: " << pkt->src();
-  (*(dp_->log_))() << "  dst: " << pkt->dst();
+  (*log_)() << "EthernetPacket dispatch in DataPlane";
+  (*log_)() << "  src: " << pkt->src();
+  (*log_)() << "  dst: " << pkt->dst();
+  (*log_)() << "  type: " << pkt->type();
 }
 
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {

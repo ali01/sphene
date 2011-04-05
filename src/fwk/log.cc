@@ -4,21 +4,31 @@
 
 namespace Fwk {
 
-/* For 'log << "foo" << ...' convenience. */
-Log& operator<<(Log& log, const std::string& str) {
-  log.entryNew(str);
-  return log;
-}
+#define L_LS_OP_LL(TYPE)                                              \
+  Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, TYPE val) {  \
+    ls->stream() << val;                                              \
+    return ls;                                                        \
+  }
 
-Log::Ptr operator<<(Log::Ptr log, const std::string& str) {
-  log->entryNew(str);
-  return log;
-}
+L_LS_OP_LL(const std::string&);
+L_LS_OP_LL(bool);
+L_LS_OP_LL(short);
+L_LS_OP_LL(unsigned short);
+L_LS_OP_LL(int);
+L_LS_OP_LL(unsigned int);
+L_LS_OP_LL(long);
+L_LS_OP_LL(unsigned long);
+L_LS_OP_LL(float);
+L_LS_OP_LL(double);
+L_LS_OP_LL(long double);
+L_LS_OP_LL(const void*);
+L_LS_OP_LL(char);
+L_LS_OP_LL(signed char);
+L_LS_OP_LL(unsigned char);
+L_LS_OP_LL(const char*);
+L_LS_OP_LL(const signed char*);
+L_LS_OP_LL(const unsigned char*);
 
-Log::LogStream::Ptr operator<<(Log::LogStream::Ptr logstream,
-                               const std::string& str) {
-  logstream->stream() << str;
-  return logstream;
-}
+#undef L_LS_OP_LL
 
 }  /* Fwk */

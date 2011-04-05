@@ -52,11 +52,6 @@ public:
 
    protected:
     LogStream(Log::Ptr log, Level level) : log_(log), level_(level) { }
-    LogStream(const LogStream& other) {
-      log_ = other.log_;
-      level_ = other.level_;
-      ss_ << other.ss_;
-    }
     ~LogStream() {
       log_->entryNew(level_, ss_.str());
     }
@@ -64,8 +59,6 @@ public:
     Log::Ptr log_;
     Level level_;
     std::stringstream ss_;
-
-    friend class Log;
   };
 
   static Log::Ptr LogNew(const string& loggerName="root") {
@@ -100,7 +93,7 @@ public:
     return LogStream::LogStreamNew(this, level);
   }
   LogStream::Ptr operator()() {
-    return LogStream::LogStreamNew(this, info());
+    return LogStream::LogStreamNew(this, level());
   }
 
   virtual void entryNew(Level level, Fwk::NamedInterface *entity,
@@ -169,10 +162,24 @@ protected:
 };
 
 
-Log& operator<<(Log& log, const std::string& str);
-Log::Ptr operator<<(Log::Ptr log, const std::string& str);
-Log::LogStream::Ptr operator<<(Log::LogStream::Ptr stream,
-                               const std::string& str);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const std::string& val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, bool val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, short val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned short val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, int val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned int val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, long val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned long val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, float val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, double val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, long double val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const void* val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, char c);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, signed char c);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned char c);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const char* s);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const signed char* s);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const unsigned char* s);
 
 }
 
