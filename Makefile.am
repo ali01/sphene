@@ -97,6 +97,7 @@ libsr_base_a_SOURCES = \
                        src/ethernet_packet.h \
                        src/getarg.cc \
                        src/icmp_packet.h \
+                       src/ip_packet.cc \
                        src/ip_packet.h \
                        src/nf2.h \
                        src/nf2util.cc \
