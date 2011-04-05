@@ -1,0 +1,86 @@
+#include "gtest/gtest.h"
+
+#include <cstring>
+#include <inttypes.h>
+#include <net/ethernet.h>
+#include "fwk/buffer.h"
+#include "ethernet_packet.h"
+
+
+class EthernetPacketTest : public ::testing::Test {
+ protected:
+  virtual void SetUp() {
+    uint8_t src[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+    uint8_t dst[] = { 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C };
+    uint16_t type = ETHERTYPE_IP;
+
+    // Put a packet in a buffer.
+    const char* payload = "This is an ethernet packet payload.";
+    uint8_t pkt[ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN + strlen(payload)];
+    buf_ = Buffer::BufferNew(pkt, sizeof(pkt));
+
+    // Update header pointer.
+    header_ = (struct ether_header*)buf_->data();
+
+    // Set fields in the header.
+    memcpy(header_->ether_shost, src, sizeof(src));
+    memcpy(header_->ether_dhost, dst, sizeof(dst));
+    header_->ether_type = type;
+
+    // Update payload pointer.
+    payload_ = (char*)((uint8_t*)header_ + ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN);
+
+    // Copy in payload.
+    memcpy(payload_, payload, strlen(payload));
+
+    // Construct packet.
+    pkt_ = EthernetPacket::EthernetPacketNew(buf_, 0);
+  }
+
+  Buffer::Ptr buf_;
+  struct ether_header* header_;
+  char* payload_;
+  EthernetPacket::Ptr pkt_;
+};
+
+
+TEST_F(EthernetPacketTest, Src) {
+  // Extract the source address.
+  EthernetAddr src = pkt_->src();
+
+  // Compare it with expected source.
+  EXPECT_EQ(EthernetAddr(header_->ether_shost), src);
+
+  // Change the source.
+  uint8_t kNewSrc[] = { 0xDE, 0xAD, 0xC0, 0xFF, 0xEE, 0x00 };
+  pkt_->srcIs(EthernetAddr(kNewSrc));
+  EXPECT_EQ(EthernetAddr(kNewSrc), pkt_->src());
+}
+
+
+TEST_F(EthernetPacketTest, Dst) {
+  // Extract the destination address.
+  EthernetAddr dst = pkt_->dst();
+
+  // Compare it with the expected destination.
+  EXPECT_EQ(EthernetAddr(header_->ether_dhost), dst);
+
+  // Change the destination.
+  uint8_t kNewDst[] = { 0xC0, 0xFF, 0xEE, 0xBA, 0xBE, 0xCC };
+  pkt_->dstIs(EthernetAddr(kNewDst));
+  EXPECT_EQ(EthernetAddr(kNewDst), pkt_->dst());
+}
+
+
+TEST_F(EthernetPacketTest, EtherType) {
+  // Ensure Ethernet type is exported properly.
+  ASSERT_EQ(header_->ether_type, pkt_->type());
+
+  // Set the Ethernet type to IP.
+  pkt_->typeIs(ETHERTYPE_IP);
+  EXPECT_EQ(ETHERTYPE_IP, pkt_->type());
+
+  // Set the Ethernet type to ARP.
+  pkt_->typeIs(ETHERTYPE_ARP);
+  EXPECT_EQ(ETHERTYPE_ARP, pkt_->type());
+}

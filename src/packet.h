@@ -2,6 +2,8 @@
 #define PACKET_H_
 
 #include "fwk/buffer.h"
+#include "fwk/ptr.h"
+#include "fwk/ptr_interface.h"
 
 using Fwk::Buffer;
 
@@ -12,8 +14,11 @@ class ICMPPacket;
 class IPPacket;
 
 
-class Packet {
+class Packet : public Fwk::PtrInterface<Packet> {
  public:
+  typedef Fwk::Ptr<const Packet> PtrConst;
+  typedef Fwk::Ptr<Packet> Ptr;
+
   class Functor {
    public:
     virtual void operator()(ARPPacket*) { }

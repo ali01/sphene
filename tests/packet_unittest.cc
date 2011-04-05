@@ -9,7 +9,7 @@ TEST(PacketTest, Construct) {
   const char *data = "this is my string";
 
   Buffer::Ptr buf = Buffer::BufferNew(data, sizeof(data));
-  EthernetPacket pkt(buf, 0);
+  EthernetPacket::Ptr pkt = EthernetPacket::EthernetPacketNew(buf, 0);
 
-  ASSERT_EQ(buf, pkt.buffer());
+  ASSERT_EQ(buf, pkt->buffer());
 }
