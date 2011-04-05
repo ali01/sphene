@@ -14,10 +14,12 @@ class EthernetPacketTest : public ::testing::Test {
     uint8_t dst[] = { 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C };
     memcpy(header_.ether_shost, src, sizeof(src));
     memcpy(header_.ether_dhost, dst, sizeof(dst));
+    header_.ether_type = ETHERTYPE_IP;
 
     src_ = src;
     dst_ = dst;
 
+    // Put the Ethernet header in a buffer.
     buf_ = Buffer::BufferNew(&header_, sizeof(header_));
   }
 
@@ -43,4 +45,20 @@ TEST_F(EthernetPacketTest, Addresses) {
 
   // Compare it with the expected destination.
   EXPECT_EQ(dst_, dst);
+}
+
+
+TEST_F(EthernetPacketTest, EtherType) {
+  EthernetPacket pkt(buf_, 0);
+
+  // Ensure Ethernet type is exported properly.
+  ASSERT_EQ(header_.ether_type, pkt.type());
+
+  // Set the Ethernet type to IP.
+  pkt.typeIs(ETHERTYPE_IP);
+  EXPECT_EQ(ETHERTYPE_IP, pkt.type());
+
+  // Set the Ethernet type to ARP.
+  pkt.typeIs(ETHERTYPE_ARP);
+  EXPECT_EQ(ETHERTYPE_ARP, pkt.type());
 }

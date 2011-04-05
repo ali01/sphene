@@ -10,7 +10,7 @@
 #include "packet.h"
 
 
-typedef uint16_t EtherType;
+typedef uint16_t EthernetType;
 
 class EthernetAddr {
  public:
@@ -51,8 +51,12 @@ class EthernetPacket : public Packet {
     return (EthernetAddr&)eth_hdr->ether_dhost;
   }
 
-  EtherType etherType() const {
+  EthernetType type() const {
     return eth_hdr->ether_type;
+  }
+
+  void typeIs(const EthernetType eth_type) {
+    eth_hdr->ether_type = eth_type;
   }
 
  protected:
