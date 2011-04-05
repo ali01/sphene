@@ -2,3 +2,4 @@ src/cli/parser.cc
 src/cli/scanner.cc
 build
 auth_key
+vns_run.sh
