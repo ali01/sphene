@@ -6,7 +6,8 @@
 
 
 TEST(PacketTest, Construct) {
-  char data[64];
+  const char *data = "this is my string";
+
   Buffer::Ptr buf = Buffer::BufferNew(data, sizeof(data));
   EthernetPacket pkt(buf, 0);
 
