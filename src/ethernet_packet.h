@@ -6,11 +6,13 @@
 #include <net/ethernet.h>
 
 #include "fwk/buffer.h"
+#include "fwk/exception.h"
 #include "fwk/ptr.h"
 
 #include "arp_packet.h"
 #include "ip_packet.h"
 #include "packet.h"
+#include "unknown_packet.h"
 
 
 typedef uint16_t EthernetType;
@@ -84,8 +86,7 @@ class EthernetPacket : public Packet {
         return IPPacket::IPPacketNew(buffer_, payload_offset);
         break;
       default:
-        /* TODO(ms): Should return an UnknownPacket when it exists. */
-        return NULL;
+        return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
         break;
     }
   }
@@ -93,6 +94,9 @@ class EthernetPacket : public Packet {
  protected:
   EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : Packet(buffer, buffer_offset) {
+    unsigned int length = buffer->size() - buffer_offset;
+    if (length < ETHER_HDR_LEN)
+      throw Fwk::RangeException("EthernetPacket", "packet length too small");
     eth_hdr = (struct ether_header*)((uint8_t*)buffer->data() + buffer_offset);
   }
 

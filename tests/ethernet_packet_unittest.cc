@@ -116,3 +116,19 @@ TEST_F(EthernetPacketTest, PayloadIP) {
   // Ensure we got the correct type.
   EXPECT_TRUE(dynamic_cast<IPPacket*>(payload.ptr()));
 }
+
+
+TEST_F(EthernetPacketTest, PayloadUnknown) {
+  // Force the type to be unknown.
+  pkt_->typeIs(0x1337);
+
+  // Extract the excapsulated packet.
+  Packet::Ptr payload = pkt_->payload();
+  ASSERT_NE((Packet*)NULL, payload.ptr());
+
+  // Ensure we extracted the expected payload.
+  EXPECT_EQ((uint8_t*)payload_, payload->data());
+
+  // Ensure we got the correct type.
+  EXPECT_TRUE(dynamic_cast<UnknownPacket*>(payload.ptr()));
+}
