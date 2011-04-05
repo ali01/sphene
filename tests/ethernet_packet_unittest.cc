@@ -30,7 +30,7 @@ class EthernetPacketTest : public ::testing::Test {
 };
 
 
-TEST_F(EthernetPacketTest, Addresses) {
+TEST_F(EthernetPacketTest, Src) {
   // Construct packet.
   EthernetPacket pkt(buf_, 0);
 
@@ -44,6 +44,11 @@ TEST_F(EthernetPacketTest, Addresses) {
   uint8_t kNewSrc[] = { 0xDE, 0xAD, 0xC0, 0xFF, 0xEE, 0x00 };
   pkt.srcIs(EthernetAddr(kNewSrc));
   EXPECT_EQ(EthernetAddr(kNewSrc), pkt.src());
+}
+
+
+TEST_F(EthernetPacketTest, Dst) {
+  EthernetPacket pkt(buf_, 0);
 
   // Extract the destination address.
   EthernetAddr dst = pkt.dst();
