@@ -9,6 +9,7 @@
 #include "fwk/ptr.h"
 
 #include "arp_packet.h"
+#include "ip_packet.h"
 #include "packet.h"
 
 
@@ -79,7 +80,11 @@ class EthernetPacket : public Packet {
       case ETHERTYPE_ARP:
         return ARPPacket::ARPPacketNew(buffer_, payload_offset);
         break;
+      case ETHERTYPE_IP:
+        return IPPacket::IPPacketNew(buffer_, payload_offset);
+        break;
       default:
+        /* TODO(ms): Should return an UnknownPacket when it exists. */
         return NULL;
         break;
     }

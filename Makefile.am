@@ -102,6 +102,7 @@ libsr_base_a_SOURCES = \
                        src/nf2.h \
                        src/nf2util.cc \
                        src/nf2util.h \
+                       src/packet.cc \
                        src/packet.h \
                        src/real_socket_helper.cc \
                        src/real_socket_helper.h \

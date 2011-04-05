@@ -100,3 +100,19 @@ TEST_F(EthernetPacketTest, PayloadARP) {
   // Ensure we got the correct type.
   EXPECT_TRUE(dynamic_cast<ARPPacket*>(payload.ptr()));
 }
+
+
+TEST_F(EthernetPacketTest, PayloadIP) {
+  // Force the type to be IP.
+  pkt_->typeIs(ETHERTYPE_IP);
+
+  // Extract the excapsulated packet.
+  Packet::Ptr payload = pkt_->payload();
+  ASSERT_NE((Packet*)NULL, payload.ptr());
+
+  // Ensure we extracted the expected payload.
+  EXPECT_EQ((uint8_t*)payload_, payload->data());
+
+  // Ensure we got the correct type.
+  EXPECT_TRUE(dynamic_cast<IPPacket*>(payload.ptr()));
+}
