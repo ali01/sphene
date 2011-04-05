@@ -8,6 +8,7 @@
 #include "fwk/buffer.h"
 #include "fwk/ptr.h"
 
+#include "arp_packet.h"
 #include "packet.h"
 
 
@@ -69,6 +70,19 @@ class EthernetPacket : public Packet {
 
   void typeIs(const EthernetType eth_type) {
     eth_hdr->ether_type = eth_type;
+  }
+
+  Packet::Ptr payload() const {
+    uint16_t payload_offset = ETHER_HDR_LEN;
+
+    switch (type()) {
+      case ETHERTYPE_ARP:
+        return ARPPacket::ARPPacketNew(buffer_, payload_offset);
+        break;
+      default:
+        return NULL;
+        break;
+    }
   }
 
  protected:

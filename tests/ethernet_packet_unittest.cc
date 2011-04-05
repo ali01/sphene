@@ -12,7 +12,7 @@ class EthernetPacketTest : public ::testing::Test {
   virtual void SetUp() {
     uint8_t src[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
     uint8_t dst[] = { 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C };
-    uint16_t type = ETHERTYPE_IP;
+    uint16_t type = ETHERTYPE_ARP;
 
     // Put a packet in a buffer.
     const char* payload = "This is an ethernet packet payload.";
@@ -83,4 +83,20 @@ TEST_F(EthernetPacketTest, EtherType) {
   // Set the Ethernet type to ARP.
   pkt_->typeIs(ETHERTYPE_ARP);
   EXPECT_EQ(ETHERTYPE_ARP, pkt_->type());
+}
+
+
+TEST_F(EthernetPacketTest, PayloadARP) {
+  // Force the type to be ARP.
+  pkt_->typeIs(ETHERTYPE_ARP);
+
+  // Extract the excapsulated packet.
+  Packet::Ptr payload = pkt_->payload();
+  ASSERT_NE((Packet*)NULL, payload.ptr());
+
+  // Ensure we extracted the expected payload.
+  EXPECT_EQ((uint8_t*)payload_, payload->data());
+
+  // Ensure we got the correct type.
+  EXPECT_TRUE(dynamic_cast<ARPPacket*>(payload.ptr()));
 }
