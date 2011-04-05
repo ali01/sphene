@@ -84,6 +84,19 @@ class EthernetPacket : public Packet {
     eth_hdr->ether_type = eth_type;
   }
 
+  std::string typeName() const {
+    switch (type()) {
+      case ETHERTYPE_ARP:
+        return "ARP";
+        break;
+      case ETHERTYPE_IP:
+        return "IP";
+        break;
+      default:
+        return "unknown";
+    }
+  }
+
   Packet::Ptr payload() const {
     uint16_t payload_offset = ETHER_HDR_LEN;
 

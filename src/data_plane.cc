@@ -36,7 +36,7 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt) {
   (*log_)() << "EthernetPacket dispatch in DataPlane";
   (*log_)() << "  src: " << pkt->src();
   (*log_)() << "  dst: " << pkt->dst();
-  (*log_)() << "  type: " << pkt->type();
+  (*log_)() << "  type: " << pkt->typeName();
 }
 
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {

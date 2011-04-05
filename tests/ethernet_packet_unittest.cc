@@ -79,10 +79,17 @@ TEST_F(EthernetPacketTest, EtherType) {
   // Set the Ethernet type to IP.
   pkt_->typeIs(ETHERTYPE_IP);
   EXPECT_EQ(ETHERTYPE_IP, pkt_->type());
+  EXPECT_EQ("IP", pkt_->typeName());
 
   // Set the Ethernet type to ARP.
   pkt_->typeIs(ETHERTYPE_ARP);
   EXPECT_EQ(ETHERTYPE_ARP, pkt_->type());
+  EXPECT_EQ("ARP", pkt_->typeName());
+
+  // Set the Ethernet type to an unknown value.
+  pkt_->typeIs(0x1337);
+  EXPECT_EQ(0x1337, pkt_->type());
+  EXPECT_EQ("unknown", pkt_->typeName());
 }
 
 
