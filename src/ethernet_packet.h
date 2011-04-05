@@ -35,7 +35,7 @@ class EthernetPacket : public Packet {
  public:
   EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : Packet(buffer, buffer_offset) {
-    eth_hdr = (struct ether_header*)buffer->data();
+    eth_hdr = (struct ether_header*)((uint8_t*)buffer->data() + buffer_offset);
   }
 
   /* Functor for double-dispatch. */
