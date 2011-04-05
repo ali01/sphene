@@ -9,8 +9,6 @@
 #include "icmp_packet.h"
 #include "ip_packet.h"
 
-using std::string;
-
 
 DataPlane::DataPlane(const std::string& name) : Fwk::NamedInterface(name) {
   log_ = Fwk::Log::LogNew(name);
