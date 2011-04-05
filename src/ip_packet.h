@@ -38,7 +38,7 @@ class IPPacket : public Packet {
   IPPacket(Buffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
-  struct ip_hdr *ip_hdr_;
+  struct ip_hdr* ip_hdr_;
 
   /* IP Header packet struct. */
   struct ip_hdr {
@@ -49,8 +49,8 @@ class IPPacket : public Packet {
     unsigned int ip_v:4;      /* version */
     unsigned int ip_hl:4;     /* header length */
 #else
-#error "Byte ordering not specified." 
-#endif 
+#error "Byte ordering not specified."
+#endif
     uint8_t ip_tos;           /* type of service */
     uint16_t ip_len;          /* total length */
     uint16_t ip_id;           /* identification */
