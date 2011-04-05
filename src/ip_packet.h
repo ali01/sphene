@@ -35,6 +35,10 @@ class IPPacket : public Packet {
   IPv4Addr dst() const;
   void dstIs(const IPv4Addr& dst);
 
+  uint8_t ttl() const;
+  void ttlIs(uint8_t ttl);
+  void ttlDec(uint8_t dec_amount);
+
   uint16_t checksum() const;
   void checksumIs(uint16_t ck);
   void checksumReset();

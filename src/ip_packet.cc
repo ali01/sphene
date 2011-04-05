@@ -26,6 +26,21 @@ IPPacket::protocolIs(const Protocol& protocol) {
   ip_hdr_->ip_p = protocol;
 }
 
+uint8_t
+IPPacket::ttl() const {
+  return ip_hdr_->ip_ttl;
+}
+
+void
+IPPacket::ttlIs(uint8_t ttl) {
+  ip_hdr_->ip_ttl = ttl;
+}
+
+void
+IPPacket::ttlDec(uint8_t dec_amount) {
+  ip_hdr_->ip_ttl -= dec_amount;
+}
+
 IPv4Addr
 IPPacket::src() const {
   return ntohl(ip_hdr_->ip_src);
