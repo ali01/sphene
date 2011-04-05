@@ -1,6 +1,7 @@
 #ifndef ETHERNET_PACKET_H_5KIE50BV
 #define ETHERNET_PACKET_H_5KIE50BV
 
+#include <arpa/inet.h>
 #include <cstdio>
 #include <cstring>
 #include <inttypes.h>
@@ -77,11 +78,11 @@ class EthernetPacket : public Packet {
   }
 
   EthernetType type() const {
-    return eth_hdr->ether_type;
+    return ntohs(eth_hdr->ether_type);
   }
 
   void typeIs(const EthernetType eth_type) {
-    eth_hdr->ether_type = eth_type;
+    eth_hdr->ether_type = htons(eth_type);
   }
 
   std::string typeName() const {

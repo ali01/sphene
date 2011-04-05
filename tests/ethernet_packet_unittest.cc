@@ -12,7 +12,7 @@ class EthernetPacketTest : public ::testing::Test {
   virtual void SetUp() {
     uint8_t src[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
     uint8_t dst[] = { 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C };
-    uint16_t type = ETHERTYPE_ARP;
+    uint16_t type = htons(ETHERTYPE_ARP);  // packet should be in network order
 
     // Put a packet in a buffer.
     const char* payload = "This is an ethernet packet payload.";
@@ -74,7 +74,7 @@ TEST_F(EthernetPacketTest, Dst) {
 
 TEST_F(EthernetPacketTest, EtherType) {
   // Ensure Ethernet type is exported properly.
-  ASSERT_EQ(header_->ether_type, pkt_->type());
+  ASSERT_EQ(ntohs(header_->ether_type), pkt_->type());
 
   // Set the Ethernet type to IP.
   pkt_->typeIs(ETHERTYPE_IP);
