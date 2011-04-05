@@ -7,6 +7,7 @@
 
 /* Typedefs. */
 typedef uint8_t IPVersion;
+typedef uint8_t Protocol;
 typedef uint32_t IPv4Addr;
 
 class IPPacket : public Packet {
@@ -24,6 +25,9 @@ class IPPacket : public Packet {
 
   IPVersion version() const;
   void versionIs(const IPVersion& version);
+
+  Protocol protocol() const;
+  void protocolIs(const Protocol& protocol);
 
   IPv4Addr src() const;
   void srcIs(const IPv4Addr& src);

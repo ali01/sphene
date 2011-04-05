@@ -16,6 +16,16 @@ IPPacket::versionIs(const IPVersion& version) {
   ip_hdr_->ip_v = version;
 }
 
+Protocol
+IPPacket::protocol() const {
+  return ip_hdr_->ip_p;
+}
+
+void
+IPPacket::protocolIs(const Protocol& protocol) {
+  ip_hdr_->ip_p = protocol;
+}
+
 IPv4Addr
 IPPacket::src() const {
   return ntohl(ip_hdr_->ip_src);
