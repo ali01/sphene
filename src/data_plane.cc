@@ -9,6 +9,8 @@
 #include "icmp_packet.h"
 #include "ip_packet.h"
 
+using std::string;
+
 
 DataPlane::DataPlane(const std::string& name) : Fwk::NamedInterface(name) {
   functor_ = new PacketFunctor(this);
@@ -31,6 +33,8 @@ void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt) {
 
 void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt) {
   dp_->log_->entryNew("EthernetPacket dispatch in DataPlane");
+  (*(dp_->log_))() << "  src: " << pkt->src();
+  (*(dp_->log_))() << "  dst: " << pkt->dst();
 }
 
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {

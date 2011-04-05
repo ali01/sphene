@@ -86,6 +86,8 @@ liblwtcp_a_SOURCES = \
 FWK_SRCS = \
            src/fwk/atomic.h \
            src/fwk/exception.h \
+           src/fwk/log.cc \
+           src/fwk/log.h \
            src/fwk/ptr.h \
            src/fwk/ptr_interface.h
 
