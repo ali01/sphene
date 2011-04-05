@@ -206,6 +206,7 @@ cli_LDADD = $(USER_LIBS)
 TESTS = \
         atomic_unittest \
         buffer_unittest \
+        ethernet_packet_unittest \
         packet_unittest \
         sample1_unittest \
         sw_data_plane_unittest
@@ -215,6 +216,10 @@ bin_PROGRAMS += $(TESTS)
 atomic_unittest_SOURCES = tests/atomic_unittest.cc $(FWK_SRCS)
 atomic_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
+
+ethernet_packet_unittest_SOURCES = tests/ethernet_packet_unittest.cc $(FWK_SRCS)
+ethernet_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+ethernet_packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
