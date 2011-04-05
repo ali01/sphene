@@ -17,7 +17,7 @@ class EthernetPacketTest : public ::testing::Test {
     // Put a packet in a buffer.
     const char* payload = "This is an ethernet packet payload.";
     uint8_t pkt[ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN + strlen(payload)];
-    buf_ = Buffer::BufferNew(pkt, sizeof(pkt));
+    buf_ = Fwk::Buffer::BufferNew(pkt, sizeof(pkt));
 
     // Update header pointer.
     header_ = (struct ether_header*)buf_->data();
@@ -37,7 +37,7 @@ class EthernetPacketTest : public ::testing::Test {
     pkt_ = EthernetPacket::EthernetPacketNew(buf_, 0);
   }
 
-  Buffer::Ptr buf_;
+  Fwk::Buffer::Ptr buf_;
   struct ether_header* header_;
   char* payload_;
   EthernetPacket::Ptr pkt_;

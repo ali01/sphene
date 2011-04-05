@@ -4,7 +4,6 @@
 #include <time.h>
 
 #include "fwk/buffer.h"
-using Fwk::Buffer;
 
 #define BUFFER_SIZE 64
 
@@ -20,7 +19,7 @@ class BufferTest : public ::testing::Test {
 };
 
 TEST_F(BufferTest, Construct) {
-  Buffer::Ptr buffer = Buffer::BufferNew(data_, sizeof(data_));
+  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(data_, sizeof(data_));
   int cmp_val = memcmp(buffer->data(), data_, sizeof(data_));
   ASSERT_EQ(cmp_val, 0);
 }

@@ -7,8 +7,6 @@
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
 
-using Fwk::Buffer;
-
 /* Forward declarations. */
 class ARPPacket;
 class EthernetPacket;
@@ -32,16 +30,16 @@ class Packet : public Fwk::PtrInterface<Packet> {
   };
 
   uint8_t* data() const { return buffer_->data() + buffer_offset_; }
-  Buffer::Ptr buffer() const { return buffer_; }
+  Fwk::Buffer::Ptr buffer() const { return buffer_; }
 
  protected:
-  Packet(Buffer::Ptr buffer, unsigned int buffer_offset)
+  Packet(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : buffer_(buffer), buffer_offset_(buffer_offset) { }
 
   uint8_t* offsetAddress(unsigned int offset) const;
 
   /* Data members. */
-  Buffer::Ptr buffer_;
+  Fwk::Buffer::Ptr buffer_;
   const unsigned int buffer_offset_;
 };
 

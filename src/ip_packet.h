@@ -18,7 +18,7 @@ class IPPacket : public Packet {
   typedef Fwk::Ptr<const IPPacket> PtrConst;
   typedef Fwk::Ptr<IPPacket> Ptr;
 
-  static Ptr IPPacketNew(Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }
 
@@ -35,7 +35,7 @@ class IPPacket : public Packet {
   void checksumIs(uint16_t ck);
 
  protected:
-  IPPacket(Buffer::Ptr buffer, unsigned int buffer_offset);
+  IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
   struct ip_hdr* ip_hdr_;
