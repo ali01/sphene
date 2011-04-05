@@ -55,6 +55,11 @@ TEST_F(EthernetPacketTest, Dst) {
 
   // Compare it with the expected destination.
   EXPECT_EQ(dst_, dst);
+
+  // Change the destination.
+  uint8_t kNewDst[] = { 0xC0, 0xFF, 0xEE, 0xBA, 0xBE, 0xCC };
+  pkt.dstIs(EthernetAddr(kNewDst));
+  EXPECT_EQ(EthernetAddr(kNewDst), pkt.dst());
 }
 
 
