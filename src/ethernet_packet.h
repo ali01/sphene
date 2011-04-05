@@ -2,8 +2,8 @@
 #define ETHERNET_PACKET_H_5KIE50BV
 
 #include <cstring>
-#include <net/ethernet.h>
 #include <inttypes.h>
+#include <net/ethernet.h>
 
 #include "fwk/buffer.h"
 
