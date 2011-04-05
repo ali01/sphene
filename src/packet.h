@@ -1,6 +1,8 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
+#include <inttypes.h>
+
 #include "fwk/buffer.h"
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
@@ -29,6 +31,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
     virtual ~Functor() { }
   };
 
+  uint8_t* data() const { return buffer_->data() + buffer_offset_; }
   Buffer::Ptr buffer() const { return buffer_; }
 
  protected:
