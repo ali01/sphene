@@ -2,7 +2,6 @@
 #define ARP_PACKET_H_WDIREBCF
 
 #include "fwk/buffer.h"
-#include "fwk/ptr.h"
 
 #include "packet.h"
 
