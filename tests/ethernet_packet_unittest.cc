@@ -74,7 +74,8 @@ TEST_F(EthernetPacketTest, Dst) {
 
 TEST_F(EthernetPacketTest, EtherType) {
   // Ensure Ethernet type is exported properly.
-  ASSERT_EQ(ntohs(header_->ether_type), pkt_->type());
+  EthernetType expected = ntohs(header_->ether_type);
+  ASSERT_EQ(expected, pkt_->type());
 
   // Set the Ethernet type to IP.
   pkt_->typeIs(ETHERTYPE_IP);
