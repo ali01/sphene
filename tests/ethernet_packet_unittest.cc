@@ -15,8 +15,8 @@ class EthernetPacketTest : public ::testing::Test {
     uint16_t type = ETHERTYPE_IP;
 
     // Put a packet in a buffer.
-    payload_ = "This is an ethernet packet payload.";
-    uint8_t pkt[ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN + strlen(payload_)];
+    const char* payload = "This is an ethernet packet payload.";
+    uint8_t pkt[ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN + strlen(payload)];
     buf_ = Buffer::BufferNew(pkt, sizeof(pkt));
 
     // Update header pointer.
@@ -27,15 +27,16 @@ class EthernetPacketTest : public ::testing::Test {
     memcpy(header_->ether_dhost, dst, sizeof(dst));
     header_->ether_type = type;
 
+    // Update payload pointer.
+    payload_ = (char*)((uint8_t*)header_ + ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN);
+
     // Copy in payload.
-    memcpy(header_ + ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN,
-           payload_,
-           strlen(payload_));
+    memcpy(payload_, payload, strlen(payload));
   }
 
   Buffer::Ptr buf_;
   struct ether_header* header_;
-  const char* payload_;
+  char* payload_;
 };
 
 
