@@ -11,6 +11,7 @@
 #include "arp_packet.h"
 #include "ip_packet.h"
 #include "packet.h"
+#include "unknown_packet.h"
 
 
 typedef uint16_t EthernetType;
@@ -84,8 +85,7 @@ class EthernetPacket : public Packet {
         return IPPacket::IPPacketNew(buffer_, payload_offset);
         break;
       default:
-        /* TODO(ms): Should return an UnknownPacket when it exists. */
-        return NULL;
+        return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
         break;
     }
   }
