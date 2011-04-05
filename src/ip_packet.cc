@@ -2,7 +2,7 @@
 
 #include <netinet/in.h>
 
-IPPacket::IPPacket(Buffer::Ptr buffer, unsigned int buffer_offset)
+IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ip_hdr_((struct ip_hdr *)offsetAddress(0)) {}
 

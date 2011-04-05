@@ -18,7 +18,7 @@ class IPPacket : public Packet {
   typedef Fwk::Ptr<const IPPacket> PtrConst;
   typedef Fwk::Ptr<IPPacket> Ptr;
 
-  static Ptr IPPacketNew(Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }
 
@@ -35,10 +35,10 @@ class IPPacket : public Packet {
   void checksumIs(uint16_t ck);
 
  protected:
-  IPPacket(Buffer::Ptr buffer, unsigned int buffer_offset);
+  IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
-  struct ip_hdr *ip_hdr_;
+  struct ip_hdr* ip_hdr_;
 
   /* IP Header packet struct. */
   struct ip_hdr {
@@ -49,8 +49,8 @@ class IPPacket : public Packet {
     unsigned int ip_v:4;      /* version */
     unsigned int ip_hl:4;     /* header length */
 #else
-#error "Byte ordering not specified." 
-#endif 
+#error "Byte ordering not specified."
+#endif
     uint8_t ip_tos;           /* type of service */
     uint16_t ip_len;          /* total length */
     uint16_t ip_id;           /* identification */
