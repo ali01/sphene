@@ -12,21 +12,30 @@ class EthernetPacketTest : public ::testing::Test {
   virtual void SetUp() {
     uint8_t src[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
     uint8_t dst[] = { 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C };
-    memcpy(header_.ether_shost, src, sizeof(src));
-    memcpy(header_.ether_dhost, dst, sizeof(dst));
-    header_.ether_type = ETHERTYPE_IP;
+    uint16_t type = ETHERTYPE_IP;
 
-    src_ = src;
-    dst_ = dst;
+    // Put a packet in a buffer.
+    payload_ = "This is an ethernet packet payload.";
+    uint8_t pkt[ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN + strlen(payload_)];
+    buf_ = Buffer::BufferNew(pkt, sizeof(pkt));
 
-    // Put the Ethernet header in a buffer.
-    buf_ = Buffer::BufferNew(&header_, sizeof(header_));
+    // Update header pointer.
+    header_ = (struct ether_header*)buf_->data();
+
+    // Set fields in the header.
+    memcpy(header_->ether_shost, src, sizeof(src));
+    memcpy(header_->ether_dhost, dst, sizeof(dst));
+    header_->ether_type = type;
+
+    // Copy in payload.
+    memcpy(header_ + ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN,
+           payload_,
+           strlen(payload_));
   }
 
-  EthernetAddr src_;
-  EthernetAddr dst_;
-  struct ether_header header_;
   Buffer::Ptr buf_;
+  struct ether_header* header_;
+  const char* payload_;
 };
 
 
@@ -38,7 +47,7 @@ TEST_F(EthernetPacketTest, Src) {
   EthernetAddr src = pkt.src();
 
   // Compare it with expected source.
-  EXPECT_EQ(src_, src);
+  EXPECT_EQ(EthernetAddr(header_->ether_shost), src);
 
   // Change the source.
   uint8_t kNewSrc[] = { 0xDE, 0xAD, 0xC0, 0xFF, 0xEE, 0x00 };
@@ -54,7 +63,7 @@ TEST_F(EthernetPacketTest, Dst) {
   EthernetAddr dst = pkt.dst();
 
   // Compare it with the expected destination.
-  EXPECT_EQ(dst_, dst);
+  EXPECT_EQ(EthernetAddr(header_->ether_dhost), dst);
 
   // Change the destination.
   uint8_t kNewDst[] = { 0xC0, 0xFF, 0xEE, 0xBA, 0xBE, 0xCC };
@@ -67,7 +76,7 @@ TEST_F(EthernetPacketTest, EtherType) {
   EthernetPacket pkt(buf_, 0);
 
   // Ensure Ethernet type is exported properly.
-  ASSERT_EQ(header_.ether_type, pkt.type());
+  ASSERT_EQ(header_->ether_type, pkt.type());
 
   // Set the Ethernet type to IP.
   pkt.typeIs(ETHERTYPE_IP);
