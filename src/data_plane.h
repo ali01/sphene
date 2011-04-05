@@ -20,7 +20,7 @@ class DataPlane : public Fwk::NamedInterface {
   typedef Fwk::Ptr<const DataPlane> PtrConst;
   typedef Fwk::Ptr<DataPlane> Ptr;
 
-  void packetNew(EthernetPacket* pkt);
+  void packetNew(Fwk::Ptr<EthernetPacket> pkt);
 
  protected:
   DataPlane(const std::string& name);

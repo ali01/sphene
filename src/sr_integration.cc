@@ -90,10 +90,10 @@ void sr_integ_input(struct sr_instance* sr,
   printf(" ** sr_integ_input(..) called \n");
 
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
-  EthernetPacket eth_pkt(buffer, 0);
+  EthernetPacket::Ptr eth_pkt = EthernetPacket::EthernetPacketNew(buffer, 0);
 
   /* TODO(ms): bypass dataplane here on _CPUMODE_? */
-  dp->packetNew(&eth_pkt);
+  dp->packetNew(eth_pkt);
 }
 
 /*-----------------------------------------------------------------------------

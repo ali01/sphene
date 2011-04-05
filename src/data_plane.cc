@@ -19,7 +19,7 @@ DataPlane::~DataPlane() {
   delete functor_;
 }
 
-void DataPlane::packetNew(EthernetPacket* const pkt) {
+void DataPlane::packetNew(EthernetPacket::Ptr pkt) {
   (*pkt)(functor_);
 }
 

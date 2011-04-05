@@ -32,58 +32,55 @@ class EthernetPacketTest : public ::testing::Test {
 
     // Copy in payload.
     memcpy(payload_, payload, strlen(payload));
+
+    // Construct packet.
+    pkt_ = EthernetPacket::EthernetPacketNew(buf_, 0);
   }
 
   Buffer::Ptr buf_;
   struct ether_header* header_;
   char* payload_;
+  EthernetPacket::Ptr pkt_;
 };
 
 
 TEST_F(EthernetPacketTest, Src) {
-  // Construct packet.
-  EthernetPacket pkt(buf_, 0);
-
   // Extract the source address.
-  EthernetAddr src = pkt.src();
+  EthernetAddr src = pkt_->src();
 
   // Compare it with expected source.
   EXPECT_EQ(EthernetAddr(header_->ether_shost), src);
 
   // Change the source.
   uint8_t kNewSrc[] = { 0xDE, 0xAD, 0xC0, 0xFF, 0xEE, 0x00 };
-  pkt.srcIs(EthernetAddr(kNewSrc));
-  EXPECT_EQ(EthernetAddr(kNewSrc), pkt.src());
+  pkt_->srcIs(EthernetAddr(kNewSrc));
+  EXPECT_EQ(EthernetAddr(kNewSrc), pkt_->src());
 }
 
 
 TEST_F(EthernetPacketTest, Dst) {
-  EthernetPacket pkt(buf_, 0);
-
   // Extract the destination address.
-  EthernetAddr dst = pkt.dst();
+  EthernetAddr dst = pkt_->dst();
 
   // Compare it with the expected destination.
   EXPECT_EQ(EthernetAddr(header_->ether_dhost), dst);
 
   // Change the destination.
   uint8_t kNewDst[] = { 0xC0, 0xFF, 0xEE, 0xBA, 0xBE, 0xCC };
-  pkt.dstIs(EthernetAddr(kNewDst));
-  EXPECT_EQ(EthernetAddr(kNewDst), pkt.dst());
+  pkt_->dstIs(EthernetAddr(kNewDst));
+  EXPECT_EQ(EthernetAddr(kNewDst), pkt_->dst());
 }
 
 
 TEST_F(EthernetPacketTest, EtherType) {
-  EthernetPacket pkt(buf_, 0);
-
   // Ensure Ethernet type is exported properly.
-  ASSERT_EQ(header_->ether_type, pkt.type());
+  ASSERT_EQ(header_->ether_type, pkt_->type());
 
   // Set the Ethernet type to IP.
-  pkt.typeIs(ETHERTYPE_IP);
-  EXPECT_EQ(ETHERTYPE_IP, pkt.type());
+  pkt_->typeIs(ETHERTYPE_IP);
+  EXPECT_EQ(ETHERTYPE_IP, pkt_->type());
 
   // Set the Ethernet type to ARP.
-  pkt.typeIs(ETHERTYPE_ARP);
-  EXPECT_EQ(ETHERTYPE_ARP, pkt.type());
+  pkt_->typeIs(ETHERTYPE_ARP);
+  EXPECT_EQ(ETHERTYPE_ARP, pkt_->type());
 }

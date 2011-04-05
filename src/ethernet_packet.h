@@ -6,6 +6,7 @@
 #include <net/ethernet.h>
 
 #include "fwk/buffer.h"
+#include "fwk/ptr.h"
 
 #include "packet.h"
 
@@ -33,9 +34,12 @@ class EthernetAddr {
 
 class EthernetPacket : public Packet {
  public:
-  EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
-      : Packet(buffer, buffer_offset) {
-    eth_hdr = (struct ether_header*)((uint8_t*)buffer->data() + buffer_offset);
+  typedef Fwk::Ptr<const EthernetPacket> PtrConst;
+  typedef Fwk::Ptr<EthernetPacket> Ptr;
+
+  static Ptr EthernetPacketNew(Fwk::Buffer::Ptr buffer,
+                               unsigned int buffer_offset) {
+    return new EthernetPacket(buffer, buffer_offset);
   }
 
   /* Functor for double-dispatch. */
@@ -68,6 +72,11 @@ class EthernetPacket : public Packet {
   }
 
  protected:
+  EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
+      : Packet(buffer, buffer_offset) {
+    eth_hdr = (struct ether_header*)((uint8_t*)buffer->data() + buffer_offset);
+  }
+
   struct ether_header* eth_hdr;
 };
 
