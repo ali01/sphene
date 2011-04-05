@@ -1,6 +1,7 @@
 #include "data_plane.h"
 
 #include <string>
+#include "fwk/log.h"
 #include "fwk/named_interface.h"
 
 #include "arp_packet.h"
@@ -8,12 +9,33 @@
 #include "icmp_packet.h"
 #include "ip_packet.h"
 
-DataPlane::DataPlane(const std::string& name) : Fwk::NamedInterface(name) { }
+DataPlane::DataPlane(const std::string& name) : Fwk::NamedInterface(name) {
+  functor_ = new PacketFunctor(this);
+  log_ = Fwk::Log::LogNew(name);
+}
 
-void DataPlane::PacketFunctor::operator()(ARPPacket* pkt) { }
+DataPlane::~DataPlane() {
+  delete functor_;
+}
 
-void DataPlane::PacketFunctor::operator()(EthernetPacket* pkt) { }
+void DataPlane::packetNew(EthernetPacket* const pkt) {
+  (*pkt)(functor_);
+}
 
-void DataPlane::PacketFunctor::operator()(ICMPPacket* pkt) { }
+DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp) : dp_(dp) { }
 
-void DataPlane::PacketFunctor::operator()(IPPacket* pkt) { }
+void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt) {
+
+}
+
+void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt) {
+  dp_->log_->entryNew("EthernetPacket dispatch in DataPlane");
+}
+
+void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {
+
+}
+
+void DataPlane::PacketFunctor::operator()(IPPacket* const pkt) {
+
+}

@@ -16,12 +16,20 @@
 
 #include <assert.h>
 
+#include "fwk/buffer.h"
+
+#include "data_plane.h"
+#include "ethernet_packet.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
+#include "sw_data_plane.h"
 
 #ifdef _CPUMODE_
 #include "sr_cpu_extension_nf2.h"
 #endif
+
+DataPlane::Ptr dp;
+
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_init(..)
@@ -35,8 +43,11 @@
 
 void sr_integ_init(struct sr_instance* sr)
 {
-    printf(" ** sr_integ_init(..) called \n");
-} /* -- sr_integ_init -- */
+  printf(" ** sr_integ_init(..) called \n");
+
+  /* TODO(ms): Differentiate based on _CPUMODE_. */
+  dp = SWDataPlane::SWDataPlaneNew();
+}
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_hw_setup(..)
@@ -72,15 +83,18 @@ void sr_integ_hw_setup(struct sr_instance* sr)
  *---------------------------------------------------------------------*/
 
 void sr_integ_input(struct sr_instance* sr,
-        const uint8_t * packet/* borrowed */,
-        unsigned int len,
-        const char* interface/* borrowed */)
+                    const uint8_t * packet/* borrowed */,
+                    unsigned int len,
+                    const char* interface/* borrowed */)
 {
-    /* -- INTEGRATION PACKET ENTRY POINT!-- */
+  printf(" ** sr_integ_input(..) called \n");
 
-    printf(" ** sr_integ_input(..) called \n");
+  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
+  EthernetPacket eth_pkt(buffer, 0);
 
-} /* -- sr_integ_input -- */
+  /* TODO(ms): bypass dataplane here on _CPUMODE_? */
+  dp->packetNew(&eth_pkt);
+}
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_add_interface(..)

@@ -10,6 +10,11 @@ class EthernetPacket : public Packet {
  public:
   EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : Packet(buffer, buffer_offset) {}
+
+  /* Functor for double-dispatch. */
+  virtual void operator()(Functor* f) {
+    (*f)(this);
+  }
 };
 
 #endif

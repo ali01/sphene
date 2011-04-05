@@ -14,8 +14,6 @@ class IPPacket;
 
 class Packet {
  public:
-  Buffer::Ptr buffer() const { return buffer_; }
-
   class Functor {
    public:
     virtual void operator()(ARPPacket*) { }
@@ -25,6 +23,8 @@ class Packet {
 
     virtual ~Functor() { }
   };
+
+  Buffer::Ptr buffer() const { return buffer_; }
 
  protected:
   Packet(Buffer::Ptr buffer, unsigned int buffer_offset)
