@@ -41,6 +41,26 @@ public:
     critical_
   };
 
+  class LogStream : public Fwk::PtrInterface<LogStream> {
+   public:
+    typedef Fwk::Ptr<LogStream> Ptr;
+    static Ptr LogStreamNew(Log::Ptr log, Level level) {
+      return new LogStream(log, level);
+    }
+
+    std::stringstream& stream() { return ss_; }
+
+   protected:
+    LogStream(Log::Ptr log, Level level) : log_(log), level_(level) { }
+    ~LogStream() {
+      log_->entryNew(level_, ss_.str());
+    }
+
+    Log::Ptr log_;
+    Level level_;
+    std::stringstream ss_;
+  };
+
   static Log::Ptr LogNew(const string& loggerName="root") {
     if (rootLog.ptr() == NULL)
       rootLog = new Log("root");
@@ -68,6 +88,13 @@ public:
 
   inline string name() const { return loggerName_; }
   void nameIs(const string& name) { loggerName_ = name; }
+
+  LogStream::Ptr operator()(Level level) {
+    return LogStream::LogStreamNew(this, level);
+  }
+  LogStream::Ptr operator()() {
+    return LogStream::LogStreamNew(this, level());
+  }
 
   virtual void entryNew(Level level, Fwk::NamedInterface *entity,
                         string funcName, string cond) {
@@ -133,6 +160,26 @@ protected:
   string loggerName_;
   Level logLevel_;
 };
+
+
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const std::string& val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, bool val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, short val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned short val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, int val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned int val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, long val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned long val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, float val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, double val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, long double val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const void* val);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, char c);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, signed char c);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, unsigned char c);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const char* s);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const signed char* s);
+Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, const unsigned char* s);
 
 }
 

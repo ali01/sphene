@@ -1,9 +1,12 @@
 #ifndef ETHERNET_PACKET_H_5KIE50BV
 #define ETHERNET_PACKET_H_5KIE50BV
 
+#include <arpa/inet.h>
+#include <cstdio>
 #include <cstring>
 #include <inttypes.h>
 #include <net/ethernet.h>
+#include <string>
 
 #include "fwk/buffer.h"
 #include "fwk/exception.h"
@@ -29,6 +32,13 @@ class EthernetAddr {
 
   bool operator==(const EthernetAddr& other) const {
     return (memcmp(addr_, other.addr_, ETH_ALEN) == 0);
+  }
+
+  operator std::string() const {
+    char mac[ETH_ALEN];
+    sprintf(mac, "%02x:%02x:%02x:%02x:%02x:%02x",
+            addr_[0], addr_[1], addr_[2], addr_[3], addr_[4], addr_[5]);
+    return mac;
   }
 
  protected:
@@ -68,11 +78,24 @@ class EthernetPacket : public Packet {
   }
 
   EthernetType type() const {
-    return eth_hdr->ether_type;
+    return ntohs(eth_hdr->ether_type);
   }
 
   void typeIs(const EthernetType eth_type) {
-    eth_hdr->ether_type = eth_type;
+    eth_hdr->ether_type = htons(eth_type);
+  }
+
+  std::string typeName() const {
+    switch (type()) {
+      case ETHERTYPE_ARP:
+        return "ARP";
+        break;
+      case ETHERTYPE_IP:
+        return "IP";
+        break;
+      default:
+        return "unknown";
+    }
   }
 
   Packet::Ptr payload() const {

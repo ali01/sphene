@@ -42,6 +42,7 @@ class DataPlane : public Fwk::NamedInterface {
 
    private:
     DataPlane* dp_;
+    Fwk::Log::Ptr log_;
   };
 
   PacketFunctor* functor_;
