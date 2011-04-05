@@ -46,5 +46,5 @@ void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {
 }
 
 void DataPlane::PacketFunctor::operator()(IPPacket* const pkt) {
-
+  (*log_)() << "IPPacket dispatch in DataPlane";
 }
