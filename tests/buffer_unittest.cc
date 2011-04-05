@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <time.h>
 
 #include "fwk/buffer.h"
@@ -17,6 +18,7 @@ class BufferTest : public ::testing::Test {
 
   char data_[BUFFER_SIZE];
 };
+
 
 TEST_F(BufferTest, Construct) {
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(data_, sizeof(data_));
