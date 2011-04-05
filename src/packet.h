@@ -30,6 +30,8 @@ class Packet : public Fwk::PtrInterface<Packet> {
   };
 
   uint8_t* data() const { return buffer_->data() + buffer_offset_; }
+  size_t len() const { return buffer_->size() - buffer_offset_; }
+
   Fwk::Buffer::Ptr buffer() const { return buffer_; }
 
  protected:
