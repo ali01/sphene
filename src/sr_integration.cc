@@ -30,7 +30,7 @@
 #endif
 
 static DataPlane::Ptr dp;
-static Fwk::Log::Ptr log;
+static Fwk::Log::Ptr log_;
 
 
 /*-----------------------------------------------------------------------------
@@ -45,9 +45,9 @@ static Fwk::Log::Ptr log;
 
 void sr_integ_init(struct sr_instance* sr)
 {
-  log = Fwk::Log::LogNew("root");
-  log->levelIs(log->debug());
-  (*log)(log->info()) << "Initializing";
+  log_ = Fwk::Log::LogNew("root");
+  log_->levelIs(log_->debug());
+  ILOG << "Initializing";
 
   /* TODO(ms): Differentiate based on _CPUMODE_. */
   dp = SWDataPlane::SWDataPlaneNew();
@@ -65,7 +65,7 @@ void sr_integ_init(struct sr_instance* sr)
 
 void sr_integ_hw_setup(struct sr_instance* sr)
 {
-  (*log)(log->debug()) << "sw_integ_hw() called";
+  DLOG << "sw_integ_hw() called";
 }
 
 /*---------------------------------------------------------------------
@@ -91,7 +91,7 @@ void sr_integ_input(struct sr_instance* sr,
                     unsigned int len,
                     const char* interface/* borrowed */)
 {
-  (*log)(log->debug()) << "sr_integ_input() called";
+  DLOG << "sr_integ_input() called";
 
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
   EthernetPacket::Ptr eth_pkt = EthernetPacket::EthernetPacketNew(buffer, 0);
@@ -112,7 +112,7 @@ void sr_integ_input(struct sr_instance* sr,
 void sr_integ_add_interface(struct sr_instance* sr,
                             struct sr_vns_if* vns_if/* borrowed */)
 {
-  (*log)(log->debug()) << "sr_integ_add_interface() called";
+  DLOG << "sr_integ_add_interface() called";
 
 
 }
@@ -155,7 +155,7 @@ int sr_integ_low_level_output(struct sr_instance* sr /* borrowed */,
 
 void sr_integ_destroy(struct sr_instance* sr)
 {
-  (*log)(log->debug()) << "sr_integ_destroy() called";
+  DLOG << "sr_integ_destroy() called";
 }
 
 /*-----------------------------------------------------------------------------
@@ -234,5 +234,5 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
 
 void sr_integ_close(struct sr_instance* sr)
 {
-  (*log)(log->debug()) << "sr_integ_close called";
+  DLOG << "sr_integ_close called";
 }

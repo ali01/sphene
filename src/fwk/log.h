@@ -14,7 +14,19 @@
 #include "ptr.h"
 #include "ptr_interface.h"
 
+// Convenience macros for LogStreams. Assumes Log object is 'log_'.
+// TODO(ms): Maybe these should be streams a la 'cout', 'cerr'.
+#define LOG  (*log_)()                 // default level
+#define DLOG (*log_)(log_->debug())    // debug level
+#define ILOG (*log_)(log_->info())     // info level
+#define WLOG (*log_)(log_->warning())  // warning level
+#define ELOG (*log_)(log_->error())    // error level
+#define CLOG (*log_)(log_->clog())     // critical level
+
+
 namespace Fwk {
+
+// TODO(ms): A lot of this code should go into log.cc.
 
 /* Log is a singleton */
 class Log;
