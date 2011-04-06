@@ -18,12 +18,14 @@ class IPPacketTest : public ::testing::Test {
                                 0x8d, 0x59, 0xe2, 0x92, /* fourth word */
                                 0xab, 0x42, 0x03, 0xe7, /* fifth word */
                                 0xDD, 0xEE, 0xFF /* irrelevant bytes after */ };
+    memcpy(&packet_buffer_, &packet_buffer, sizeof(packet_buffer));
 
     Fwk::Buffer::Ptr buf_ =
       Fwk::Buffer::BufferNew(packet_buffer, sizeof(packet_buffer));
     pkt_ = IPPacket::IPPacketNew(buf_, 3);
   }
 
+  uint8_t packet_buffer_[26];
   IPPacket::Ptr pkt_;
 };
 
@@ -70,4 +72,31 @@ TEST_F(IPPacketTest, ip_id) {
   pkt_->identificationIs(0xdead);
   id = pkt_->identification();
   EXPECT_EQ(id, 0xdead);
+}
+
+TEST_F(IPPacketTest, ip_fl_off) {
+  /* IP Flags */
+  EXPECT_EQ(0, pkt_->flags());
+
+  pkt_->flagsAre(IP_RF);
+  EXPECT_EQ(IP_RF, pkt_->flags());
+
+  pkt_->flagsAre(IP_DF);
+  EXPECT_EQ(IP_DF, pkt_->flags());
+
+  pkt_->flagsAre(IP_MF);
+  EXPECT_EQ(IP_MF, pkt_->flags());
+
+  pkt_->flagsAre(IP_RF | IP_MF);
+  EXPECT_EQ(IP_RF | IP_MF, pkt_->flags());
+  // EXPECT_EQ(packet_buffer[], 0xA0);
+
+  /* fragment offset */
+  EXPECT_EQ(0, pkt_->fragmentOffset());
+
+  pkt_->fragmentOffsetIs(0xAD);
+  EXPECT_EQ(0xAD, pkt_->fragmentOffset());
+
+  /* retesting flags */
+  EXPECT_EQ(IP_RF | IP_MF, pkt_->flags());
 }
