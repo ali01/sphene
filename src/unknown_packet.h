@@ -5,6 +5,8 @@
 
 #include "packet.h"
 
+class Interface;
+
 
 class UnknownPacket : public Packet {
  public:
@@ -17,9 +19,7 @@ class UnknownPacket : public Packet {
   }
 
   /* Double-dispatch support. */
-  void operator()(Functor* f) {
-    (*f)(this);
-  }
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  protected:
   UnknownPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)

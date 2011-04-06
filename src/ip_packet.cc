@@ -3,6 +3,8 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include "interface.h"
+
 /* IPv4Addr */
 
 /* TODO(ms): This needs a unit test. */
@@ -31,6 +33,12 @@ IPv4Addr::operator std::string() const {
 IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ip_hdr_((struct ip_hdr *)offsetAddress(0)) {}
+
+
+void IPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
+  (*f)(this, iface);
+}
+
 
 IPVersion
 IPPacket::version() const {

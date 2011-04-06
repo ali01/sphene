@@ -22,6 +22,9 @@ typedef uint8_t IPDiffServices;
 typedef uint16_t IPFragmentOffset;
 typedef uint8_t IPFlags;
 
+class Interface;
+
+
 class IPv4Addr {
  public:
   IPv4Addr() : addr_(0) {}
@@ -62,6 +65,9 @@ class IPPacket : public Packet {
     return new IPPacket(buffer, buffer_offset);
   }
 
+  /* Double-dispatch support. */
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
   IPVersion version() const;
   void versionIs(const IPVersion& version);
 
@@ -99,11 +105,6 @@ class IPPacket : public Packet {
   uint16_t checksum() const;
   void checksumIs(uint16_t ck);
   void checksumReset();
-
-  /* Double-dispatch support. */
-  void operator()(Functor* f) {
-    (*f)(this);
-  }
 
  protected:
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);

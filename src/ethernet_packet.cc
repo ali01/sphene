@@ -9,6 +9,7 @@
 #include "arp_packet.h"
 #include "fwk/buffer.h"
 #include "fwk/exception.h"
+#include "interface.h"
 #include "ip_packet.h"
 #include "packet.h"
 #include "unknown_packet.h"
@@ -22,7 +23,7 @@ EthernetAddr::EthernetAddr() {
 }
 
 
-EthernetAddr::EthernetAddr(const uint8_t* addr) {
+EthernetAddr::EthernetAddr(const uint8_t* const addr) {
   memcpy(addr_, addr, kAddrLen);
 }
 
@@ -44,12 +45,20 @@ void EthernetAddr::init(const std::string& str) {
 
   // Try uppercase first.
   if (sscanf(str.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X",
-             &addr_[0], &addr_[1], &addr_[2],
-             &addr_[3], &addr_[4], &addr_[5]) != kAddrLen) {
+             (unsigned int*)(&addr_[0]),
+             (unsigned int*)(&addr_[1]),
+             (unsigned int*)(&addr_[2]),
+             (unsigned int*)(&addr_[3]),
+             (unsigned int*)(&addr_[4]),
+             (unsigned int*)(&addr_[5])) != kAddrLen) {
     // Try lowercase.
     if (sscanf(str.c_str(), "%02x:%02x:%02x:%02x:%02x:%02x",
-               &addr_[0], &addr_[1], &addr_[2],
-               &addr_[3], &addr_[4], &addr_[5]) != kAddrLen) {
+               (unsigned int*)(&addr_[0]),
+               (unsigned int*)(&addr_[1]),
+               (unsigned int*)(&addr_[2]),
+               (unsigned int*)(&addr_[3]),
+               (unsigned int*)(&addr_[4]),
+               (unsigned int*)(&addr_[5])) != kAddrLen) {
       // Still failed to find a valid MAC.
       goto error;
     }
@@ -75,13 +84,19 @@ EthernetAddr::operator std::string() const {
 }
 
 
-EthernetPacket::EthernetPacket(Fwk::Buffer::Ptr buffer,
-                               unsigned int buffer_offset)
+EthernetPacket::EthernetPacket(const Fwk::Buffer::Ptr buffer,
+                               const unsigned int buffer_offset)
     : Packet(buffer, buffer_offset) {
   unsigned int length = buffer->size() - buffer_offset;
   if (length < ETHER_HDR_LEN)
     throw Fwk::RangeException("EthernetPacket", "packet length too small");
   eth_hdr = (struct ether_header*)((uint8_t*)buffer->data() + buffer_offset);
+}
+
+
+void EthernetPacket::operator()(Functor* const f,
+                                const Interface::PtrConst iface) {
+  (*f)(this, iface);
 }
 
 

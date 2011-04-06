@@ -10,6 +10,8 @@
 
 #include "packet.h"
 
+class Interface;
+
 
 class EthernetAddr {
  public:
@@ -60,9 +62,7 @@ class EthernetPacket : public Packet {
   }
 
   // Functor for double-dispatch.
-  virtual void operator()(Functor* f) {
-    (*f)(this);
-  }
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
   // Returns the source address.
   EthernetAddr src() const;

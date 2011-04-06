@@ -5,6 +5,8 @@
 
 #include "packet.h"
 
+class Interface;
+
 
 class ARPPacket : public Packet {
  public:
@@ -16,9 +18,7 @@ class ARPPacket : public Packet {
     return new ARPPacket(buffer, buffer_offset);
   }
 
-  void operator()(Functor* f) {
-    (*f)(this);
-  }
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  protected:
   ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)

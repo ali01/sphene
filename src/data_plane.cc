@@ -7,6 +7,7 @@
 #include "arp_packet.h"
 #include "ethernet_packet.h"
 #include "icmp_packet.h"
+#include "interface.h"
 #include "ip_packet.h"
 
 
@@ -19,7 +20,7 @@ DataPlane::DataPlane(const std::string& name)
 
 void DataPlane::packetNew(EthernetPacket::Ptr pkt,
                           const Interface::PtrConst iface) {
-  (*pkt)(&functor_);
+  (*pkt)(&functor_, iface);
 }
 
 
@@ -32,33 +33,39 @@ DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp)
     : dp_(dp), log_(dp->log_) { }
 
 
-void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt) {
+void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt,
+                                          const Interface::PtrConst iface) {
   (*log_)() << "ARPPacket dispatch in DataPlane";
 }
 
 
-void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt) {
-  (*log_)() << "EthernetPacket dispatch in DataPlane";
-  (*log_)() << "  src: " << pkt->src();
-  (*log_)() << "  dst: " << pkt->dst();
-  (*log_)() << "  type: " << pkt->typeName();
+void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
+                                          const Interface::PtrConst iface) {
+  DLOG << "EthernetPacket dispatch in DataPlane";
+  DLOG << "  iface: " << iface->name();
+  DLOG << "  src: " << pkt->src();
+  DLOG << "  dst: " << pkt->dst();
+  DLOG << "  type: " << pkt->typeName();
 
   // Dispatch encapsulated packet.
   Packet::Ptr payload_pkt = pkt->payload();
-  (*payload_pkt)(this);
+  (*payload_pkt)(this, iface);
 }
 
 
-void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {
+void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
+                                          const Interface::PtrConst iface) {
 
 }
 
 
-void DataPlane::PacketFunctor::operator()(IPPacket* const pkt) {
+void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
+                                          const Interface::PtrConst iface) {
   (*log_)() << "IPPacket dispatch in DataPlane";
 }
 
 
-void DataPlane::PacketFunctor::operator()(UnknownPacket* const pkt) {
+void DataPlane::PacketFunctor::operator()(UnknownPacket* const pkt,
+                                          const Interface::PtrConst iface) {
 
 }

@@ -40,11 +40,11 @@ class DataPlane : public Fwk::NamedInterface {
    public:
     PacketFunctor(DataPlane* dp);
 
-    void operator()(ARPPacket*);
-    void operator()(EthernetPacket*);
-    void operator()(ICMPPacket*);
-    void operator()(IPPacket*);
-    void operator()(UnknownPacket*);
+    void operator()(ARPPacket*, Interface::PtrConst);
+    void operator()(EthernetPacket*, Interface::PtrConst);
+    void operator()(ICMPPacket*, Interface::PtrConst);
+    void operator()(IPPacket*, Interface::PtrConst);
+    void operator()(UnknownPacket*, Interface::PtrConst);
 
    private:
     DataPlane* dp_;

@@ -89,6 +89,7 @@ liblwtcp_a_SOURCES = \
 
 FWK_SRCS = \
            src/fwk/atomic.h \
+           src/fwk/buffer.h \
            src/fwk/exception.h \
            src/fwk/log.cc \
            src/fwk/log.h \
@@ -96,6 +97,7 @@ FWK_SRCS = \
            src/fwk/ptr_interface.h
 
 libsr_base_a_SOURCES = \
+                       src/arp_packet.cc \
                        src/arp_packet.h \
                        src/buffer.h \
                        src/data_plane.cc \
@@ -135,6 +137,8 @@ libsr_base_a_SOURCES = \
                        src/sr_vns.h \
                        src/sw_data_plane.cc \
                        src/sw_data_plane.h \
+                       src/unknown_packet.cc \
+                       src/unknown_packet.h \
                        src/vnscommand.h \
                        $(FWK_SRCS)
 
