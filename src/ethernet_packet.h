@@ -15,11 +15,16 @@ typedef uint16_t EthernetType;
 
 class EthernetAddr {
  public:
+  // Construct EthernetAddr of '00:00:00:00:00:00'.
   EthernetAddr();
+
+  // Construct EthernetAddr from 'addr'.
   EthernetAddr(const uint8_t addr[ETH_ALEN]);
 
+  // Copy constructor.
   bool operator==(const EthernetAddr& other) const;
 
+  // Stringify the EthernetAddr into something like 'DE:AD:BE:EF:BA:BE'.
   operator std::string() const;
 
  protected:
@@ -32,30 +37,45 @@ class EthernetPacket : public Packet {
   typedef Fwk::Ptr<const EthernetPacket> PtrConst;
   typedef Fwk::Ptr<EthernetPacket> Ptr;
 
+  // Construct a new EthernetPacket in 'buffer' starting at 'buffer_offset'
+  // within the buffer.
   static Ptr EthernetPacketNew(Fwk::Buffer::Ptr buffer,
                                unsigned int buffer_offset) {
     return new EthernetPacket(buffer, buffer_offset);
   }
 
-  /* Functor for double-dispatch. */
+  // Functor for double-dispatch.
   virtual void operator()(Functor* f) {
     (*f)(this);
   }
 
+  // Returns the source address.
   EthernetAddr src() const;
+
+  // Sets the source address to 'src'.
   void srcIs(const EthernetAddr& src);
 
+  // Returns the destination address.
   EthernetAddr dst() const;
+
+  // Sets the destination address to 'dst'.
   void dstIs(const EthernetAddr& dst);
 
+  // Returns the EtherType (ARP, IP, ...).
   EthernetType type() const;
+
+  // Sets the EtherType to 'eth_type'.
   void typeIs(const EthernetType eth_type);
 
+  // Returns a string name for the EtherType ("ARP", "IP", ...).
   std::string typeName() const;
 
+  // Returns the encapsulated packet.
   Packet::Ptr payload() const;
 
  protected:
+  // Constructs an EthernetPacket from 'buffer' starting at 'buffer_offset'
+  // within the buffer.
   EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
   struct ether_header* eth_hdr;
