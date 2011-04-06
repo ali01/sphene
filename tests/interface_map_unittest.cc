@@ -24,14 +24,14 @@ class InterfaceMapTest : public ::testing::Test {
 
 TEST_F(InterfaceMapTest, Insert) {
   // Map is initially empty.
-  EXPECT_EQ(0, map_->interfaces());
+  EXPECT_EQ((size_t)0, map_->interfaces());
 
   // Insert interfaces into the map.
   map_->interfaceIs(eth0_);
   map_->interfaceIs(eth1_);
 
   // Ensure the map size has increased.
-  EXPECT_EQ(2, map_->interfaces());
+  EXPECT_EQ((size_t)2, map_->interfaces());
 }
 
 
