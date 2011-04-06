@@ -35,7 +35,7 @@ DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp)
 
 void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt,
                                           const Interface::PtrConst iface) {
-  (*log_)() << "ARPPacket dispatch in DataPlane";
+  DLOG << "ARPPacket dispatch in DataPlane";
 }
 
 
@@ -61,7 +61,7 @@ void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
 
 void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                           const Interface::PtrConst iface) {
-  (*log_)() << "IPPacket dispatch in DataPlane";
+  DLOG << "IPPacket dispatch in DataPlane";
 }
 
 
