@@ -13,14 +13,52 @@
 #include "packet.h"
 #include "unknown_packet.h"
 
+// Minimum size of string buffers for formatting addresses.
+static const int kAddrStrLen = 18;
+
 
 EthernetAddr::EthernetAddr() {
-  memset(addr_, 0, sizeof(addr_));
+  memset(addr_, 0, kAddrLen);
 }
 
 
-EthernetAddr::EthernetAddr(const uint8_t addr[ETH_ALEN]) {
-  memcpy(addr_, addr, ETH_ALEN);
+EthernetAddr::EthernetAddr(const uint8_t* addr) {
+  memcpy(addr_, addr, kAddrLen);
+}
+
+
+EthernetAddr::EthernetAddr(const std::string& str) {
+  init(str);
+}
+
+
+EthernetAddr::EthernetAddr(const char* const str) {
+  init(str);
+}
+
+
+void EthernetAddr::init(const std::string& str) {
+  // TODO(ms): Throw exception here?
+  if (str.size() != kAddrStrLen - 1)  // -1 for NULL terminator
+    goto error;
+
+  // Try uppercase first.
+  if (sscanf(str.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X",
+             &addr_[0], &addr_[1], &addr_[2],
+             &addr_[3], &addr_[4], &addr_[5]) != kAddrLen) {
+    // Try lowercase.
+    if (sscanf(str.c_str(), "%02x:%02x:%02x:%02x:%02x:%02x",
+               &addr_[0], &addr_[1], &addr_[2],
+               &addr_[3], &addr_[4], &addr_[5]) != kAddrLen) {
+      // Still failed to find a valid MAC.
+      goto error;
+    }
+  }
+
+  return;
+error:
+  // Something went wrong. Clear address.
+  memset(addr_, 0, kAddrLen);
 }
 
 
@@ -30,8 +68,8 @@ bool EthernetAddr::operator==(const EthernetAddr& other) const {
 
 
 EthernetAddr::operator std::string() const {
-  char mac[17];
-  sprintf(mac, "%02x:%02x:%02x:%02x:%02x:%02x",
+  char mac[18];
+  sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
           addr_[0], addr_[1], addr_[2], addr_[3], addr_[4], addr_[5]);
   return mac;
 }

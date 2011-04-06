@@ -4,12 +4,51 @@
 #include <cstring>
 #include <inttypes.h>
 #include <net/ethernet.h>
+#include <string>
 
 #include "arp_packet.h"
 #include "fwk/buffer.h"
 #include "ethernet_packet.h"
 #include "ip_packet.h"
 #include "unknown_packet.h"
+
+using std::string;
+
+
+TEST(EthernetAddrTest, ConstructZero) {
+  EthernetAddr addr;
+  EXPECT_EQ("00:00:00:00:00:00", (string)addr);
+}
+
+
+TEST(EthernetAddrTest, ConstructBytes) {
+  uint8_t bytes[] = { 0xC0, 0xFF, 0xEE, 0xBA, 0xBE, 0xEE };
+  EthernetAddr addr(bytes);
+  EXPECT_EQ("C0:FF:EE:BA:BE:EE", (string)addr);
+}
+
+
+TEST(EthernetAddrTets, ConstructString) {
+  // Try an uppercase MAC.
+  const string& upper = "00:DE:AD:BE:EF:00";
+  EthernetAddr addr(upper);
+  EXPECT_EQ(upper, (string)addr);
+
+  // Try a lowercase MAC.
+  const char* const lower = "be:ef:ca:fe:ba:be";
+  EthernetAddr addr2(lower);
+  EXPECT_EQ("BE:EF:CA:FE:BA:BE", (string)addr2);
+
+  // Try an invalid string.
+  const char* const invalid = "invalidmac";
+  EthernetAddr addr3(invalid);
+  EXPECT_EQ("00:00:00:00:00:00", (string)addr3);
+
+  // Long strings that start with MAC addresses are still invalid.
+  const char* const invalid_long = "be:ef:ca:fe:ba:be_this_is_long";
+  EthernetAddr addr4(invalid_long);
+  EXPECT_EQ("00:00:00:00:00:00", (string)addr4);
+}
 
 
 class EthernetPacketTest : public ::testing::Test {

@@ -17,7 +17,13 @@ class EthernetAddr {
   EthernetAddr();
 
   // Construct EthernetAddr from 'addr'.
-  EthernetAddr(const uint8_t addr[ETH_ALEN]);
+  // '*addr' must be at least 'kAddrLen' bytes.
+  EthernetAddr(const uint8_t* addr);
+
+  // Construct EthernetAddr from a string like 'C0:FF:EE:BA:BE:EE'. Invalid
+  // strings will set the MAC to all zeroes.
+  EthernetAddr(const std::string& str);
+  EthernetAddr(const char* str);
 
   // Copy constructor.
   bool operator==(const EthernetAddr& other) const;
@@ -25,8 +31,13 @@ class EthernetAddr {
   // Stringify the EthernetAddr into something like 'DE:AD:BE:EF:BA:BE'.
   operator std::string() const;
 
+  // Address length in bytes.
+  static const int kAddrLen = 6;
+
  protected:
-  uint8_t addr_[ETH_ALEN];
+  void init(const std::string& str);
+
+  uint8_t addr_[kAddrLen];
 };
 
 
