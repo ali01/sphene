@@ -20,6 +20,7 @@ DataPlane::DataPlane(const std::string& name)
 
 void DataPlane::packetNew(EthernetPacket::Ptr pkt,
                           const Interface::PtrConst iface) {
+  // Dispatch packet.
   (*pkt)(&functor_, iface);
 }
 
