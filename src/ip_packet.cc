@@ -5,6 +5,12 @@
 
 /* IPv4Addr */
 
+/* TODO(ms): This needs a unit test. */
+IPv4Addr::IPv4Addr(const std::string& addr) {
+  /* TODO(ms): throw exception on failure? */
+  inet_pton(AF_INET, addr.c_str(), &addr_);
+}
+
 IPv4Addr::operator std::string() const {
   char buf[INET_ADDRSTRLEN + 1];
   inet_ntop(AF_INET, (struct in_addr*)&addr_, buf, sizeof(buf));

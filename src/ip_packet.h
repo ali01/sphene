@@ -29,6 +29,9 @@ class IPv4Addr {
   /* addr is expected in network byte order. */
   IPv4Addr(uint32_t addr) : addr_(addr) {}
 
+  /* Construct from the dotted string representation. */
+  IPv4Addr(const std::string& addr);
+
   bool operator==(const IPv4Addr& other) const {
     return addr_ == other.addr_;
   }
