@@ -103,6 +103,8 @@ libsr_base_a_SOURCES = \
                        src/ethernet_packet.h \
                        src/getarg.cc \
                        src/icmp_packet.h \
+                       src/interface.cc \
+                       src/interface.h \
                        src/interface_map.cc \
                        src/interface_map.h \
                        src/ip_packet.cc \
