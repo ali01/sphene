@@ -20,7 +20,28 @@ class InterfaceTest : public ::testing::Test {
 
 
 TEST_F(InterfaceTest, Mac) {
-  const EthernetAddr mac = "DE:AD:BE:EF:CA:FE";
+  const EthernetAddr& mac = "DE:AD:BE:EF:CA:FE";
   iface_->macIs(mac);
   EXPECT_EQ(mac, iface_->mac());
+}
+
+
+TEST_F(InterfaceTest, IP) {
+  const IPv4Addr& ip = "255.1.33.7";
+  iface_->ipIs(ip);
+  EXPECT_EQ(ip, iface_->ip());
+}
+
+
+TEST_F(InterfaceTest, SubnetMask) {
+  const IPv4Addr& mask = "255.1.33.7";
+  iface_->subnetMaskIs(mask);
+  EXPECT_EQ(mask, iface_->subnetMask());
+}
+
+
+TEST_F(InterfaceTest, Speed) {
+  const uint32_t speed = 31337;
+  iface_->speedIs(speed);
+  EXPECT_EQ(speed, iface_->speed());
 }
