@@ -44,3 +44,12 @@ TEST_F(IPPacketTest, ip_v_hl) {
   EXPECT_EQ(version, 6);
   EXPECT_EQ(header_length, 8);
 }
+
+TEST_F(IPPacketTest, ip_tos) {
+  IPDiffServices diff_services = pkt_->diffServices();
+  EXPECT_EQ(diff_services, 0);
+
+  pkt_->diffServicesAre(0xAD);
+  diff_services = pkt_->diffServices();
+  EXPECT_EQ(diff_services, 0xAD);
+}
