@@ -102,13 +102,14 @@ IPPacket::identificationIs(uint16_t id) {
 
 IPFlags
 IPPacket::flags() const {
-  return (uint8_t)(ip_hdr_->ip_fl_off >> 13);
+  return (uint8_t)(ntohs(ip_hdr_->ip_fl_off) >> 13);
 }
 
 void
 IPPacket::flagsAre(const IPFlags& flags) {
-  uint16_t val = flags;
-  ip_hdr_->ip_fl_off = (val << 13) | (ip_hdr_->ip_fl_off & 0x1FFF);
+  uint16_t shifted_flags = flags << 13;
+  uint16_t masked_offset = ntohs(ip_hdr_->ip_fl_off) & 0x1FFF;
+  ip_hdr_->ip_fl_off = htons(shifted_flags | masked_offset);
 }
 
 IPFragmentOffset
@@ -117,8 +118,10 @@ IPPacket::fragmentOffset() const {
 }
 
 void
-IPPacket::fragmentOffsetIs(const IPFragmentOffset off) {
-  ip_hdr_->ip_fl_off = htons(off & 0x1FFF) | (ip_hdr_->ip_fl_off & 0xE000);
+IPPacket::fragmentOffsetIs(const IPFragmentOffset& off) {
+  uint16_t shifted_flags = ntohs(ip_hdr_->ip_fl_off) & 0xE000;
+  uint16_t masked_offset = off & 0x1FFF;
+  ip_hdr_->ip_fl_off = htons(shifted_flags | masked_offset);
 }
 
 uint8_t

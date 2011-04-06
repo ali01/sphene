@@ -7,12 +7,10 @@
 
 #include "packet.h"
 
-// TODO: these are wrong
 /* IP Header Flags (ip_fl) */
-#define IP_RF 0x8000          /* reserved fragment flag */
-#define IP_DF 0x4000          /* dont fragment flag */
-#define IP_MF 0x2000          /* more fragments flag */
-#define IP_OFFMASK 0x1fff     /* mask for fragmenting bits */
+#define IP_RF 0x4          /* reserved fragment flag */
+#define IP_DF 0x2          /* dont fragment flag */
+#define IP_MF 0x1          /* more fragments flag */
 
 /* Typedefs. */
 typedef uint8_t IPVersion;
@@ -90,7 +88,7 @@ class IPPacket : public Packet {
   void flagsAre(const IPFlags& flags);
 
   IPFragmentOffset fragmentOffset() const;
-  void fragmentOffsetIs(const IPFragmentOffset off);
+  void fragmentOffsetIs(const IPFragmentOffset& off);
 
   IPv4Addr src() const;
   void srcIs(const IPv4Addr& src);
