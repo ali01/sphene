@@ -16,6 +16,11 @@ class UnknownPacket : public Packet {
     return new UnknownPacket(buffer, buffer_offset);
   }
 
+  /* Double-dispatch support. */
+  void operator()(Functor* f) {
+    (*f)(this);
+  }
+
  protected:
   UnknownPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : Packet(buffer, buffer_offset) {}

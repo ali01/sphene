@@ -13,6 +13,7 @@ class ARPPacket;
 class EthernetPacket;
 class ICMPPacket;
 class IPPacket;
+class UnknownPacket;
 
 
 class DataPlane : public Fwk::NamedInterface {
@@ -24,7 +25,7 @@ class DataPlane : public Fwk::NamedInterface {
 
  protected:
   DataPlane(const std::string& name);
-  virtual ~DataPlane();
+  virtual ~DataPlane() {}
 
   /* Operations disallowed. */
   DataPlane(const DataPlane&);
@@ -39,14 +40,15 @@ class DataPlane : public Fwk::NamedInterface {
     void operator()(EthernetPacket*);
     void operator()(ICMPPacket*);
     void operator()(IPPacket*);
+    void operator()(UnknownPacket*);
 
    private:
     DataPlane* dp_;
     Fwk::Log::Ptr log_;
   };
 
-  PacketFunctor* functor_;
   Fwk::Log::Ptr log_;
+  PacketFunctor functor_;
 };
 
 #endif

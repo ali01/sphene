@@ -1,6 +1,31 @@
 #include "ip_packet.h"
 
+#include <iostream>
+#include <sstream>
 #include <netinet/in.h>
+
+/* IPv4Addr */
+
+IPv4Addr::operator std::string() const {
+  uint32_t curr_octet = addr_ >> 24;
+  std::stringstream ss;
+
+  ss << curr_octet << ".";
+  curr_octet = (addr_ << 8) >> 24;
+
+  ss << curr_octet << ".";
+  curr_octet = (addr_ << 16) >> 24;
+
+  ss << curr_octet << ".";
+  curr_octet = (addr_ << 24) >> 24;
+
+  ss << curr_octet;
+
+  return ss.str();
+}
+
+
+/* IPPacket */
 
 IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
@@ -8,12 +33,98 @@ IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
 
 IPVersion
 IPPacket::version() const {
-  return ip_hdr_->ip_v;
+  return ip_hdr_->ip_v_hl >> 4;
 }
 
 void
 IPPacket::versionIs(const IPVersion& version) {
-  ip_hdr_->ip_v = version;
+  ip_hdr_->ip_v_hl = (version << 4) | (ip_hdr_->ip_v_hl & 0x0F);
+}
+
+IPHeaderLength
+IPPacket::headerLength() const {
+  return ip_hdr_->ip_v_hl & 0x0F;
+}
+
+void
+IPPacket::headerLengthIs(const IPHeaderLength& len) {
+  ip_hdr_->ip_v_hl = (len & 0x0F) | (ip_hdr_->ip_v_hl & 0xF0);
+}
+
+uint16_t
+IPPacket::packetLength() const {
+  return ntohs(ip_hdr_->ip_len);
+}
+
+void
+IPPacket::packetLengthIs(uint16_t len) {
+  ip_hdr_->ip_len = htons(len);
+}
+
+IPDiffServices
+IPPacket::diffServices() const {
+  return ip_hdr_->ip_tos;
+}
+
+void
+IPPacket::diffServicesAre(const IPDiffServices& srv) {
+  ip_hdr_->ip_tos = srv;
+}
+
+IPType
+IPPacket::protocol() const {
+  return ip_hdr_->ip_p;
+}
+
+void
+IPPacket::protocolIs(const IPType& protocol) {
+  ip_hdr_->ip_p = protocol;
+}
+
+uint16_t
+IPPacket::identification() const {
+  return ntohs(ip_hdr_->ip_id);
+}
+
+void
+IPPacket::identificationIs(uint16_t id) {
+  ip_hdr_->ip_id = htons(id);
+}
+
+IPFlags
+IPPacket::flags() const {
+  return (uint8_t)(ip_hdr_->ip_fl_off >> 13);
+}
+
+void
+IPPacket::flagsAre(const IPFlags& flags) {
+  uint16_t val = flags;
+  ip_hdr_->ip_fl_off = (val << 13) | (ip_hdr_->ip_fl_off & 0x1FFF);
+}
+
+IPFragmentOffset
+IPPacket::fragmentOffset() const {
+  return ntohs(ip_hdr_->ip_fl_off) & 0x1FFF;
+}
+
+void
+IPPacket::fragmentOffsetIs(const IPFragmentOffset off) {
+  ip_hdr_->ip_fl_off = htons(off & 0x1FFF) | (ip_hdr_->ip_fl_off & 0xE000);
+}
+
+uint8_t
+IPPacket::ttl() const {
+  return ip_hdr_->ip_ttl;
+}
+
+void
+IPPacket::ttlIs(uint8_t ttl) {
+  ip_hdr_->ip_ttl = ttl;
+}
+
+void
+IPPacket::ttlDec(uint8_t dec_amount) {
+  ip_hdr_->ip_ttl -= dec_amount;
 }
 
 IPv4Addr

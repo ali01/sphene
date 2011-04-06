@@ -16,8 +16,7 @@ class ARPPacket : public Packet {
     return new ARPPacket(buffer, buffer_offset);
   }
 
-  /* Functor for double-dispatch. */
-  virtual void operator()(Functor* f) {
+  void operator()(Functor* f) {
     (*f)(this);
   }
 
