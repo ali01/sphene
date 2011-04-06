@@ -1,6 +1,8 @@
 #ifndef IP_PACKET_H_8CU5IVY3
 #define IP_PACKET_H_8CU5IVY3
 
+#include <string>
+
 #include "fwk/buffer.h"
 
 #include "packet.h"
@@ -12,11 +14,29 @@
 /* Typedefs. */
 typedef uint8_t IPVersion;
 typedef uint8_t IPType;
-typedef uint32_t IPv4Addr;
 typedef uint8_t IPHeaderLength;
 typedef uint8_t IPDiffServices;
 typedef uint16_t IPFragmentOffset;
 typedef uint8_t IPFlags;
+
+class IPv4Addr {
+ public:
+  IPv4Addr() : addr_(0) {}
+  IPv4Addr(uint32_t addr) : addr_(addr) {}
+
+  bool operator==(const IPv4Addr& other) const {
+    return addr_ == other.addr_;
+  }
+
+  operator uint32_t() const {
+    return addr_;
+  }
+
+  operator std::string() const;
+
+ protected:
+  uint32_t addr_;
+};
 
 class IPPacket : public Packet {
 

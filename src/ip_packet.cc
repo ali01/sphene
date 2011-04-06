@@ -1,6 +1,31 @@
 #include "ip_packet.h"
 
+#include <iostream>
+#include <sstream>
 #include <netinet/in.h>
+
+/* IPv4Addr */
+
+IPv4Addr::operator std::string() const {
+  uint32_t curr_octet = addr_ >> 24;
+  std::stringstream ss;
+
+  ss << curr_octet << ".";
+  curr_octet = (addr_ << 8) >> 24;
+
+  ss << curr_octet << ".";
+  curr_octet = (addr_ << 16) >> 24;
+
+  ss << curr_octet << ".";
+  curr_octet = (addr_ << 24) >> 24;
+
+  ss << curr_octet;
+
+  return ss.str();
+}
+
+
+/* IPPacket */
 
 IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
