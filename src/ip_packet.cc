@@ -16,14 +16,74 @@ IPPacket::versionIs(const IPVersion& version) {
   ip_hdr_->ip_v = version;
 }
 
-Protocol
+IPHeaderLength
+IPPacket::headerLength() const {
+  return ip_hdr_->ip_hl;
+}
+
+uint16_t
+IPPacket::packetLength() const {
+  return ntohs(ip_hdr_->ip_len);
+}
+
+void
+IPPacket::packetLengthIs(uint16_t len) {
+  ip_hdr_->ip_len = htons(len);
+}
+
+void
+IPPacket::headerLengthIs(const IPHeaderLength& len) {
+  ip_hdr_->ip_hl = len;
+}
+
+IPDiffServices
+IPPacket::diffServices() const {
+  return ip_hdr_->ip_tos;
+}
+
+void
+IPPacket::diffServicesAre(const IPDiffServices& srv) {
+  ip_hdr_->ip_tos = srv;
+}
+
+IPType
 IPPacket::protocol() const {
   return ip_hdr_->ip_p;
 }
 
 void
-IPPacket::protocolIs(const Protocol& protocol) {
+IPPacket::protocolIs(const IPType& protocol) {
   ip_hdr_->ip_p = protocol;
+}
+
+uint16_t
+IPPacket::identification() const {
+  return ntohs(ip_hdr_->ip_id);
+}
+
+void
+IPPacket::identificationIs(uint16_t id) {
+  ip_hdr_->ip_id = htons(id);
+}
+
+IPFlags
+IPPacket::flags() const {
+  return ip_hdr_->ip_fl;
+}
+
+void
+IPPacket::flagsAre(const IPFlags& flags) {
+  ip_hdr_->ip_fl = flags;
+}
+
+IPFragmentOffset
+IPPacket::fragmentOffset() const {
+  return ntohs(ip_hdr_->ip_off);
+}
+
+void
+IPPacket::fragmentOffset(const IPFragmentOffset off) {
+  ip_hdr_->ip_off = htons(off);
 }
 
 uint8_t
