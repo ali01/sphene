@@ -1,10 +1,15 @@
 #include "gtest/gtest.h"
 
+#include <arpa/inet.h>
 #include <cstring>
 #include <inttypes.h>
 #include <net/ethernet.h>
+
+#include "arp_packet.h"
 #include "fwk/buffer.h"
 #include "ethernet_packet.h"
+#include "ip_packet.h"
+#include "unknown_packet.h"
 
 
 class EthernetPacketTest : public ::testing::Test {

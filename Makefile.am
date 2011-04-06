@@ -100,6 +100,7 @@ libsr_base_a_SOURCES = \
                        src/buffer.h \
                        src/data_plane.cc \
                        src/data_plane.h \
+                       src/ethernet_packet.cc \
                        src/ethernet_packet.h \
                        src/getarg.cc \
                        src/icmp_packet.h \
