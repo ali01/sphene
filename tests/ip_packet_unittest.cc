@@ -62,3 +62,12 @@ TEST_F(IPPacketTest, ip_len) {
   packet_len = pkt_->packetLength();
   EXPECT_EQ(packet_len, 0xbeef);
 }
+
+TEST_F(IPPacketTest, ip_id) {
+  uint16_t id = pkt_->identification();
+  EXPECT_EQ(id, 0x7c83);
+
+  pkt_->identificationIs(0xdead);
+  id = pkt_->identification();
+  EXPECT_EQ(id, 0xdead);
+}
