@@ -11,8 +11,6 @@
 #include "packet.h"
 
 
-typedef uint16_t EthernetType;
-
 class EthernetAddr {
  public:
   // Construct EthernetAddr of '00:00:00:00:00:00'.
@@ -36,6 +34,12 @@ class EthernetPacket : public Packet {
  public:
   typedef Fwk::Ptr<const EthernetPacket> PtrConst;
   typedef Fwk::Ptr<EthernetPacket> Ptr;
+
+  enum EthernetType {
+    kIP      = ETHERTYPE_IP,
+    kARP     = ETHERTYPE_ARP,
+    kUnknown = 0
+  };
 
   // Construct a new EthernetPacket in 'buffer' starting at 'buffer_offset'
   // within the buffer.

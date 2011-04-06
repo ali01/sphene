@@ -67,22 +67,32 @@ void EthernetPacket::dstIs(const EthernetAddr& dst) {
 }
 
 
-EthernetType EthernetPacket::type() const {
-  return ntohs(eth_hdr->ether_type);
+EthernetPacket::EthernetType EthernetPacket::type() const {
+  switch (ntohs(eth_hdr->ether_type)) {
+    case kARP:
+      return kARP;
+      break;
+    case kIP:
+      return kIP;
+      break;
+    default:
+      return kUnknown;
+      break;
+  }
 }
 
 
-void EthernetPacket::typeIs(const EthernetType eth_type) {
+void EthernetPacket::typeIs(const EthernetPacket::EthernetType eth_type) {
   eth_hdr->ether_type = htons(eth_type);
 }
 
 
 std::string EthernetPacket::typeName() const {
   switch (type()) {
-    case ETHERTYPE_ARP:
+    case kARP:
       return "ARP";
       break;
-    case ETHERTYPE_IP:
+    case kIP:
       return "IP";
       break;
     default:
@@ -95,10 +105,10 @@ Packet::Ptr EthernetPacket::payload() const {
   uint16_t payload_offset = ETHER_HDR_LEN;
 
   switch (type()) {
-    case ETHERTYPE_ARP:
+    case kARP:
       return ARPPacket::ARPPacketNew(buffer_, payload_offset);
       break;
-    case ETHERTYPE_IP:
+    case kIP:
       return IPPacket::IPPacketNew(buffer_, payload_offset);
       break;
     default:

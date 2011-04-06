@@ -79,29 +79,29 @@ TEST_F(EthernetPacketTest, Dst) {
 
 TEST_F(EthernetPacketTest, EtherType) {
   // Ensure Ethernet type is exported properly.
-  EthernetType expected = ntohs(header_->ether_type);
-  ASSERT_EQ(expected, pkt_->type());
+  uint16_t expected = ntohs(header_->ether_type);
+  ASSERT_EQ(expected, (uint16_t)pkt_->type());
 
   // Set the Ethernet type to IP.
-  pkt_->typeIs(ETHERTYPE_IP);
+  pkt_->typeIs(EthernetPacket::kIP);
   EXPECT_EQ(ETHERTYPE_IP, pkt_->type());
   EXPECT_EQ("IP", pkt_->typeName());
 
   // Set the Ethernet type to ARP.
-  pkt_->typeIs(ETHERTYPE_ARP);
+  pkt_->typeIs(EthernetPacket::kARP);
   EXPECT_EQ(ETHERTYPE_ARP, pkt_->type());
   EXPECT_EQ("ARP", pkt_->typeName());
 
   // Set the Ethernet type to an unknown value.
-  pkt_->typeIs(0x1337);
-  EXPECT_EQ(0x1337, pkt_->type());
+  pkt_->typeIs(EthernetPacket::kUnknown);
+  EXPECT_EQ(EthernetPacket::kUnknown, pkt_->type());
   EXPECT_EQ("unknown", pkt_->typeName());
 }
 
 
 TEST_F(EthernetPacketTest, PayloadARP) {
   // Force the type to be ARP.
-  pkt_->typeIs(ETHERTYPE_ARP);
+  pkt_->typeIs(EthernetPacket::kARP);
 
   // Extract the excapsulated packet.
   Packet::Ptr payload = pkt_->payload();
@@ -117,7 +117,7 @@ TEST_F(EthernetPacketTest, PayloadARP) {
 
 TEST_F(EthernetPacketTest, PayloadIP) {
   // Force the type to be IP.
-  pkt_->typeIs(ETHERTYPE_IP);
+  pkt_->typeIs(EthernetPacket::kIP);
 
   // Extract the excapsulated packet.
   Packet::Ptr payload = pkt_->payload();
@@ -133,7 +133,7 @@ TEST_F(EthernetPacketTest, PayloadIP) {
 
 TEST_F(EthernetPacketTest, PayloadUnknown) {
   // Force the type to be unknown.
-  pkt_->typeIs(0x1337);
+  pkt_->typeIs(EthernetPacket::kUnknown);
 
   // Extract the excapsulated packet.
   Packet::Ptr payload = pkt_->payload();
