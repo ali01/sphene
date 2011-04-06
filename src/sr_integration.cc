@@ -22,6 +22,8 @@
 
 #include "data_plane.h"
 #include "ethernet_packet.h"
+#include "interface.h"
+#include "interface_map.h"
 #include "ip_packet.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
@@ -100,7 +102,7 @@ void sr_integ_input(struct sr_instance* sr,
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
   EthernetPacket::Ptr eth_pkt = EthernetPacket::EthernetPacketNew(buffer, 0);
 
-  /* TODO(ms): bypass dataplane here on _CPUMODE_? */
+  // TODO(ms): bypass dataplane here on _CPUMODE_?
   dp->packetNew(eth_pkt);
 }
 
@@ -116,19 +118,21 @@ void sr_integ_input(struct sr_instance* sr,
 void sr_integ_add_interface(struct sr_instance* sr,
                             struct sr_vns_if* vns_if/* borrowed */)
 {
-  DLOG << "sr_integ_add_interface() called";
+  // Create an Interface from vns_if data.
+  Interface::Ptr iface = Interface::InterfaceNew(vns_if->name);
+  iface->macIs(vns_if->addr);
+  iface->ipIs(vns_if->ip);  // vns_if->ip and friends are nbo
+  iface->subnetMaskIs(vns_if->mask);
+  iface->speedIs(vns_if->speed);
 
-  string name(vns_if->name);
-  EthernetAddr mac(vns_if->addr);
-  IPv4Addr ip(vns_if->ip);  /* vns_if->ip and friends are nbo */
-  IPv4Addr mask(vns_if->mask);
-  uint32_t speed(vns_if->speed);
+  // Add the interface to the data plane.
+  dp->interfaceMap()->interfaceIs(iface);
 
-  DLOG << "  name: " << name;
-  DLOG << "  mac: " << mac;
-  DLOG << "  ip: " << (string)ip;
-  DLOG << "  mask: " << (string)mask;
-  DLOG << "  speed: " << speed;
+  DLOG << "Added interface " << iface->name();
+  DLOG << "  mac: " << iface->mac();
+  DLOG << "  ip: " << (string)iface->ip();
+  DLOG << "  mask: " << (string)iface->subnetMask();
+  DLOG << "  speed: " << iface->speed();
 }
 
 struct sr_instance* get_sr() {
