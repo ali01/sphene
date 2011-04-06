@@ -99,11 +99,19 @@ void sr_integ_input(struct sr_instance* sr,
 {
   DLOG << "sr_integ_input() called";
 
+  // Find incoming interface.
+  Interface::PtrConst iface = dp->interfaceMap()->interface(interface);
+  if (!iface) {
+    ELOG << "received packet on interface " << interface
+         << ", but failed to find associated Interface object.";
+    return;
+  }
+
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
   EthernetPacket::Ptr eth_pkt = EthernetPacket::EthernetPacketNew(buffer, 0);
 
   // TODO(ms): bypass dataplane here on _CPUMODE_?
-  dp->packetNew(eth_pkt);
+  dp->packetNew(eth_pkt, iface);
 }
 
 /*-----------------------------------------------------------------------------

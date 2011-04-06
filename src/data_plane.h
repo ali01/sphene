@@ -23,7 +23,7 @@ class DataPlane : public Fwk::NamedInterface {
   typedef Fwk::Ptr<const DataPlane> PtrConst;
   typedef Fwk::Ptr<DataPlane> Ptr;
 
-  void packetNew(Fwk::Ptr<EthernetPacket> pkt);
+  void packetNew(Fwk::Ptr<EthernetPacket> pkt, Interface::PtrConst iface);
 
   InterfaceMap::Ptr interfaceMap() const;
 

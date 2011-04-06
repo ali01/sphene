@@ -17,7 +17,8 @@ DataPlane::DataPlane(const std::string& name)
       iface_map_(InterfaceMap::InterfaceMapNew()) { }
 
 
-void DataPlane::packetNew(EthernetPacket::Ptr pkt) {
+void DataPlane::packetNew(EthernetPacket::Ptr pkt,
+                          const Interface::PtrConst iface) {
   (*pkt)(&functor_);
 }
 
