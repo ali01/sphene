@@ -20,7 +20,7 @@ DataPlane::DataPlane(const std::string& name)
 
 void DataPlane::packetNew(EthernetPacket::Ptr pkt,
                           const Interface::PtrConst iface) {
-  // Dispatch packet.
+  // Dispatch packet using double-dispatch.
   (*pkt)(&functor_, iface);
 }
 
