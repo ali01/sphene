@@ -8,7 +8,14 @@
 /* TODO(ms): This needs a unit test. */
 IPv4Addr::IPv4Addr(const std::string& addr) {
   /* TODO(ms): throw exception on failure? */
-  inet_pton(AF_INET, addr.c_str(), &addr_);
+  if (!inet_pton(AF_INET, addr.c_str(), &addr_))
+    addr_ = 0;
+}
+
+/* TODO(ms): Needs tests. See ethernet_packet_unittest for hints. */
+IPv4Addr::IPv4Addr(const char* const addr) {
+  if (!inet_pton(AF_INET, addr, &addr_))
+    addr_ = 0;
 }
 
 IPv4Addr::operator std::string() const {

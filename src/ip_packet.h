@@ -31,6 +31,7 @@ class IPv4Addr {
 
   /* Construct from the dotted string representation. */
   IPv4Addr(const std::string& addr);
+  IPv4Addr(const char* addr);
 
   bool operator==(const IPv4Addr& other) const {
     return addr_ == other.addr_;
