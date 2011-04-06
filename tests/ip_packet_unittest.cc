@@ -51,5 +51,14 @@ TEST_F(IPPacketTest, ip_tos) {
 
   pkt_->diffServicesAre(0xAD);
   diff_services = pkt_->diffServices();
-  EXPECT_EQ(diff_services, 0xAD);
+  EXPECT_EQ(diff_services, 0xad);
+}
+
+TEST_F(IPPacketTest, ip_len) {
+  uint16_t packet_len = pkt_->packetLength();
+  EXPECT_EQ(packet_len, 120);
+
+  pkt_->packetLengthIs(0xbeef);
+  packet_len = pkt_->packetLength();
+  EXPECT_EQ(packet_len, 0xbeef);
 }
