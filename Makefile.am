@@ -220,6 +220,7 @@ TESTS = \
         atomic_unittest \
         buffer_unittest \
         ethernet_packet_unittest \
+        interface_unittest \
         packet_unittest \
         sample1_unittest \
         sw_data_plane_unittest
@@ -233,6 +234,10 @@ atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 ethernet_packet_unittest_SOURCES = tests/ethernet_packet_unittest.cc $(FWK_SRCS)
 ethernet_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 ethernet_packet_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+interface_unittest_SOURCES = tests/interface_unittest.cc $(FWK_SRCS)
+interface_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+interface_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
