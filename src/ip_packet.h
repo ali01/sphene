@@ -7,6 +7,7 @@
 
 #include "packet.h"
 
+// TODO: these are wrong
 /* IP Header Flags (ip_fl) */
 #define IP_RF 0x8000          /* reserved fragment flag */
 #define IP_DF 0x4000          /* dont fragment flag */
@@ -90,6 +91,11 @@ class IPPacket : public Packet {
   uint16_t checksum() const;
   void checksumIs(uint16_t ck);
   void checksumReset();
+
+  /* Double-dispatch support. */
+  void operator()(Functor* f) {
+    (*f)(this);
+  }
 
  protected:
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);

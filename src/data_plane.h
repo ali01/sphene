@@ -13,6 +13,7 @@ class ARPPacket;
 class EthernetPacket;
 class ICMPPacket;
 class IPPacket;
+class UnknownPacket;
 
 
 class DataPlane : public Fwk::NamedInterface {
@@ -39,6 +40,7 @@ class DataPlane : public Fwk::NamedInterface {
     void operator()(EthernetPacket*);
     void operator()(ICMPPacket*);
     void operator()(IPPacket*);
+    void operator()(UnknownPacket*);
 
    private:
     DataPlane* dp_;

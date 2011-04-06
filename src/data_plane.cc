@@ -41,3 +41,7 @@ void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt) {
 void DataPlane::PacketFunctor::operator()(IPPacket* const pkt) {
 
 }
+
+void DataPlane::PacketFunctor::operator()(UnknownPacket* const pkt) {
+
+}

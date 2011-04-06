@@ -16,6 +16,11 @@ class ICMPPacket : public Packet {
     return new ICMPPacket(buffer, buffer_offset);
   }
 
+  /* Double-dispatch support. */
+  void operator()(Functor* f) {
+    (*f)(this);
+  }
+
  protected:
   ICMPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : Packet(buffer, buffer_offset) {}
