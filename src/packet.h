@@ -31,8 +31,6 @@ class Packet : public Fwk::PtrInterface<Packet> {
     virtual ~Functor() { }
   };
 
-  virtual void operator()(Functor* f) { }
-
   uint8_t* data() const { return buffer_->data() + buffer_offset_; }
   size_t len() const { return buffer_->size() - buffer_offset_; }
 

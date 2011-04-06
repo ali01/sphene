@@ -54,11 +54,6 @@ class IPPacket : public Packet {
     return new IPPacket(buffer, buffer_offset);
   }
 
-  /* Functor for double-dispatch. */
-  virtual void operator()(Functor* f) {
-    (*f)(this);
-  }
-
   IPVersion version() const;
   void versionIs(const IPVersion& version);
 
