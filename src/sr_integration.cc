@@ -15,12 +15,14 @@
 #include <stdlib.h>
 
 #include <assert.h>
+#include <string>
 
 #include "fwk/buffer.h"
 #include "fwk/log.h"
 
 #include "data_plane.h"
 #include "ethernet_packet.h"
+#include "ip_packet.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
 #include "sw_data_plane.h"
@@ -28,6 +30,8 @@
 #ifdef _CPUMODE_
 #include "sr_cpu_extension_nf2.h"
 #endif
+
+using std::string;
 
 static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
@@ -114,7 +118,17 @@ void sr_integ_add_interface(struct sr_instance* sr,
 {
   DLOG << "sr_integ_add_interface() called";
 
+  string name(vns_if->name);
+  EthernetAddr mac(vns_if->addr);
+  IPv4Addr ip(vns_if->ip);
+  IPv4Addr mask(vns_if->mask);
+  uint32_t speed(vns_if->speed);
 
+  DLOG << "  name: " << name;
+  DLOG << "  mac: " << mac;
+  DLOG << "  ip: " << (string)ip;
+  DLOG << "  mask: " << (string)mask;
+  DLOG << "  speed: " << speed;
 }
 
 struct sr_instance* get_sr() {
