@@ -13,7 +13,9 @@ using std::string;
 
 
 DataPlane::DataPlane(const std::string& name)
-    : Fwk::NamedInterface(name), functor_(this), log_(Fwk::Log::LogNew(name)) {}
+    : Fwk::NamedInterface(name), log_(Fwk::Log::LogNew(name)), functor_(this) {
+  
+}
 
 
 void DataPlane::packetNew(EthernetPacket::Ptr pkt) {
