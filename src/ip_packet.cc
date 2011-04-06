@@ -1,27 +1,15 @@
 #include "ip_packet.h"
 
-#include <iostream>
-#include <sstream>
+#include <arpa/inet.h>
 #include <netinet/in.h>
 
 /* IPv4Addr */
 
 IPv4Addr::operator std::string() const {
-  uint32_t curr_octet = addr_ >> 24;
-  std::stringstream ss;
-
-  ss << curr_octet << ".";
-  curr_octet = (addr_ << 8) >> 24;
-
-  ss << curr_octet << ".";
-  curr_octet = (addr_ << 16) >> 24;
-
-  ss << curr_octet << ".";
-  curr_octet = (addr_ << 24) >> 24;
-
-  ss << curr_octet;
-
-  return ss.str();
+  char buf[INET_ADDRSTRLEN + 1];
+  inet_ntop(AF_INET, (struct in_addr*)&addr_, buf, sizeof(buf));
+  buf[INET_ADDRSTRLEN] = 0;
+  return buf;
 }
 
 

@@ -25,16 +25,20 @@ typedef uint8_t IPFlags;
 class IPv4Addr {
  public:
   IPv4Addr() : addr_(0) {}
+
+  /* addr is expected in network byte order. */
   IPv4Addr(uint32_t addr) : addr_(addr) {}
 
   bool operator==(const IPv4Addr& other) const {
     return addr_ == other.addr_;
   }
 
+  /* Returns IP address in network byte order. */
   operator uint32_t() const {
     return addr_;
   }
 
+  /* Returns string representation of IP address. */
   operator std::string() const;
 
  protected:

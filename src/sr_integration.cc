@@ -120,7 +120,7 @@ void sr_integ_add_interface(struct sr_instance* sr,
 
   string name(vns_if->name);
   EthernetAddr mac(vns_if->addr);
-  IPv4Addr ip(vns_if->ip);
+  IPv4Addr ip(vns_if->ip);  /* vns_if->ip and friends are nbo */
   IPv4Addr mask(vns_if->mask);
   uint32_t speed(vns_if->speed);
 
