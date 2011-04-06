@@ -1,27 +1,30 @@
 #include "ip_packet.h"
 
-#include <iostream>
-#include <sstream>
+#include <arpa/inet.h>
 #include <netinet/in.h>
+
+#include "interface.h"
 
 /* IPv4Addr */
 
+/* TODO(ms): This needs a unit test. */
+IPv4Addr::IPv4Addr(const std::string& addr) {
+  /* TODO(ms): throw exception on failure? */
+  if (!inet_pton(AF_INET, addr.c_str(), &addr_))
+    addr_ = 0;
+}
+
+/* TODO(ms): Needs tests. See ethernet_packet_unittest for hints. */
+IPv4Addr::IPv4Addr(const char* const addr) {
+  if (!inet_pton(AF_INET, addr, &addr_))
+    addr_ = 0;
+}
+
 IPv4Addr::operator std::string() const {
-  uint32_t curr_octet = addr_ >> 24;
-  std::stringstream ss;
-
-  ss << curr_octet << ".";
-  curr_octet = (addr_ << 8) >> 24;
-
-  ss << curr_octet << ".";
-  curr_octet = (addr_ << 16) >> 24;
-
-  ss << curr_octet << ".";
-  curr_octet = (addr_ << 24) >> 24;
-
-  ss << curr_octet;
-
-  return ss.str();
+  char buf[INET_ADDRSTRLEN + 1];
+  inet_ntop(AF_INET, (struct in_addr*)&addr_, buf, sizeof(buf));
+  buf[INET_ADDRSTRLEN] = 0;
+  return buf;
 }
 
 
@@ -30,6 +33,12 @@ IPv4Addr::operator std::string() const {
 IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ip_hdr_((struct ip_hdr *)offsetAddress(0)) {}
+
+
+void IPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
+  (*f)(this, iface);
+}
+
 
 IPVersion
 IPPacket::version() const {

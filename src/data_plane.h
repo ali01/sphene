@@ -6,6 +6,8 @@
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
 
+#include "interface.h"
+#include "interface_map.h"
 #include "packet.h"
 
 /* Forward declarations. */
@@ -21,7 +23,9 @@ class DataPlane : public Fwk::NamedInterface {
   typedef Fwk::Ptr<const DataPlane> PtrConst;
   typedef Fwk::Ptr<DataPlane> Ptr;
 
-  void packetNew(Fwk::Ptr<EthernetPacket> pkt);
+  void packetNew(Fwk::Ptr<EthernetPacket> pkt, Interface::PtrConst iface);
+
+  InterfaceMap::Ptr interfaceMap() const;
 
  protected:
   DataPlane(const std::string& name);
@@ -36,11 +40,11 @@ class DataPlane : public Fwk::NamedInterface {
    public:
     PacketFunctor(DataPlane* dp);
 
-    void operator()(ARPPacket*);
-    void operator()(EthernetPacket*);
-    void operator()(ICMPPacket*);
-    void operator()(IPPacket*);
-    void operator()(UnknownPacket*);
+    void operator()(ARPPacket*, Interface::PtrConst);
+    void operator()(EthernetPacket*, Interface::PtrConst);
+    void operator()(ICMPPacket*, Interface::PtrConst);
+    void operator()(IPPacket*, Interface::PtrConst);
+    void operator()(UnknownPacket*, Interface::PtrConst);
 
    private:
     DataPlane* dp_;
@@ -49,6 +53,7 @@ class DataPlane : public Fwk::NamedInterface {
 
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
+  InterfaceMap::Ptr iface_map_;
 };
 
 #endif

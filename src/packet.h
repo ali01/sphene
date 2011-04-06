@@ -11,6 +11,7 @@
 class ARPPacket;
 class EthernetPacket;
 class ICMPPacket;
+class Interface;
 class IPPacket;
 class UnknownPacket;
 
@@ -22,11 +23,11 @@ class Packet : public Fwk::PtrInterface<Packet> {
 
   class Functor {
    public:
-    virtual void operator()(ARPPacket*) { }
-    virtual void operator()(EthernetPacket*) { }
-    virtual void operator()(ICMPPacket*) { }
-    virtual void operator()(IPPacket*) { }
-    virtual void operator()(UnknownPacket*) { }
+    virtual void operator()(ARPPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(EthernetPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(ICMPPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(IPPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(UnknownPacket*, Fwk::Ptr<const Interface>) { }
 
     virtual ~Functor() { }
   };
@@ -37,7 +38,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
   Fwk::Buffer::Ptr buffer() const { return buffer_; }
 
   /* Double-dispatch support. */
-  virtual void operator()(Functor* f) = 0;
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface) = 0;
 
  protected:
   Packet(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)

@@ -23,7 +23,11 @@ if STANDALONE_CLI
 CLI_FLAGS
 endif
 
-AM_CPPFLAGS = -m32 -march=i586 -O3 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
+# Force debug build.
+#CXXFLAGS += -O0
+
+AM_CXXFLAGS = -m32
+AM_CPPFLAGS = -march=i586 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
               -D__STDC_LIMIT_MACROS \
               -I src -I src/cli -I src/lwtcp -I $(CK_DIR)/include \
               $(ARCH) $(MODE) $(CLI_FLAGS) \
@@ -85,6 +89,7 @@ liblwtcp_a_SOURCES = \
 
 FWK_SRCS = \
            src/fwk/atomic.h \
+           src/fwk/buffer.h \
            src/fwk/exception.h \
            src/fwk/log.cc \
            src/fwk/log.h \
@@ -92,13 +97,19 @@ FWK_SRCS = \
            src/fwk/ptr_interface.h
 
 libsr_base_a_SOURCES = \
+                       src/arp_packet.cc \
                        src/arp_packet.h \
                        src/buffer.h \
                        src/data_plane.cc \
                        src/data_plane.h \
+                       src/ethernet_packet.cc \
                        src/ethernet_packet.h \
                        src/getarg.cc \
                        src/icmp_packet.h \
+                       src/interface.cc \
+                       src/interface.h \
+                       src/interface_map.cc \
+                       src/interface_map.h \
                        src/ip_packet.cc \
                        src/ip_packet.h \
                        src/nf2.h \
@@ -126,6 +137,8 @@ libsr_base_a_SOURCES = \
                        src/sr_vns.h \
                        src/sw_data_plane.cc \
                        src/sw_data_plane.h \
+                       src/unknown_packet.cc \
+                       src/unknown_packet.h \
                        src/vnscommand.h \
                        $(FWK_SRCS)
 
@@ -211,6 +224,8 @@ TESTS = \
         atomic_unittest \
         buffer_unittest \
         ethernet_packet_unittest \
+        interface_unittest \
+        interface_map_unittest \
         ip_packet_unittest \
         packet_unittest \
         sample1_unittest \
@@ -229,6 +244,14 @@ buffer_unittest_LDADD = libgtest.a $(USER_LIBS)
 ethernet_packet_unittest_SOURCES = tests/ethernet_packet_unittest.cc $(FWK_SRCS)
 ethernet_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 ethernet_packet_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+interface_unittest_SOURCES = tests/interface_unittest.cc $(FWK_SRCS)
+interface_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+interface_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+interface_map_unittest_SOURCES = tests/interface_map_unittest.cc $(FWK_SRCS)
+interface_map_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+interface_map_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 ip_packet_unittest_SOURCES = tests/ip_packet_unittest.cc
 ip_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include

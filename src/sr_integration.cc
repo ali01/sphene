@@ -15,11 +15,16 @@
 #include <stdlib.h>
 
 #include <assert.h>
+#include <string>
 
 #include "fwk/buffer.h"
+#include "fwk/log.h"
 
 #include "data_plane.h"
 #include "ethernet_packet.h"
+#include "interface.h"
+#include "interface_map.h"
+#include "ip_packet.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
 #include "sw_data_plane.h"
@@ -28,7 +33,10 @@
 #include "sr_cpu_extension_nf2.h"
 #endif
 
-DataPlane::Ptr dp;
+using std::string;
+
+static DataPlane::Ptr dp;
+static Fwk::Log::Ptr log_;
 
 
 /*-----------------------------------------------------------------------------
@@ -43,7 +51,9 @@ DataPlane::Ptr dp;
 
 void sr_integ_init(struct sr_instance* sr)
 {
-  printf(" ** sr_integ_init(..) called \n");
+  log_ = Fwk::Log::LogNew("root");
+  log_->levelIs(log_->debug());
+  ILOG << "Initializing";
 
   /* TODO(ms): Differentiate based on _CPUMODE_. */
   dp = SWDataPlane::SWDataPlaneNew();
@@ -61,8 +71,8 @@ void sr_integ_init(struct sr_instance* sr)
 
 void sr_integ_hw_setup(struct sr_instance* sr)
 {
-    printf(" ** sr_integ_hw(..) called \n");
-} /* -- sr_integ_hw_setup -- */
+  DLOG << "sw_integ_hw() called";
+}
 
 /*---------------------------------------------------------------------
  * Method: sr_integ_input(struct sr_instance*,
@@ -87,13 +97,21 @@ void sr_integ_input(struct sr_instance* sr,
                     unsigned int len,
                     const char* interface/* borrowed */)
 {
-  printf(" ** sr_integ_input(..) called \n");
+  DLOG << "sr_integ_input() called";
+
+  // Find incoming interface.
+  Interface::PtrConst iface = dp->interfaceMap()->interface(interface);
+  if (!iface) {
+    ELOG << "received packet on interface " << interface
+         << ", but failed to find associated Interface object.";
+    return;
+  }
 
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
   EthernetPacket::Ptr eth_pkt = EthernetPacket::EthernetPacketNew(buffer, 0);
 
-  /* TODO(ms): bypass dataplane here on _CPUMODE_? */
-  dp->packetNew(eth_pkt);
+  // TODO(ms): bypass dataplane here on _CPUMODE_?
+  dp->packetNew(eth_pkt, iface);
 }
 
 /*-----------------------------------------------------------------------------
@@ -108,8 +126,22 @@ void sr_integ_input(struct sr_instance* sr,
 void sr_integ_add_interface(struct sr_instance* sr,
                             struct sr_vns_if* vns_if/* borrowed */)
 {
-    printf(" ** sr_integ_add_interface(..) called \n");
-} /* -- sr_integ_add_interface -- */
+  // Create an Interface from vns_if data.
+  Interface::Ptr iface = Interface::InterfaceNew(vns_if->name);
+  iface->macIs(vns_if->addr);
+  iface->ipIs(vns_if->ip);  // vns_if->ip and friends are nbo
+  iface->subnetMaskIs(vns_if->mask);
+  iface->speedIs(vns_if->speed);
+
+  // Add the interface to the data plane.
+  dp->interfaceMap()->interfaceIs(iface);
+
+  DLOG << "Added interface " << iface->name();
+  DLOG << "  mac: " << iface->mac();
+  DLOG << "  ip: " << (string)iface->ip();
+  DLOG << "  mask: " << (string)iface->subnetMask();
+  DLOG << "  speed: " << iface->speed();
+}
 
 struct sr_instance* get_sr() {
     struct sr_instance* sr;
@@ -137,7 +169,7 @@ int sr_integ_low_level_output(struct sr_instance* sr /* borrowed */,
 #else
     return sr_vns_send_packet(sr, buf /*lent*/, len, iface);
 #endif /* _CPUMODE_ */
-} /* -- sr_vns_integ_output -- */
+}
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_destroy(..)
@@ -149,8 +181,8 @@ int sr_integ_low_level_output(struct sr_instance* sr /* borrowed */,
 
 void sr_integ_destroy(struct sr_instance* sr)
 {
-    printf(" ** sr_integ_destroy(..) called \n");
-} /* -- sr_integ_destroy -- */
+  DLOG << "sr_integ_destroy() called";
+}
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_findsrcip(..)
@@ -181,7 +213,7 @@ uint32_t sr_integ_findsrcip(uint32_t dest /* nbo */)
      * -- */
 
     return 0;
-} /* -- ip_findsrcip -- */
+}
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_ip_output(..)
@@ -216,7 +248,7 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
      * -- */
 
     return 0;
-} /* -- ip_integ_route -- */
+}
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_close(..)
@@ -228,5 +260,5 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
 
 void sr_integ_close(struct sr_instance* sr)
 {
-    printf(" ** sr_integ_close(..) called \n");
-}  /* -- sr_integ_close -- */
+  DLOG << "sr_integ_close called";
+}

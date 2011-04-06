@@ -1,48 +1,45 @@
 #ifndef ETHERNET_PACKET_H_5KIE50BV
 #define ETHERNET_PACKET_H_5KIE50BV
 
-#include <arpa/inet.h>
-#include <cstdio>
-#include <cstring>
 #include <inttypes.h>
 #include <net/ethernet.h>
 #include <string>
 
 #include "fwk/buffer.h"
-#include "fwk/exception.h"
 #include "fwk/ptr.h"
 
-#include "arp_packet.h"
-#include "ip_packet.h"
 #include "packet.h"
-#include "unknown_packet.h"
 
+class Interface;
 
-typedef uint16_t EthernetType;
 
 class EthernetAddr {
  public:
-  EthernetAddr() {
-    memset(addr_, 0, sizeof(addr_));
-  }
+  // Construct EthernetAddr of '00:00:00:00:00:00'.
+  EthernetAddr();
 
-  EthernetAddr(uint8_t addr[ETH_ALEN]) {
-    memcpy(addr_, addr, ETH_ALEN);
-  }
+  // Construct EthernetAddr from 'addr'.
+  // '*addr' must be at least 'kAddrLen' bytes.
+  EthernetAddr(const uint8_t* addr);
 
-  bool operator==(const EthernetAddr& other) const {
-    return (memcmp(addr_, other.addr_, ETH_ALEN) == 0);
-  }
+  // Construct EthernetAddr from a string like 'C0:FF:EE:BA:BE:EE'. Invalid
+  // strings will set the MAC to all zeroes.
+  EthernetAddr(const std::string& str);
+  EthernetAddr(const char* str);
 
-  operator std::string() const {
-    char mac[ETH_ALEN];
-    sprintf(mac, "%02x:%02x:%02x:%02x:%02x:%02x",
-            addr_[0], addr_[1], addr_[2], addr_[3], addr_[4], addr_[5]);
-    return mac;
-  }
+  // Copy constructor.
+  bool operator==(const EthernetAddr& other) const;
+
+  // Stringify the EthernetAddr into something like 'DE:AD:BE:EF:BA:BE'.
+  operator std::string() const;
+
+  // Address length in bytes.
+  static const int kAddrLen = 6;
 
  protected:
-  uint8_t addr_[ETH_ALEN];
+  void init(const std::string& str);
+
+  uint8_t addr_[kAddrLen];
 };
 
 
@@ -51,77 +48,50 @@ class EthernetPacket : public Packet {
   typedef Fwk::Ptr<const EthernetPacket> PtrConst;
   typedef Fwk::Ptr<EthernetPacket> Ptr;
 
+  enum EthernetType {
+    kIP      = ETHERTYPE_IP,
+    kARP     = ETHERTYPE_ARP,
+    kUnknown = 0
+  };
+
+  // Construct a new EthernetPacket in 'buffer' starting at 'buffer_offset'
+  // within the buffer.
   static Ptr EthernetPacketNew(Fwk::Buffer::Ptr buffer,
                                unsigned int buffer_offset) {
     return new EthernetPacket(buffer, buffer_offset);
   }
 
-  /* Functor for double-dispatch. */
-  virtual void operator()(Functor* f) {
-    (*f)(this);
-  }
+  // Functor for double-dispatch.
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
-  EthernetAddr src() const {
-    return (EthernetAddr&)eth_hdr->ether_shost;
-  }
+  // Returns the source address.
+  EthernetAddr src() const;
 
-  void srcIs(const EthernetAddr& src) {
-    (EthernetAddr&)eth_hdr->ether_shost = src;
-  }
+  // Sets the source address to 'src'.
+  void srcIs(const EthernetAddr& src);
 
-  EthernetAddr dst() const {
-    return (EthernetAddr&)eth_hdr->ether_dhost;
-  }
+  // Returns the destination address.
+  EthernetAddr dst() const;
 
-  void dstIs(const EthernetAddr& dst) {
-    (EthernetAddr&)eth_hdr->ether_dhost = dst;
-  }
+  // Sets the destination address to 'dst'.
+  void dstIs(const EthernetAddr& dst);
 
-  EthernetType type() const {
-    return ntohs(eth_hdr->ether_type);
-  }
+  // Returns the EtherType (ARP, IP, ...).
+  EthernetType type() const;
 
-  void typeIs(const EthernetType eth_type) {
-    eth_hdr->ether_type = htons(eth_type);
-  }
+  // Sets the EtherType to 'eth_type'.
+  void typeIs(const EthernetType eth_type);
 
-  std::string typeName() const {
-    switch (type()) {
-      case ETHERTYPE_ARP:
-        return "ARP";
-        break;
-      case ETHERTYPE_IP:
-        return "IP";
-        break;
-      default:
-        return "unknown";
-    }
-  }
+  // Returns a string name for the EtherType ("ARP", "IP", ...).
+  std::string typeName() const;
 
-  Packet::Ptr payload() const {
-    uint16_t payload_offset = ETHER_HDR_LEN;
-
-    switch (type()) {
-      case ETHERTYPE_ARP:
-        return ARPPacket::ARPPacketNew(buffer_, payload_offset);
-        break;
-      case ETHERTYPE_IP:
-        return IPPacket::IPPacketNew(buffer_, payload_offset);
-        break;
-      default:
-        return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
-        break;
-    }
-  }
+  // Returns the encapsulated packet.
+  Packet::Ptr payload() const;
 
  protected:
-  EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
-      : Packet(buffer, buffer_offset) {
-    unsigned int length = buffer->size() - buffer_offset;
-    if (length < ETHER_HDR_LEN)
-      throw Fwk::RangeException("EthernetPacket", "packet length too small");
-    eth_hdr = (struct ether_header*)((uint8_t*)buffer->data() + buffer_offset);
-  }
+  // Constructs an EthernetPacket from 'buffer' starting at 'buffer_offset'
+  // within the buffer.
+  EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
   struct ether_header* eth_hdr;
 };

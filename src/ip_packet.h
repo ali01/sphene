@@ -22,19 +22,30 @@ typedef uint8_t IPDiffServices;
 typedef uint16_t IPFragmentOffset;
 typedef uint8_t IPFlags;
 
+class Interface;
+
+
 class IPv4Addr {
  public:
   IPv4Addr() : addr_(0) {}
+
+  /* addr is expected in network byte order. */
   IPv4Addr(uint32_t addr) : addr_(addr) {}
+
+  /* Construct from the dotted string representation. */
+  IPv4Addr(const std::string& addr);
+  IPv4Addr(const char* addr);
 
   bool operator==(const IPv4Addr& other) const {
     return addr_ == other.addr_;
   }
 
+  /* Returns IP address in network byte order. */
   operator uint32_t() const {
     return addr_;
   }
 
+  /* Returns string representation of IP address. */
   operator std::string() const;
 
  protected:
@@ -53,6 +64,9 @@ class IPPacket : public Packet {
   static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }
+
+  /* Double-dispatch support. */
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
   IPVersion version() const;
   void versionIs(const IPVersion& version);
@@ -91,11 +105,6 @@ class IPPacket : public Packet {
   uint16_t checksum() const;
   void checksumIs(uint16_t ck);
   void checksumReset();
-
-  /* Double-dispatch support. */
-  void operator()(Functor* f) {
-    (*f)(this);
-  }
 
  protected:
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);

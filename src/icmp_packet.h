@@ -5,6 +5,8 @@
 
 #include "packet.h"
 
+class Interface;
+
 
 class ICMPPacket : public Packet {
  public:
@@ -17,8 +19,8 @@ class ICMPPacket : public Packet {
   }
 
   /* Double-dispatch support. */
-  void operator()(Functor* f) {
-    (*f)(this);
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface) {
+    (*f)(this, iface);
   }
 
  protected:
