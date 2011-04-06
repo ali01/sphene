@@ -26,7 +26,7 @@ class EthernetAddr {
     memset(addr_, 0, sizeof(addr_));
   }
 
-  EthernetAddr(uint8_t addr[ETH_ALEN]) {
+  EthernetAddr(const uint8_t addr[ETH_ALEN]) {
     memcpy(addr_, addr, ETH_ALEN);
   }
 
@@ -35,7 +35,7 @@ class EthernetAddr {
   }
 
   operator std::string() const {
-    char mac[ETH_ALEN];
+    char mac[17];
     sprintf(mac, "%02x:%02x:%02x:%02x:%02x:%02x",
             addr_[0], addr_[1], addr_[2], addr_[3], addr_[4], addr_[5]);
     return mac;
