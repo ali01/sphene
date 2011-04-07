@@ -30,13 +30,17 @@ You have been assigned topology 594 which looks like this:
                                         +====================+
                                            Application Server
 
-After extracting the stub code, you'll need to create a file named "auth_key" and place your authentication key in this file.  Your authentication key can be viewed if you click on the "Your Profile" link on the VNS web interface.
+After extracting the stub code, you'll need to create a file named "auth_key"
+and place your authentication key in this file.  Your authentication key can be
+viewed if you click on the "Your Profile" link on the VNS web interface.
 
-To connect to your topology, after compiling the stub code, invoke sr as follows:
+To connect to your topology, after compiling the stub code, invoke sr as
+follows:
 
 >./sr -t 594 -s vns-1.stanford.edu -u <your_vns_user_name>
 
-Please verify that the IP addresses for the interfaces match those in this email!
+Please verify that the IP addresses for the interfaces match those in this
+email!
 
 Your output upon connecting should look like this:
 
@@ -66,7 +70,9 @@ VNS Welcome Message
 **************************************
 System status should be normal. Enjoy!
 
-Secondly, please verify that you can see packets arriving to your topology when you try and ping one of your router interfaces.  To do this, connect to your topology as described above and try and ping eth0 (IP: 10.3.0.24).
+Secondly, please verify that you can see packets arriving to your topology when
+you try and ping one of your router interfaces.  To do this, connect to your
+topology as described above and try and ping eth0 (IP: 10.3.0.24).
 
 > ping 10.3.0.24
 
