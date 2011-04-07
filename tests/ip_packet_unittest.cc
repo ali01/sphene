@@ -114,3 +114,13 @@ TEST_F(IPPacketTest, ip_p) {
   pkt_->protocolIs(0x01); /* ICMP */
   EXPECT_EQ(1, pkt_->protocol());
 }
+
+TEST_F(IPPacketTest, ip_sum) {
+  EXPECT_EQ(pkt_->checksum(), 0xafdc);
+
+  pkt_->checksumReset();
+  EXPECT_EQ(pkt_->checksum(), 0xafdc);
+
+  pkt_->checksumIs(0x4242);
+  EXPECT_EQ(pkt_->checksum(), 0x4242);
+}
