@@ -75,23 +75,27 @@ TEST_F(IPPacketTest, ip_id) {
 
 TEST_F(IPPacketTest, ip_fl_off) {
   /* IP Flags */
-  EXPECT_EQ(0, pkt_->flags());
+  EXPECT_EQ(pkt_->flags(), 0);
+  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
   pkt_->flagsAre(IP_RF);
-  EXPECT_EQ(IP_RF, pkt_->flags());
+  EXPECT_EQ(pkt_->flags(), IP_RF);
+  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
   pkt_->flagsAre(IP_DF);
-  EXPECT_EQ(IP_DF, pkt_->flags());
+  EXPECT_EQ(pkt_->flags(), IP_DF);
+  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
   pkt_->flagsAre(IP_MF);
-  EXPECT_EQ(IP_MF, pkt_->flags());
+  EXPECT_EQ(pkt_->flags(), IP_MF);
+  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
   pkt_->flagsAre(IP_RF | IP_MF);
-  EXPECT_EQ(IP_RF | IP_MF, pkt_->flags());
-  // EXPECT_EQ(packet_buffer[], 0xA0);
+  EXPECT_EQ(pkt_->flags(), IP_RF | IP_MF);
+  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
   /* fragment offset */
-  EXPECT_EQ(0, pkt_->fragmentOffset());
+  EXPECT_EQ(pkt_->fragmentOffset(), 0);
 
   pkt_->fragmentOffsetIs(0xAD);
   EXPECT_EQ(0xAD, pkt_->fragmentOffset());
