@@ -83,5 +83,3 @@ If you see output from sr that looks like:
  *** -> Received packet of length 60
 
  everything is working!  If not, please email vns-support@lists.stanford.edu.
-
-Good Luck!
