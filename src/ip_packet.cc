@@ -5,6 +5,22 @@
 
 #include "interface.h"
 
+/* IP Header packet struct. */
+
+struct ip_hdr {
+  uint8_t ip_v_hl;          /* version and header length */
+  uint8_t ip_tos;           /* type of service */
+  uint16_t ip_len;          /* total length */
+  uint16_t ip_id;           /* identification */
+  uint16_t ip_fl_off;       /* flags and fragment offset */
+  uint8_t ip_ttl;           /* time to live */
+  uint8_t ip_p;             /* protocol */
+  uint16_t ip_sum;          /* checksum */
+  uint32_t ip_src;          /* source address */
+  uint32_t ip_dst;          /* destination address */
+} __attribute__((packed));
+
+
 /* IPv4Addr */
 
 /* TODO(ms): This needs a unit test. */
@@ -38,6 +54,7 @@ IPv4Addr::operator std::string() const {
 
 
 /* IPPacket */
+
 
 IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),

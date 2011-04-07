@@ -7,11 +7,6 @@
 
 #include "packet.h"
 
-/* IP Header Flags (ip_fl) */
-#define IP_RF 0x4          /* reserved fragment flag */
-#define IP_DF 0x2          /* dont fragment flag */
-#define IP_MF 0x1          /* more fragments flag */
-
 /* Typedefs. */
 typedef uint8_t IPVersion;
 typedef uint8_t IPType;
@@ -20,7 +15,9 @@ typedef uint8_t IPDiffServices;
 typedef uint16_t IPFragmentOffset;
 typedef uint8_t IPFlags;
 
+/* Forward declarations. */
 class Interface;
+struct ip_hdr;
 
 
 class IPv4Addr {
@@ -57,12 +54,16 @@ class IPv4Addr {
 
 class IPPacket : public Packet {
 
-  /* Forward declarations. */
-  struct ip_hdr;
-
  public:
   typedef Fwk::Ptr<const IPPacket> PtrConst;
   typedef Fwk::Ptr<IPPacket> Ptr;
+
+  /* IP Header Flags (ip_fl) */
+  enum Flags {
+    IP_RF = 0x4, /* reserved fragment flag */
+    IP_DF = 0x2, /* dont fragment flag */
+    IP_MF = 0x1  /* more fragments flag */
+  };
 
   static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
@@ -118,20 +119,6 @@ class IPPacket : public Packet {
   struct ip_hdr* ip_hdr_;
 
   uint16_t compute_cksum() const;
-
-  /* IP Header packet struct. */
-  struct ip_hdr {
-    uint8_t ip_v_hl;          /* version and header length */
-    uint8_t ip_tos;           /* type of service */
-    uint16_t ip_len;          /* total length */
-    uint16_t ip_id;           /* identification */
-    uint16_t ip_fl_off;       /* flags and fragment offset */
-    uint8_t ip_ttl;           /* time to live */
-    uint8_t ip_p;             /* protocol */
-    uint16_t ip_sum;          /* checksum */
-    uint32_t ip_src;          /* source address */
-    uint32_t ip_dst;          /* destination address */
-  } __attribute__ ((packed));
 };
 
 #endif

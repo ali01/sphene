@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include <arpa/inet.h>
 #include <cstring>
 #include <inttypes.h>
 
@@ -29,6 +30,20 @@ class IPPacketTest : public ::testing::Test {
   IPPacket::Ptr pkt_;
 };
 
+class IPv4AddrTest : public ::testing::Test {
+ protected:
+  IPv4AddrTest()
+      : ip_val_(0xabcdef42),
+        ip_val_nbo_(htonl(ip_val_)),
+        addr_(ip_val_nbo_) {}
+
+  uint32_t ip_val_;
+  uint32_t ip_val_nbo_;
+  IPv4Addr addr_;
+};
+
+
+/* IP Packet */
 
 TEST_F(IPPacketTest, ip_v_hl) {
   EXPECT_EQ(pkt_->version(), 4);
@@ -78,20 +93,20 @@ TEST_F(IPPacketTest, ip_fl_off) {
   EXPECT_EQ(pkt_->flags(), 0);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_RF);
-  EXPECT_EQ(pkt_->flags(), IP_RF);
+  pkt_->flagsAre(IPPacket::IP_RF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_DF);
-  EXPECT_EQ(pkt_->flags(), IP_DF);
+  pkt_->flagsAre(IPPacket::IP_DF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_DF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_MF);
-  EXPECT_EQ(pkt_->flags(), IP_MF);
+  pkt_->flagsAre(IPPacket::IP_MF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_MF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_RF | IP_MF);
-  EXPECT_EQ(pkt_->flags(), IP_RF | IP_MF);
+  pkt_->flagsAre(IPPacket::IP_RF | IPPacket::IP_MF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF | IPPacket::IP_MF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
   /* fragment offset */
@@ -101,7 +116,7 @@ TEST_F(IPPacketTest, ip_fl_off) {
   EXPECT_EQ(0xAD, pkt_->fragmentOffset());
 
   /* retesting flags */
-  EXPECT_EQ(IP_RF | IP_MF, pkt_->flags());
+  EXPECT_EQ(IPPacket::IP_RF | IPPacket::IP_MF, pkt_->flags());
 }
 
 TEST_F(IPPacketTest, ip_ttl) {
@@ -130,4 +145,31 @@ TEST_F(IPPacketTest, ip_sum) {
 
 TEST_F(IPPacketTest, ip_src) {
   EXPECT_EQ((uint32_t)pkt_->src(), 0x8d59e292);
+}
+
+
+/* IPv4Addr */
+
+TEST_F(IPv4AddrTest, int_construction) {
+  uint32_t val = addr_;
+  EXPECT_EQ(val, ip_val_);
+  EXPECT_EQ(ip_val_nbo_, addr_.nbo());
+
+  EXPECT_TRUE(addr_ == ip_val_);
+  EXPECT_TRUE(ip_val_ == addr_);
+}
+
+TEST_F(IPv4AddrTest, str_construction) {
+  std::string str = addr_; /* address implicitly casted into std::str */
+  const char *c_str = (const char *)"171.205.239.66";
+
+  EXPECT_EQ(str, c_str);
+
+  IPv4Addr addr_from_str(str);
+  EXPECT_EQ(addr_from_str, ip_val_);
+  EXPECT_EQ(addr_from_str.nbo(), ip_val_nbo_);
+
+  IPv4Addr addr_from_c_str(c_str);
+  EXPECT_EQ(addr_from_c_str, ip_val_);
+  EXPECT_EQ(addr_from_c_str.nbo(), ip_val_nbo_);
 }
