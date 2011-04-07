@@ -100,3 +100,17 @@ TEST_F(IPPacketTest, ip_fl_off) {
   /* retesting flags */
   EXPECT_EQ(IP_RF | IP_MF, pkt_->flags());
 }
+
+TEST_F(IPPacketTest, ip_ttl) {
+  EXPECT_EQ(111, pkt_->ttl());
+
+  pkt_->ttlIs(147);
+  EXPECT_EQ(147, pkt_->ttl());
+}
+
+TEST_F(IPPacketTest, ip_p) {
+  EXPECT_EQ(0x11, pkt_->protocol()); /* UDP Expected */
+
+  pkt_->protocolIs(0x01); /* ICMP */
+  EXPECT_EQ(1, pkt_->protocol());
+}
