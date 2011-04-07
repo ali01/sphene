@@ -30,6 +30,8 @@ class IPPacketTest : public ::testing::Test {
 };
 
 
+/* IP Packet */
+
 TEST_F(IPPacketTest, ip_v_hl) {
   EXPECT_EQ(pkt_->version(), 4);
   EXPECT_EQ(pkt_->version(), packet_buffer_[0] >> 4);
@@ -78,20 +80,20 @@ TEST_F(IPPacketTest, ip_fl_off) {
   EXPECT_EQ(pkt_->flags(), 0);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_RF);
-  EXPECT_EQ(pkt_->flags(), IP_RF);
+  pkt_->flagsAre(IPPacket::IP_RF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_DF);
-  EXPECT_EQ(pkt_->flags(), IP_DF);
+  pkt_->flagsAre(IPPacket::IP_DF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_DF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_MF);
-  EXPECT_EQ(pkt_->flags(), IP_MF);
+  pkt_->flagsAre(IPPacket::IP_MF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_MF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
-  pkt_->flagsAre(IP_RF | IP_MF);
-  EXPECT_EQ(pkt_->flags(), IP_RF | IP_MF);
+  pkt_->flagsAre(IPPacket::IP_RF | IPPacket::IP_MF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF | IPPacket::IP_MF);
   EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
 
   /* fragment offset */
@@ -101,7 +103,7 @@ TEST_F(IPPacketTest, ip_fl_off) {
   EXPECT_EQ(0xAD, pkt_->fragmentOffset());
 
   /* retesting flags */
-  EXPECT_EQ(IP_RF | IP_MF, pkt_->flags());
+  EXPECT_EQ(IPPacket::IP_RF | IPPacket::IP_MF, pkt_->flags());
 }
 
 TEST_F(IPPacketTest, ip_ttl) {
@@ -130,4 +132,11 @@ TEST_F(IPPacketTest, ip_sum) {
 
 TEST_F(IPPacketTest, ip_src) {
   EXPECT_EQ((uint32_t)pkt_->src(), 0x8d59e292);
+}
+
+
+/* IPv4Addr */
+
+TEST(IPv4AddrTest, construction) {
+  
 }
