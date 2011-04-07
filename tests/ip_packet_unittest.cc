@@ -18,33 +18,32 @@ class IPPacketTest : public ::testing::Test {
                                 0x8d, 0x59, 0xe2, 0x92, /* fourth word */
                                 0xab, 0x42, 0x03, 0xe7, /* fifth word */
                                 0xDD, 0xEE, 0xFF /* irrelevant bytes after */ };
-    memcpy(&packet_buffer_, &packet_buffer, sizeof(packet_buffer));
 
     Fwk::Buffer::Ptr buf_ =
       Fwk::Buffer::BufferNew(packet_buffer, sizeof(packet_buffer));
     pkt_ = IPPacket::IPPacketNew(buf_, 3);
+    packet_buffer_ = pkt_->buffer();
   }
 
-  uint8_t packet_buffer_[26];
+  const uint8_t *packet_buffer_;
   IPPacket::Ptr pkt_;
 };
 
 
 TEST_F(IPPacketTest, ip_v_hl) {
-  IPVersion version = pkt_->version();
-  EXPECT_EQ(version, 4);
+  EXPECT_EQ(pkt_->version(), 4);
+  EXPECT_EQ(pkt_->version(), packet_buffer_[0] >> 4);
 
-  IPHeaderLength header_length = pkt_->headerLength();
-  EXPECT_EQ(header_length, 5);
+  EXPECT_EQ(pkt_->headerLength(), 5);
+  EXPECT_EQ(pkt_->headerLength(), packet_buffer_[0] & 0x0F);
 
   pkt_->versionIs(6);
+  EXPECT_EQ(pkt_->version(), 6);
+  EXPECT_EQ(pkt_->version(), packet_buffer_[0] >> 4);
+
   pkt_->headerLengthIs(8);
-
-  version = pkt_->version();
-  header_length = pkt_->headerLength();
-
-  EXPECT_EQ(version, 6);
-  EXPECT_EQ(header_length, 8);
+  EXPECT_EQ(pkt_->headerLength(), 8);
+  EXPECT_EQ(pkt_->headerLength(), packet_buffer_[0] & 0x0F);
 }
 
 TEST_F(IPPacketTest, ip_tos) {
