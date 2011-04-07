@@ -65,7 +65,6 @@ class IPPacket : public Packet {
     IP_MF = 0x1  /* more fragments flag */
   };
 
-
   static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }

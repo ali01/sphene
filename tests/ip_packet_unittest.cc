@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include <arpa/inet.h>
 #include <cstring>
 #include <inttypes.h>
 
@@ -27,6 +28,18 @@ class IPPacketTest : public ::testing::Test {
 
   const uint8_t *packet_buffer_;
   IPPacket::Ptr pkt_;
+};
+
+class IPv4AddrTest : public ::testing::Test {
+ protected:
+  IPv4AddrTest()
+      : ip_val_(0xabcdef42),
+        ip_val_nbo_(htonl(ip_val_)),
+        addr_(ip_val_nbo_) {}
+
+  uint32_t ip_val_;
+  uint32_t ip_val_nbo_;
+  IPv4Addr addr_;
 };
 
 
@@ -137,6 +150,26 @@ TEST_F(IPPacketTest, ip_src) {
 
 /* IPv4Addr */
 
-TEST(IPv4AddrTest, construction) {
-  
+TEST_F(IPv4AddrTest, int_construction) {
+  uint32_t val = addr_;
+  EXPECT_EQ(val, ip_val_);
+  EXPECT_EQ(ip_val_nbo_, addr_.nbo());
+
+  EXPECT_TRUE(addr_ == ip_val_);
+  EXPECT_TRUE(ip_val_ == addr_);
+}
+
+TEST_F(IPv4AddrTest, str_construction) {
+  std::string str = addr_; /* address implicitly casted into std::str */
+  const char *c_str = (const char *)"171.205.239.66";
+
+  EXPECT_EQ(str, c_str);
+
+  IPv4Addr addr_from_str(str);
+  EXPECT_EQ(addr_from_str, ip_val_);
+  EXPECT_EQ(addr_from_str.nbo(), ip_val_nbo_);
+
+  IPv4Addr addr_from_c_str(c_str);
+  EXPECT_EQ(addr_from_c_str, ip_val_);
+  EXPECT_EQ(addr_from_c_str.nbo(), ip_val_nbo_);
 }
