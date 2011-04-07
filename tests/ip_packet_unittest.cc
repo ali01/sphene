@@ -124,3 +124,7 @@ TEST_F(IPPacketTest, ip_sum) {
   pkt_->checksumIs(0x4242);
   EXPECT_EQ(pkt_->checksum(), 0x4242);
 }
+
+TEST_F(IPPacketTest, ip_src) {
+  EXPECT_EQ((uint32_t)pkt_->src(), 0x8d59e292);
+}

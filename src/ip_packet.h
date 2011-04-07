@@ -38,8 +38,11 @@ class IPv4Addr {
     return addr_ == other.addr_;
   }
 
-  /* Returns IP address in network byte order. */
-  operator uint32_t() const {
+  /* Returns IP address in host byte order. */
+  operator uint32_t() const;
+
+  /* Returns IP address in network byte order */
+  uint32_t nbo() const {
     return addr_;
   }
 

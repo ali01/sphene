@@ -20,6 +20,10 @@ IPv4Addr::IPv4Addr(const char* const addr) {
     addr_ = 0;
 }
 
+IPv4Addr::operator uint32_t() const {
+  return ntohl(addr_);
+}
+
 IPv4Addr::operator std::string() const {
   char buf[INET_ADDRSTRLEN + 1];
   inet_ntop(AF_INET, (struct in_addr*)&addr_, buf, sizeof(buf));
@@ -141,22 +145,22 @@ IPPacket::ttlDec(uint8_t dec_amount) {
 
 IPv4Addr
 IPPacket::src() const {
-  return ntohl(ip_hdr_->ip_src);
+  return ip_hdr_->ip_src;
 }
 
 void
 IPPacket::srcIs(const IPv4Addr& src) {
-  ip_hdr_->ip_src = htonl(src);
+  ip_hdr_->ip_src = src.nbo();
 }
 
 IPv4Addr
 IPPacket::dst() const {
-  return ntohl(ip_hdr_->ip_dst);
+  return ip_hdr_->ip_dst;
 }
 
 void
 IPPacket::dstIs(const IPv4Addr& dst) {
-  ip_hdr_->ip_dst = htonl(dst);
+  ip_hdr_->ip_dst = dst.nbo();
 }
 
 uint16_t
