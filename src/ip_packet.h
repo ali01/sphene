@@ -109,6 +109,8 @@ class IPPacket : public Packet {
   void checksumIs(uint16_t ck);
   void checksumReset();
 
+  const uint8_t* buffer() const { return (uint8_t *)ip_hdr_; }
+
  protected:
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
