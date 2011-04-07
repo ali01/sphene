@@ -20,6 +20,11 @@ IPv4Addr::IPv4Addr(const char* const addr) {
     addr_ = 0;
 }
 
+bool
+IPv4Addr::operator==(uint32_t other) const {
+  return addr_ == htonl(other);
+}
+
 IPv4Addr::operator uint32_t() const {
   return ntohl(addr_);
 }

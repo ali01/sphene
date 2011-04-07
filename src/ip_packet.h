@@ -38,6 +38,8 @@ class IPv4Addr {
     return addr_ == other.addr_;
   }
 
+  bool operator==(uint32_t other) const;
+
   /* Returns IP address in host byte order. */
   operator uint32_t() const;
 
