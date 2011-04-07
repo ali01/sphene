@@ -1,5 +1,7 @@
 This readme describes your particular setup for the VNS sr assignment.
 
+:)
+
 You have been assigned topology 594 which looks like this:
 
 
