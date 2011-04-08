@@ -9,7 +9,6 @@
 
 /* Typedefs. */
 typedef uint8_t IPVersion;
-typedef uint8_t IPType;
 typedef uint8_t IPHeaderLength;
 typedef uint8_t IPDiffServices;
 typedef uint16_t IPFragmentOffset;
@@ -68,6 +67,13 @@ class IPPacket : public Packet {
     IP_MF = 0x1  /* more fragments flag */
   };
 
+  enum IPType {
+    kICMP    = 0x01,
+    kTCP     = 0x06,
+    kUDP     = 0x11,
+    kOSPF    = 0x59
+  };
+
   static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }
@@ -112,6 +118,9 @@ class IPPacket : public Packet {
   uint16_t checksum() const;
   void checksumIs(uint16_t ck);
   void checksumReset();
+
+  // Returns the encapsulated packet.
+  Packet::Ptr payload() const;
 
   const uint8_t* buffer() const { return (uint8_t *)ip_hdr_; }
 

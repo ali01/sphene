@@ -104,14 +104,15 @@ IPPacket::diffServicesAre(const IPDiffServices& srv) {
   ip_hdr_->ip_tos = srv;
 }
 
-IPType
+IPPacket::IPType
 IPPacket::protocol() const {
-  return ip_hdr_->ip_p;
+  return (IPPacket::IPType)(ip_hdr_->ip_p);
 }
 
 void
 IPPacket::protocolIs(const IPType& protocol) {
-  ip_hdr_->ip_p = protocol;
+  uint8_t p = (uint8_t)protocol;
+  ip_hdr_->ip_p = p;
 }
 
 uint16_t

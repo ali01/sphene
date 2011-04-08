@@ -127,10 +127,10 @@ TEST_F(IPPacketTest, ip_ttl) {
 }
 
 TEST_F(IPPacketTest, ip_p) {
-  EXPECT_EQ(0x11, pkt_->protocol()); /* UDP Expected */
+  EXPECT_EQ(IPPacket::kUDP, pkt_->protocol());
 
-  pkt_->protocolIs(0x01); /* ICMP */
-  EXPECT_EQ(1, pkt_->protocol());
+  pkt_->protocolIs(IPPacket::kICMP); /* ICMP */
+  EXPECT_EQ(IPPacket::kICMP, pkt_->protocol());
 }
 
 TEST_F(IPPacketTest, ip_sum) {
