@@ -100,6 +100,8 @@ libsr_base_a_SOURCES = \
                        src/arp_packet.cc \
                        src/arp_packet.h \
                        src/buffer.h \
+                       src/control_plane.cc \
+                       src/control_plane.h \
                        src/data_plane.cc \
                        src/data_plane.h \
                        src/ethernet_packet.cc \
