@@ -58,6 +58,9 @@ class ARPPacket : public Packet {
   // Sets the sender protocol address.
   void targetPAddrIs(const IPv4Addr& addr);
 
+  // Packet length in bytes.
+  static const int kPacketLen = 28;
+
  protected:
   ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
