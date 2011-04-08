@@ -8,6 +8,7 @@
 #include "arp_packet.h"
 #include "ethernet_packet.h"
 #include "fwk/buffer.h"
+#include "fwk/exception.h"
 #include "ip_packet.h"
 
 using std::string;
@@ -125,3 +126,20 @@ TEST_F(ARPPacketTest, targetAddr) {
   // Ensure that it changed.
   EXPECT_EQ(new_addr, pkt_->targetPAddr());
 }
+
+
+TEST_F(ARPPacketTest, badTypes) {
+  // Change the hardware type to an unknown value and construct an ARP packet.
+  header_->htype = htons(0xFFFF);
+  EXPECT_THROW(ARPPacket::ARPPacketNew(buf_, 0), Fwk::RangeException);
+
+  // Reset the hardware type.
+  header_->htype = 0x0001;
+
+  // Change the protocol type to something other than IP.
+  header_->ptype = htons(0xFF88);
+  EXPECT_THROW(ARPPacket::ARPPacketNew(buf_, 0), Fwk::RangeException);
+}
+
+
+// TODO(ms): Need tests for the rest of the exceptions that ARPPacket tests.
