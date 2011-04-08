@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "arp_cache.h"
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
 #include "fwk/ptr.h"
@@ -40,14 +41,17 @@ class DataPlane : public Fwk::NamedInterface {
   // Sets the ControlPlane.
   void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
 
+  // Returns the ARPCache.
+  ARPCache::Ptr ethernetCache() const { return arp_cache_; }
+
+  // Sets the ARPCache.
+  void ethernetCacheIs(ARPCache::Ptr arp_cache) { arp_cache_ = arp_cache; }
+
   // Returns the router instance.
   struct sr_instance* instance() const { return sr_; }
 
-  // Sets the router instance.
-  void instanceIs(struct sr_instance* sr) { sr_ = sr; }
-
  protected:
-  DataPlane(const std::string& name);
+  DataPlane(const std::string& name, struct sr_instance *sr);
   virtual ~DataPlane() {}
 
   /* Operations disallowed. */
@@ -74,7 +78,8 @@ class DataPlane : public Fwk::NamedInterface {
   PacketFunctor functor_;
   InterfaceMap::Ptr iface_map_;
   ControlPlane* cp_;
-  struct sr_instance* sr_;
+  struct sr_instance* sr_;  
+  ARPCache::Ptr arp_cache_;
 };
 
 #endif

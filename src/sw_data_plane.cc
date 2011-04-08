@@ -7,9 +7,9 @@
 struct sr_instance;
 
 
-SWDataPlane::SWDataPlane() : DataPlane("SWDataPlane") {
+SWDataPlane::SWDataPlane(struct sr_instance *sr)
+    : DataPlane("SWDataPlane", sr) {
   log_ = Fwk::Log::LogNew("SWDataPlane");
-
   log_->entryNew("constructor");
 }
 

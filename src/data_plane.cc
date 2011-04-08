@@ -12,12 +12,13 @@
 #include "ip_packet.h"
 
 
-DataPlane::DataPlane(const std::string& name)
+DataPlane::DataPlane(const std::string& name, struct sr_instance *sr)
     : Fwk::NamedInterface(name),
       log_(Fwk::Log::LogNew(name)),
       functor_(this),
       iface_map_(InterfaceMap::InterfaceMapNew()),
-      cp_(NULL) { }
+      cp_(NULL),
+      sr_(sr) { }
 
 
 void DataPlane::packetNew(EthernetPacket::Ptr pkt,

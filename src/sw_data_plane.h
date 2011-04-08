@@ -18,15 +18,15 @@ class SWDataPlane : public DataPlane {
   typedef Fwk::Ptr<const SWDataPlane> PtrConst;
   typedef Fwk::Ptr<SWDataPlane> Ptr;
 
-  static Ptr SWDataPlaneNew() {
-    return new SWDataPlane();
+  static Ptr SWDataPlaneNew(struct sr_instance *sr) {
+    return new SWDataPlane(sr);
   }
 
   virtual void outputPacketNew(Fwk::Ptr<EthernetPacket> pkt,
                                Interface::PtrConst iface);
 
  protected:
-  SWDataPlane();
+  SWDataPlane(struct sr_instance *sr);
 
   /* Operations disallowed. */
   SWDataPlane(const SWDataPlane&);

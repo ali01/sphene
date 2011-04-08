@@ -39,30 +39,37 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
   DLOG << "  target HW addr: " << (string)pkt->targetHWAddr();
   DLOG << "  target IP addr: " << (string)pkt->targetPAddr();
 
-  // TODO(ms): Look in ARP cache. If the sender IP address is already in the
-  //   ARP cache, then update the sender hardware address field of the entry in
-  //   the ARP cache and set the merge_flag.
-  //...
+  IPv4Addr sender_ip = pkt->senderPAddr();
+  IPv4Addr target_ip = pkt->targetPAddr();
+  EthernetAddr sender_eth = pkt->senderHWAddr();
+  EthernetAddr target_eth = pkt->targetHWAddr();
+  bool merge_flag = false;
+
+  ARPCache::Entry::Ptr cache_entry = cp_->ethernetCache()->entry(sender_ip);
+  if (cache_entry) {
+    cache_entry->ethernetAddrIs(sender_eth);
+    cache_entry->ageIs(0);
+    merge_flag = true;
+  }
 
   // Are we the target of the ARP packet?
-  if (cp_->dataPlane()->interfaceMap()->interfaceAddr(pkt->targetPAddr())) {
-    DLOG << "we are the target of this ARP packet";
+  if (cp_->dataPlane()->interfaceMap()->interfaceAddr(target_ip)) {
+    DLOG << "We are the target of this ARP packet.";
 
-    // TODO(ms): Add the <sender IP, sender HW> to the ARP cache if it wasn't
-    //   there already.
-    //...
+    if (!merge_flag) {
+      cache_entry = ARPCache::Entry::EntryNew(sender_ip, sender_eth);
+      cp_->ethernetCache()->entryIs(sender_ip, cache_entry);
+    }
 
     // Look at the opcode.
     if (pkt->operation() == ARPPacket::kRequest) {
       DLOG << "sending ARP reply";
 
       // Swap the hardware and protocol fields.
-      EthernetAddr our_hwaddr = pkt->targetHWAddr();
-      IPv4Addr our_ipaddr = pkt->targetPAddr();
-      pkt->targetHWAddrIs(pkt->senderHWAddr());
-      pkt->targetPAddrIs(pkt->senderPAddr());
-      pkt->senderHWAddrIs(our_hwaddr);
-      pkt->senderPAddrIs(our_ipaddr);
+      pkt->targetHWAddrIs(sender_eth);
+      pkt->targetPAddrIs(sender_ip);
+      pkt->senderHWAddrIs(target_eth);
+      pkt->senderPAddrIs(target_ip);
 
       // Flip the operation.
       pkt->operationIs(ARPPacket::kReply);
@@ -76,6 +83,7 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
 
       // Send ARP reply on same interface.
       cp_->dataPlane()->outputPacketNew(eth_pkt, iface);
+
     } else if (pkt->operation() == ARPPacket::kReply) {
       DLOG << "ARP reply handling unimplemented";
     }

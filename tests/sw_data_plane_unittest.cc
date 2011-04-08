@@ -4,7 +4,7 @@
 
 
 TEST(SWDataPlaneTest, Construct) {
-  SWDataPlane::Ptr swdp = SWDataPlane::SWDataPlaneNew();
+  SWDataPlane::Ptr swdp = SWDataPlane::SWDataPlaneNew(NULL);
 
   ASSERT_TRUE(swdp.ptr());
 }

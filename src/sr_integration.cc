@@ -20,6 +20,7 @@
 #include "fwk/buffer.h"
 #include "fwk/log.h"
 
+#include "arp_cache.h"
 #include "control_plane.h"
 #include "data_plane.h"
 #include "ethernet_packet.h"
@@ -57,13 +58,17 @@ void sr_integ_init(struct sr_instance* sr)
   log_->levelIs(log_->debug());
   ILOG << "Initializing";
 
+  // Create ARPCache
+  ARPCache::Ptr arp_cache = ARPCache::ARPCacheNew();
+
   // Create ControlPlane.
   cp = ControlPlane::ControlPlaneNew();
+  cp->ethernetCacheIs(arp_cache);
 
   // Create DataPlane.
   // TODO(ms): Differentiate based on _CPUMODE_.
-  dp = SWDataPlane::SWDataPlaneNew();
-  dp->instanceIs(sr);
+  dp = SWDataPlane::SWDataPlaneNew(sr);
+  dp->ethernetCacheIs(arp_cache);
 
   // Initialize pointers between ControlPlane and DataPlane.
   cp->dataPlaneIs(dp);
