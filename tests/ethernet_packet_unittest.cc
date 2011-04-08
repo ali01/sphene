@@ -138,9 +138,7 @@ TEST_F(EthernetPacketTest, EtherType) {
 }
 
 
-// TODO(ms): Renable this. Disabled because ARPPacket will throw exceptions if
-//   the packet is malformed.
-TEST_F(EthernetPacketTest, DISABLED_PayloadARP) {
+TEST_F(EthernetPacketTest, PayloadARP) {
   // Force the type to be ARP.
   pkt_->typeIs(EthernetPacket::kARP);
 

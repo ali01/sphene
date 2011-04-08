@@ -13,32 +13,10 @@
 ARPPacket::ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       arp_hdr_((struct ARPHeader *)offsetAddress(0)) {
-  // Validate length.
-  if (buffer->size() - buffer_offset != (int)kPacketLen) {
-    throw Fwk::RangeException("ARPPacket::ARPPacket",
-                              "invalid packet size");
-  }
-
-  // Validate types.
-  if (ntohs(arp_hdr_->htype) != 0x0001)  // 0x0001 = Ethernet
-    throw Fwk::RangeException("ARPPacket::ARPPacket",
-                              "unexpected value in htype field");
-  if (ntohs(arp_hdr_->ptype) != EthernetPacket::kIP)
-    throw Fwk::RangeException("ARPPacket::ARPPacket",
-                              "unexpected value in ptype field");
-
-  // Validate address lengths.
-  if (arp_hdr_->hlen != EthernetAddr::kAddrLen)
-    throw Fwk::RangeException("ARPPacket::ARPPacket",
-                              "unexpected value in hlen field");
-  if (arp_hdr_->plen != IPv4Addr::kAddrLen)
-    throw Fwk::RangeException("ARPPacket::ARPPacket",
-                              "unexpected value in plen field");
-
-  // Validate operation field.
-  if (ntohs(arp_hdr_->oper) != kRequest && arp_hdr_->oper != kReply)
-    throw Fwk::RangeException("ARPPacket::ARPPacket",
-                              "unexpected value in operation field");
+  // NOTE(ms): No validation of the fields is done here for performance
+  //   reasons. We want to be able to create ARP packets inside of
+  //   pre-allocated buffers, so to avoid the chicken-egg problem, we require
+  //   validation to be done by the users of this interface.
 }
 
 
