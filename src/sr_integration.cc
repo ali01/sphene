@@ -20,6 +20,7 @@
 #include "fwk/buffer.h"
 #include "fwk/log.h"
 
+#include "control_plane.h"
 #include "data_plane.h"
 #include "ethernet_packet.h"
 #include "interface.h"
@@ -35,6 +36,7 @@
 
 using std::string;
 
+static ControlPlane::Ptr cp;
 static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
 
@@ -55,8 +57,15 @@ void sr_integ_init(struct sr_instance* sr)
   log_->levelIs(log_->debug());
   ILOG << "Initializing";
 
-  /* TODO(ms): Differentiate based on _CPUMODE_. */
+  // Create ControlPlane.
+  cp = ControlPlane::ControlPlaneNew();
+
+  // TODO(ms): Differentiate based on _CPUMODE_.
   dp = SWDataPlane::SWDataPlaneNew();
+
+  // Initialize pointers between ControlPlane and DataPlane.
+  cp->dataPlaneIs(dp);
+  dp->controlPlaneIs(cp.ptr());  // weak pointer to prevent circular reference
 }
 
 /*-----------------------------------------------------------------------------

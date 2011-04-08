@@ -24,6 +24,10 @@ class ControlPlane : public Fwk::NamedInterface {
   typedef Fwk::Ptr<const ControlPlane> PtrConst;
   typedef Fwk::Ptr<ControlPlane> Ptr;
 
+  static Ptr ControlPlaneNew() {
+    return new ControlPlane("ControlPlane");
+  }
+
   void packetNew(Fwk::Ptr<EthernetPacket> pkt, Interface::PtrConst iface);
 
   // Returns the DataPlane.
