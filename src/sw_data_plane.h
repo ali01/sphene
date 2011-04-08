@@ -22,6 +22,9 @@ class SWDataPlane : public DataPlane {
     return new SWDataPlane();
   }
 
+  virtual void outputPacketNew(Fwk::Ptr<EthernetPacket> pkt,
+                               Interface::PtrConst iface);
+
  protected:
   SWDataPlane();
 

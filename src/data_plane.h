@@ -24,7 +24,12 @@ class DataPlane : public Fwk::NamedInterface {
   typedef Fwk::Ptr<const DataPlane> PtrConst;
   typedef Fwk::Ptr<DataPlane> Ptr;
 
+  // Processes incoming packets.
   void packetNew(Fwk::Ptr<EthernetPacket> pkt, Interface::PtrConst iface);
+
+  // Sends outgoing packets.
+  virtual void outputPacketNew(Fwk::Ptr<EthernetPacket> pkt,
+                               Interface::PtrConst iface) = 0;
 
   InterfaceMap::Ptr interfaceMap() const;
 
