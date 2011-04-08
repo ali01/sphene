@@ -224,6 +224,7 @@ cli_LDADD = $(USER_LIBS)
 
 # Unit tests.
 TESTS = \
+        arp_cache_unittest \
         arp_packet_unittest \
         atomic_unittest \
         buffer_unittest \
@@ -236,6 +237,10 @@ TESTS = \
         sw_data_plane_unittest
 
 bin_PROGRAMS += $(TESTS)
+
+arp_cache_unittest_SOURCES = tests/arp_cache_unittest.cc $(FWK_SRCS)
+arp_cache_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+arp_cache_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 arp_packet_unittest_SOURCES = tests/arp_packet_unittest.cc $(FWK_SRCS)
 arp_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
