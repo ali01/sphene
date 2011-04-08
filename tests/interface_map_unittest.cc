@@ -4,6 +4,7 @@
 #include "ethernet_packet.h"
 #include "interface.h"
 #include "interface_map.h"
+#include "ip_packet.h"
 
 using std::string;
 
@@ -13,7 +14,10 @@ class InterfaceMapTest : public ::testing::Test {
   virtual void SetUp() {
     map_ = InterfaceMap::InterfaceMapNew();
     eth0_ = Interface::InterfaceNew("eth0");
+    eth0_->ipIs("8.8.4.4");
+
     eth1_ = Interface::InterfaceNew("eth1");
+    eth1_->ipIs("4.2.2.1");
   }
 
   Interface::Ptr eth0_;
@@ -44,9 +48,13 @@ TEST_F(InterfaceMapTest, Retrieve) {
   Interface::PtrConst eth0(eth0_);
   Interface::PtrConst eth1(eth1_);
 
-  // Ensure we can retrieve them.
+  // Ensure we can retrieve them by name.
   EXPECT_EQ(eth0, map_->interface(eth0->name()));
   EXPECT_EQ(eth1, map_->interface(eth1->name()));
+
+  // Ensure we can retrieve them by IP address.
+  EXPECT_EQ(eth0, map_->interfaceAddr(eth0_->ip()));
+  EXPECT_EQ(eth1, map_->interfaceAddr(eth1_->ip()));
 
   // NULL pointers are returned for non-existent interfaces.
   Interface::PtrConst null(NULL);

@@ -7,6 +7,7 @@
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
 #include "interface.h"
+#include "ip_packet.h"
 
 
 class InterfaceMap : public Fwk::PtrInterface<InterfaceMap> {
@@ -26,14 +27,22 @@ class InterfaceMap : public Fwk::PtrInterface<InterfaceMap> {
   // by that name.
   Interface::PtrConst interface(const std::string& name) const;
 
+  // Returns an interface with IP address 'addr'. Returns NULL if no interface
+  // exists with that address.
+  Interface::PtrConst interfaceAddr(const IPv4Addr& addr) const;
+
   // Returns the number of interfaces in the map.
-  size_t interfaces() const { return map_.size(); }
+  size_t interfaces() const { return name_if_map_.size(); }
 
  protected:
   InterfaceMap() { }
 
  private:
-  std::map<std::string, Interface::PtrConst> map_;
+  typedef std::map<std::string, Interface::PtrConst> NameInterfaceMap;
+  typedef std::map<IPv4Addr, Interface::PtrConst> IPInterfaceMap;
+
+  NameInterfaceMap name_if_map_;
+  IPInterfaceMap ip_if_map_;
 
   InterfaceMap(const InterfaceMap&);
   void operator=(const InterfaceMap&);
