@@ -86,12 +86,8 @@ EthernetAddr::operator std::string() const {
 
 EthernetPacket::EthernetPacket(const Fwk::Buffer::Ptr buffer,
                                const unsigned int buffer_offset)
-    : Packet(buffer, buffer_offset) {
-  unsigned int length = buffer->size() - buffer_offset;
-  if (length < ETHER_HDR_LEN)
-    throw Fwk::RangeException("EthernetPacket", "packet length too small");
-  eth_hdr = (struct ether_header*)((uint8_t*)buffer->data() + buffer_offset);
-}
+    : Packet(buffer, buffer_offset),
+      eth_hdr((struct ether_header*)offsetAddress(0)) { }
 
 
 void EthernetPacket::operator()(Functor* const f,
@@ -155,7 +151,7 @@ std::string EthernetPacket::typeName() const {
 
 
 Packet::Ptr EthernetPacket::payload() const {
-  uint16_t payload_offset = ETHER_HDR_LEN;
+  uint16_t payload_offset = buffer_offset_ + headerLen();
 
   switch (type()) {
     case kARP:

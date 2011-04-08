@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 
 #include "interface.h"
+#include "unknown_packet.h"
 
 /* IP Header packet struct. */
 
@@ -221,4 +222,16 @@ IPPacket::compute_cksum() const {
     sum = 0xFFFF;
 
   return sum;
+}
+
+
+// TODO(ms): Need tests for this.
+Packet::Ptr IPPacket::payload() const {
+  uint16_t payload_offset = buffer_offset_ + headerLen();
+
+  switch (protocol()) {
+    default:
+      return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
+      break;
+  }
 }
