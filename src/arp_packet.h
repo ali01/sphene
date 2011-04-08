@@ -1,6 +1,8 @@
 #ifndef ARP_PACKET_H_WDIREBCF
 #define ARP_PACKET_H_WDIREBCF
 
+#include <string>
+
 #include "fwk/buffer.h"
 
 #include "ethernet_packet.h"
@@ -33,6 +35,9 @@ class ARPPacket : public Packet {
 
   // Sets the operation of the ARP packet.
   void operationIs(const Operation& op);
+
+  // Returns the string name for the operation ('request', 'reply', 'unknown').
+  std::string operationName() const;
 
   // Returns the sender hardware address.
   EthernetAddr senderHWAddr() const;

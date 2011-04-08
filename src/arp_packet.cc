@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <inttypes.h>
+#include <string>
 #include "ethernet_packet.h"
 #include "fwk/buffer.h"
 #include "fwk/exception.h"
@@ -32,6 +33,22 @@ ARPPacket::Operation ARPPacket::operation() const {
 
 void ARPPacket::operationIs(const Operation& op) {
   arp_hdr_->oper = htons(op);
+}
+
+
+// TODO(ms): This needs tests.
+std::string ARPPacket::operationName() const {
+  switch (operation()) {
+    case kRequest:
+      return "request";
+      break;
+    case kReply:
+      return "reply";
+      break;
+    default:
+      return "unknown";
+      break;
+  }
 }
 
 
