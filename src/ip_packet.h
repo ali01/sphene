@@ -48,6 +48,9 @@ class IPv4Addr {
   /* Returns string representation of IP address. */
   operator std::string() const;
 
+  /* Address length in bytes. */
+  static const int kAddrLen = 4;
+
  protected:
   uint32_t addr_;
 };
