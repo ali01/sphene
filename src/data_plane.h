@@ -32,10 +32,7 @@ class DataPlane : public Fwk::NamedInterface {
   ControlPlane* controlPlane() const { return cp_; }
 
   // Sets the ControlPlane.
-  void controlPlaneIs(ControlPlane* cp) {
-    cp_ = cp;
-    functor_.controlPlaneIs(cp);
-  }
+  void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
 
  protected:
   DataPlane(const std::string& name);
@@ -56,11 +53,7 @@ class DataPlane : public Fwk::NamedInterface {
     void operator()(IPPacket*, Interface::PtrConst);
     void operator()(UnknownPacket*, Interface::PtrConst);
 
-    // Sets the ControlPlane.
-    void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
-
    private:
-    ControlPlane* cp_;
     DataPlane* dp_;
     Fwk::Log::Ptr log_;
   };
