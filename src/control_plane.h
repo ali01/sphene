@@ -27,8 +27,6 @@ class ControlPlane : public Fwk::NamedInterface {
 
   void packetNew(Fwk::Ptr<EthernetPacket> pkt, Interface::PtrConst iface);
 
-  InterfaceMap::Ptr interfaceMap() const;
-
   // Returns the DataPlane.
   DataPlane::Ptr dataPlane() const { return dp_; }
 
