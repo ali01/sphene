@@ -28,10 +28,6 @@ namespace Fwk {
 
 // TODO(ms): A lot of this code should go into log.cc.
 
-/* Log is a singleton */
-class Log;
-static Fwk::Ptr<Log> rootLog = NULL;
-
 static const char *levelNames[] = {
   "debug",
   "info",
@@ -74,7 +70,7 @@ public:
   };
 
   static Log::Ptr LogNew(const string& loggerName="root") {
-    if (rootLog.ptr() == NULL)
+    if (rootLog == NULL)
       rootLog = new Log("root");
     if (loggerName == "root")
       return rootLog;
@@ -171,6 +167,9 @@ protected:
 
   string loggerName_;
   Level logLevel_;
+
+  // Log is a singleton
+  static Log::Ptr rootLog;
 };
 
 

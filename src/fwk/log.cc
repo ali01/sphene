@@ -4,6 +4,8 @@
 
 namespace Fwk {
 
+Log::Ptr Log::rootLog = NULL;
+
 #define L_LS_OP_LL(TYPE)                                              \
   Log::LogStream::Ptr operator<<(Log::LogStream::Ptr ls, TYPE val) {  \
     ls->stream() << val;                                              \
