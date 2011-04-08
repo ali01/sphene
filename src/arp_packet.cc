@@ -26,15 +26,7 @@ void ARPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 
 ARPPacket::Operation ARPPacket::operation() const {
-  switch (ntohs(arp_hdr_->oper)) {
-    case kRequest:
-      return kRequest;
-      break;
-    case kReply:
-    default:
-      return kReply;
-      break;
-  }
+  return (Operation)(ntohs(arp_hdr_->oper));
 }
 
 
