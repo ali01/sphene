@@ -22,17 +22,25 @@ TEST_F(ARPCacheTest, construction) {
   ASSERT_TRUE(entry == NULL);
 }
 
+
+void
+test_single_entry(ARPCache::Ptr cache, IPv4Addr ip, EthernetAddr eth) {
+  EXPECT_EQ(cache->entries(), (size_t)1);
+  EXPECT_NE(cache->begin(), cache->end());
+
+  ARPCache::Entry::Ptr entry = cache->entry(ip);
+  ASSERT_TRUE(entry != NULL);
+  EXPECT_EQ(entry->ipAddr(), ip);
+  EXPECT_EQ(entry->ethernetAddr(), eth);
+}
+
 TEST_F(ARPCacheTest, insert_delete) {
   ARPCache::Entry::Ptr entry = ARPCache::Entry::EntryNew(ip_addr_, eth_addr_);
   arp_cache_->entryIs(entry->ipAddr(), entry);
+  test_single_entry(arp_cache_, ip_addr_, eth_addr_);
 
-  EXPECT_EQ(arp_cache_->entries(), (size_t)1);
-  EXPECT_NE(arp_cache_->begin(), arp_cache_->end());
-
-  entry = arp_cache_->entry(ip_addr_);
-  ASSERT_TRUE(entry != NULL);
-  EXPECT_EQ(entry->ipAddr(), ip_addr_);
-  EXPECT_EQ(entry->ethernetAddr(), eth_addr_);
+  arp_cache_->entryIs(entry);
+  test_single_entry(arp_cache_, ip_addr_, eth_addr_);
 
   for (int i = 0; i < 2; ++i) {
     arp_cache_->entryIs(ip_addr_, NULL);

@@ -58,7 +58,7 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
 
     if (!merge_flag) {
       cache_entry = ARPCache::Entry::EntryNew(sender_ip, sender_eth);
-      cp_->ethernetCache()->entryIs(sender_ip, cache_entry);
+      cp_->ethernetCache()->entryIs(cache_entry);
     }
 
     // Look at the opcode.
