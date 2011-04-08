@@ -59,8 +59,22 @@ class ARPPacket : public Packet {
   void targetPAddrIs(const IPv4Addr& addr);
 
  protected:
-  ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
-      : Packet(buffer, buffer_offset) { }
+  ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+
+ private:
+  struct ARPHeader {
+    uint16_t htype;                        // hardware type
+    uint16_t ptype;                        // protocol type
+    uint8_t  hlen;                         // hardware address length
+    uint8_t  plen;                         // protocol address length
+    uint16_t oper;                         // ARP operation
+    uint8_t  sha[EthernetAddr::kAddrLen];  // sender hardware address
+    uint32_t spa;                          // sender protocol address
+    uint8_t  tha[EthernetAddr::kAddrLen];  // target hardware address
+    uint32_t tpa;                          // target protocol address
+  } __attribute__((packed));
+
+  struct ARPHeader* arp_hdr_;
 };
 
 #endif

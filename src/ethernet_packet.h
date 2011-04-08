@@ -33,6 +33,9 @@ class EthernetAddr {
   // Stringify the EthernetAddr into something like 'DE:AD:BE:EF:BA:BE'.
   operator std::string() const;
 
+  // Returns the bytes containing the hardware address.
+  const uint8_t* data() const { return addr_; }
+
   // Address length in bytes.
   static const int kAddrLen = 6;
 
