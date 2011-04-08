@@ -115,6 +115,9 @@ class IPPacket : public Packet {
 
   const uint8_t* buffer() const { return (uint8_t *)ip_hdr_; }
 
+  // Returns the IPv4 header length without options.
+  uint8_t headerLen() const { return 20; }
+
  protected:
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
