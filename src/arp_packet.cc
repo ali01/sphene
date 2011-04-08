@@ -14,7 +14,7 @@ ARPPacket::ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       arp_hdr_((struct ARPHeader *)offsetAddress(0)) {
   // Validate length.
-  if (buffer->size() - buffer_offset != kPacketLen) {
+  if (buffer->size() - buffer_offset != (int)kPacketLen) {
     throw Fwk::RangeException("ARPPacket::ARPPacket",
                               "invalid packet size");
   }
