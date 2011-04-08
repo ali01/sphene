@@ -11,7 +11,11 @@ ARPCache::entry(const IPv4Addr& ip) const {
 }
 
 void
-ARPCache::entryIs(Entry::Ptr entry) {
-  IPv4Addr key = entry->ipAddr();
-  addr_map_[key] = entry;
+ARPCache::entryIs(const IPv4Addr& ip, Entry::Ptr entry) {
+  if (entry) {
+    IPv4Addr key = entry->ipAddr();
+    addr_map_[key] = entry;
+  } else {
+    addr_map_.erase(ip);
+  }
 }

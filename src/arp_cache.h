@@ -55,7 +55,7 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
   size_t entries() const { return addr_map_.size(); }
 
   Entry::Ptr entry(const IPv4Addr& ip) const;
-  void entryIs(Entry::Ptr entry);
+  void entryIs(const IPv4Addr& ip, Entry::Ptr entry);
 
   iterator begin() { return addr_map_.begin(); }
   iterator end() { return addr_map_.end(); }
