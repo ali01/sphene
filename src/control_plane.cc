@@ -31,16 +31,17 @@ ControlPlane::PacketFunctor::PacketFunctor(ControlPlane* const cp)
 void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "ARPPacket dispatch in ControlPlane";
+  DLOG << "  operation: " << pkt->operationName();
+  DLOG << "  sender HW addr: " << (string)pkt->senderHWAddr();
+  DLOG << "  sender IP addr: " << (string)pkt->senderPAddr();
+  DLOG << "  target HW addr: " << (string)pkt->targetHWAddr();
+  DLOG << "  target IP addr: " << (string)pkt->targetPAddr();
 }
 
 
 void ControlPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "EthernetPacket dispatch in ControlPlane";
-  DLOG << "  iface: " << iface->name();
-  DLOG << "  src: " << pkt->src();
-  DLOG << "  dst: " << pkt->dst();
-  DLOG << "  type: " << pkt->typeName();
 
   // Dispatch encapsulated packet.
   Packet::Ptr payload_pkt = pkt->payload();
