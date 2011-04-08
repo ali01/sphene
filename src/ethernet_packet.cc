@@ -150,18 +150,23 @@ std::string EthernetPacket::typeName() const {
 }
 
 
-Packet::Ptr EthernetPacket::payload() const {
+Packet::Ptr EthernetPacket::payload() {
   uint16_t payload_offset = buffer_offset_ + headerLen();
+  Packet::Ptr pkt;
 
   switch (type()) {
     case kARP:
-      return ARPPacket::ARPPacketNew(buffer_, payload_offset);
+      pkt = ARPPacket::ARPPacketNew(buffer_, payload_offset);
       break;
     case kIP:
-      return IPPacket::IPPacketNew(buffer_, payload_offset);
+      pkt = IPPacket::IPPacketNew(buffer_, payload_offset);
       break;
     default:
-      return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
+      pkt = UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
       break;
   }
+
+  // Chain the packets together.
+  pkt->enclosingPacketIs(this);
+  return pkt;
 }

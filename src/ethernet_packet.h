@@ -89,7 +89,9 @@ class EthernetPacket : public Packet {
   std::string typeName() const;
 
   // Returns the encapsulated packet.
-  Packet::Ptr payload() const;
+  // This is non-const because encapsulated packets have pointers to the
+  // EthernetPacket.
+  Packet::Ptr payload();
 
   // Returns the Ethernet header length.
   uint8_t headerLen() const { return 14; }

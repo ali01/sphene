@@ -40,15 +40,22 @@ class Packet : public Fwk::PtrInterface<Packet> {
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface) = 0;
 
+  /* Returns the enclosing packet. */
+  Ptr enclosingPacket() const { return encl_pkt_; }
+
+  /* Sets the enclosing packet. */
+  void enclosingPacketIs(Ptr pkt) { encl_pkt_ = pkt; }
+
  protected:
   Packet(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
-      : buffer_(buffer), buffer_offset_(buffer_offset) { }
+      : buffer_(buffer), buffer_offset_(buffer_offset), encl_pkt_(NULL) { }
 
   uint8_t* offsetAddress(unsigned int offset) const;
 
   /* Data members. */
   Fwk::Buffer::Ptr buffer_;
   const unsigned int buffer_offset_;
+  Ptr encl_pkt_;
 };
 
 #endif
