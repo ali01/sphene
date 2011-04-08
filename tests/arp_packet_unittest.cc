@@ -73,13 +73,55 @@ TEST_F(ARPPacketTest, operation) {
 
 TEST_F(ARPPacketTest, senderHWAddr) {
   // Ensure our packet has the expected sender hardware address.
-  const string& expected = "DE:AD:BE:EF:BA:BE";
-  EXPECT_EQ(expected, (string)pkt_->senderHWAddr());
+  const EthernetAddr& expected = "DE:AD:BE:EF:BA:BE";
+  EXPECT_EQ(expected, pkt_->senderHWAddr());
 
   // Change the sender hardware address.
-  const string& new_addr = "CA:FE:BA:BE:00:00";
+  const EthernetAddr& new_addr = "CA:FE:BA:BE:00:00";
   pkt_->senderHWAddrIs(new_addr);
 
   // Ensure that it changed.
-  EXPECT_EQ(new_addr, (string)pkt_->senderHWAddr());
+  EXPECT_EQ(new_addr, pkt_->senderHWAddr());
+}
+
+
+TEST_F(ARPPacketTest, targetHWAddr) {
+  // Ensure our packet has the expected target hardware address.
+  const EthernetAddr& expected = "C0:FF:EE:C0:FF:EE";
+  EXPECT_EQ(expected, pkt_->targetHWAddr());
+
+  // Change the sender hardware address.
+  const EthernetAddr& new_addr = "CA:FE:BA:BE:00:01";
+  pkt_->targetHWAddrIs(new_addr);
+
+  // Ensure that it changed.
+  EXPECT_EQ(new_addr, pkt_->targetHWAddr());
+}
+
+
+TEST_F(ARPPacketTest, senderPAddr) {
+  // Ensure our packet has the expected sender protocol address.
+  const IPv4Addr& expected = "4.2.2.1";
+  EXPECT_EQ(expected, pkt_->senderPAddr());
+
+  // Change the sender protocol address.
+  const IPv4Addr& new_addr = "13.37.13.37";
+  pkt_->senderPAddrIs(new_addr);
+
+  // Ensure that it changed.
+  EXPECT_EQ(new_addr, pkt_->senderPAddr());
+}
+
+
+TEST_F(ARPPacketTest, targetAddr) {
+  // Ensure our packet has the expected target protocol address.
+  const IPv4Addr& expected = "8.8.4.4";
+  EXPECT_EQ(expected, pkt_->targetPAddr());
+
+  // Change the target protocol address.
+  const IPv4Addr& new_addr = "13.37.37.45";
+  pkt_->targetPAddrIs(new_addr);
+
+  // Ensure that it changed.
+  EXPECT_EQ(new_addr, pkt_->targetPAddr());
 }
