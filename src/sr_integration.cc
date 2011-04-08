@@ -60,8 +60,10 @@ void sr_integ_init(struct sr_instance* sr)
   // Create ControlPlane.
   cp = ControlPlane::ControlPlaneNew();
 
+  // Create DataPlane.
   // TODO(ms): Differentiate based on _CPUMODE_.
   dp = SWDataPlane::SWDataPlaneNew();
+  dp->instanceIs(sr);
 
   // Initialize pointers between ControlPlane and DataPlane.
   cp->dataPlaneIs(dp);

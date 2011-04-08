@@ -17,6 +17,7 @@ class EthernetPacket;
 class ICMPPacket;
 class IPPacket;
 class UnknownPacket;
+struct sr_instance;
 
 
 class DataPlane : public Fwk::NamedInterface {
@@ -38,6 +39,12 @@ class DataPlane : public Fwk::NamedInterface {
 
   // Sets the ControlPlane.
   void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
+
+  // Returns the router instance.
+  struct sr_instance* instance() const { return sr_; }
+
+  // Sets the router instance.
+  void instanceIs(struct sr_instance* sr) { sr_ = sr; }
 
  protected:
   DataPlane(const std::string& name);
@@ -67,6 +74,7 @@ class DataPlane : public Fwk::NamedInterface {
   PacketFunctor functor_;
   InterfaceMap::Ptr iface_map_;
   ControlPlane* cp_;
+  struct sr_instance* sr_;
 };
 
 #endif

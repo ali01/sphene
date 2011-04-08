@@ -275,7 +275,9 @@ sample1_unittest_SOURCES = \
 sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sample1_unittest_LDADD = libgtest.a
 
-sw_data_plane_unittest_SOURCES = tests/sw_data_plane_unittest.cc $(FWK_SRCS)
+sw_data_plane_unittest_SOURCES = tests/sw_data_plane_unittest.cc \
+                                 $(FWK_SRCS) \
+                                 $(SR_SRCS_CLI)
 sw_data_plane_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sw_data_plane_unittest_LDADD = libgtest.a $(USER_LIBS)
 
