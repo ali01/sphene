@@ -5,6 +5,7 @@
 #include "fwk/named_interface.h"
 
 #include "arp_packet.h"
+#include "control_plane.h"
 #include "ethernet_packet.h"
 #include "icmp_packet.h"
 #include "interface.h"
@@ -38,6 +39,10 @@ DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp)
 void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "ARPPacket dispatch in DataPlane";
+
+  // Dispatch ARP packets to control plane.
+  EthernetPacket::Ptr eth_pkt = (EthernetPacket*)(pkt->enclosingPacket().ptr());
+  dp_->controlPlane()->packetNew(eth_pkt, iface);
 }
 
 
