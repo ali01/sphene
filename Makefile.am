@@ -123,6 +123,7 @@ libsr_base_a_SOURCES = \
                        src/real_socket_helper.cc \
                        src/real_socket_helper.h \
                        src/reg_defines.h \
+                       src/routing_table.cc \
                        src/sha1.cc \
                        src/sha1.h \
                        src/sr_base.cc \
