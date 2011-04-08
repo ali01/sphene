@@ -27,6 +27,9 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
     EthernetAddr ethernetAddr() const { return eth_; }
     IPv4Addr ipAddr() const { return ip_; }
 
+    void ethernetAddrIs(const EthernetAddr& eth) { eth_ = eth; }
+    void ipAddrIs(const IPv4Addr& ip) { ip_ = ip; }
+
     time_t age() const { return time(NULL) - t_; }
     void ageIs(time_t age) { t_ = time(NULL) - age; }
 
@@ -36,8 +39,8 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
 
    private:
     /* Data members */
-    const IPv4Addr ip_;
-    const EthernetAddr eth_;
+    IPv4Addr ip_;
+    EthernetAddr eth_;
     time_t t_;
 
     /* Disallowed operations */
