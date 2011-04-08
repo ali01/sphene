@@ -13,7 +13,6 @@
 
 // Forward declarations.
 class ARPPacket;
-class DataPlane;
 class EthernetPacket;
 class ICMPPacket;
 class IPPacket;
