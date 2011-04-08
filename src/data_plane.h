@@ -5,13 +5,14 @@
 
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
-
+#include "fwk/ptr.h"
 #include "interface.h"
 #include "interface_map.h"
 #include "packet.h"
 
 /* Forward declarations. */
 class ARPPacket;
+class ControlPlane;
 class EthernetPacket;
 class ICMPPacket;
 class IPPacket;
@@ -26,6 +27,12 @@ class DataPlane : public Fwk::NamedInterface {
   void packetNew(Fwk::Ptr<EthernetPacket> pkt, Interface::PtrConst iface);
 
   InterfaceMap::Ptr interfaceMap() const;
+
+  // Returns the ControlPlane.
+  ControlPlane* controlPlane() const { return cp_; }
+
+  // Sets the ControlPlane.
+  void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
 
  protected:
   DataPlane(const std::string& name);
@@ -54,6 +61,7 @@ class DataPlane : public Fwk::NamedInterface {
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
   InterfaceMap::Ptr iface_map_;
+  ControlPlane* cp_;
 };
 
 #endif

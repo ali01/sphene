@@ -15,7 +15,8 @@ DataPlane::DataPlane(const std::string& name)
     : Fwk::NamedInterface(name),
       log_(Fwk::Log::LogNew(name)),
       functor_(this),
-      iface_map_(InterfaceMap::InterfaceMapNew()) { }
+      iface_map_(InterfaceMap::InterfaceMapNew()),
+      cp_(NULL) { }
 
 
 void DataPlane::packetNew(EthernetPacket::Ptr pkt,
