@@ -32,7 +32,7 @@ InterfaceMap::Ptr DataPlane::interfaceMap() const {
 
 
 DataPlane::PacketFunctor::PacketFunctor(DataPlane* const dp)
-    : dp_(dp), log_(dp->log_) { }
+    : cp_(NULL), dp_(dp), log_(dp->log_) { }
 
 
 void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt,
