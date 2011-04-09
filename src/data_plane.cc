@@ -12,11 +12,14 @@
 #include "ip_packet.h"
 
 
-DataPlane::DataPlane(const std::string& name, struct sr_instance *sr)
+DataPlane::DataPlane(const std::string& name,
+                     struct sr_instance *sr,
+                     ARPCache::Ptr arp_cache)
     : Fwk::NamedInterface(name),
       log_(Fwk::Log::LogNew(name)),
       functor_(this),
       iface_map_(InterfaceMap::InterfaceMapNew()),
+      arp_cache_(arp_cache),
       cp_(NULL),
       sr_(sr) { }
 

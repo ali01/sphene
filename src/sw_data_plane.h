@@ -3,6 +3,7 @@
 
 #include "fwk/ptr_interface.h"
 
+#include "arp_cache.h"
 #include "packet.h"
 #include "data_plane.h"
 
@@ -18,15 +19,15 @@ class SWDataPlane : public DataPlane {
   typedef Fwk::Ptr<const SWDataPlane> PtrConst;
   typedef Fwk::Ptr<SWDataPlane> Ptr;
 
-  static Ptr SWDataPlaneNew(struct sr_instance *sr) {
-    return new SWDataPlane(sr);
+  static Ptr SWDataPlaneNew(struct sr_instance *sr, ARPCache::Ptr arp_cache) {
+    return new SWDataPlane(sr, arp_cache);
   }
 
   virtual void outputPacketNew(Fwk::Ptr<EthernetPacket> pkt,
                                Interface::PtrConst iface);
 
  protected:
-  SWDataPlane(struct sr_instance *sr);
+  SWDataPlane(struct sr_instance *sr, ARPCache::Ptr arp_cache);
 
   /* Operations disallowed. */
   SWDataPlane(const SWDataPlane&);

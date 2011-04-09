@@ -38,7 +38,6 @@ class ControlPlane : public Fwk::NamedInterface {
   void dataPlaneIs(DataPlane::Ptr dp) { dp_ = dp; }
 
   ARPCache::Ptr ethernetCache() const { return arp_cache_; }
-  void ethernetCacheIs(ARPCache::Ptr arp_cache) { arp_cache_ = arp_cache; }
 
  protected:
   ControlPlane(const std::string& name);
@@ -66,8 +65,8 @@ class ControlPlane : public Fwk::NamedInterface {
 
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
-  DataPlane::Ptr dp_;
   ARPCache::Ptr arp_cache_;
+  DataPlane::Ptr dp_;
 };
 
 #endif

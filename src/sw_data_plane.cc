@@ -7,8 +7,8 @@
 struct sr_instance;
 
 
-SWDataPlane::SWDataPlane(struct sr_instance *sr)
-    : DataPlane("SWDataPlane", sr) {
+SWDataPlane::SWDataPlane(struct sr_instance *sr, ARPCache::Ptr arp_cache)
+    : DataPlane("SWDataPlane", sr, arp_cache) {
   log_ = Fwk::Log::LogNew("SWDataPlane");
   log_->entryNew("constructor");
 }

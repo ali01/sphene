@@ -58,17 +58,13 @@ void sr_integ_init(struct sr_instance* sr)
   log_->levelIs(log_->debug());
   ILOG << "Initializing";
 
-  // Create ARPCache
-  ARPCache::Ptr arp_cache = ARPCache::ARPCacheNew();
-
   // Create ControlPlane.
   cp = ControlPlane::ControlPlaneNew();
-  cp->ethernetCacheIs(arp_cache);
 
   // Create DataPlane.
   // TODO(ms): Differentiate based on _CPUMODE_.
-  dp = SWDataPlane::SWDataPlaneNew(sr);
-  dp->ethernetCacheIs(arp_cache);
+  ARPCache::Ptr arp_cache = cp->ethernetCache();
+  dp = SWDataPlane::SWDataPlaneNew(sr, arp_cache);
 
   // Initialize pointers between ControlPlane and DataPlane.
   cp->dataPlaneIs(dp);

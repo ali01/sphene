@@ -41,21 +41,17 @@ class DataPlane : public Fwk::NamedInterface {
   // Sets the ControlPlane.
   void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
 
-  // Returns the ARPCache.
-  ARPCache::Ptr ethernetCache() const { return arp_cache_; }
-
-  // Sets the ARPCache.
-  void ethernetCacheIs(ARPCache::Ptr arp_cache) { arp_cache_ = arp_cache; }
-
   // Returns the router instance.
   struct sr_instance* instance() const { return sr_; }
 
  protected:
-  DataPlane(const std::string& name, struct sr_instance *sr);
+  DataPlane(const std::string& name,
+            struct sr_instance *sr,
+            ARPCache::Ptr arp_cache);
   virtual ~DataPlane() {}
 
   /* Operations disallowed. */
-  DataPlane(const DataPlane&);
+  DataPlane(const DataPlane&, ARPCache::Ptr arp_cache);
   void operator=(const DataPlane&);
 
  private:
@@ -77,9 +73,9 @@ class DataPlane : public Fwk::NamedInterface {
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
   InterfaceMap::Ptr iface_map_;
+  ARPCache::Ptr arp_cache_;
   ControlPlane* cp_;
   struct sr_instance* sr_;  
-  ARPCache::Ptr arp_cache_;
 };
 
 #endif
