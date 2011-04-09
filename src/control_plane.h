@@ -11,6 +11,7 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "packet.h"
+#include "routing_table.h"
 
 // Forward declarations.
 class ARPPacket;
@@ -66,6 +67,7 @@ class ControlPlane : public Fwk::NamedInterface {
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
   ARPCache::Ptr arp_cache_;
+  RoutingTable::Ptr routing_table_;
   DataPlane::Ptr dp_;
 };
 
