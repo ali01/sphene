@@ -27,6 +27,7 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "ip_packet.h"
+#include "routing_table.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
 #include "sw_data_plane.h"
@@ -63,8 +64,9 @@ void sr_integ_init(struct sr_instance* sr)
 
   // Create DataPlane.
   // TODO(ms): Differentiate based on _CPUMODE_.
+  RoutingTable::Ptr routing_table = cp->routingTable();
   ARPCache::Ptr arp_cache = cp->ethernetCache();
-  dp = SWDataPlane::SWDataPlaneNew(sr, arp_cache);
+  dp = SWDataPlane::SWDataPlaneNew(sr, routing_table, arp_cache);
 
   // Initialize pointers between ControlPlane and DataPlane.
   cp->dataPlaneIs(dp);

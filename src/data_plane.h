@@ -10,6 +10,7 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "packet.h"
+#include "routing_table.h"
 
 /* Forward declarations. */
 class ARPPacket;
@@ -47,11 +48,12 @@ class DataPlane : public Fwk::NamedInterface {
  protected:
   DataPlane(const std::string& name,
             struct sr_instance *sr,
+            RoutingTable::Ptr routing_table,
             ARPCache::Ptr arp_cache);
   virtual ~DataPlane() {}
 
   /* Operations disallowed. */
-  DataPlane(const DataPlane&, ARPCache::Ptr arp_cache);
+  DataPlane(const DataPlane&);
   void operator=(const DataPlane&);
 
  private:
@@ -73,6 +75,7 @@ class DataPlane : public Fwk::NamedInterface {
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
   InterfaceMap::Ptr iface_map_;
+  RoutingTable::Ptr routing_table_;
   ARPCache::Ptr arp_cache_;
   ControlPlane* cp_;
   struct sr_instance* sr_;  

@@ -40,6 +40,8 @@ class ControlPlane : public Fwk::NamedInterface {
 
   ARPCache::Ptr ethernetCache() const { return arp_cache_; }
 
+  RoutingTable::Ptr routingTable() const { return routing_table_; }
+
  protected:
   ControlPlane(const std::string& name);
   virtual ~ControlPlane() { }
