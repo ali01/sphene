@@ -71,6 +71,10 @@ void sr_integ_init(struct sr_instance* sr)
   // Initialize pointers between ControlPlane and DataPlane.
   cp->dataPlaneIs(dp);
   dp->controlPlaneIs(cp.ptr());  // weak pointer to prevent circular reference
+
+  // ControlPlane and DataPlane are parts of the router.
+  sr->cp = cp.ptr();
+  sr->dp = dp.ptr();
 }
 
 /*-----------------------------------------------------------------------------
