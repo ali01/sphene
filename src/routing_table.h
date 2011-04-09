@@ -37,10 +37,10 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     void interfaceIs(Interface::Ptr iface) { interface_ = iface; }
 
    protected:
-    Entry (const IPv4Addr& dest,
-           const IPv4Addr& subnet_mask,
-           const IPv4Addr& gateway,
-           Interface::Ptr interface);
+    Entry(const IPv4Addr& dest,
+          const IPv4Addr& subnet_mask,
+          const IPv4Addr& gateway,
+          Interface::Ptr interface);
 
    private:
     IPv4Addr subnet_;
