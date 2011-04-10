@@ -234,7 +234,7 @@ TESTS = \
         interface_map_unittest \
         ip_packet_unittest \
         packet_unittest \
-        sample1_unittest \
+        routing_table_unittest \
         sw_data_plane_unittest
 
 bin_PROGRAMS += $(TESTS)
@@ -275,12 +275,9 @@ packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 
-sample1_unittest_SOURCES = \
-                           tests/sample1.cc \
-                           tests/sample1.h \
-                           tests/sample1_unittest.cc
-sample1_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-sample1_unittest_LDADD = libgtest.a
+routing_table_unittest_SOURCES = tests/routing_table_unittest.cc
+routing_table_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+routing_table_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 sw_data_plane_unittest_SOURCES = tests/sw_data_plane_unittest.cc \
                                  $(FWK_SRCS) \
