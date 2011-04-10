@@ -7,7 +7,7 @@
 using std::string;
 
 
-Interface::Interface(const std::string& name)
-    : Fwk::NamedInterface(name) {
-
-}
+Interface::Interface(const string& name)
+    : Fwk::NamedInterface(name),
+      enabled_(true),
+      speed_(0) { }
