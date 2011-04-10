@@ -16,7 +16,7 @@ ControlPlane::ControlPlane(const std::string& name)
       log_(Fwk::Log::LogNew(name)),
       functor_(this),
       arp_cache_(ARPCache::ARPCacheNew()),
-      routing_table_(RoutingTable::RoutingTableNew()) { }
+      routing_table_(RoutingTable::New()) { }
 
 
 void ControlPlane::packetNew(EthernetPacket::Ptr pkt,
