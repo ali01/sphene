@@ -38,7 +38,7 @@ class ControlPlane : public Fwk::NamedInterface {
   // Sets the DataPlane.
   void dataPlaneIs(DataPlane::Ptr dp) { dp_ = dp; }
 
-  ARPCache::Ptr ethernetCache() const { return arp_cache_; }
+  ARPCache::Ptr arpCache() const { return arp_cache_; }
 
   RoutingTable::Ptr routingTable() const { return routing_table_; }
 

@@ -65,12 +65,16 @@ void sr_integ_init(struct sr_instance* sr)
   // Create DataPlane.
   // TODO(ms): Differentiate based on _CPUMODE_.
   RoutingTable::Ptr routing_table = cp->routingTable();
-  ARPCache::Ptr arp_cache = cp->ethernetCache();
+  ARPCache::Ptr arp_cache = cp->arpCache();
   dp = SWDataPlane::SWDataPlaneNew(sr, routing_table, arp_cache);
 
   // Initialize pointers between ControlPlane and DataPlane.
   cp->dataPlaneIs(dp);
   dp->controlPlaneIs(cp.ptr());  // weak pointer to prevent circular reference
+
+  // ControlPlane and DataPlane are parts of the router.
+  sr->cp = cp.ptr();
+  sr->dp = dp.ptr();
 }
 
 /*-----------------------------------------------------------------------------

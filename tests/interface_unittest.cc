@@ -45,3 +45,12 @@ TEST_F(InterfaceTest, Speed) {
   iface_->speedIs(speed);
   EXPECT_EQ(speed, iface_->speed());
 }
+
+
+TEST_F(InterfaceTest, Enabled) {
+  const bool enabled = true;
+  iface_->enabledIs(enabled);
+  EXPECT_EQ(enabled, iface_->enabled());
+  iface_->enabledIs(!enabled);
+  EXPECT_EQ((bool)!enabled, iface_->enabled());
+}

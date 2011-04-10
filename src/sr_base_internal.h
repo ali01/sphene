@@ -53,6 +53,10 @@
 #define DebugMAC(x) do{}while(0)
 #endif
 
+class DataPlane;
+class ControlPlane;
+
+
 /* ----------------------------------------------------------------------------
  * struct sr_vns_if
  *
@@ -78,6 +82,9 @@ struct sr_vns_if
 
 struct sr_instance
 {
+    ControlPlane* cp;
+    DataPlane* dp;
+
     /* VNS specific */
     int  sockfd;    /* socket to server */
     char user[32];  /* user name */

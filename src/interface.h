@@ -45,9 +45,16 @@ class Interface : public Fwk::NamedInterface {
   // Sets the interface speed.
   void speedIs(uint32_t speed) { speed_ = speed; }
 
+  // Returns whether or not the interface is enabled.
+  bool enabled() const { return enabled_; }
+
+  // Sets the enabled flag.
+  void enabledIs(bool enabled) { enabled_ = enabled; }
+
  protected:
   Interface(const std::string& name);
 
+  bool enabled_;
   EthernetAddr mac_;
   IPv4Addr ip_;
   IPv4Addr mask_;
