@@ -20,11 +20,8 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     typedef Fwk::Ptr<const Entry> PtrConst;
     typedef Fwk::Ptr<Entry> Ptr;
 
-    static Ptr EntryNew(const IPv4Addr& dest,
-                        const IPv4Addr& subnet_mask,
-                        const IPv4Addr& gateway,
-                        Interface::Ptr interface) {
-      return new Entry(dest, subnet_mask, gateway, interface);
+    static Ptr New() {
+      return new Entry();
     }
 
     IPv4Addr subnet() const { return subnet_; }
@@ -37,10 +34,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     void interfaceIs(Interface::Ptr iface) { interface_ = iface; }
 
    protected:
-    Entry (const IPv4Addr& dest,
-           const IPv4Addr& subnet_mask,
-           const IPv4Addr& gateway,
-           Interface::Ptr interface);
+    Entry();
 
    private:
     IPv4Addr subnet_;
@@ -59,7 +53,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     void operator=(const Entry&);
   };
 
-  static Ptr RoutingTableNew() {
+  static Ptr New() {
     return new RoutingTable();
   }
 

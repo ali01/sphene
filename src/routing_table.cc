@@ -2,15 +2,9 @@
 
 /* RoutingTable::Entry */
 
-RoutingTable::Entry::Entry(const IPv4Addr& dest,
-                           const IPv4Addr& subnet_mask,
-                           const IPv4Addr& gateway,
-                           Interface::Ptr interface)
-    : subnet_(dest & subnet_mask),
-      subnet_mask_(subnet_mask),
-      gateway_(gateway),
-      interface_(interface),
-      next_(NULL), prev_(NULL) {}
+RoutingTable::Entry::Entry()
+    : subnet_((uint32_t)0), subnet_mask_((uint32_t)0), gateway_((uint32_t)0),
+      interface_(NULL), next_(NULL), prev_(NULL) {}
 
 void
 RoutingTable::Entry::subnetIs(const IPv4Addr& dest_ip,
