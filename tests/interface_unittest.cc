@@ -52,5 +52,5 @@ TEST_F(InterfaceTest, Enabled) {
   iface_->enabledIs(enabled);
   EXPECT_EQ(enabled, iface_->enabled());
   iface_->enabledIs(!enabled);
-  EXPECT_EQ(!enabled, iface_->enabled());
+  EXPECT_EQ((bool)!enabled, iface_->enabled());
 }
