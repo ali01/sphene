@@ -16,7 +16,7 @@ RoutingTable::Entry::subnetIs(const IPv4Addr& dest_ip,
 /* RoutingTable */
 
 RoutingTable::Entry::Ptr
-RoutingTable::longestPrefixMatch(const IPv4Addr& dest_ip) const {
+RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   Entry::Ptr lpm = NULL;
   Entry::Ptr curr = rtable_;
   while (curr)  {

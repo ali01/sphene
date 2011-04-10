@@ -57,7 +57,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     return new RoutingTable();
   }
 
-  Entry::Ptr longestPrefixMatch(const IPv4Addr& dest_ip) const;
+  Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
 
   void entryIs(Entry::Ptr entry);
   void entryDel(Entry::Ptr entry);
