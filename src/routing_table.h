@@ -4,6 +4,7 @@
 #include <set>
 
 #include "fwk/ptr_interface.h"
+#include "fwk/linked_list.h"
 
 #include "ip_packet.h"
 #include "interface.h"
@@ -15,7 +16,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
   typedef Fwk::Ptr<RoutingTable> Ptr;
 
   /* Nested routing table entry class */
-  class Entry : public Fwk::PtrInterface<Entry> {
+  class Entry : public Fwk::LinkedList<Entry>::Node {
    public:
     typedef Fwk::Ptr<const Entry> PtrConst;
     typedef Fwk::Ptr<Entry> Ptr;
@@ -42,12 +43,6 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     IPv4Addr gateway_;
     Interface::Ptr interface_;
 
-    /* Linked list support. */
-    Entry::Ptr next_;
-    Entry* prev_; /* weak pointer to prevent circular references */
-
-    friend class RoutingTable;
-
     /* Operations disallowed */
     Entry(const Entry&);
     void operator=(const Entry&);
@@ -59,16 +54,15 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
 
   Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
 
-  void entryIs(Entry::Ptr entry);
-  void entryDel(Entry::Ptr entry);
+  void entryIs(Entry::Ptr entry) { rtable_.pushFront(entry); }
+  void entryDel(Entry::Ptr entry) { rtable_.del(entry); }
 
  protected:
   RoutingTable() {}
 
  private:
   /* Routing table is a linked list. */
-  Entry::Ptr rtable_; /* Convert to a radix trie if time allows. */
-  std::set<Entry*> rtable_set_; /* Prevents double insertion of an entry */
+  Fwk::LinkedList<Entry> rtable_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);
