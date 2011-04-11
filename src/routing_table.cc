@@ -54,7 +54,7 @@ RoutingTable::entryDel(Entry::Ptr entry) {
   if (entry == NULL || rtable_ == NULL)
     return;
 
-  /* If entry is the root node. */
+  /* If entry is the head node. */
   if (rtable_ == entry)
     rtable_ = entry->next_;
   else

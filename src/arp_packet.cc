@@ -73,20 +73,20 @@ void ARPPacket::targetHWAddrIs(const EthernetAddr& addr) {
 
 
 IPv4Addr ARPPacket::senderPAddr() const {
-  return IPv4Addr(arp_hdr_->spa);
+  return ntohl(arp_hdr_->spa);
 }
 
 
 void ARPPacket::senderPAddrIs(const IPv4Addr& addr) {
-  arp_hdr_->spa = htonl((uint32_t)addr);
+  arp_hdr_->spa = addr.nbo();
 }
 
 
 IPv4Addr ARPPacket::targetPAddr() const {
-  return IPv4Addr(arp_hdr_->tpa);
+  return ntohl(arp_hdr_->tpa);
 }
 
 
 void ARPPacket::targetPAddrIs(const IPv4Addr& addr) {
-  arp_hdr_->tpa = htonl((uint32_t)addr);
+  arp_hdr_->tpa = addr.nbo();
 }

@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 #include <cstring>
+#include <string>
 #include <inttypes.h>
 
 #include "fwk/buffer.h"
@@ -23,10 +24,10 @@ class IPPacketTest : public ::testing::Test {
     Fwk::Buffer::Ptr buf_ =
       Fwk::Buffer::BufferNew(packet_buffer, sizeof(packet_buffer));
     pkt_ = IPPacket::IPPacketNew(buf_, 3);
-    packet_buffer_ = pkt_->buffer();
+    ip_hdr_ = pkt_->buffer()->data() + 3; /* ptr to beginning of IP header */
   }
 
-  const uint8_t *packet_buffer_;
+  const uint8_t *ip_hdr_;
   IPPacket::Ptr pkt_;
 };
 
@@ -35,7 +36,7 @@ class IPv4AddrTest : public ::testing::Test {
   IPv4AddrTest()
       : ip_val_(0xabcdef42),
         ip_val_nbo_(htonl(ip_val_)),
-        addr_(ip_val_nbo_) {}
+        addr_(ip_val_) {}
 
   uint32_t ip_val_;
   uint32_t ip_val_nbo_;
@@ -47,18 +48,18 @@ class IPv4AddrTest : public ::testing::Test {
 
 TEST_F(IPPacketTest, ip_v_hl) {
   EXPECT_EQ(pkt_->version(), 4);
-  EXPECT_EQ(pkt_->version(), packet_buffer_[0] >> 4);
+  EXPECT_EQ(pkt_->version(), ip_hdr_[0] >> 4);
 
   EXPECT_EQ(pkt_->headerLength(), 5);
-  EXPECT_EQ(pkt_->headerLength(), packet_buffer_[0] & 0x0F);
+  EXPECT_EQ(pkt_->headerLength(), ip_hdr_[0] & 0x0F);
 
   pkt_->versionIs(6);
   EXPECT_EQ(pkt_->version(), 6);
-  EXPECT_EQ(pkt_->version(), packet_buffer_[0] >> 4);
+  EXPECT_EQ(pkt_->version(), ip_hdr_[0] >> 4);
 
   pkt_->headerLengthIs(8);
   EXPECT_EQ(pkt_->headerLength(), 8);
-  EXPECT_EQ(pkt_->headerLength(), packet_buffer_[0] & 0x0F);
+  EXPECT_EQ(pkt_->headerLength(), ip_hdr_[0] & 0x0F);
 }
 
 TEST_F(IPPacketTest, ip_tos) {
@@ -91,23 +92,23 @@ TEST_F(IPPacketTest, ip_id) {
 TEST_F(IPPacketTest, ip_fl_off) {
   /* IP Flags */
   EXPECT_EQ(pkt_->flags(), 0);
-  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
+  EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
   pkt_->flagsAre(IPPacket::IP_RF);
   EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF);
-  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
+  EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
   pkt_->flagsAre(IPPacket::IP_DF);
   EXPECT_EQ(pkt_->flags(), IPPacket::IP_DF);
-  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
+  EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
   pkt_->flagsAre(IPPacket::IP_MF);
   EXPECT_EQ(pkt_->flags(), IPPacket::IP_MF);
-  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
+  EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
   pkt_->flagsAre(IPPacket::IP_RF | IPPacket::IP_MF);
   EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF | IPPacket::IP_MF);
-  EXPECT_EQ(pkt_->flags(), packet_buffer_[6] >> 5);
+  EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
   /* fragment offset */
   EXPECT_EQ(pkt_->fragmentOffset(), 0);
@@ -143,15 +144,28 @@ TEST_F(IPPacketTest, ip_sum) {
   EXPECT_EQ(pkt_->checksum(), 0x4242);
 }
 
-TEST_F(IPPacketTest, ip_src) {
-  EXPECT_EQ((uint32_t)pkt_->src(), 0x8d59e292);
+TEST_F(IPPacketTest, ip_src_dst) {
+  EXPECT_EQ(pkt_->src(), 0x8d59e292);
+  EXPECT_EQ(pkt_->dst(), 0xab4203e7);
+
+  std::string ip_one_str = "192.168.0.1";
+  IPv4Addr ip_one(ip_one_str);
+  pkt_->srcIs(ip_one_str);
+  EXPECT_EQ(pkt_->src(), ip_one);
+  EXPECT_EQ(*(uint32_t *)&ip_hdr_[12], ip_one.nbo());
+
+  std::string ip_two_str = "10.4.0.1";
+  IPv4Addr ip_two(ip_two_str);
+  pkt_->dstIs(ip_two_str);
+  EXPECT_EQ(pkt_->dst(), ip_two);
+  EXPECT_EQ(*(uint32_t *)&ip_hdr_[16], ip_two.nbo());
 }
 
 
 /* IPv4Addr */
 
 TEST_F(IPv4AddrTest, int_construction) {
-  uint32_t val = addr_;
+  uint32_t val = addr_.value();
   EXPECT_EQ(val, ip_val_);
   EXPECT_EQ(ip_val_nbo_, addr_.nbo());
 

@@ -4,10 +4,11 @@
 
 class ARPCacheTest : public ::testing::Test {
  protected:
-  ARPCacheTest()
-      : arp_cache_(ARPCache::ARPCacheNew()),
-        ip_addr_("192.168.0.1"),
-        eth_addr_("C0:FF:EE:BA:BE:EE") {}
+  ARPCacheTest() {
+    arp_cache_ = ARPCache::ARPCacheNew();
+    ip_addr_ = "192.168.0.1";
+    eth_addr_ = "C0:FF:EE:BA:BE:EE";
+  }
 
   ARPCache::Ptr arp_cache_;
   IPv4Addr ip_addr_;
