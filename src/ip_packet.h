@@ -117,8 +117,6 @@ class IPPacket : public Packet {
   // Returns the encapsulated packet.
   Packet::Ptr payload() const;
 
-  const uint8_t* buffer() const { return (uint8_t *)ip_hdr_; }
-
   // Returns the IPv4 header length without options.
   uint8_t headerLen() const { return 20; }
 
