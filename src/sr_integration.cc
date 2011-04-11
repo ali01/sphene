@@ -147,8 +147,8 @@ void sr_integ_add_interface(struct sr_instance* sr,
   // Create an Interface from vns_if data.
   Interface::Ptr iface = Interface::InterfaceNew(vns_if->name);
   iface->macIs(vns_if->addr);
-  iface->ipIs(vns_if->ip);  // vns_if->ip and friends are nbo
-  iface->subnetMaskIs(vns_if->mask);
+  iface->ipIs(ntohl(vns_if->ip));  // vns_if->ip and friends are nbo
+  iface->subnetMaskIs(ntohl(vns_if->mask));
   iface->speedIs(vns_if->speed);
 
   // Add the interface to the data plane.

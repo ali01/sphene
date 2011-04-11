@@ -35,7 +35,7 @@ class IPv4AddrTest : public ::testing::Test {
   IPv4AddrTest()
       : ip_val_(0xabcdef42),
         ip_val_nbo_(htonl(ip_val_)),
-        addr_(ip_val_nbo_) {}
+        addr_(ip_val_) {}
 
   uint32_t ip_val_;
   uint32_t ip_val_nbo_;
@@ -144,14 +144,14 @@ TEST_F(IPPacketTest, ip_sum) {
 }
 
 TEST_F(IPPacketTest, ip_src) {
-  EXPECT_EQ((uint32_t)pkt_->src(), 0x8d59e292);
+  EXPECT_EQ(pkt_->src(), 0x8d59e292);
 }
 
 
 /* IPv4Addr */
 
 TEST_F(IPv4AddrTest, int_construction) {
-  uint32_t val = addr_;
+  uint32_t val = addr_.value();
   EXPECT_EQ(val, ip_val_);
   EXPECT_EQ(ip_val_nbo_, addr_.nbo());
 

@@ -24,36 +24,65 @@ struct ip_hdr {
 
 /* IPv4Addr */
 
+IPv4Addr::IPv4Addr() : Fwk::Ordinal<IPv4Addr,uint32_t>(0) {}
+
+IPv4Addr::IPv4Addr(uint32_t addr) : Fwk::Ordinal<IPv4Addr,uint32_t>(addr) {}
+
 IPv4Addr::IPv4Addr(const std::string& addr) {
-  /* TODO(ms): throw exception on failure? */
-  if (!inet_pton(AF_INET, addr.c_str(), &addr_))
-    addr_ = 0;
+  uint32_t nbo;
+  if (inet_pton(AF_INET, addr.c_str(), &nbo))
+    valueIs(ntohl(nbo));
+  else
+    valueIs(0);
 }
 
 IPv4Addr::IPv4Addr(const char* const addr) {
-  if (!inet_pton(AF_INET, addr, &addr_))
-    addr_ = 0;
+  uint32_t nbo;
+  if (inet_pton(AF_INET, addr, &nbo))
+    valueIs(ntohl(nbo));
+  else
+    valueIs(0);
 }
 
-bool
-IPv4Addr::operator==(uint32_t other) const {
-  return addr_ == htonl(other);
+IPv4Addr
+IPv4Addr::operator&(uint32_t other) const {
+  return value() & other;
 }
 
-IPv4Addr::operator uint32_t() const {
-  return ntohl(addr_);
+IPv4Addr
+IPv4Addr::operator&(const IPv4Addr& other) const {
+  return value() & other.value();
+}
+
+IPv4Addr&
+IPv4Addr::operator&=(uint32_t other) {
+  valueIs(value() & other);
+  return *this;
+}
+
+IPv4Addr&
+IPv4Addr::operator&=(const IPv4Addr& other) {
+  valueIs(value() & other.value());
+  return *this;
+}
+
+/* Returns IP address in network byte order */
+uint32_t
+IPv4Addr::nbo() const {
+  return htonl(value());
 }
 
 IPv4Addr::operator std::string() const {
+  uint32_t nbo = this->nbo();
   char buf[INET_ADDRSTRLEN + 1];
-  inet_ntop(AF_INET, (struct in_addr*)&addr_, buf, sizeof(buf));
+  inet_ntop(AF_INET, (struct in_addr*)&nbo, buf, sizeof(buf));
   buf[INET_ADDRSTRLEN] = 0;
   return buf;
 }
 
 
-/* IPPacket */
 
+/* IPPacket */
 
 IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
@@ -167,7 +196,7 @@ IPPacket::ttlDec(uint8_t dec_amount) {
 
 IPv4Addr
 IPPacket::src() const {
-  return ip_hdr_->ip_src;
+  return ntohl(ip_hdr_->ip_src);
 }
 
 void
@@ -177,7 +206,7 @@ IPPacket::srcIs(const IPv4Addr& src) {
 
 IPv4Addr
 IPPacket::dst() const {
-  return ip_hdr_->ip_dst;
+  return ntohl(ip_hdr_->ip_dst);
 }
 
 void
@@ -226,7 +255,8 @@ IPPacket::compute_cksum() const {
 
 
 // TODO(ms): Need tests for this.
-Packet::Ptr IPPacket::payload() const {
+Packet::Ptr
+IPPacket::payload() const {
   uint16_t payload_offset = buffer_offset_ + headerLen();
 
   switch (protocol()) {
