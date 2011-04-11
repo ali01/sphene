@@ -24,7 +24,7 @@ public:
   }
 
   virtual ~Ordinal() {}
-  
+
   RepType value() const {
     return value_;
   }
@@ -37,7 +37,7 @@ public:
     operator=(const RepType& v);
 
   /* relational operators */
-  
+
   bool operator==(const Ordinal<UnitType,RepType>& v) const;
   bool operator!=(const Ordinal<UnitType,RepType>& v) const;
   bool operator>=(const Ordinal<UnitType,RepType>& v) const;
@@ -57,16 +57,16 @@ public:
 
   template<typename U, typename R>
   friend bool operator!=(const R& left, const Ordinal<U,R>& right);
-  
+
   template<typename U, typename R>
   friend bool operator>=(const R& left, const Ordinal<U,R>& right);
-  
+
   template<typename U, typename R>
   friend bool operator<=(const R& left, const Ordinal<U,R>& right);
-  
+
   template<typename U, typename R>
   friend bool operator<(const R& left, const Ordinal<U,R>& right);
-  
+
   template<typename U, typename R>
   friend bool operator>(const R& left, const Ordinal<U,R>& right);
 
