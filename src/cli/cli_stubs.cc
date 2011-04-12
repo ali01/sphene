@@ -68,6 +68,7 @@ static unsigned arp_cache_type_purge(struct sr_instance* const sr,
     cache->entryDel(*it);
   }
 
+  cache->lockedIs(false);
   return entries.size();
 }
 
