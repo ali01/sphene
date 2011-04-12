@@ -1,5 +1,6 @@
 #include "cli_stubs.h"
 
+#include <arpa/inet.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <vector>
@@ -10,6 +11,7 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "sr_base_internal.h"
+#include "routing_table.h"
 
 using std::vector;
 
@@ -18,7 +20,7 @@ int arp_cache_static_entry_add(struct sr_instance* const sr,
                                const uint32_t ip,
                                const uint8_t* const mac) {
   ARPCache::Ptr cache = sr->cp->arpCache();
-  ARPCache::Entry::Ptr cache_entry = ARPCache::Entry::EntryNew(ip, mac);
+  ARPCache::Entry::Ptr cache_entry = ARPCache::Entry::EntryNew(ntohl(ip), mac);
   cache_entry->typeIs(ARPCache::Entry::kStatic);
   cache->lockedIs(true);
   cache->entryIs(cache_entry);
@@ -34,7 +36,7 @@ int arp_cache_static_entry_remove(struct sr_instance* const sr,
   ARPCache::Ptr cache = sr->cp->arpCache();
   cache->lockedIs(true);
 
-  ARPCache::Entry::Ptr cache_entry = cache->entry(ip);
+  ARPCache::Entry::Ptr cache_entry = cache->entry(ntohl(ip));
   if (!cache_entry || cache_entry->type() != ARPCache::Entry::kStatic) {
     cache->lockedIs(false);
     return 0;
@@ -66,6 +68,7 @@ static unsigned arp_cache_type_purge(struct sr_instance* const sr,
     cache->entryDel(*it);
   }
 
+  cache->lockedIs(false);
   return entries.size();
 }
 
@@ -96,24 +99,25 @@ int router_interface_set_enabled(struct sr_instance* const sr,
 }
 
 
-void* router_lookup_interface_via_ip(struct sr_instance* const sr,
-                                     const uint32_t ip) {
-    fprintf( stderr, "not yet implemented: router_lookup_interface_via_ip\n" );
-    return NULL;
+Interface::Ptr router_lookup_interface_via_ip(struct sr_instance* const sr,
+                                              const uint32_t ip) {
+  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  return if_map->interfaceAddr(ntohl(ip));
 }
 
 
-void* router_lookup_interface_via_name(struct sr_instance* const sr,
-                                       const char* name) {
-    fprintf( stderr, "not yet implemented: router_lookup_interface_via_name\n" );
-    return NULL;
+Interface::Ptr router_lookup_interface_via_name(struct sr_instance* const sr,
+                                                const char* name) {
+  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  return if_map->interface(name);
 }
 
 
 int router_is_interface_enabled(struct sr_instance* const sr,
-                                const void* intf) {
-    fprintf( stderr, "not yet implemented: router_is_interface_enabled\n" );
+                                Interface::PtrConst iface) {
+  if (!iface)
     return 0;
+  return (iface->enabled()) ? 1 : 0;
 }
 
 
@@ -132,9 +136,19 @@ void rtable_route_add(struct sr_instance* const sr,
                       const uint32_t dest,
                       const uint32_t gw,
                       const uint32_t mask,
-                      void* intf,
+                      Interface::Ptr iface,
                       const int is_static_route) {
-    fprintf( stderr, "not yet implemented: rtable_route_add\n" );
+  RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
+  entry->subnetIs(ntohl(dest), ntohl(mask));
+  entry->gatewayIs(ntohl(gw));
+  entry->interfaceIs(iface);
+  entry->typeIs(is_static_route ?
+                RoutingTable::Entry::kStatic : RoutingTable::Entry::kDynamic);
+
+  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  rtable->lockedIs(true);
+  rtable->entryIs(entry);
+  rtable->lockedIs(false);
 }
 
 

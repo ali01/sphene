@@ -1,9 +1,11 @@
 /* Filename: cli.c */
 
+#include <iostream>
 #include <signal.h>
 #include <stdio.h>               /* snprintf()                        */
 #include <stdlib.h>              /* malloc()                          */
 #include <string.h>              /* strncpy()                         */
+#include <string>
 #include <sys/time.h>            /* struct timeval                    */
 #include <unistd.h>              /* sleep()                           */
 #include "cli.h"
@@ -12,8 +14,16 @@
 #include "socket_helper.h"       /* writenstr()                       */
 #include "../sr_base_internal.h" /* struct sr_instance                */
 
+#include "arp_cache.h"
+#include "control_plane.h"
+#include "interface.h"
+#include "interface_map.h"
+
 /* temporary */
 #include "cli_stubs.h"
+
+using std::string;
+
 
 /** whether to shutdown the server or not */
 static int router_shutdown;
@@ -218,11 +228,51 @@ void cli_show_ip() {
 }
 
 void cli_show_ip_arp() {
-    cli_send_str( "not yet implemented: show ARP cache of SR\n" );
+  struct sr_instance* sr = get_sr();
+  ARPCache::Ptr cache = sr->cp->arpCache();
+  cache->lockedIs(true);
+
+  cli_send_str("ARP cache:\n");
+  for (ARPCache::iterator it = cache->begin(); it != cache->end(); ++it) {
+    ARPCache::Entry::Ptr entry = it->second;
+    const string& ip = entry->ipAddr();
+    const string& mac = entry->ethernetAddr();
+
+    cli_send_str("  ");
+    cli_send_str(ip.c_str());
+    cli_send_str("\t");
+    cli_send_str(mac.c_str());
+    cli_send_str("\n");
+  }
+
+  cache->lockedIs(false);
 }
 
 void cli_show_ip_intf() {
-    cli_send_str( "not yet implemented: show interfaces on SR\n" );
+  struct sr_instance* sr = get_sr();
+  InterfaceMap::Ptr ifaces = sr->dp->interfaceMap();
+
+  cli_send_str("Interfaces:\n");
+  for (InterfaceMap::const_iterator it = ifaces->begin();
+       it != ifaces->end(); ++it) {
+    Interface::Ptr iface = it->second;
+    const string& name = iface->name();
+    const string& ip = iface->ip();
+    const string& mask = iface->subnetMask();
+    const string& mac = iface->mac();
+    const bool enabled = iface->enabled();
+    cli_send_str("  ");
+    cli_send_str(name.c_str());
+    cli_send_str("\t");
+    cli_send_str(ip.c_str());
+    cli_send_str("\t");
+    cli_send_str(mask.c_str());
+    cli_send_str("\t");
+    cli_send_str(mac.c_str());
+    cli_send_str("\t");
+    cli_send_str(enabled ? "up" : "down");
+    cli_send_str("\n");
+  }
 }
 
 void cli_show_ip_route() {
@@ -363,8 +413,8 @@ void cli_manip_ip_arp_purge_sta() {
 }
 
 void cli_manip_ip_intf_set( gross_intf_t* data ) {
-    void* intf;
-    intf = router_lookup_interface_via_name( SR, data->intf_name );
+    Interface::Ptr intf =
+        router_lookup_interface_via_name( SR, data->intf_name );
     if( intf ) {
         /* not yet implmented: set intf's IP as data->ip and subnet mask as
            data->subnet_mask */
@@ -423,8 +473,8 @@ void cli_manip_ip_ospf_up() {
 }
 
 void cli_manip_ip_route_add( gross_route_t* data ) {
-    void *intf;
-    intf = router_lookup_interface_via_name( SR, data->intf_name );
+    Interface::Ptr intf =
+        router_lookup_interface_via_name( SR, data->intf_name );
     if( !intf )
         cli_send_strs( 3, "Error: no interface with the name ",
                        data->intf_name, " exists.\n" );
@@ -471,9 +521,7 @@ void cli_exit() {
 }
 
 int cli_ping_handle_self( uint32_t ip ) {
-    void* intf;
-
-    intf = router_lookup_interface_via_ip( SR, ip );
+    Interface::Ptr intf = router_lookup_interface_via_ip( SR, ip );
     if( intf ) {
         if( router_is_interface_enabled( SR, intf ) )
             cli_send_str( "Your interface is up.\n" );

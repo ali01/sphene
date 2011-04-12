@@ -1,6 +1,7 @@
 #ifndef ROUTING_TABLE_H_HE9H7VS9
 #define ROUTING_TABLE_H_HE9H7VS9
 
+#include <pthread.h>
 #include <set>
 
 #include "fwk/ptr_interface.h"
@@ -21,6 +22,11 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     typedef Fwk::Ptr<const Entry> PtrConst;
     typedef Fwk::Ptr<Entry> Ptr;
 
+    enum Type {
+      kDynamic,
+      kStatic
+    };
+
     static Ptr New() {
       return new Entry();
     }
@@ -34,6 +40,9 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     void gatewayIs(const IPv4Addr& gateway) { gateway_ = gateway; }
     void interfaceIs(Interface::Ptr iface) { interface_ = iface; }
 
+    Type type() const { return type_; }
+    void typeIs(Type type) { type_ = type; }
+
    protected:
     Entry();
 
@@ -42,6 +51,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     IPv4Addr subnet_mask_;
     IPv4Addr gateway_;
     Interface::Ptr interface_;
+    Type type_;
 
     /* Operations disallowed */
     Entry(const Entry&);
@@ -52,6 +62,9 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     return new RoutingTable();
   }
 
+  /* Locking for thread safety. */
+  void lockedIs(bool locked);
+
   Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
   Entry::Ptr front() const { return rtable_.front(); }
 
@@ -59,11 +72,14 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
   Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
 
  protected:
-  RoutingTable() {}
+  RoutingTable();
 
  private:
   /* Routing table is a linked list. */
   Fwk::LinkedList<Entry> rtable_;
+
+  /* Lock for modifications. */
+  pthread_mutex_t lock_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);
