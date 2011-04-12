@@ -257,7 +257,7 @@ IPPacket::compute_cksum() const {
 
 // TODO(ms): Need tests for this.
 Packet::Ptr
-IPPacket::payload() const {
+IPPacket::payload() {
   uint16_t payload_offset = buffer_offset_ + headerLen();
   Packet::Ptr pkt;
 

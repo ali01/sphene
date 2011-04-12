@@ -32,7 +32,7 @@ void ICMPPacket::typeIs(const Type t) {
 
 
 // TODO(ms): This needs tests.
-std::string typeName() const {
+std::string ICMPPacket::typeName() const {
   switch (type()) {
     case kEchoReply:
       return "echo reply";

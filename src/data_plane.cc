@@ -69,6 +69,8 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "ICMPPacket dispatch in DataPlane";
+  DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
+  DLOG << "  code: " << (uint32_t)pkt->code();
 }
 
 
