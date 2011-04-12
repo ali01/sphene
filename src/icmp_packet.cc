@@ -31,6 +31,28 @@ void ICMPPacket::typeIs(const Type t) {
 }
 
 
+// TODO(ms): This needs tests.
+std::string typeName() const {
+  switch (type()) {
+    case kEchoReply:
+      return "echo reply";
+      break;
+    case kDestUnreachable:
+      return "destination unreachable";
+      break;
+    case kEchoRequest:
+      return "echo request";
+      break;
+    case kTimeExceeded:
+      return "time exceeded";
+      break;
+    default:
+      return "unknown";
+      break;
+  }
+}
+
+
 uint8_t ICMPPacket::code() const {
   return icmp_hdr_->code;
 }
