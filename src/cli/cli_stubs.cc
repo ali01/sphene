@@ -13,6 +13,7 @@ int arp_cache_static_entry_add( struct sr_instance* sr,
                                 uint8_t* mac ) {
   ARPCache::Ptr cache = sr->cp->arpCache();
   ARPCache::Entry::Ptr cache_entry = ARPCache::Entry::EntryNew(ip, mac);
+  cache_entry->typeIs(ARPCache::Entry::kStatic);
   cache->lockedIs(true);
   cache->entryIs(cache_entry);
   cache->lockedIs(false);
