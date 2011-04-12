@@ -225,10 +225,21 @@ IPPacket::checksumIs(uint16_t ck) {
   ip_hdr_->ip_sum = htons(ck);
 }
 
-void
+uint16_t
 IPPacket::checksumReset() {
   checksumIs(0);
   checksumIs(compute_cksum());
+  return checksum();
+}
+
+bool
+IPPacket::checksumValid() const {
+  IPPacket *self = const_cast<IPPacket*>(this);
+  uint16_t pkt_cksum, actual_cksum;
+  pkt_cksum = checksum();
+  actual_cksum = self->checksumReset();
+  self->checksumIs(pkt_cksum);
+  return pkt_cksum == actual_cksum;
 }
 
 uint16_t

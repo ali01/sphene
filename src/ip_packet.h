@@ -112,7 +112,8 @@ class IPPacket : public Packet {
 
   uint16_t checksum() const;
   void checksumIs(uint16_t ck);
-  void checksumReset();
+  uint16_t checksumReset();
+  bool checksumValid() const;
 
   // Returns the encapsulated packet.
   Packet::Ptr payload();

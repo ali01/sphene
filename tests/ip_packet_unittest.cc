@@ -136,6 +136,7 @@ TEST_F(IPPacketTest, ip_p) {
 
 TEST_F(IPPacketTest, ip_sum) {
   EXPECT_EQ(pkt_->checksum(), 0xafdc);
+  EXPECT_TRUE(pkt_->checksumValid());
 
   pkt_->checksumReset();
   EXPECT_EQ(pkt_->checksum(), 0xafdc);
