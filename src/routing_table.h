@@ -53,6 +53,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
   }
 
   Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
+  Entry::Ptr front() const { return rtable_.front(); }
 
   void entryIs(Entry::Ptr entry) { rtable_.pushFront(entry); }
   Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
