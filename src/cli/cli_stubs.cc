@@ -2,10 +2,13 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <vector>
 
 #include "arp_cache.h"
 #include "control_plane.h"
 #include "sr_base_internal.h"
+
+using std::vector;
 
 
 int arp_cache_static_entry_add( struct sr_instance* sr,
@@ -28,8 +31,10 @@ int arp_cache_static_entry_remove( struct sr_instance* sr, uint32_t ip ) {
   cache->lockedIs(true);
 
   ARPCache::Entry::Ptr cache_entry = cache->entry(ip);
-  if (!cache_entry || cache_entry->type() != ARPCache::Entry::kStatic)
+  if (!cache_entry || cache_entry->type() != ARPCache::Entry::kStatic) {
+    cache->lockedIs(false);
     return 0;
+  }
 
   cache->entryDel(cache_entry);
   cache->lockedIs(false);
@@ -37,15 +42,37 @@ int arp_cache_static_entry_remove( struct sr_instance* sr, uint32_t ip ) {
 }
 
 
+// Removes all entries from the ARP Cache of the specified type.
+static unsigned arp_cache_type_purge(struct sr_instance* sr,
+                                     ARPCache::Entry::Type type) {
+  ARPCache::Ptr cache = sr->cp->arpCache();
+  cache->lockedIs(true);
+
+  // Build list of entries to remove.
+  vector<ARPCache::Entry::Ptr> entries;
+  for (ARPCache::iterator it = cache->begin(); it != cache->end(); ++it) {
+    ARPCache::Entry::Ptr entry = it->second;
+    if (entry->type() == type)
+      entries.push_back(entry);
+  }
+
+  // Remove the chosen entries.
+  for (vector<ARPCache::Entry::Ptr>::iterator it = entries.begin();
+       it != entries.end(); ++it) {
+    cache->entryDel(*it);
+  }
+
+  return entries.size();
+}
+
+
 unsigned arp_cache_static_purge( struct sr_instance* sr ) {
-    fprintf( stderr, "not yet implemented: arp_cache_static_purge\n" );
-    return 0;
+  return arp_cache_type_purge(sr, ARPCache::Entry::kStatic);
 }
 
 
 unsigned arp_cache_dynamic_purge( struct sr_instance* sr ) {
-    fprintf( stderr, "not yet implemented: arp_cache_dynamic_purge\n" );
-    return 0;
+  return arp_cache_type_purge(sr, ARPCache::Entry::kDynamic);
 }
 
 
