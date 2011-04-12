@@ -37,14 +37,14 @@ test_single_entry(ARPCache::Ptr cache, IPv4Addr ip, EthernetAddr eth) {
 
 TEST_F(ARPCacheTest, insert_delete) {
   ARPCache::Entry::Ptr entry = ARPCache::Entry::EntryNew(ip_addr_, eth_addr_);
-  arp_cache_->entryIs(entry->ipAddr(), entry);
+  arp_cache_->entryIs(entry);
   test_single_entry(arp_cache_, ip_addr_, eth_addr_);
 
   arp_cache_->entryIs(entry);
   test_single_entry(arp_cache_, ip_addr_, eth_addr_);
 
   for (int i = 0; i < 2; ++i) {
-    arp_cache_->entryIs(ip_addr_, NULL);
+    arp_cache_->entryDel(ip_addr_);
     EXPECT_EQ(arp_cache_->entries(), (size_t)0);
     EXPECT_EQ(arp_cache_->begin(), arp_cache_->end());
   }

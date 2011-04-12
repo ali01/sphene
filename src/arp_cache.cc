@@ -11,19 +11,23 @@ ARPCache::entry(const IPv4Addr& ip) const {
 }
 
 void
-ARPCache::entryIs(const IPv4Addr& ip, Entry::Ptr entry) {
-  if (entry) {
-    entry->ipAddrIs(ip);
-    this->entryIs(entry);
-  } else {
-    addr_map_.erase(ip);
-  }
-}
-
-void
 ARPCache::entryIs(Entry::Ptr entry) {
   if (entry) {
     IPv4Addr key = entry->ipAddr();
     addr_map_[key] = entry;
   }
+}
+
+void
+ARPCache::entryDel(Entry::Ptr entry) {
+  if (entry == NULL)
+    return;
+
+  IPv4Addr key = entry->ipAddr();
+  this->entryDel(key);
+}
+
+void
+ARPCache::entryDel(const IPv4Addr& ip) {
+  addr_map_.erase(ip);
 }

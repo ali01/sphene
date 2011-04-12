@@ -24,8 +24,8 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
       return new Entry(ip, eth);
     }
 
-    EthernetAddr ethernetAddr() const { return eth_; }
-    IPv4Addr ipAddr() const { return ip_; }
+    const EthernetAddr& ethernetAddr() const { return eth_; }
+    const IPv4Addr& ipAddr() const { return ip_; }
 
     void ethernetAddrIs(const EthernetAddr& eth) { eth_ = eth; }
     void ipAddrIs(const IPv4Addr& ip) { ip_ = ip; }
@@ -58,8 +58,9 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
   size_t entries() const { return addr_map_.size(); }
 
   Entry::Ptr entry(const IPv4Addr& ip) const;
-  void entryIs(const IPv4Addr& ip, Entry::Ptr entry);
   void entryIs(Entry::Ptr entry);
+  void entryDel(const IPv4Addr& ip);
+  void entryDel(Entry::Ptr entry);
 
   iterator begin() { return addr_map_.begin(); }
   iterator end() { return addr_map_.end(); }
