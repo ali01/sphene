@@ -90,7 +90,7 @@ uint16_t ICMPPacket::computeChecksum() const {
   for (sum = 0; length >= 2; header += 2, length -= 2)
     sum += header[0] << 8 | header[1];
 
-  if (len > 0)
+  if (length > 0)
     sum += header[0] << 8;
 
   while (sum > 0xFFFF)
