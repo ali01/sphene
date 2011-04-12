@@ -18,8 +18,8 @@
 #include "control_plane.h"
 #include "interface.h"
 #include "interface_map.h"
+#include "routing_table.h"
 
-/* temporary */
 #include "cli_stubs.h"
 
 using std::string;
@@ -276,7 +276,35 @@ void cli_show_ip_intf() {
 }
 
 void cli_show_ip_route() {
-    cli_send_str( "not yet implemented: show routing table of SR\n" );
+  struct sr_instance* sr = get_sr();
+  RoutingTable::Ptr rtable = sr->cp->routingTable();
+
+  cli_send_str("Routing table:\n");
+  cli_send_str("  Destination\tGateway\tMask\tIface\tType\n");
+  rtable->lockedIs(true);
+  for (RoutingTable::Entry::Ptr entry = rtable->front();
+       entry; entry = entry->next()) {
+    const string& subnet = entry->subnet();
+    const string& mask = entry->subnetMask();
+    const string& gateway = entry->gateway();
+    const string& if_name = entry->interface()->name();
+    const RoutingTable::Entry::Type type = entry->type();
+
+    // TODO(ms): The alignment here is poor.
+    cli_send_str("  ");
+    cli_send_str(subnet.c_str());
+    cli_send_str("\t");
+    cli_send_str(gateway.c_str());
+    cli_send_str("\t");
+    cli_send_str(mask.c_str());
+    cli_send_str("\t");
+    cli_send_str(if_name.c_str());
+    cli_send_str("\t");
+    cli_send_str((type == RoutingTable::Entry::kStatic) ? "static" :
+                 "dynamic");
+    cli_send_str("\n");
+  }
+  rtable->lockedIs(false);
 }
 
 void cli_show_opt() {
