@@ -30,7 +30,7 @@ class ControlPlane : public Fwk::NamedInterface {
     return new ControlPlane("ControlPlane");
   }
 
-  void packetNew(Fwk::Ptr<EthernetPacket> pkt, Interface::PtrConst iface);
+  void packetNew(Packet::Ptr pkt, Interface::PtrConst iface);
 
   // Returns the DataPlane.
   DataPlane::Ptr dataPlane() const { return dp_; }

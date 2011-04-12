@@ -192,7 +192,10 @@ IPPacket::ttlIs(uint8_t ttl) {
 
 void
 IPPacket::ttlDec(uint8_t dec_amount) {
-  ip_hdr_->ip_ttl -= dec_amount;
+  if (ip_hdr_->ip_ttl > dec_amount)
+    ip_hdr_->ip_ttl -= dec_amount;
+  else
+    ip_hdr_ = 0;
 }
 
 IPv4Addr

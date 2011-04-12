@@ -19,7 +19,7 @@ ControlPlane::ControlPlane(const std::string& name)
       routing_table_(RoutingTable::New()) { }
 
 
-void ControlPlane::packetNew(EthernetPacket::Ptr pkt,
+void ControlPlane::packetNew(Packet::Ptr pkt,
                              const Interface::PtrConst iface) {
   // Dispatch packet using double-dispatch.
   (*pkt)(&functor_, iface);
