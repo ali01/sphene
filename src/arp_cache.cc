@@ -1,5 +1,14 @@
 #include "arp_cache.h"
 
+#include <pthread.h>
+
+
+ARPCache::ARPCache() {
+  // TODO(ms): Check return value.
+  pthread_mutex_init(&lock_, NULL);
+}
+
+
 ARPCache::Entry::Ptr
 ARPCache::entry(const IPv4Addr& ip) const {
   Entry::Ptr entry = NULL;
@@ -30,4 +39,13 @@ ARPCache::entryDel(Entry::Ptr entry) {
 void
 ARPCache::entryDel(const IPv4Addr& ip) {
   addr_map_.erase(ip);
+}
+
+
+void
+ARPCache::lockedIs(const bool locked) {
+  if (locked)
+    pthread_mutex_lock(&lock_);
+  else
+    pthread_mutex_unlock(&lock_);
 }
