@@ -11,9 +11,9 @@
 using std::vector;
 
 
-int arp_cache_static_entry_add( struct sr_instance* sr,
-                                uint32_t ip,
-                                uint8_t* mac ) {
+int arp_cache_static_entry_add(struct sr_instance* const sr,
+                               const uint32_t ip,
+                               const uint8_t* const mac) {
   ARPCache::Ptr cache = sr->cp->arpCache();
   ARPCache::Entry::Ptr cache_entry = ARPCache::Entry::EntryNew(ip, mac);
   cache_entry->typeIs(ARPCache::Entry::kStatic);
@@ -26,7 +26,8 @@ int arp_cache_static_entry_add( struct sr_instance* sr,
 }
 
 
-int arp_cache_static_entry_remove( struct sr_instance* sr, uint32_t ip ) {
+int arp_cache_static_entry_remove(struct sr_instance* const sr,
+                                  const uint32_t ip) {
   ARPCache::Ptr cache = sr->cp->arpCache();
   cache->lockedIs(true);
 
@@ -43,8 +44,8 @@ int arp_cache_static_entry_remove( struct sr_instance* sr, uint32_t ip ) {
 
 
 // Removes all entries from the ARP Cache of the specified type.
-static unsigned arp_cache_type_purge(struct sr_instance* sr,
-                                     ARPCache::Entry::Type type) {
+static unsigned arp_cache_type_purge(struct sr_instance* const sr,
+                                     const ARPCache::Entry::Type type) {
   ARPCache::Ptr cache = sr->cp->arpCache();
   cache->lockedIs(true);
 
@@ -66,74 +67,80 @@ static unsigned arp_cache_type_purge(struct sr_instance* sr,
 }
 
 
-unsigned arp_cache_static_purge( struct sr_instance* sr ) {
+unsigned arp_cache_static_purge(struct sr_instance* const sr) {
   return arp_cache_type_purge(sr, ARPCache::Entry::kStatic);
 }
 
 
-unsigned arp_cache_dynamic_purge( struct sr_instance* sr ) {
+unsigned arp_cache_dynamic_purge(struct sr_instance* const sr) {
   return arp_cache_type_purge(sr, ARPCache::Entry::kDynamic);
 }
 
 
-int router_interface_set_enabled( struct sr_instance* sr, const char* name, int enabled ) {
+int router_interface_set_enabled(struct sr_instance* const sr,
+                                 const char* const name,
+                                 const int enabled) {
     fprintf( stderr, "not yet implemented: router_interface_set_enabled\n" );
     return -1;
 }
 
 
-void* router_lookup_interface_via_ip( struct sr_instance* sr,
-                                      uint32_t ip ) {
+void* router_lookup_interface_via_ip(struct sr_instance* const sr,
+                                     const uint32_t ip) {
     fprintf( stderr, "not yet implemented: router_lookup_interface_via_ip\n" );
     return NULL;
 }
 
 
-void* router_lookup_interface_via_name( struct sr_instance* sr,
-                                        const char* name ) {
+void* router_lookup_interface_via_name(struct sr_instance* const sr,
+                                       const char* name) {
     fprintf( stderr, "not yet implemented: router_lookup_interface_via_name\n" );
     return NULL;
 }
 
 
-int router_is_interface_enabled( struct sr_instance* sr, void* intf ) {
+int router_is_interface_enabled(struct sr_instance* const sr,
+                                const void* intf) {
     fprintf( stderr, "not yet implemented: router_is_interface_enabled\n" );
     return 0;
 }
 
 
-int router_is_ospf_enabled( struct sr_instance* sr ) {
+int router_is_ospf_enabled(struct sr_instance* const sr) {
     fprintf( stderr, "not yet implemented: router_is_ospf_enabled\n" );
     return 0;
 }
 
 
-void router_set_ospf_enabled( struct sr_instance* sr, int enabled ) {
+void router_set_ospf_enabled(struct sr_instance* const sr, const int enabled) {
     fprintf( stderr, "not yet implemented: router_set_ospf_enabled\n" );
 }
 
 
-void rtable_route_add( struct sr_instance* sr,
-                       uint32_t dest, uint32_t gw, uint32_t mask,
-                       void* intf,
-                       int is_static_route ) {
+void rtable_route_add(struct sr_instance* const sr,
+                      const uint32_t dest,
+                      const uint32_t gw,
+                      const uint32_t mask,
+                      void* intf,
+                      const int is_static_route) {
     fprintf( stderr, "not yet implemented: rtable_route_add\n" );
 }
 
 
-int rtable_route_remove( struct sr_instance* sr,
-                         uint32_t dest, uint32_t mask,
-                         int is_static ) {
+int rtable_route_remove(struct sr_instance* const sr,
+                        const uint32_t dest,
+                        const uint32_t mask,
+                        const int is_static) {
     fprintf( stderr, "not yet implemented: rtable_route_remove\n" );
     return 0 /* fail */;
 }
 
 
-void rtable_purge_all( struct sr_instance* sr ) {
+void rtable_purge_all(struct sr_instance* const sr) {
     fprintf( stderr, "not yet implemented: rtable_purge_all\n" );
 }
 
 
-void rtable_purge( struct sr_instance* sr, int is_static ) {
+void rtable_purge(struct sr_instance* const sr, const int is_static) {
     fprintf( stderr, "not yet implemented: rtable_purge\n" );
 }
