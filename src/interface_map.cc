@@ -10,7 +10,7 @@
 using std::string;
 
 
-void InterfaceMap::interfaceIs(const Interface::PtrConst iface) {
+void InterfaceMap::interfaceIs(const Interface::Ptr iface) {
   if (!iface)
     throw Fwk::ResourceException("InterfaceMap::interfaceIs",
                                  "Interface is NULL");
@@ -20,13 +20,13 @@ void InterfaceMap::interfaceIs(const Interface::PtrConst iface) {
 }
 
 
-Interface::PtrConst InterfaceMap::interface(const string& name) const {
-  NameInterfaceMap::const_iterator it = name_if_map_.find(name);
+Interface::Ptr InterfaceMap::interface(const string& name) {
+  NameInterfaceMap::iterator it = name_if_map_.find(name);
   return (it != name_if_map_.end()) ? it->second : NULL;
 }
 
 
-Interface::PtrConst InterfaceMap::interfaceAddr(const IPv4Addr& addr) const {
-  IPInterfaceMap::const_iterator it = ip_if_map_.find(addr);
+Interface::Ptr InterfaceMap::interfaceAddr(const IPv4Addr& addr) {
+  IPInterfaceMap::iterator it = ip_if_map_.find(addr);
   return (it != ip_if_map_.end()) ? it->second : NULL;
 }

@@ -21,15 +21,15 @@ class InterfaceMap : public Fwk::PtrInterface<InterfaceMap> {
 
   // Adds a new interface to the map. If an interface with the same name
   // already exists, it is replaced with 'iface'.
-  void interfaceIs(Interface::PtrConst iface);
+  void interfaceIs(Interface::Ptr iface);
 
   // Returns an interface by name 'name'. Returns NULL if no interface exists
   // by that name.
-  Interface::PtrConst interface(const std::string& name) const;
+  Interface::Ptr interface(const std::string& name);
 
   // Returns an interface with IP address 'addr'. Returns NULL if no interface
   // exists with that address.
-  Interface::PtrConst interfaceAddr(const IPv4Addr& addr) const;
+  Interface::Ptr interfaceAddr(const IPv4Addr& addr);
 
   // Returns the number of interfaces in the map.
   size_t interfaces() const { return name_if_map_.size(); }
@@ -38,8 +38,8 @@ class InterfaceMap : public Fwk::PtrInterface<InterfaceMap> {
   InterfaceMap() { }
 
  private:
-  typedef std::map<std::string, Interface::PtrConst> NameInterfaceMap;
-  typedef std::map<IPv4Addr, Interface::PtrConst> IPInterfaceMap;
+  typedef std::map<std::string, Interface::Ptr> NameInterfaceMap;
+  typedef std::map<IPv4Addr, Interface::Ptr> IPInterfaceMap;
 
   NameInterfaceMap name_if_map_;
   IPInterfaceMap ip_if_map_;
