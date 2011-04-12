@@ -24,8 +24,16 @@ int arp_cache_static_entry_add( struct sr_instance* sr,
 
 
 int arp_cache_static_entry_remove( struct sr_instance* sr, uint32_t ip ) {
-    fprintf( stderr, "not yet implemented: remove static ip <-> mac translation to ROUTER's ARP cache\n" );
-    return 0; /* fail */
+  ARPCache::Ptr cache = sr->cp->arpCache();
+  cache->lockedIs(true);
+
+  ARPCache::Entry::Ptr cache_entry = cache->entry(ip);
+  if (!cache_entry || cache_entry->type() != ARPCache::Entry::kStatic)
+    return 0;
+
+  cache->entryDel(cache_entry);
+  cache->lockedIs(false);
+  return 1;
 }
 
 
