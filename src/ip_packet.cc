@@ -259,13 +259,18 @@ IPPacket::compute_cksum() const {
 Packet::Ptr
 IPPacket::payload() const {
   uint16_t payload_offset = buffer_offset_ + headerLen();
+  Packet::Ptr pkt;
 
   switch (protocol()) {
     case kICMP:
-      return ICMPPacket::ICMPPacketNew(buffer_, payload_offset);
+      pkt = ICMPPacket::ICMPPacketNew(buffer_, payload_offset);
       break;
     default:
-      return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
+      pkt = UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
       break;
   }
+
+  // This IP packet encapsulates the payload.
+  pkt->enclosingPacketIs(this);
+  return pkt;
 }
