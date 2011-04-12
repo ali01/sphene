@@ -77,6 +77,8 @@ void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
 void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "IPPacket dispatch in DataPlane";
+  DLOG << "  src: " << pkt->src();
+  DLOG << "  dst: " << pkt->dst();
 
   if (pkt->buffer()->len() >= 5 && pkt->headerLength() >= 5 &&
       pkt->version() == 4 && pkt->checksumValid()) {
