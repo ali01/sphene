@@ -85,7 +85,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
 
     // IP Packet's destination
     IPv4Addr dest_ip = pkt->dst();
-    Interface::Ptr target_iface = dp_->iface_map_->interface(dest_ip);
+    Interface::Ptr target_iface = dp_->iface_map_->interfaceAddr(dest_ip);
 
     if (target_iface == NULL) { // Packet is not destined to router
       // Decrementing TTL
