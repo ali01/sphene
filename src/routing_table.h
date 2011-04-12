@@ -1,6 +1,7 @@
 #ifndef ROUTING_TABLE_H_HE9H7VS9
 #define ROUTING_TABLE_H_HE9H7VS9
 
+#include <pthread.h>
 #include <set>
 
 #include "fwk/ptr_interface.h"
@@ -61,17 +62,23 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     return new RoutingTable();
   }
 
+  /* Locking for thread safety. */
+  void lockedIs(bool locked);
+
   Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
 
   void entryIs(Entry::Ptr entry) { rtable_.pushFront(entry); }
   Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
 
  protected:
-  RoutingTable() {}
+  RoutingTable();
 
  private:
   /* Routing table is a linked list. */
   Fwk::LinkedList<Entry> rtable_;
+
+  /* Lock for modifications. */
+  pthread_mutex_t lock_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);

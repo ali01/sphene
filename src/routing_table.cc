@@ -1,5 +1,8 @@
 #include "routing_table.h"
 
+#include <pthread.h>
+
+
 /* RoutingTable::Entry */
 
 RoutingTable::Entry::Entry()
@@ -16,6 +19,12 @@ RoutingTable::Entry::subnetIs(const IPv4Addr& dest_ip,
 
 /* RoutingTable */
 
+RoutingTable::RoutingTable() {
+  // TODO(ms): Check return value.
+  pthread_mutex_init(&lock_, NULL);
+}
+
+
 RoutingTable::Entry::Ptr
 RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   Entry::Ptr lpm = NULL;
@@ -29,4 +38,13 @@ RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   }
 
   return lpm;
+}
+
+
+void
+RoutingTable::lockedIs(const bool locked) {
+  if (locked)
+    pthread_mutex_lock(&lock_);
+  else
+    pthread_mutex_unlock(&lock_);
 }
