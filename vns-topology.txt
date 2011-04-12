@@ -85,3 +85,11 @@ If you see output from sr that looks like:
  *** -> Received packet of length 60
 
  everything is working!  If not, please email vns-support@lists.stanford.edu.
+
+
+CLI commands to insert routes:
+
+
+ip route add 0.0.0.0 172.24.74.17 0.0.0.0 eth0
+ip route add 10.3.0.29 10.3.0.29 255.255.255.255 eth1
+ip route add 10.3.0.31 10.3.0.31 255.255.255.255 eth2
