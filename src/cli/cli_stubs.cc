@@ -6,6 +6,9 @@
 
 #include "arp_cache.h"
 #include "control_plane.h"
+#include "data_plane.h"
+#include "interface.h"
+#include "interface_map.h"
 #include "sr_base_internal.h"
 
 using std::vector;
@@ -80,8 +83,16 @@ unsigned arp_cache_dynamic_purge(struct sr_instance* const sr) {
 int router_interface_set_enabled(struct sr_instance* const sr,
                                  const char* const name,
                                  const int enabled) {
-    fprintf( stderr, "not yet implemented: router_interface_set_enabled\n" );
-    return -1;
+  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  Interface::Ptr iface = if_map->interface(name);
+
+  if (!iface)
+    return -1;  // interface does not exist
+  if (iface->enabled() == enabled)
+    return 1;   // already set to desired value
+
+  iface->enabledIs(enabled);
+  return 0;
 }
 
 
