@@ -58,12 +58,22 @@ class ICMPPacketTest : public ::testing::Test {
 
 
 TEST_F(ICMPPacketTest, type) {
+  // Ensure we retrieve the type correctly.
   EXPECT_EQ(header_->type, pkt_->type());
+
+  // Ensure we can set the type.
+  pkt_->typeIs(ICMPPacket::kEchoReply);
+  EXPECT_EQ(ICMPPacket::kEchoReply, pkt_->type());
 }
 
 
 TEST_F(ICMPPacketTest, code) {
+  // Ensure we retrieve the code correctly.
   EXPECT_EQ(header_->code, pkt_->code());
+
+  // Ensure we can set the code.
+  pkt_->codeIs(0xFF);
+  EXPECT_EQ(0xFF, pkt_->code());
 }
 
 
