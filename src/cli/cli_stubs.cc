@@ -143,9 +143,10 @@ void rtable_route_add(struct sr_instance* const sr,
   entry->typeIs(is_static_route ?
                 RoutingTable::Entry::kStatic : RoutingTable::Entry::kDynamic);
 
-  // TODO(ms): locking
   RoutingTable::Ptr rtable = sr->cp->routingTable();
+  rtable->lockedIs(true);
   rtable->entryIs(entry);
+  rtable->lockedIs(false);
 }
 
 
