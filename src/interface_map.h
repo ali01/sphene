@@ -14,6 +14,10 @@ class InterfaceMap : public Fwk::PtrInterface<InterfaceMap> {
  public:
   typedef Fwk::Ptr<const InterfaceMap> PtrConst;
   typedef Fwk::Ptr<InterfaceMap> Ptr;
+  typedef std::map<std::string, Interface::Ptr> NameInterfaceMap;
+  typedef std::map<IPv4Addr, Interface::Ptr> IPInterfaceMap;
+  typedef NameInterfaceMap::iterator iterator;
+  typedef NameInterfaceMap::const_iterator const_iterator;
 
   static Ptr InterfaceMapNew() {
     return new InterfaceMap();
@@ -34,13 +38,15 @@ class InterfaceMap : public Fwk::PtrInterface<InterfaceMap> {
   // Returns the number of interfaces in the map.
   size_t interfaces() const { return name_if_map_.size(); }
 
+  iterator begin() { return name_if_map_.begin(); }
+  iterator end() { return name_if_map_.end(); }
+  const_iterator begin() const { return name_if_map_.begin(); }
+  const_iterator end() const { return name_if_map_.end(); }
+
  protected:
   InterfaceMap() { }
 
  private:
-  typedef std::map<std::string, Interface::Ptr> NameInterfaceMap;
-  typedef std::map<IPv4Addr, Interface::Ptr> IPInterfaceMap;
-
   NameInterfaceMap name_if_map_;
   IPInterfaceMap ip_if_map_;
 
