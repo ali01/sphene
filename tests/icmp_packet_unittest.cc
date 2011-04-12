@@ -78,7 +78,17 @@ TEST_F(ICMPPacketTest, code) {
 
 
 TEST_F(ICMPPacketTest, checksum) {
-  EXPECT_EQ(ntohs(header_->cksum), pkt_->checksum());
+  const uint16_t expected = ntohs(header_->cksum);
+  EXPECT_EQ(expected, pkt_->checksum());
+
+  // Manually set checksum.
+  pkt_->checksumIs(0xDEAD);
+  EXPECT_EQ(0xDEAD, pkt_->checksum());
+
+  // Recompute checksum.
+  pkt_->checksumIs(0);
+  pkt_->checksumReset();
+  EXPECT_EQ(expected, pkt_->checksum());
 }
 
 
