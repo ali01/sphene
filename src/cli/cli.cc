@@ -17,6 +17,7 @@
 #include "arp_cache.h"
 #include "control_plane.h"
 #include "interface.h"
+#include "interface_map.h"
 
 /* temporary */
 #include "cli_stubs.h"
@@ -248,7 +249,30 @@ void cli_show_ip_arp() {
 }
 
 void cli_show_ip_intf() {
-    cli_send_str( "not yet implemented: show interfaces on SR\n" );
+  struct sr_instance* sr = get_sr();
+  InterfaceMap::Ptr ifaces = sr->dp->interfaceMap();
+
+  cli_send_str("Interfaces:\n");
+  for (InterfaceMap::const_iterator it = ifaces->begin();
+       it != ifaces->end(); ++it) {
+    Interface::Ptr iface = it->second;
+    const string& name = iface->name();
+    const string& ip = iface->ip();
+    const string& mask = iface->subnetMask();
+    const string& mac = iface->mac();
+    const bool enabled = iface->enabled();
+    cli_send_str("  ");
+    cli_send_str(name.c_str());
+    cli_send_str("\t");
+    cli_send_str(ip.c_str());
+    cli_send_str("\t");
+    cli_send_str(mask.c_str());
+    cli_send_str("\t");
+    cli_send_str(mac.c_str());
+    cli_send_str("\t");
+    cli_send_str(enabled ? "up" : "down");
+    cli_send_str("\n");
+  }
 }
 
 void cli_show_ip_route() {
