@@ -21,6 +21,11 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     typedef Fwk::Ptr<const Entry> PtrConst;
     typedef Fwk::Ptr<Entry> Ptr;
 
+    enum Type {
+      kDynamic,
+      kStatic
+    };
+
     static Ptr New() {
       return new Entry();
     }
@@ -34,6 +39,9 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     void gatewayIs(const IPv4Addr& gateway) { gateway_ = gateway; }
     void interfaceIs(Interface::Ptr iface) { interface_ = iface; }
 
+    Type type() const { return type_; }
+    void typeIs(Type type) { type_ = type; }
+
    protected:
     Entry();
 
@@ -42,6 +50,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     IPv4Addr subnet_mask_;
     IPv4Addr gateway_;
     Interface::Ptr interface_;
+    Type type_;
 
     /* Operations disallowed */
     Entry(const Entry&);

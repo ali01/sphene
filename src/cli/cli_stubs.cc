@@ -10,6 +10,7 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "sr_base_internal.h"
+#include "routing_table.h"
 
 using std::vector;
 
@@ -135,7 +136,16 @@ void rtable_route_add(struct sr_instance* const sr,
                       const uint32_t mask,
                       Interface::Ptr iface,
                       const int is_static_route) {
-    fprintf( stderr, "not yet implemented: rtable_route_add\n" );
+  RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
+  entry->subnetIs(dest, mask);
+  entry->gatewayIs(gw);
+  entry->interfaceIs(iface);
+  entry->typeIs(is_static_route ?
+                RoutingTable::Entry::kStatic : RoutingTable::Entry::kDynamic);
+
+  // TODO(ms): locking
+  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  rtable->entryIs(entry);
 }
 
 
