@@ -1,9 +1,11 @@
 /* Filename: cli.c */
 
+#include <iostream>
 #include <signal.h>
 #include <stdio.h>               /* snprintf()                        */
 #include <stdlib.h>              /* malloc()                          */
 #include <string.h>              /* strncpy()                         */
+#include <string>
 #include <sys/time.h>            /* struct timeval                    */
 #include <unistd.h>              /* sleep()                           */
 #include "cli.h"
@@ -11,10 +13,16 @@
 #include "helper.h"
 #include "socket_helper.h"       /* writenstr()                       */
 #include "../sr_base_internal.h" /* struct sr_instance                */
+
+#include "arp_cache.h"
+#include "control_plane.h"
 #include "interface.h"
 
 /* temporary */
 #include "cli_stubs.h"
+
+using std::string;
+
 
 /** whether to shutdown the server or not */
 static int router_shutdown;
@@ -219,7 +227,24 @@ void cli_show_ip() {
 }
 
 void cli_show_ip_arp() {
-    cli_send_str( "not yet implemented: show ARP cache of SR\n" );
+  struct sr_instance* sr = get_sr();
+  ARPCache::Ptr cache = sr->cp->arpCache();
+  cache->lockedIs(true);
+
+  cli_send_str("ARP cache:\n");
+  for (ARPCache::iterator it = cache->begin(); it != cache->end(); ++it) {
+    ARPCache::Entry::Ptr entry = it->second;
+    const string& ip = entry->ipAddr();
+    const string& mac = entry->ethernetAddr();
+
+    cli_send_str("  ");
+    cli_send_str(ip.c_str());
+    cli_send_str("\t");
+    cli_send_str(mac.c_str());
+    cli_send_str("\n");
+  }
+
+  cache->lockedIs(false);
 }
 
 void cli_show_ip_intf() {

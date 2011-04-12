@@ -5,9 +5,9 @@
 #ifndef __FWK__LOG_H_
 #define __FWK__LOG_H_
 
+#include <iostream>
 #include <string>
 #include <sstream>
-#include <iostream>
 #include <ctime>
 
 #include "exception.h"
