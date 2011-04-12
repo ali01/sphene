@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include "icmp_packet.h"
 #include "interface.h"
 #include "unknown_packet.h"
 
@@ -260,6 +261,9 @@ IPPacket::payload() const {
   uint16_t payload_offset = buffer_offset_ + headerLen();
 
   switch (protocol()) {
+    case kICMP:
+      return ICMPPacket::ICMPPacketNew(buffer_, payload_offset);
+      break;
     default:
       return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
       break;
