@@ -100,6 +100,7 @@ libsr_base_a_SOURCES = \
                        src/arp_cache.cc \
                        src/arp_packet.cc \
                        src/arp_packet.h \
+                       src/arp_queue.cc \
                        src/buffer.h \
                        src/control_plane.cc \
                        src/control_plane.h \
