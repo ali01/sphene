@@ -31,6 +31,28 @@ void ICMPPacket::typeIs(const Type t) {
 }
 
 
+// TODO(ms): This needs tests.
+std::string ICMPPacket::typeName() const {
+  switch (type()) {
+    case kEchoReply:
+      return "echo reply";
+      break;
+    case kDestUnreachable:
+      return "destination unreachable";
+      break;
+    case kEchoRequest:
+      return "echo request";
+      break;
+    case kTimeExceeded:
+      return "time exceeded";
+      break;
+    default:
+      return "unknown";
+      break;
+  }
+}
+
+
 uint8_t ICMPPacket::code() const {
   return icmp_hdr_->code;
 }
@@ -62,10 +84,10 @@ void ICMPPacket::checksumReset() {
 //   header and data, which is not yet part of the above implementation.
 uint16_t ICMPPacket::computeChecksum() const {
   uint32_t sum;
-  unsigned int len = sizeof(struct ICMPHeader);
+  unsigned int length = len();
   const uint8_t *header = (const uint8_t *)icmp_hdr_;
 
-  for (sum = 0; len >= 2; header += 2, len -= 2)
+  for (sum = 0; length >= 2; header += 2, length -= 2)
     sum += header[0] << 8 | header[1];
 
   if (len > 0)

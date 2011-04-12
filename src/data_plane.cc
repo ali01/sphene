@@ -68,17 +68,23 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
 
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
                                           const Interface::PtrConst iface) {
-
+  DLOG << "ICMPPacket dispatch in DataPlane";
+  DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
+  DLOG << "  code: " << (uint32_t)pkt->code();
 }
 
 
 void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "IPPacket dispatch in DataPlane";
+
+  // Dispatch encapsulated packet.
+  Packet::Ptr payload_pkt = pkt->payload();
+  (*payload_pkt)(this, iface);
 }
 
 
 void DataPlane::PacketFunctor::operator()(UnknownPacket* const pkt,
                                           const Interface::PtrConst iface) {
-
+  DLOG << "UnknownPacket dispatch in DataPlane";
 }

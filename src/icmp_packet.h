@@ -1,6 +1,8 @@
 #ifndef ICMP_PACKET_H_7H1D49WV
 #define ICMP_PACKET_H_7H1D49WV
 
+#include <string>
+
 #include "fwk/buffer.h"
 
 #include "packet.h"
@@ -33,6 +35,9 @@ class ICMPPacket : public Packet {
 
   // Sets the ICMP Type.
   void typeIs(Type t);
+
+  // Returns the Type name.
+  std::string typeName() const;
 
   // Returns the ICMP Code (subtype).
   uint8_t code() const;

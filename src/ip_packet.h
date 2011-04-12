@@ -115,7 +115,7 @@ class IPPacket : public Packet {
   void checksumReset();
 
   // Returns the encapsulated packet.
-  Packet::Ptr payload() const;
+  Packet::Ptr payload();
 
   // Returns the IPv4 header length without options.
   uint8_t headerLen() const { return 20; }

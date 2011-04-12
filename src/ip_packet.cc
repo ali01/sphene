@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include "icmp_packet.h"
 #include "interface.h"
 #include "unknown_packet.h"
 
@@ -256,12 +257,20 @@ IPPacket::compute_cksum() const {
 
 // TODO(ms): Need tests for this.
 Packet::Ptr
-IPPacket::payload() const {
+IPPacket::payload() {
   uint16_t payload_offset = buffer_offset_ + headerLen();
+  Packet::Ptr pkt;
 
   switch (protocol()) {
+    case kICMP:
+      pkt = ICMPPacket::ICMPPacketNew(buffer_, payload_offset);
+      break;
     default:
-      return UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
+      pkt = UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
       break;
   }
+
+  // This IP packet encapsulates the payload.
+  pkt->enclosingPacketIs(this);
+  return pkt;
 }
