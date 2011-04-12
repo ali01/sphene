@@ -21,6 +21,11 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
     typedef Fwk::Ptr<const Entry> PtrConst;
     typedef Fwk::Ptr<Entry> Ptr;
 
+    enum Type {
+      kDynamic,
+      kStatic
+    };
+
     static Ptr EntryNew(const IPv4Addr& ip, const EthernetAddr& eth) {
       return new Entry(ip, eth);
     }
@@ -34,15 +39,19 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
     time_t age() const { return time(NULL) - t_; }
     void ageIs(time_t age) { t_ = time(NULL) - age; }
 
+    Type type() const { return type_; }
+    void typeIs(Type type) { type_ = type; }
+
    protected:
     Entry(const IPv4Addr& ip, const EthernetAddr& eth)
-        : ip_(ip), eth_(eth), t_(time(NULL)) {}
+        : ip_(ip), eth_(eth), t_(time(NULL)), type_(kDynamic) { }
 
    private:
     /* Data members */
     IPv4Addr ip_;
     EthernetAddr eth_;
     time_t t_;
+    Type type_;
 
     /* Disallowed operations */
     Entry(const Entry&);
