@@ -11,6 +11,7 @@
 #include "helper.h"
 #include "socket_helper.h"       /* writenstr()                       */
 #include "../sr_base_internal.h" /* struct sr_instance                */
+#include "interface.h"
 
 /* temporary */
 #include "cli_stubs.h"
@@ -363,8 +364,8 @@ void cli_manip_ip_arp_purge_sta() {
 }
 
 void cli_manip_ip_intf_set( gross_intf_t* data ) {
-    void* intf;
-    intf = router_lookup_interface_via_name( SR, data->intf_name );
+    Interface::Ptr intf =
+        router_lookup_interface_via_name( SR, data->intf_name );
     if( intf ) {
         /* not yet implmented: set intf's IP as data->ip and subnet mask as
            data->subnet_mask */
@@ -423,8 +424,8 @@ void cli_manip_ip_ospf_up() {
 }
 
 void cli_manip_ip_route_add( gross_route_t* data ) {
-    void *intf;
-    intf = router_lookup_interface_via_name( SR, data->intf_name );
+    Interface::Ptr intf =
+        router_lookup_interface_via_name( SR, data->intf_name );
     if( !intf )
         cli_send_strs( 3, "Error: no interface with the name ",
                        data->intf_name, " exists.\n" );
@@ -471,9 +472,7 @@ void cli_exit() {
 }
 
 int cli_ping_handle_self( uint32_t ip ) {
-    void* intf;
-
-    intf = router_lookup_interface_via_ip( SR, ip );
+    Interface::Ptr intf = router_lookup_interface_via_ip( SR, ip );
     if( intf ) {
         if( router_is_interface_enabled( SR, intf ) )
             cli_send_str( "Your interface is up.\n" );

@@ -11,6 +11,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#include "interface.h"
+
 
 /**
  * Add a static entry to the static ARP cache.
@@ -55,8 +57,8 @@ int router_interface_set_enabled(struct sr_instance* sr,
  * @return interface, or NULL if the IP does not belong to any interface
  *         (you'll want to change void* to whatever type you end up using)
  */
-void* router_lookup_interface_via_ip(struct sr_instance* sr,
-                                     uint32_t ip);
+Interface::Ptr router_lookup_interface_via_ip(struct sr_instance* sr,
+                                              uint32_t ip);
 
 /**
  * Returns a pointer to the interface described by the specified name.
@@ -64,13 +66,14 @@ void* router_lookup_interface_via_ip(struct sr_instance* sr,
  * @return interface, or NULL if the name does not match any interface
  *         (you'll want to change void* to whatever type you end up using)
  */
-void* router_lookup_interface_via_name(struct sr_instance* sr,
-                                       const char* name);
+Interface::Ptr router_lookup_interface_via_name(struct sr_instance* sr,
+                                                const char* name);
 
 /**
  * Returns 1 if the specified interface is up and 0 otherwise.
  */
-int router_is_interface_enabled(struct sr_instance* sr, const void* intf);
+int router_is_interface_enabled(struct sr_instance* sr,
+                                Interface::PtrConst iface);
 
 /**
  * Returns whether OSPF is enabled (0 if disabled, otherwise it is enabled).
@@ -85,7 +88,7 @@ void router_set_ospf_enabled(struct sr_instance* sr, int enabled);
 /** Adds a route to the appropriate routing table. */
 void rtable_route_add(struct sr_instance* sr,
                       uint32_t dest, uint32_t gw, uint32_t mask,
-                      void* intf,
+                      Interface::Ptr iface,
                       int is_static_route);
 
 /** Removes the specified route from the routing table, if present. */

@@ -96,24 +96,25 @@ int router_interface_set_enabled(struct sr_instance* const sr,
 }
 
 
-void* router_lookup_interface_via_ip(struct sr_instance* const sr,
-                                     const uint32_t ip) {
-    fprintf( stderr, "not yet implemented: router_lookup_interface_via_ip\n" );
-    return NULL;
+Interface::Ptr router_lookup_interface_via_ip(struct sr_instance* const sr,
+                                              const uint32_t ip) {
+  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  return if_map->interfaceAddr(ip);
 }
 
 
-void* router_lookup_interface_via_name(struct sr_instance* const sr,
-                                       const char* name) {
-    fprintf( stderr, "not yet implemented: router_lookup_interface_via_name\n" );
-    return NULL;
+Interface::Ptr router_lookup_interface_via_name(struct sr_instance* const sr,
+                                                const char* name) {
+  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  return if_map->interface(name);
 }
 
 
 int router_is_interface_enabled(struct sr_instance* const sr,
-                                const void* intf) {
-    fprintf( stderr, "not yet implemented: router_is_interface_enabled\n" );
+                                Interface::PtrConst iface) {
+  if (!iface)
     return 0;
+  return (iface->enabled()) ? 1 : 0;
 }
 
 
@@ -132,7 +133,7 @@ void rtable_route_add(struct sr_instance* const sr,
                       const uint32_t dest,
                       const uint32_t gw,
                       const uint32_t mask,
-                      void* intf,
+                      Interface::Ptr iface,
                       const int is_static_route) {
     fprintf( stderr, "not yet implemented: rtable_route_add\n" );
 }
