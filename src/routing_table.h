@@ -55,7 +55,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
   Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
 
   void entryIs(Entry::Ptr entry) { rtable_.pushFront(entry); }
-  void entryDel(Entry::Ptr entry) { rtable_.del(entry); }
+  Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
 
  protected:
   RoutingTable() {}

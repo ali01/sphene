@@ -52,7 +52,7 @@ class LinkedList : public PtrInterface<LinkedList<NodeType> > {
 
   void pushFront(Fwk::Ptr<NodeType> node);
   void pushBack(Fwk::Ptr<NodeType> node);
-  void del(Fwk::Ptr<NodeType> node);
+  Fwk::Ptr<NodeType> del(Fwk::Ptr<NodeType> node);
 
  protected:
   bool validateNode(Fwk::Ptr<NodeType> node) const;
@@ -108,10 +108,10 @@ LinkedList<NodeType>::pushBack(Fwk::Ptr<NodeType> node) {
 }
 
 template <typename NodeType>
-inline void
+inline Fwk::Ptr<NodeType>
 LinkedList<NodeType>::del(Fwk::Ptr<NodeType> node) {
   if (node == NULL || front_ == NULL)
-    return;
+    return NULL;
 
   /* If node is the head node. */
   if (front_ == node)
@@ -126,6 +126,8 @@ LinkedList<NodeType>::del(Fwk::Ptr<NodeType> node) {
     node->next_->prev_ = node->prev_;
 
   node_set_.erase(node.ptr());
+
+  return node->next_;
 }
 
 template <typename NodeType>
