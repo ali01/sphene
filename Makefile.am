@@ -202,6 +202,7 @@ RESTRICTED_CLI_SRCS = src/cli/cli.cc \
                       src/cli/cli_main.h \
                       src/cli/cli_parser.h \
                       src/cli/cli_scanner.h \
+                      src/cli/cli_stubs.cc \
                       src/cli/cli_stubs.h \
                       src/cli/helper.cc \
                       src/cli/helper.h \
