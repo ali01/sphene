@@ -21,7 +21,7 @@ void SWDataPlane::outputPacketNew(EthernetPacket::Ptr pkt,
   DLOG << "outputPacketNew() in SWDataPlane";
   DLOG << "  iface: " << iface->name();
   DLOG << "  src: " << pkt->src();
-  DLOG << "  dst: " << pkt->src();
+  DLOG << "  dst: " << pkt->dst();
   DLOG << "  type: " << pkt->typeName();
   DLOG << "  length: " << pkt->len();
 
