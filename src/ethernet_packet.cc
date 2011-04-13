@@ -17,6 +17,7 @@
 // Minimum size of string buffers for formatting addresses.
 static const int kAddrStrLen = 18;
 
+const EthernetAddr EthernetAddr::kBroadcast("FF:FF:FF:FF:FF:FF");
 
 EthernetAddr::EthernetAddr() {
   memset(addr_, 0, kAddrLen);

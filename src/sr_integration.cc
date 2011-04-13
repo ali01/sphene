@@ -126,7 +126,7 @@ void sr_integ_input(struct sr_instance* sr,
   }
 
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
-  EthernetPacket::Ptr eth_pkt = EthernetPacket::EthernetPacketNew(buffer, 0);
+  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
 
   // TODO(ms): bypass dataplane here on _CPUMODE_?
   dp->packetNew(eth_pkt, iface);
