@@ -78,7 +78,7 @@ class EthernetPacketTest : public ::testing::Test {
     memcpy(payload_, payload, strlen(payload));
 
     // Construct packet.
-    pkt_ = EthernetPacket::EthernetPacketNew(buf_, 0);
+    pkt_ = EthernetPacket::New(buf_, 0);
   }
 
   Fwk::Buffer::Ptr buf_;

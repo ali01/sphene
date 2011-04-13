@@ -61,8 +61,7 @@ class EthernetPacket : public Packet {
 
   // Construct a new EthernetPacket in 'buffer' starting at 'buffer_offset'
   // within the buffer.
-  static Ptr EthernetPacketNew(Fwk::Buffer::Ptr buffer,
-                               unsigned int buffer_offset) {
+  static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new EthernetPacket(buffer, buffer_offset);
   }
 
