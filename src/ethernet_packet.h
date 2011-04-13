@@ -27,6 +27,8 @@ class EthernetAddr {
   EthernetAddr(const std::string& str);
   EthernetAddr(const char* str);
 
+  static const EthernetAddr kBroadcast;
+
   // Copy constructor.
   bool operator==(const EthernetAddr& other) const;
 
