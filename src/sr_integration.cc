@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 
+#include <arpa/inet.h>
 #include <assert.h>
 #include <string>
 
@@ -213,25 +214,24 @@ void sr_integ_destroy(struct sr_instance* sr)
 
 uint32_t sr_integ_findsrcip(uint32_t dest /* nbo */)
 {
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    fprintf(stderr, "!!! Tranport layer called ip_findsrcip(..) this must be !!!\n");
-    fprintf(stderr, "!!! defined to return the correct source address        !!!\n");
-    fprintf(stderr, "!!! given a destination                                 !!!\n ");
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+  struct sr_instance* sr = sr_get_global_instance(NULL);
+  RoutingTable::Ptr rtable = sr->cp->routingTable();
 
-    assert(0);
+  // Find routing table entry for destination.
+  IPv4Addr dest_ip(ntohl(dest));
+  RoutingTable::Entry::Ptr entry = rtable->lpm(dest_ip);
 
-    /* --
-     * e.g.
-     *
-     * struct sr_instance* sr = sr_get_global_instance();
-     * struct my_router* mr = (struct my_router*)
-     *                              sr_get_subsystem(sr);
-     * return my_findsrcip(mr, dest);
-     * -- */
-
+  if (!entry) {
+    // No route for destination.
     return 0;
+  }
+
+  // Source address is the IP address of the entry's interface.
+  IPv4Addr src_ip = entry->interface()->ip();
+
+  return src_ip.nbo();
 }
+
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_ip_output(..)
