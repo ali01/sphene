@@ -18,6 +18,7 @@
 static const int kAddrStrLen = 18;
 
 const EthernetAddr EthernetAddr::kBroadcast("FF:FF:FF:FF:FF:FF");
+const EthernetAddr EthernetAddr::kZero;
 
 EthernetAddr::EthernetAddr() {
   memset(addr_, 0, kAddrLen);
