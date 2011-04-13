@@ -112,13 +112,39 @@ void ControlPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
 
 void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
                                              const Interface::PtrConst iface) {
+  // TODO(ms): Further dispatch of ICMPPacket types should probably be here.
+  DLOG << "ICMPPacket dispatch in ControlPlane";
+  DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
+  DLOG << "  code: " << (uint32_t)pkt->code();
 
+  IPPacket::Ptr ip_pkt = (IPPacket*)(pkt->enclosingPacket().ptr());
+
+  // Handle ICMP Echo Requests.
+  if (pkt->type() == ICMPPacket::kEchoRequest) {
+    // Swap IP src/dst.
+    IPv4Addr sender = ip_pkt->src();
+    ip_pkt->srcIs(ip_pkt->dst());
+    ip_pkt->dstIs(sender);
+
+    // Change type to reply.
+    pkt->typeIs(ICMPPacket::kEchoReply);
+
+    // Recompute checksums.
+    pkt->checksumReset();
+    ip_pkt->checksumReset();
+
+    // TODO(ms): send ip_pkt, pending outputPacketNew() in CP.
+  }
 }
 
 
 void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "IPPacket dispatch in ControlPlane";
+
+  // Dispatch encapsulated packet.
+  Packet::Ptr payload_pkt = pkt->payload();
+  (*payload_pkt)(this, iface);
 }
 
 
