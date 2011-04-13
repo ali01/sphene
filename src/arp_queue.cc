@@ -1,9 +1,24 @@
 #include "arp_queue.h"
 
+/* ARPQueue::Entry */
+
 void
 ARPQueue::Entry::packetIs(IPPacket::Ptr packet) {
   PacketWrapper::Ptr wrapper = PacketWrapper::New(packet);
   packet_queue_.pushBack(wrapper);
+}
+
+
+/* ARPQueue */
+
+ARPQueue::Entry::Ptr
+ARPQueue::entry(const IPv4Addr& ip) const {
+  Entry::Ptr entry = NULL;
+  const_iterator it = addr_map_.find(ip);
+  if (it != this->end())
+    entry = it->second;
+
+  return entry;
 }
 
 void
