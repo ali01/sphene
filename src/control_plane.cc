@@ -17,7 +17,7 @@ ControlPlane::ControlPlane(const std::string& name)
     : Fwk::NamedInterface(name),
       log_(Fwk::Log::LogNew(name)),
       functor_(this),
-      arp_cache_(ARPCache::ARPCacheNew()),
+      arp_cache_(ARPCache::New()),
       arp_queue_(ARPQueue::New()),
       routing_table_(RoutingTable::New()) { }
 

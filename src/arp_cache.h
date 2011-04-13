@@ -61,7 +61,7 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
   typedef std::map<IPv4Addr,Entry::Ptr>::iterator iterator;
   typedef std::map<IPv4Addr,Entry::Ptr>::const_iterator const_iterator;
 
-  static Ptr ARPCacheNew() {
+  static Ptr New() {
     return new ARPCache();
   }
 
