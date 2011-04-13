@@ -78,15 +78,24 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
           DLOG << "Route for " << string(dest_ip)
                << " does not exist in RoutingTable.";
 
-          // Don't generate ICMP when sending ICMP.
-          if (pkt->type() != IPPacket::kICMP) {
-            // TODO: send ICMP no route to host.
+          bool send_unreach = true;
+          if (pkt->protocol() == IPPacket::kICMP) {
+            ICMPPacket::Ptr icmp_pkt((ICMPPacket*)pkt->payload().ptr());
+
+            // Don't generate ICMP when sending ICMP.
+            if (icmp_pkt->type() == ICMPPacket::kDestUnreachable)
+              send_unreach = false;
+          }
+
+          if (send_unreach) {
+            // ICMP Destination Host Unreachable.
+            sendICMPDestHostUnreach(pkt);
           }
         }
 
       } else {
-        // Send ICMP Time Exceeded Message to source
-        // TODO
+        // Send ICMP Time Exceeded Message to source.
+        sendICMPTTLExceeded(pkt);
       }
 
     } else {
@@ -296,7 +305,7 @@ ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
     while (pkt_wrapper != NULL) {
       pkt = pkt_wrapper->packet();
       pkt->dstIs(eth_addr);
-      
+
       DLOG << "Forwarding queued packet to " << ip_addr;
       dp_->outputPacketNew(pkt, out_iface);
 
@@ -305,4 +314,14 @@ ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
 
     arp_queue_->entryDel(queue_entry);
   }
+}
+
+
+void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
+  DLOG << "sending ICMP TTL Exceeded message to " << orig_pkt->src();
+}
+
+
+void ControlPlane::sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt) {
+  DLOG << "sending ICMP Destination Host Unreachable to " << orig_pkt->src();
 }
