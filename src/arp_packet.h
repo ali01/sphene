@@ -22,6 +22,8 @@ class ARPPacket : public Packet {
     kReply   = 2
   };
 
+  static const size_t kHeaderSize;
+
   // Only IPv4-on-Ethernet packets are supported.
   static Ptr ARPPacketNew(Fwk::Buffer::Ptr buffer,
                           unsigned int buffer_offset) {

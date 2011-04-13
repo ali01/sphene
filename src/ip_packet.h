@@ -69,6 +69,8 @@ class IPPacket : public Packet {
     kOSPF    = 0x59
   };
 
+  static const size_t kHeaderSize;
+
   static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }

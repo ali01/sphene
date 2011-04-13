@@ -57,6 +57,8 @@ class EthernetPacket : public Packet {
     kUnknown = 0
   };
 
+  static const size_t kHeaderSize = sizeof(struct ether_header);
+
   // Construct a new EthernetPacket in 'buffer' starting at 'buffer_offset'
   // within the buffer.
   static Ptr EthernetPacketNew(Fwk::Buffer::Ptr buffer,

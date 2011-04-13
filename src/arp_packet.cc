@@ -11,6 +11,9 @@
 #include "ip_packet.h"
 
 
+const size_t
+ARPPacket::kHeaderSize = sizeof(struct ARPHeader);
+
 ARPPacket::ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       arp_hdr_((struct ARPHeader *)offsetAddress(0)) {
