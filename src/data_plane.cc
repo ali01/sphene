@@ -110,10 +110,12 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
             eth_pkt->dstIs(arp_entry->ethernetAddr());
 
             // Forwarding packet.
+            DLOG << "Forwarding IP packet to " << string(next_hop_ip);
             dp_->outputPacketNew(eth_pkt, out_iface);
 
           } else {
             // ARP cache miss; dispatch to control plane.
+            DLOG << "ARP Cache miss for " << string(next_hop_ip);
             dp_->controlPlane()->packetNew(pkt, iface);
           }
 
