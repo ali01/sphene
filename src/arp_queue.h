@@ -6,6 +6,7 @@
 #include "fwk/ptr_interface.h"
 #include "fwk/linked_list.h"
 
+#include "ethernet_packet.h"
 #include "ip_packet.h"
 #include "interface.h"
 
@@ -21,17 +22,17 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     typedef Fwk::Ptr<const PacketWrapper> PtrConst;
     typedef Fwk::Ptr<PacketWrapper> Ptr;
 
-    static Ptr New(IPPacket::Ptr packet) {
+    static Ptr New(EthernetPacket::Ptr packet) {
       return new PacketWrapper(packet);
     }
 
-    IPPacket::Ptr packet() const { return packet_; }
+    EthernetPacket::Ptr packet() const { return packet_; }
 
    protected:
-    PacketWrapper(IPPacket::Ptr packet) : packet_(packet) {}
+    PacketWrapper(EthernetPacket::Ptr packet) : packet_(packet) {}
 
     /* Data members. */
-    IPPacket::Ptr packet_;
+    EthernetPacket::Ptr packet_;
 
     /* Operations disallowed. */
     PacketWrapper(const PacketWrapper&);
@@ -52,7 +53,7 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     Interface::Ptr interface() const { return interface_; }
     PacketWrapper::Ptr front() const { return packet_queue_.front(); }
 
-    void packetIs(IPPacket::Ptr packet);
+    void packetIs(EthernetPacket::Ptr packet);
 
    protected:
     Entry(const IPv4Addr& ip, Interface::Ptr interface)

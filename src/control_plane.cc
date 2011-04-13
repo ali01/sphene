@@ -157,11 +157,13 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
       cp_->dataPlane()->outputPacketNew(eth_pkt, iface);
 
     } else if (pkt->operation() == ARPPacket::kReply) {
-      IPv4Addr ip_addr = pkt->targetPAddr();
-      EthernetAddr eth_addr = pkt->targetHWAddr();
-      cp_->cacheMapping(ip_addr, eth_addr);
+      IPv4Addr ip_addr = pkt->senderPAddr();
+      EthernetAddr eth_addr = pkt->senderHWAddr();
 
       DLOG << "ARP reply for " << ip_addr << " received.";
+
+      cp_->cacheMapping(ip_addr, eth_addr);
+      cp_->sendEnqueued(ip_addr, eth_addr);
     }
   }
 }
@@ -257,7 +259,9 @@ ControlPlane::enqueuePacket(IPv4Addr next_hop_ip, Interface::Ptr out_iface,
     arp_queue_->entryIs(entry);
   }
 
-  entry->packetIs(pkt);
+  EthernetPacket::Ptr eth_pkt =
+    Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+  entry->packetIs(eth_pkt);
 }
 
 void
@@ -270,5 +274,26 @@ ControlPlane::cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr) {
   } else {
     entry->ethernetAddrIs(eth_addr);
     entry->ageIs(0);
+  }
+}
+
+void
+ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
+  ARPQueue::Entry::Ptr queue_entry = arp_queue_->entry(ip_addr);
+  if (queue_entry) {
+    EthernetPacket::Ptr pkt;
+    Interface::Ptr out_iface = queue_entry->interface();
+    ARPQueue::PacketWrapper::Ptr pkt_wrapper = queue_entry->front();
+    while (pkt_wrapper != NULL) {
+      pkt = pkt_wrapper->packet();
+      pkt->dstIs(eth_addr);
+      
+      DLOG << "Forwarding queued packet to " << ip_addr;
+      dp_->outputPacketNew(pkt, out_iface);
+
+      pkt_wrapper = pkt_wrapper->next();
+    }
+
+    arp_queue_->entryDel(queue_entry);
   }
 }

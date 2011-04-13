@@ -68,6 +68,7 @@ class ControlPlane : public Fwk::NamedInterface {
   };
 
   void sendARPRequest(IPv4Addr next_hop_ip, Interface::Ptr out_iface);
+  void sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr);
   void enqueuePacket(IPv4Addr next_hop_ip, Interface::Ptr out_iface,
                      IPPacket::Ptr pkt);
   void cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr);

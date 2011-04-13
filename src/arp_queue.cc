@@ -3,7 +3,7 @@
 /* ARPQueue::Entry */
 
 void
-ARPQueue::Entry::packetIs(IPPacket::Ptr packet) {
+ARPQueue::Entry::packetIs(EthernetPacket::Ptr packet) {
   PacketWrapper::Ptr wrapper = PacketWrapper::New(packet);
   packet_queue_.pushBack(wrapper);
 }
