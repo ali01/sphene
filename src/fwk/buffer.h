@@ -18,6 +18,10 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
     return new Buffer(buffer, len);
   }
 
+  static Ptr BufferNew(size_t len) {
+    return new Buffer(len);
+  }
+
   uint8_t* data() const { return buffer_; }
   size_t len() const { return len_; }
   size_t size() const { return len_; }
@@ -26,6 +30,11 @@ class Buffer : public Fwk::PtrInterface<Buffer> {
   Buffer(const void* const buffer, const size_t len) {
     buffer_ = new uint8_t[len];
     memcpy(buffer_, buffer, len);
+    len_ = len;
+  }
+
+  Buffer(const size_t len) {
+    buffer_ = new uint8_t[len];
     len_ = len;
   }
 
