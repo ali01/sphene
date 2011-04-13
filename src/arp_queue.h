@@ -49,7 +49,7 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     const IPv4Addr& ipAddr() const { return ip_; }
 
     void packetIs(IPPacket::Ptr packet);
-    PacketWrapper::Ptr queueFront() const { return packet_queue_.front(); }
+    PacketWrapper::Ptr front() const { return packet_queue_.front(); }
 
    protected:
     Entry(const IPv4Addr& ip) : ip_(ip) {}
