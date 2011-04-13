@@ -1,7 +1,9 @@
 #include "sw_data_plane.h"
 
-#include "ethernet_packet.h"
 #include "fwk/log.h"
+#include "fwk/utility.h"
+
+#include "ethernet_packet.h"
 #include "sr_integration.h"
 
 struct sr_instance;
@@ -24,6 +26,8 @@ void SWDataPlane::outputPacketNew(EthernetPacket::Ptr pkt,
   DLOG << "  dst: " << pkt->dst();
   DLOG << "  type: " << pkt->typeName();
   DLOG << "  length: " << pkt->len();
+
+  debug_dump64((const void *)pkt->data(), pkt->len());
 
   struct sr_instance* sr = instance();
   sr_integ_low_level_output(sr, pkt->data(), pkt->len(), iface->name().c_str());
