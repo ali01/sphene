@@ -67,6 +67,7 @@ ControlPlane::outputPacketNew(IPPacket::Ptr pkt, Interface::PtrConst iface) {
           } else {
             DLOG << "ARP Cache miss for " << string(next_hop_ip);
             sendARPRequest(next_hop_ip, out_iface);
+            enqueuePacket(next_hop_ip, out_iface, pkt);
           }
 
         } else {
@@ -240,4 +241,17 @@ ControlPlane::sendARPRequest(IPv4Addr ip_addr, Interface::Ptr out_iface) {
   DLOG << "  ARP target P addr:  " << arp_pkt->targetPAddr();
 
   dp_->outputPacketNew(eth_pkt, out_iface);
+}
+
+void
+ControlPlane::enqueuePacket(IPv4Addr next_hop_ip, Interface::Ptr out_iface,
+                            IPPacket::Ptr pkt) {
+  // Adding packet to ARP queue.
+  ARPQueue::Entry::Ptr entry = arp_queue_->entry(next_hop_ip);
+  if (entry == NULL) {
+    entry = ARPQueue::Entry::New(next_hop_ip, out_iface);
+    arp_queue_->entryIs(entry);
+  }
+
+  entry->packetIs(pkt);
 }

@@ -67,7 +67,9 @@ class ControlPlane : public Fwk::NamedInterface {
     Fwk::Log::Ptr log_;
   };
 
-  void sendARPRequest(IPv4Addr ip_addr, Interface::Ptr out_iface);
+  void sendARPRequest(IPv4Addr next_hop_ip, Interface::Ptr out_iface);
+  void enqueuePacket(IPv4Addr next_hop_ip, Interface::Ptr out_iface,
+                     IPPacket::Ptr pkt);
 
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
