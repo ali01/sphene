@@ -402,4 +402,48 @@ void ControlPlane::sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt,
 void ControlPlane::sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
                                             Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP Destination Proto Unreachable to " << orig_pkt->src();
+
+  // Send at most IP header + 8 bytes of data.
+  const size_t max_data_len = orig_pkt->headerLen() + 8;
+  const size_t data_len =
+      (orig_pkt->len() < max_data_len) ? orig_pkt->len() : max_data_len;
+
+  // Create buffer for new packet.
+  const size_t pkt_len = (EthernetPacket::kHeaderSize +
+                          IPPacket::kHeaderSize +
+                          ICMPPacket::kHeaderLen +
+                          data_len);
+  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+
+  // Ethernet packet first. Src and Dst are set when the IP packet is sent.
+  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
+  eth_pkt->typeIs(EthernetPacket::kIP);
+
+  // IP packet next.
+  IPPacket::Ptr ip_pkt =
+      Ptr::st_cast<IPPacket>(eth_pkt->payload());
+  ip_pkt->versionIs(4);
+  ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
+  ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
+  ip_pkt->diffServicesAre(0);
+  ip_pkt->protocolIs(IPPacket::kICMP);
+  ip_pkt->flagsAre(IPPacket::IP_DF);
+  ip_pkt->fragmentOffsetIs(0);
+  ip_pkt->srcIs(orig_iface->ip());
+  ip_pkt->dstIs(orig_pkt->src());
+  ip_pkt->ttlIs(64);
+
+  // ICMP subtype packet.
+  ICMPPacket::Ptr icmp_pkt = Ptr::st_cast<ICMPPacket>(ip_pkt->payload());
+  ICMPDestUnreachablePacket::Ptr icmp_du_pkt =
+      ICMPDestUnreachablePacket::New(icmp_pkt);
+  icmp_du_pkt->codeIs(2);  // 2 = Protocol unreachable
+  icmp_du_pkt->originalPacketIs(orig_pkt);
+
+  // Recompute checksums in reverse order.
+  icmp_du_pkt->checksumReset();
+  ip_pkt->checksumReset();
+
+  // Send packet.
+  outputPacketNew(ip_pkt, NULL);
 }
