@@ -157,7 +157,11 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
       cp_->dataPlane()->outputPacketNew(eth_pkt, iface);
 
     } else if (pkt->operation() == ARPPacket::kReply) {
-      DLOG << "ARP reply handling unimplemented";
+      IPv4Addr ip_addr = pkt->targetPAddr();
+      EthernetAddr eth_addr = pkt->targetHWAddr();
+      cp_->cacheMapping(ip_addr, eth_addr);
+
+      DLOG << "ARP reply for " << ip_addr << " received.";
     }
   }
 }
@@ -254,4 +258,17 @@ ControlPlane::enqueuePacket(IPv4Addr next_hop_ip, Interface::Ptr out_iface,
   }
 
   entry->packetIs(pkt);
+}
+
+void
+ControlPlane::cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr) {
+  // Adding mapping to ARP cache.
+  ARPCache::Entry::Ptr entry = arp_cache_->entry(ip_addr);
+  if (entry == NULL) {
+    entry = ARPCache::Entry::New(ip_addr, eth_addr);
+    arp_cache_->entryIs(entry);
+  } else {
+    entry->ethernetAddrIs(eth_addr);
+    entry->ageIs(0);
+  }
 }
