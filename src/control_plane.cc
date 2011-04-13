@@ -245,6 +245,12 @@ void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "IPPacket dispatch in ControlPlane";
 
+  // We don't handle UDP packets at all.
+  if (pkt->protocol() == IPPacket::kUDP) {
+    DLOG << "  protocol is UDP";
+    return;
+  }
+
   // Dispatch encapsulated packet.
   Packet::Ptr payload_pkt = pkt->payload();
   (*payload_pkt)(this, iface);

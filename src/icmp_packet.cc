@@ -140,3 +140,39 @@ void ICMPTimeExceededPacket::originalPacketIs(IPPacket::Ptr pkt) {
   // Copy data.
   memcpy(ip_data, pkt->data(), len);
 }
+
+
+ICMPDestUnreachablePacket::ICMPDestUnreachablePacket(Fwk::Buffer::Ptr buffer,
+                                                     unsigned int buffer_offset)
+    : ICMPPacket(buffer, buffer_offset) {
+  typeIs(kDestUnreachable);
+  codeIs(1);  // 1 = Host unreachable
+  icmp_hdr_->rest = 0;
+}
+
+
+// TODO(ms): Move common code to a protected init() method.
+ICMPDestUnreachablePacket::ICMPDestUnreachablePacket(ICMPPacket::Ptr icmp_pkt)
+    : ICMPPacket(icmp_pkt->buffer(), icmp_pkt->bufferOffset()) {
+  typeIs(kDestUnreachable);
+  codeIs(1);  // 1 = Host unreachable
+  icmp_hdr_->rest = 0;
+}
+
+
+void ICMPDestUnreachablePacket::operator()(Functor* const f,
+                                           const Interface::PtrConst iface) {
+  (*f)(this, iface);
+}
+
+
+void ICMPDestUnreachablePacket::originalPacketIs(IPPacket::Ptr pkt) {
+  uint8_t* const ip_data = offsetAddress(kHeaderLen);
+
+  // Copy at most IP header length + 8 bytes.
+  const size_t max_len = pkt->headerLen() + 8;
+  const size_t len = (pkt->len() <= max_len) ? pkt->len() : max_len;
+
+  // Copy data.
+  memcpy(ip_data, pkt->data(), len);
+}

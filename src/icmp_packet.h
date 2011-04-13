@@ -98,4 +98,30 @@ class ICMPTimeExceededPacket : public ICMPPacket {
 };
 
 
+class ICMPDestUnreachablePacket : public ICMPPacket {
+ public:
+  typedef Fwk::Ptr<const ICMPDestUnreachablePacket> PtrConst;
+  typedef Fwk::Ptr<ICMPDestUnreachablePacket> Ptr;
+
+  static Ptr New(Fwk::Buffer::Ptr buffer,
+                 unsigned int buffer_offset) {
+    return new ICMPDestUnreachablePacket(buffer, buffer_offset);
+  }
+  static Ptr New(ICMPPacket::Ptr icmp_pkt) {
+    return new ICMPDestUnreachablePacket(icmp_pkt);
+  }
+
+  // Double-dispatch support.
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+  // Sets the original packet that generated this message.
+  void originalPacketIs(IPPacket::Ptr pkt);
+
+ protected:
+  ICMPDestUnreachablePacket(Fwk::Buffer::Ptr buffer,
+                            unsigned int buffer_offset);
+  ICMPDestUnreachablePacket(ICMPPacket::Ptr icmp_pkt);
+};
+
+
 #endif
