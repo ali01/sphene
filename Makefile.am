@@ -94,7 +94,8 @@ FWK_SRCS = \
            src/fwk/log.cc \
            src/fwk/log.h \
            src/fwk/ptr.h \
-           src/fwk/ptr_interface.h
+           src/fwk/ptr_interface.h \
+           src/fwk/utility.cc
 
 libsr_base_a_SOURCES = \
                        src/arp_cache.cc \
