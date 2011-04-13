@@ -36,6 +36,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
   size_t len() const { return buffer_->size() - buffer_offset_; }
 
   Fwk::Buffer::Ptr buffer() const { return buffer_; }
+  unsigned int bufferOffset() const { return buffer_offset_; }
 
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface) = 0;

@@ -8,6 +8,7 @@
 #include "fwk/exception.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "unknown_packet.h"
 
 
 ICMPPacket::ICMPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
@@ -108,6 +109,15 @@ uint16_t ICMPPacket::computeChecksum() const {
 ICMPTimeExceededPacket::ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer,
                                                unsigned int buffer_offset)
     : ICMPPacket(buffer, buffer_offset) {
+  typeIs(kTimeExceeded);
+  codeIs(0);  // 0 = TTL exceeded
+  icmp_hdr_->rest = 0;
+}
+
+
+// TODO(ms): Move common code to a protected init() method.
+ICMPTimeExceededPacket::ICMPTimeExceededPacket(ICMPPacket::Ptr icmp_pkt)
+    : ICMPPacket(icmp_pkt->buffer(), icmp_pkt->bufferOffset()) {
   typeIs(kTimeExceeded);
   codeIs(0);  // 0 = TTL exceeded
   icmp_hdr_->rest = 0;

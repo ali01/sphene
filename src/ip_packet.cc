@@ -112,6 +112,8 @@ IPPacket::headerLength() const {
   return ip_hdr_->ip_v_hl & 0x0F;
 }
 
+// TODO(ms): THIS NEEDS SOME DOCUMENTATION.
+//   Specifically, the length here is NOT IN BYTES AS ONE MIGHT EXPECT.
 void
 IPPacket::headerLengthIs(const IPHeaderLength& len) {
   ip_hdr_->ip_v_hl = (len & 0x0F) | (ip_hdr_->ip_v_hl & 0xF0);

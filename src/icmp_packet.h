@@ -82,6 +82,9 @@ class ICMPTimeExceededPacket : public ICMPPacket {
                  unsigned int buffer_offset) {
     return new ICMPTimeExceededPacket(buffer, buffer_offset);
   }
+  static Ptr New(ICMPPacket::Ptr icmp_pkt) {
+    return new ICMPTimeExceededPacket(icmp_pkt);
+  }
 
   // Double-dispatch support.
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
@@ -91,6 +94,7 @@ class ICMPTimeExceededPacket : public ICMPPacket {
 
  protected:
   ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  ICMPTimeExceededPacket(ICMPPacket::Ptr icmp_pkt);
 };
 
 

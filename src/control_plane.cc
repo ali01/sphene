@@ -29,79 +29,95 @@ void ControlPlane::packetNew(Packet::Ptr pkt,
 }
 
 
-// TODO(ms): This function probably shouldn't need an iface
-//   argument. Theoretically, outgoing packets should not be destined for the
-//   router, and if they are, that's probably an error.
 void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
                                    Interface::PtrConst iface) {
-  if (pkt->buffer()->len() >= 5 && pkt->headerLength() >= 5 &&
-      pkt->version() == 4 && pkt->checksumValid()) {
+  DLOG << "outputPacketNew() in ControlPlane";
 
-    // IP Packet's destination
-    IPv4Addr dest_ip = pkt->dst();
-    Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
+  if (pkt->buffer()->len() < 5) {
+    DLOG << "  packet buffer too small: " << (uint32_t)pkt->buffer()->len();
+    return;
+  }
+  if (pkt->headerLength() < 5) {
+    DLOG << "  header length too small: " << (uint32_t)pkt->headerLength();
+    return;
+  }
+  if (pkt->version() != 4) {
+    DLOG << "  invalid IP version: " << (uint32_t)pkt->version();
+    return;
+  }
+  if (!pkt->checksumValid()) {
+    DLOG << "  invalid checksum";
+    return;
+  }
 
-    if (target_iface == NULL) { // Packet is not destined to router
-      // Decrementing TTL
-      pkt->ttlDec(1);
+  // IP Packet's destination
+  IPv4Addr dest_ip = pkt->dst();
+  Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
 
-      if (pkt->ttl() > 0) {
-        // Recomputing checksum
-        pkt->checksumReset();
+  if (target_iface == NULL) { // Packet is not destined to router
+    // Decrementing TTL
+    pkt->ttlDec(1);
+    DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
 
-        // Finding longest prefix match
-        RoutingTable::Entry::Ptr r_entry = routing_table_->lpm(dest_ip);
-        if (r_entry) {
-          Interface::Ptr out_iface = r_entry->interface();
+    if (pkt->ttl() > 0) {
+      // Recomputing checksum
+      pkt->checksumReset();
 
-          IPv4Addr next_hop_ip = r_entry->gateway();
-          ARPCache::Entry::Ptr arp_entry = arp_cache_->entry(next_hop_ip);
+      // Finding longest prefix match
+      RoutingTable::Entry::Ptr r_entry = routing_table_->lpm(dest_ip);
+      if (r_entry) {
+        Interface::Ptr out_iface = r_entry->interface();
 
-          if (arp_entry) {
-            EthernetPacket::Ptr eth_pkt =
+        IPv4Addr next_hop_ip = r_entry->gateway();
+        ARPCache::Entry::Ptr arp_entry = arp_cache_->entry(next_hop_ip);
+
+        if (arp_entry) {
+          EthernetPacket::Ptr eth_pkt =
               Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
 
-            eth_pkt->srcIs(out_iface->mac());
-            eth_pkt->dstIs(arp_entry->ethernetAddr());
+          eth_pkt->srcIs(out_iface->mac());
+          eth_pkt->dstIs(arp_entry->ethernetAddr());
 
-            // Forwarding packet.
-            DLOG << "Forwarding IP packet to " << string(next_hop_ip);
-            dp_->outputPacketNew(eth_pkt, out_iface);
-
-          } else {
-            DLOG << "ARP Cache miss for " << string(next_hop_ip);
-            sendARPRequest(next_hop_ip, out_iface);
-            enqueuePacket(next_hop_ip, out_iface, pkt);
-          }
+          // Forwarding packet.
+          DLOG << "Forwarding IP packet to " << string(next_hop_ip);
+          dp_->outputPacketNew(eth_pkt, out_iface);
 
         } else {
-          DLOG << "Route for " << string(dest_ip)
-               << " does not exist in RoutingTable.";
-
-          bool send_unreach = true;
-          if (pkt->protocol() == IPPacket::kICMP) {
-            ICMPPacket::Ptr icmp_pkt((ICMPPacket*)pkt->payload().ptr());
-
-            // Don't generate ICMP when sending ICMP.
-            if (icmp_pkt->type() == ICMPPacket::kDestUnreachable)
-              send_unreach = false;
-          }
-
-          if (send_unreach) {
-            // ICMP Destination Host Unreachable.
-            sendICMPDestHostUnreach(pkt);
-          }
+          DLOG << "ARP Cache miss for " << string(next_hop_ip);
+          sendARPRequest(next_hop_ip, out_iface);
+          enqueuePacket(next_hop_ip, out_iface, pkt);
         }
 
       } else {
-        // Send ICMP Time Exceeded Message to source.
-        sendICMPTTLExceeded(pkt);
+        DLOG << "Route for " << string(dest_ip)
+             << " does not exist in RoutingTable.";
+
+        bool send_unreach = true;
+        if (pkt->protocol() == IPPacket::kICMP) {
+          ICMPPacket::Ptr icmp_pkt((ICMPPacket*)pkt->payload().ptr());
+
+          // Don't generate ICMP when sending ICMP.
+          if (icmp_pkt->type() == ICMPPacket::kDestUnreachable) {
+            DLOG << "avoiding an ICMP-on-ICMP message";
+            send_unreach = false;
+          }
+        }
+
+        if (send_unreach) {
+          // ICMP Destination Host Unreachable.
+          sendICMPDestHostUnreach(pkt, iface);
+        }
       }
 
     } else {
-      // Packet is destined to router; dispatch to control plane functor.
-      this->packetNew(pkt, iface);
+      // Send ICMP Time Exceeded Message to source.
+      pkt->ttlIs(pkt->ttl() + 1);
+      sendICMPTTLExceeded(pkt, iface);
     }
+
+  } else {
+    // Packet is destined to router; dispatch to control plane functor.
+    this->packetNew(pkt, iface);
   }
 }
 
@@ -317,11 +333,60 @@ ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
 }
 
 
-void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
+void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
+                                       Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP TTL Exceeded message to " << orig_pkt->src();
+
+  // Send at most IP header + 8 bytes of data.
+  const size_t max_data_len = orig_pkt->headerLen() + 8;
+  const size_t data_len =
+      (orig_pkt->len() < max_data_len) ? orig_pkt->len() : max_data_len;
+
+  // Create buffer for new packet.
+  const size_t pkt_len = (EthernetPacket::kHeaderSize +
+                          IPPacket::kHeaderSize +
+                          ICMPPacket::kHeaderLen +
+                          data_len);
+  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+
+  // Ethernet packet first. Src and Dst are set when the IP packet is sent.
+  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
+  eth_pkt->typeIs(EthernetPacket::kIP);
+
+  // IP packet next.
+  IPPacket::Ptr ip_pkt =
+      Ptr::st_cast<IPPacket>(eth_pkt->payload());
+  ip_pkt->versionIs(4);
+  ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
+  ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
+  ip_pkt->diffServicesAre(0);
+  ip_pkt->protocolIs(IPPacket::kICMP);
+  ip_pkt->flagsAre(IPPacket::IP_DF);
+  ip_pkt->fragmentOffsetIs(0);
+  ip_pkt->srcIs(orig_iface->ip());
+  ip_pkt->dstIs(orig_pkt->src());
+  // TODO(ms): Any reason to pick a better default?
+  ip_pkt->ttlIs(64);
+
+  // ICMP subtype packet.
+  // Cannot use a direct static cast here because we need to call the subtype
+  // constructor.
+  ICMPPacket::Ptr icmp_pkt = Ptr::st_cast<ICMPPacket>(ip_pkt->payload());
+  ICMPTimeExceededPacket::Ptr icmp_te_pkt =
+      ICMPTimeExceededPacket::New(icmp_pkt);
+  icmp_te_pkt->codeIs(0);  // TTL exceeded
+  icmp_te_pkt->originalPacketIs(orig_pkt);
+
+  // Recompute checksums in reverse order.
+  icmp_te_pkt->checksumReset();
+  ip_pkt->checksumReset();
+
+  // Send packet.
+  outputPacketNew(ip_pkt, NULL);
 }
 
 
-void ControlPlane::sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt) {
+void ControlPlane::sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt,
+                                           Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP Destination Host Unreachable to " << orig_pkt->src();
 }
