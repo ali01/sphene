@@ -97,7 +97,7 @@ class EthernetPacket : public Packet {
   Packet::Ptr payload();
 
   // Returns the Ethernet header length.
-  uint8_t headerLen() const { return 14; }
+  uint8_t headerLen() const { return kHeaderSize; }
 
  protected:
   // Constructs an EthernetPacket from 'buffer' starting at 'buffer_offset'
