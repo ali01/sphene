@@ -103,3 +103,30 @@ uint16_t ICMPPacket::computeChecksum() const {
 
   return sum;
 }
+
+
+ICMPTimeExceededPacket::ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer,
+                                               unsigned int buffer_offset)
+    : ICMPPacket(buffer, buffer_offset) {
+  typeIs(kTimeExceeded);
+  codeIs(0);  // 0 = TTL exceeded
+  icmp_hdr_->rest = 0;
+}
+
+
+void ICMPTimeExceededPacket::operator()(Functor* const f,
+                                        const Interface::PtrConst iface) {
+  (*f)(this, iface);
+}
+
+
+void ICMPTimeExceededPacket::originalPacketIs(IPPacket::Ptr pkt) {
+  uint8_t* const ip_data = offsetAddress(kHeaderLen);
+
+  // Copy at most IP header length + 8 bytes.
+  const size_t max_len = pkt->headerLen() + 8;
+  const size_t len = (pkt->len() <= max_len) ? pkt->len() : max_len;
+
+  // Copy data.
+  memcpy(ip_data, pkt->data(), len);
+}
