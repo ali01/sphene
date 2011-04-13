@@ -5,6 +5,7 @@
 
 #include "fwk/buffer.h"
 
+#include "ip_packet.h"
 #include "packet.h"
 
 class Interface;
@@ -54,19 +55,43 @@ class ICMPPacket : public Packet {
   // Recomputes the checksum of the ICMP header+data.
   void checksumReset();
 
+  // Header length in bytes.
+  static const int kHeaderLen = 8;
+
  protected:
-  ICMPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
-
-  uint16_t computeChecksum() const;
-
- private:
   struct ICMPHeader {
     uint8_t type;
     uint8_t code;
     uint16_t cksum;
+    uint32_t rest;
   } __attribute__((packed));
+
+  ICMPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  uint16_t computeChecksum() const;
 
   struct ICMPHeader* icmp_hdr_;
 };
+
+
+class ICMPTimeExceededPacket : public ICMPPacket {
+ public:
+  typedef Fwk::Ptr<const ICMPTimeExceededPacket> PtrConst;
+  typedef Fwk::Ptr<ICMPTimeExceededPacket> Ptr;
+
+  static Ptr New(Fwk::Buffer::Ptr buffer,
+                 unsigned int buffer_offset) {
+    return new ICMPTimeExceededPacket(buffer, buffer_offset);
+  }
+
+  // Double-dispatch support.
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+  // Sets the original packet that generated this message.
+  void originalPacketIs(IPPacket::Ptr pkt);
+
+ protected:
+  ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+};
+
 
 #endif
