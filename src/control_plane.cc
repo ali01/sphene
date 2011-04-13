@@ -28,8 +28,12 @@ void ControlPlane::packetNew(Packet::Ptr pkt,
   (*pkt)(&functor_, iface);
 }
 
-void
-ControlPlane::outputPacketNew(IPPacket::Ptr pkt, Interface::PtrConst iface) {
+
+// TODO(ms): This function probably shouldn't need an iface
+//   argument. Theoretically, outgoing packets should not be destined for the
+//   router, and if they are, that's probably an error.
+void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
+                                   Interface::PtrConst iface) {
   if (pkt->buffer()->len() >= 5 && pkt->headerLength() >= 5 &&
       pkt->version() == 4 && pkt->checksumValid()) {
 
@@ -202,7 +206,8 @@ void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
     pkt->checksumReset();
     ip_pkt->checksumReset();
 
-    // TODO(ms): send ip_pkt, pending outputPacketNew() in CP.
+    // Send the Echo Reply packet.
+    cp_->outputPacketNew(ip_pkt, NULL);
   }
 }
 
