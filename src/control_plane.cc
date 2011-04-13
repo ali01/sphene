@@ -12,6 +12,9 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 
+// Input to TCP stack.
+void sr_transport_input(uint8_t* packet);
+
 
 ControlPlane::ControlPlane(const std::string& name)
     : Fwk::NamedInterface(name),
@@ -249,6 +252,13 @@ void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
   if (pkt->protocol() == IPPacket::kUDP) {
     DLOG << "  protocol is UDP";
     cp_->sendICMPDestProtoUnreach(pkt, iface);
+    return;
+  }
+
+  // Send TCP packets to TCP stack.
+  if (pkt->protocol() == IPPacket::kTCP) {
+    DLOG << "  protocol is TCP";
+    sr_transport_input(pkt->data());
     return;
   }
 
