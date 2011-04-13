@@ -32,6 +32,10 @@ class ControlPlane : public Fwk::NamedInterface {
 
   void packetNew(Packet::Ptr pkt, Interface::PtrConst iface);
 
+  /* Sends out the given IP_PACKET.
+   * Makes ARP requests and updates the ARP cache if necessary. */
+  void outputPacketNew(Fwk::Ptr<IPPacket> ip_packet, Interface::PtrConst iface);
+
   // Returns the DataPlane.
   DataPlane::Ptr dataPlane() const { return dp_; }
 
@@ -62,15 +66,17 @@ class ControlPlane : public Fwk::NamedInterface {
     Fwk::Log::Ptr log_;
   };
 
-  // Operations disallowed.
-  ControlPlane(const ControlPlane&);
-  void operator=(const ControlPlane&);
+  void sendARPRequest(IPv4Addr ip_addr, Interface::Ptr out_iface);
 
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
   ARPCache::Ptr arp_cache_;
   RoutingTable::Ptr routing_table_;
   DataPlane::Ptr dp_;
+
+  // Operations disallowed.
+  ControlPlane(const ControlPlane&);
+  void operator=(const ControlPlane&);
 };
 
 #endif

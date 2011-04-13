@@ -80,61 +80,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
 
-  if (pkt->buffer()->len() >= 5 && pkt->headerLength() >= 5 &&
-      pkt->version() == 4 && pkt->checksumValid()) {
-
-    // IP Packet's destination
-    IPv4Addr dest_ip = pkt->dst();
-    Interface::Ptr target_iface = dp_->iface_map_->interfaceAddr(dest_ip);
-
-    if (target_iface == NULL) { // Packet is not destined to router
-      // Decrementing TTL
-      pkt->ttlDec(1);
-
-      if (pkt->ttl() > 0) {
-        // Recomputing checksum
-        pkt->checksumReset();
-
-        // Finding longest prefix match
-        RoutingTable::Entry::Ptr r_entry = dp_->routing_table_->lpm(dest_ip);
-        if (r_entry) {
-          IPv4Addr next_hop_ip = r_entry->gateway();
-          ARPCache::Entry::Ptr arp_entry = dp_->arp_cache_->entry(next_hop_ip);
-
-          if (arp_entry) {
-            Interface::Ptr out_iface = r_entry->interface();
-            EthernetPacket::Ptr eth_pkt =
-              Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
-
-            eth_pkt->srcIs(out_iface->mac());
-            eth_pkt->dstIs(arp_entry->ethernetAddr());
-
-            // Forwarding packet.
-            DLOG << "Forwarding IP packet to " << string(next_hop_ip);
-            dp_->outputPacketNew(eth_pkt, out_iface);
-
-          } else {
-            // ARP cache miss; dispatch to control plane.
-            DLOG << "ARP Cache miss for " << string(next_hop_ip);
-            dp_->controlPlane()->packetNew(pkt, iface);
-          }
-
-        } else {
-          DLOG << "Route for " << string(dest_ip)
-               << " does not exist in RoutingTable.";
-          // TODO: send ICMP no route to host.
-        }
-
-      } else {
-        // Send ICMP Time Exceeded Message to source
-        // TODO
-      }
-
-    } else {
-      // Packet is destined to router; dispatch payload to control plane.
-      dp_->controlPlane()->packetNew(pkt, iface);
-    }
-  }
+  dp_->controlPlane()->outputPacketNew(pkt, iface);
 }
 
 

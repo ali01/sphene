@@ -1,6 +1,7 @@
 #include "control_plane.h"
 
 #include <string>
+#include "fwk/buffer.h"
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
 
@@ -8,6 +9,7 @@
 #include "ethernet_packet.h"
 #include "icmp_packet.h"
 #include "interface.h"
+#include "interface_map.h"
 #include "ip_packet.h"
 
 
@@ -23,6 +25,65 @@ void ControlPlane::packetNew(Packet::Ptr pkt,
                              const Interface::PtrConst iface) {
   // Dispatch packet using double-dispatch.
   (*pkt)(&functor_, iface);
+}
+
+void
+ControlPlane::outputPacketNew(IPPacket::Ptr pkt, Interface::PtrConst iface) {
+  if (pkt->buffer()->len() >= 5 && pkt->headerLength() >= 5 &&
+      pkt->version() == 4 && pkt->checksumValid()) {
+
+    // IP Packet's destination
+    IPv4Addr dest_ip = pkt->dst();
+    Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
+
+    if (target_iface == NULL) { // Packet is not destined to router
+      // Decrementing TTL
+      pkt->ttlDec(1);
+
+      if (pkt->ttl() > 0) {
+        // Recomputing checksum
+        pkt->checksumReset();
+
+        // Finding longest prefix match
+        RoutingTable::Entry::Ptr r_entry = routing_table_->lpm(dest_ip);
+        if (r_entry) {
+          Interface::Ptr out_iface = r_entry->interface();
+
+          IPv4Addr next_hop_ip = r_entry->gateway();
+          ARPCache::Entry::Ptr arp_entry = arp_cache_->entry(next_hop_ip);
+
+          if (arp_entry) {
+            EthernetPacket::Ptr eth_pkt =
+              Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+
+            eth_pkt->srcIs(out_iface->mac());
+            eth_pkt->dstIs(arp_entry->ethernetAddr());
+
+            // Forwarding packet.
+            DLOG << "Forwarding IP packet to " << string(next_hop_ip);
+            dp_->outputPacketNew(eth_pkt, out_iface);
+
+          } else {
+            DLOG << "ARP Cache miss for " << string(next_hop_ip);
+            sendARPRequest(next_hop_ip, out_iface);
+          }
+
+        } else {
+          DLOG << "Route for " << string(dest_ip)
+               << " does not exist in RoutingTable.";
+          // TODO: send ICMP no route to host.
+        }
+
+      } else {
+        // Send ICMP Time Exceeded Message to source
+        // TODO
+      }
+
+    } else {
+      // Packet is destined to router; dispatch control plane functor.
+      this->packetNew(pkt, iface);
+    }
+  }
 }
 
 
@@ -151,4 +212,33 @@ void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
 void ControlPlane::PacketFunctor::operator()(UnknownPacket* const pkt,
                                              const Interface::PtrConst iface) {
 
+}
+
+void
+ControlPlane::sendARPRequest(IPv4Addr ip_addr, Interface::Ptr out_iface) {
+  size_t pkt_len = EthernetPacket::kHeaderSize + ARPPacket::kHeaderSize;
+
+  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
+
+  eth_pkt->srcIs(out_iface->mac());
+  eth_pkt->dstIs(EthernetAddr::kBroadcast);
+  eth_pkt->typeIs(EthernetPacket::kARP);
+
+  ARPPacket::Ptr arp_pkt = Ptr::st_cast<ARPPacket>(eth_pkt->payload());
+  arp_pkt->operationIs(ARPPacket::kRequest);
+  arp_pkt->senderHWAddrIs(out_iface->mac());
+  arp_pkt->senderPAddrIs(out_iface->ip());
+  arp_pkt->targetHWAddrIs(EthernetAddr::kZero);
+  arp_pkt->targetPAddrIs(ip_addr);
+
+  DLOG << "Sending ARP request for " << string(ip_addr);
+  DLOG << "  ethernet src:       " << eth_pkt->src();
+  DLOG << "  ethernet dst:       " << eth_pkt->dst();
+  DLOG << "  ARP sender HW addr: " << arp_pkt->senderHWAddr();
+  DLOG << "  ARP sender P addr:  " << arp_pkt->senderPAddr();
+  DLOG << "  ARP target HW addr: " << arp_pkt->targetHWAddr();
+  DLOG << "  ARP target P addr:  " << arp_pkt->targetPAddr();
+
+  dp_->outputPacketNew(eth_pkt, out_iface);
 }
