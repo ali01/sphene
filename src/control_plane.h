@@ -4,6 +4,7 @@
 #include <string>
 
 #include "arp_cache.h"
+#include "arp_queue.h"
 #include "data_plane.h"
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
@@ -71,6 +72,7 @@ class ControlPlane : public Fwk::NamedInterface {
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
   ARPCache::Ptr arp_cache_;
+  ARPQueue::Ptr arp_queue_;
   RoutingTable::Ptr routing_table_;
   DataPlane::Ptr dp_;
 

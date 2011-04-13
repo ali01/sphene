@@ -18,6 +18,7 @@ ControlPlane::ControlPlane(const std::string& name)
       log_(Fwk::Log::LogNew(name)),
       functor_(this),
       arp_cache_(ARPCache::ARPCacheNew()),
+      arp_queue_(ARPQueue::New()),
       routing_table_(RoutingTable::New()) { }
 
 
@@ -80,7 +81,7 @@ ControlPlane::outputPacketNew(IPPacket::Ptr pkt, Interface::PtrConst iface) {
       }
 
     } else {
-      // Packet is destined to router; dispatch control plane functor.
+      // Packet is destined to router; dispatch to control plane functor.
       this->packetNew(pkt, iface);
     }
   }
@@ -233,8 +234,6 @@ ControlPlane::sendARPRequest(IPv4Addr ip_addr, Interface::Ptr out_iface) {
   arp_pkt->targetPAddrIs(ip_addr);
 
   DLOG << "Sending ARP request for " << string(ip_addr);
-  DLOG << "  ethernet src:       " << eth_pkt->src();
-  DLOG << "  ethernet dst:       " << eth_pkt->dst();
   DLOG << "  ARP sender HW addr: " << arp_pkt->senderHWAddr();
   DLOG << "  ARP sender P addr:  " << arp_pkt->senderPAddr();
   DLOG << "  ARP target HW addr: " << arp_pkt->targetHWAddr();
