@@ -248,6 +248,7 @@ void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
   // We don't handle UDP packets at all.
   if (pkt->protocol() == IPPacket::kUDP) {
     DLOG << "  protocol is UDP";
+    cp_->sendICMPDestProtoUnreach(pkt, iface);
     return;
   }
 
@@ -395,4 +396,10 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
 void ControlPlane::sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt,
                                            Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP Destination Host Unreachable to " << orig_pkt->src();
+}
+
+
+void ControlPlane::sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
+                                            Interface::PtrConst orig_iface) {
+  DLOG << "sending ICMP Destination Proto Unreachable to " << orig_pkt->src();
 }
