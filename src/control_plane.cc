@@ -77,7 +77,11 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
         } else {
           DLOG << "Route for " << string(dest_ip)
                << " does not exist in RoutingTable.";
-          // TODO: send ICMP no route to host.
+
+          // Don't generate ICMP when sending ICMP.
+          if (pkt->type() != IPPacket::kICMP) {
+            // TODO: send ICMP no route to host.
+          }
         }
 
       } else {
