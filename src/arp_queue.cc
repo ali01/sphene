@@ -1,7 +1,7 @@
 #include "arp_queue.h"
 
 void
-ARPQueue::Entry::packetIs(Packet::Ptr packet) {
+ARPQueue::Entry::packetIs(IPPacket::Ptr packet) {
   PacketWrapper::Ptr wrapper = PacketWrapper::New(packet);
   packet_queue_.pushBack(wrapper);
 }

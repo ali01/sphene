@@ -19,17 +19,17 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     typedef Fwk::Ptr<const PacketWrapper> PtrConst;
     typedef Fwk::Ptr<PacketWrapper> Ptr;
 
-    static Ptr New(Packet::Ptr packet) {
+    static Ptr New(IPPacket::Ptr packet) {
       return new PacketWrapper(packet);
     }
 
-    Packet::Ptr packet() const { return packet_; }
+    IPPacket::Ptr packet() const { return packet_; }
 
    protected:
-    PacketWrapper(Packet::Ptr packet) : packet_(packet) {}
+    PacketWrapper(IPPacket::Ptr packet) : packet_(packet) {}
 
     /* Data members. */
-    Packet::Ptr packet_;
+    IPPacket::Ptr packet_;
 
     /* Operations disallowed. */
     PacketWrapper(const PacketWrapper&);
@@ -48,8 +48,8 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
 
     const IPv4Addr& ipAddr() const { return ip_; }
 
-    void packetIs(Packet::Ptr packet);
-    PacketWrapper::Ptr queueHead() const { return packet_queue_.front(); }
+    void packetIs(IPPacket::Ptr packet);
+    PacketWrapper::Ptr queueFront() const { return packet_queue_.front(); }
 
    protected:
     Entry(const IPv4Addr& ip) : ip_(ip) {}
