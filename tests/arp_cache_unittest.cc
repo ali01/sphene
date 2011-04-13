@@ -36,7 +36,7 @@ test_single_entry(ARPCache::Ptr cache, IPv4Addr ip, EthernetAddr eth) {
 }
 
 TEST_F(ARPCacheTest, insert_delete) {
-  ARPCache::Entry::Ptr entry = ARPCache::Entry::EntryNew(ip_addr_, eth_addr_);
+  ARPCache::Entry::Ptr entry = ARPCache::Entry::New(ip_addr_, eth_addr_);
   arp_cache_->entryIs(entry);
   test_single_entry(arp_cache_, ip_addr_, eth_addr_);
 

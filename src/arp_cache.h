@@ -26,7 +26,7 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
       kStatic
     };
 
-    static Ptr EntryNew(const IPv4Addr& ip, const EthernetAddr& eth) {
+    static Ptr New(const IPv4Addr& ip, const EthernetAddr& eth) {
       return new Entry(ip, eth);
     }
 

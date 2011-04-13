@@ -126,7 +126,7 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
 
     // Add <sender IP, sender MAC> to ARP cache.
     if (!merge_flag) {
-      cache_entry = ARPCache::Entry::EntryNew(sender_ip, sender_eth);
+      cache_entry = ARPCache::Entry::New(sender_ip, sender_eth);
       cache_entry->typeIs(ARPCache::Entry::kDynamic);
       cp_->arpCache()->lockedIs(true);
       cp_->arpCache()->entryIs(cache_entry);
