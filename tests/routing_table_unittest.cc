@@ -155,6 +155,5 @@ TEST_F(RoutingTableTest, duplicate) {
   EXPECT_EQ(1, routing_table_->entries());
 
   // Expect the default route (eth0) to be unchanged.
-  // TODO(ms): perhaps the routes should be replaced instead of unchanged?
   EXPECT_EQ(eth0_, routing_table_->lpm("184.72.19.250"));
 }

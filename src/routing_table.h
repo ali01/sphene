@@ -31,6 +31,8 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
       return new Entry();
     }
 
+    void operator=(const Entry& other);
+
     IPv4Addr subnet() const { return subnet_; }
     IPv4Addr subnetMask() const { return subnet_mask_; }
     IPv4Addr gateway() const { return gateway_; }
@@ -55,7 +57,6 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
 
     /* Operations disallowed */
     Entry(const Entry&);
-    void operator=(const Entry&);
   };
 
   static Ptr New() {
@@ -68,7 +69,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
   Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
   Entry::Ptr front() const { return rtable_.front(); }
 
-  void entryIs(Entry::Ptr entry) { rtable_.pushFront(entry); }
+  void entryIs(Entry::Ptr entry);
   Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
 
   /* Returns number of entries in routing table. */

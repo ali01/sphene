@@ -17,6 +17,15 @@ RoutingTable::Entry::subnetIs(const IPv4Addr& dest_ip,
 }
 
 
+void
+RoutingTable::Entry::operator=(const Entry& other) {
+  subnetIs(other.subnet(), other.subnetMask());
+  gatewayIs(other.gateway());
+  interfaceIs(other.interface());
+  typeIs(other.type());
+}
+
+
 /* RoutingTable */
 
 RoutingTable::RoutingTable() {
@@ -47,4 +56,17 @@ RoutingTable::lockedIs(const bool locked) {
     pthread_mutex_lock(&lock_);
   else
     pthread_mutex_unlock(&lock_);
+}
+
+
+void
+RoutingTable::entryIs(Entry::Ptr entry) {
+  Entry::Ptr existing = lpm(entry->subnet());
+  if (existing && entry->subnetMask() == existing->subnetMask()) {
+    // We have an existing routing entry for this subnet; update it.
+    *existing = *entry;
+  } else {
+    // Add the new entry.
+    rtable_.pushFront(entry);
+  }
 }
