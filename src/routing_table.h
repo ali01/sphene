@@ -71,6 +71,9 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
   void entryIs(Entry::Ptr entry) { rtable_.pushFront(entry); }
   Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
 
+  /* Returns number of entries in routing table. */
+  size_t entries() const { return rtable_.size(); }
+
  protected:
   RoutingTable();
 

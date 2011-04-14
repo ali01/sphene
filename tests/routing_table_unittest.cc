@@ -40,10 +40,19 @@ class RoutingTableTest : public ::testing::Test {
     // 10.99.1.0     10.99.1.1      255.255.255.0      eth4
 
     eth0_->subnetIs("0.0.0.0", "0.0.0.0");
+    eth0_->gatewayIs("172.24.74.17");
+
     eth1_->subnetIs("10.3.0.29", "255.255.255.255");
+    eth1_->gatewayIs("10.3.0.29");
+
     eth2_->subnetIs("10.3.0.31", "255.255.255.255");
+    eth2_->gatewayIs("10.3.0.31");
+
     eth3_->subnetIs("10.99.0.0", "255.255.0.0");
+    eth3_->gatewayIs("10.99.0.1");
+
     eth4_->subnetIs("10.99.1.0", "255.255.255.0");
+    eth4_->gatewayIs("10.99.1.1");
   }
 
   RoutingTable::Ptr routing_table_;
@@ -100,6 +109,7 @@ TEST_F(RoutingTableTest, deletion) {
   RoutingTable::Entry::Ptr entry;
   routing_table_->entryIs(eth0_);
   routing_table_->entryIs(eth1_);
+  EXPECT_EQ(2, routing_table_->entries());
 
   // More specific route before deletion.
   entry = routing_table_->lpm("10.3.0.29");
@@ -107,6 +117,7 @@ TEST_F(RoutingTableTest, deletion) {
 
   // Ensure default route is used after deletion of specific route.
   routing_table_->entryDel(eth1_);
+  EXPECT_EQ(1, routing_table_->entries());
   entry = routing_table_->lpm("10.3.0.29");
   EXPECT_EQ(eth0_, entry);
 
@@ -116,6 +127,34 @@ TEST_F(RoutingTableTest, deletion) {
 
   // No default route after deletion.
   routing_table_->entryDel(eth0_);
+  EXPECT_EQ(0, routing_table_->entries());
   entry = routing_table_->lpm("184.72.19.250");
   EXPECT_EQ(NULL, entry.ptr());
+}
+
+
+TEST_F(RoutingTableTest, duplicate) {
+  // Start with 0 entries.
+  EXPECT_EQ(0, routing_table_->entries());
+
+  // Add an entry.
+  routing_table_->entryIs(eth0_);
+  EXPECT_EQ(1, routing_table_->entries());
+
+  // Try to add the same entry again.
+  routing_table_->entryIs(eth0_);
+  EXPECT_EQ(1, routing_table_->entries());
+
+  // Duplicate the object with the same subnet and gateway.
+  RoutingTable::Entry::Ptr eth0_dup = RoutingTable::Entry::New();
+  eth0_dup->subnetIs(eth0_->subnet(), eth0_->subnetMask());
+  eth0_dup->gatewayIs(eth0_->gateway());
+
+  // Add it. The routing table should not grow.
+  routing_table_->entryIs(eth0_dup);
+  EXPECT_EQ(1, routing_table_->entries());
+
+  // Expect the default route (eth0) to be unchanged.
+  // TODO(ms): perhaps the routes should be replaced instead of unchanged?
+  EXPECT_EQ(eth0_, routing_table_->lpm("184.72.19.250"));
 }
