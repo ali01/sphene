@@ -53,6 +53,7 @@ class LinkedList : public PtrInterface<LinkedList<NodeType> > {
   void pushFront(Fwk::Ptr<NodeType> node);
   void pushBack(Fwk::Ptr<NodeType> node);
   Fwk::Ptr<NodeType> del(Fwk::Ptr<NodeType> node);
+  size_t size() const { return node_set_.size(); }
 
  protected:
   bool validateNode(Fwk::Ptr<NodeType> node) const;
