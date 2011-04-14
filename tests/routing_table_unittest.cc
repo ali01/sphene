@@ -157,3 +157,22 @@ TEST_F(RoutingTableTest, duplicate) {
   // Expect the default route (eth0) to be unchanged.
   EXPECT_EQ(eth0_, routing_table_->lpm("184.72.19.250"));
 }
+
+
+TEST_F(RoutingTableTest, updateRoute) {
+  // Add the default route.
+  routing_table_->entryIs(eth0_);
+
+  // Make a new object with an updated gateway.
+  RoutingTable::Entry::Ptr eth0_dup = RoutingTable::Entry::New();
+  eth0_dup->subnetIs(eth0_->subnet(), eth0_->subnetMask());
+  eth0_dup->gatewayIs("4.2.2.1");
+
+  // Add the duplicated default route to update the existing default route.
+  routing_table_->entryIs(eth0_dup);
+
+  // Ensure the default route was changed.
+  RoutingTable::Entry::Ptr entry = routing_table_->lpm("184.72.19.250");
+  EXPECT_EQ(eth0_, entry);
+  EXPECT_EQ(eth0_dup->gateway(), entry->gateway());
+}
