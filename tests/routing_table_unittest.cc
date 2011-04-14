@@ -109,7 +109,7 @@ TEST_F(RoutingTableTest, deletion) {
   RoutingTable::Entry::Ptr entry;
   routing_table_->entryIs(eth0_);
   routing_table_->entryIs(eth1_);
-  EXPECT_EQ(2, routing_table_->entries());
+  EXPECT_EQ((size_t)2, routing_table_->entries());
 
   // More specific route before deletion.
   entry = routing_table_->lpm("10.3.0.29");
@@ -117,7 +117,7 @@ TEST_F(RoutingTableTest, deletion) {
 
   // Ensure default route is used after deletion of specific route.
   routing_table_->entryDel(eth1_);
-  EXPECT_EQ(1, routing_table_->entries());
+  EXPECT_EQ((size_t)1, routing_table_->entries());
   entry = routing_table_->lpm("10.3.0.29");
   EXPECT_EQ(eth0_, entry);
 
@@ -127,7 +127,7 @@ TEST_F(RoutingTableTest, deletion) {
 
   // No default route after deletion.
   routing_table_->entryDel(eth0_);
-  EXPECT_EQ(0, routing_table_->entries());
+  EXPECT_EQ((size_t)0, routing_table_->entries());
   entry = routing_table_->lpm("184.72.19.250");
   EXPECT_EQ(NULL, entry.ptr());
 }
@@ -135,15 +135,15 @@ TEST_F(RoutingTableTest, deletion) {
 
 TEST_F(RoutingTableTest, duplicate) {
   // Start with 0 entries.
-  EXPECT_EQ(0, routing_table_->entries());
+  EXPECT_EQ((size_t)0, routing_table_->entries());
 
   // Add an entry.
   routing_table_->entryIs(eth0_);
-  EXPECT_EQ(1, routing_table_->entries());
+  EXPECT_EQ((size_t)1, routing_table_->entries());
 
   // Try to add the same entry again.
   routing_table_->entryIs(eth0_);
-  EXPECT_EQ(1, routing_table_->entries());
+  EXPECT_EQ((size_t)1, routing_table_->entries());
 
   // Duplicate the object with the same subnet and gateway.
   RoutingTable::Entry::Ptr eth0_dup = RoutingTable::Entry::New();
@@ -152,7 +152,7 @@ TEST_F(RoutingTableTest, duplicate) {
 
   // Add it. The routing table should not grow.
   routing_table_->entryIs(eth0_dup);
-  EXPECT_EQ(1, routing_table_->entries());
+  EXPECT_EQ((size_t)1, routing_table_->entries());
 
   // Expect the default route (eth0) to be unchanged.
   EXPECT_EQ(eth0_, routing_table_->lpm("184.72.19.250"));
