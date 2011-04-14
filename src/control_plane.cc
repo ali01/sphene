@@ -36,23 +36,6 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
                                    Interface::PtrConst iface) {
   DLOG << "outputPacketNew() in ControlPlane";
 
-  if (pkt->buffer()->len() < 5) {
-    DLOG << "  packet buffer too small: " << (uint32_t)pkt->buffer()->len();
-    return;
-  }
-  if (pkt->headerLength() < 5) {
-    DLOG << "  header length too small: " << (uint32_t)pkt->headerLength();
-    return;
-  }
-  if (pkt->version() != 4) {
-    DLOG << "  invalid IP version: " << (uint32_t)pkt->version();
-    return;
-  }
-  if (!pkt->checksumValid()) {
-    DLOG << "  invalid checksum";
-    return;
-  }
-
   // IP Packet's destination
   IPv4Addr dest_ip = pkt->dst();
   Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
