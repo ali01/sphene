@@ -149,6 +149,11 @@ void rtable_route_add(struct sr_instance* const sr,
   rtable->lockedIs(true);
   rtable->entryIs(entry);
   rtable->lockedIs(false);
+
+  fprintf(stdout, "Added route: %s/%s gw %s\n",
+          string(entry->subnet()).c_str(),
+          string(entry->subnetMask()).c_str(),
+          string(entry->gateway()).c_str());
 }
 
 
