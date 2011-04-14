@@ -124,6 +124,9 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   // Outgoing interface.
   Interface::Ptr out_iface = r_entry->interface();
 
+  DLOG << "  LPM for " << dest_ip << ": " << r_entry->subnet()
+       << " (" << out_iface->name() << ")";
+
   // Next hop IP address.
   IPv4Addr next_hop_ip = r_entry->gateway();
 
