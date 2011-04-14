@@ -32,79 +32,81 @@ void ControlPlane::packetNew(Packet::Ptr pkt,
 }
 
 
+// Assumes the outgoing IP packet is valid (or does not need to be
+// valid). Therefore, packets enter this function only if they are not destined
+// for the router. ICMP error messages will be generated if the outgoing packet
+// cannot be forwarded.
 void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
                                    Interface::PtrConst iface) {
   DLOG << "outputPacketNew() in ControlPlane";
 
-  // IP Packet's destination
+  // Look up routing table entry of the longest prefix match.
   IPv4Addr dest_ip = pkt->dst();
-  Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
+  RoutingTable::Entry::Ptr r_entry = routing_table_->lpm(dest_ip);
+  if (!r_entry) {
+    DLOG << "Route for " << string(dest_ip)
+         << " does not exist in RoutingTable.";
 
-  if (target_iface == NULL) { // Packet is not destined to router
-    // Decrementing TTL
-    pkt->ttlDec(1);
-    DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
+    bool send_unreach = true;
+    if (pkt->protocol() == IPPacket::kICMP) {
+      ICMPPacket::Ptr icmp_pkt((ICMPPacket*)pkt->payload().ptr());
 
-    if (pkt->ttl() > 0) {
-      // Recomputing checksum
-      pkt->checksumReset();
-
-      // Finding longest prefix match
-      RoutingTable::Entry::Ptr r_entry = routing_table_->lpm(dest_ip);
-      if (r_entry) {
-        Interface::Ptr out_iface = r_entry->interface();
-
-        IPv4Addr next_hop_ip = r_entry->gateway();
-        ARPCache::Entry::Ptr arp_entry = arp_cache_->entry(next_hop_ip);
-
-        if (arp_entry) {
-          EthernetPacket::Ptr eth_pkt =
-              Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
-
-          eth_pkt->srcIs(out_iface->mac());
-          eth_pkt->dstIs(arp_entry->ethernetAddr());
-
-          // Forwarding packet.
-          DLOG << "Forwarding IP packet to " << string(next_hop_ip);
-          dp_->outputPacketNew(eth_pkt, out_iface);
-
-        } else {
-          DLOG << "ARP Cache miss for " << string(next_hop_ip);
-          sendARPRequest(next_hop_ip, out_iface);
-          enqueuePacket(next_hop_ip, out_iface, pkt);
-        }
-
-      } else {
-        DLOG << "Route for " << string(dest_ip)
-             << " does not exist in RoutingTable.";
-
-        bool send_unreach = true;
-        if (pkt->protocol() == IPPacket::kICMP) {
-          ICMPPacket::Ptr icmp_pkt((ICMPPacket*)pkt->payload().ptr());
-
-          // Don't generate ICMP when sending ICMP.
-          if (icmp_pkt->type() == ICMPPacket::kDestUnreachable) {
-            DLOG << "avoiding an ICMP-on-ICMP message";
-            send_unreach = false;
-          }
-        }
-
-        if (send_unreach) {
-          // ICMP Destination Host Unreachable.
-          sendICMPDestHostUnreach(pkt, iface);
-        }
+      // Don't generate ICMP when sending ICMP.
+      if (icmp_pkt->type() == ICMPPacket::kDestUnreachable) {
+        DLOG << "avoiding an ICMP-on-ICMP message";
+        send_unreach = false;
       }
-
-    } else {
-      // Send ICMP Time Exceeded Message to source.
-      pkt->ttlIs(pkt->ttl() + 1);
-      sendICMPTTLExceeded(pkt, iface);
     }
 
-  } else {
-    // Packet is destined to router; dispatch to control plane functor.
-    this->packetNew(pkt, iface);
+    if (send_unreach) {
+      // ICMP Destination Host Unreachable.
+      // TODO(ms): eliminate second param if possible.
+      sendICMPDestHostUnreach(pkt, iface);
+    }
+
+    return;
   }
+
+  // Outgoing interface.
+  Interface::Ptr out_iface = r_entry->interface();
+
+  // Next hop IP address.
+  IPv4Addr next_hop_ip = r_entry->gateway();
+
+  // Look up ARP entry for next hop.
+  ARPCache::Entry::Ptr arp_entry = arp_cache_->entry(next_hop_ip);
+  if (!arp_entry) {
+    DLOG << "ARP Cache miss for " << string(next_hop_ip);
+    sendARPRequest(next_hop_ip, out_iface);
+    enqueuePacket(next_hop_ip, out_iface, pkt);
+    return;
+  }
+
+  // Decrement TTL. We do this last to avoid having to increase the TTL and
+  // recompute the checksum again if an error occurs.
+  pkt->ttlDec(1);
+  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
+  if (pkt->ttl() < 1) {
+    // Send ICMP Time Exceeded Message to source.
+    pkt->ttlIs(pkt->ttl() + 1);
+    // TODO(ms): can we remove this second parameter? Maybe using the
+    //   forwarding table.
+    sendICMPTTLExceeded(pkt, iface);
+    return;
+  }
+
+  // Recompute the checksum since we changed the TTL.
+  pkt->checksumReset();
+
+  // Update Ethernet header using ARP entry.
+  EthernetPacket::Ptr eth_pkt =
+      Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+  eth_pkt->srcIs(out_iface->mac());
+  eth_pkt->dstIs(arp_entry->ethernetAddr());
+
+  // Send packet.
+  DLOG << "Forwarding IP packet to " << string(next_hop_ip);
+  dp_->outputPacketNew(eth_pkt, out_iface);
 }
 
 

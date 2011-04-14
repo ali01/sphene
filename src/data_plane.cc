@@ -77,6 +77,7 @@ void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
 void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "IPPacket dispatch in DataPlane";
+  DLOG << "  iface: " << iface->name();
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
 
@@ -98,7 +99,67 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
     return;
   }
 
-  dp_->controlPlane()->outputPacketNew(pkt, iface);
+  // Look up IP Packet's destination.
+  IPv4Addr dest_ip = pkt->dst();
+  Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
+
+  // IP packets destined for the router go to the control plane immediately.
+  if (target_iface) {
+    dp_->controlPlane()->packetNew(pkt, iface);
+    return;
+  }
+
+  // Otherwise, we need to forward the packet.
+
+  // Look up routing table entry of the longest prefix match.
+  RoutingTable::Entry::Ptr r_entry =
+      dp_->controlPlane()->routingTable()->lpm(dest_ip);
+  if (!r_entry) {
+    DLOG << "Routing table entry not found";
+    // Send to control plane for error processing.
+    dp_->controlPlane()->outputPacketNew(pkt, iface);
+    return;
+  }
+
+  // Outgoing interface.
+  Interface::Ptr out_iface = r_entry->interface();
+
+  // Next hop IP address.
+  IPv4Addr next_hop_ip = r_entry->gateway();
+
+  // Look up ARP entry for next hop.
+  ARPCache::Entry::Ptr arp_entry =
+      dp_->controlPlane()->arpCache()->entry(next_hop_ip);
+  if (!arp_entry) {
+    // ARP cache miss. Send packet to control plane to be forwarded.
+    dp_->controlPlane()->outputPacketNew(pkt, iface);
+    return;
+  }
+
+  // Decrement TTL. We do this last to avoid having to increase the TTL and
+  // recompute the checksum again if an error occurs.
+  pkt->ttlDec(1);
+  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
+  if (pkt->ttl() < 1) {
+    // Send ICMP Time Exceeded Message to source.
+    pkt->ttlIs(pkt->ttl() + 1);
+    // Send to control plane for error processing.
+    dp_->controlPlane()->outputPacketNew(pkt, iface);
+    return;
+  }
+
+  // Recompute the checksum since we changed the TTL.
+  pkt->checksumReset();
+
+  // Update Ethernet header using ARP entry.
+  EthernetPacket::Ptr eth_pkt =
+      Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+  eth_pkt->srcIs(out_iface->mac());
+  eth_pkt->dstIs(arp_entry->ethernetAddr());
+
+  // Send packet.
+  DLOG << "Forwarding IP packet to " << string(next_hop_ip);
+  dp_->outputPacketNew(eth_pkt, out_iface);
 }
 
 
