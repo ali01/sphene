@@ -101,7 +101,7 @@ class ICMPTimeExceededPacket : public ICMPPacket {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
   // Sets the original packet that generated this message.
-  void originalPacketIs(IPPacket::Ptr pkt);
+  void originalPacketIs(IPPacket::PtrConst pkt);
 
  protected:
   ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
@@ -126,7 +126,7 @@ class ICMPDestUnreachablePacket : public ICMPPacket {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
   // Sets the original packet that generated this message.
-  void originalPacketIs(IPPacket::Ptr pkt);
+  void originalPacketIs(IPPacket::PtrConst pkt);
 
  protected:
   ICMPDestUnreachablePacket(Fwk::Buffer::Ptr buffer,

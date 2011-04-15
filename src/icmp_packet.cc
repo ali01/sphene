@@ -130,7 +130,7 @@ void ICMPTimeExceededPacket::operator()(Functor* const f,
 }
 
 
-void ICMPTimeExceededPacket::originalPacketIs(IPPacket::Ptr pkt) {
+void ICMPTimeExceededPacket::originalPacketIs(IPPacket::PtrConst pkt) {
   uint8_t* const ip_data = offsetAddress(kHeaderLen);
 
   // Copy at most IP header length + 8 bytes.
@@ -166,7 +166,7 @@ void ICMPDestUnreachablePacket::operator()(Functor* const f,
 }
 
 
-void ICMPDestUnreachablePacket::originalPacketIs(IPPacket::Ptr pkt) {
+void ICMPDestUnreachablePacket::originalPacketIs(IPPacket::PtrConst pkt) {
   uint8_t* const ip_data = offsetAddress(kHeaderLen);
 
   // Copy at most IP header length + 8 bytes.

@@ -398,14 +398,14 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
 }
 
 
-void ControlPlane::sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt,
+void ControlPlane::sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt,
                                            Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP Destination Host Unreachable to " << orig_pkt->src();
   sendICMPDestUnreach(ICMPPacket::kHostUnreach, orig_pkt, orig_iface);
 }
 
 
-void ControlPlane::sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
+void ControlPlane::sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt,
                                             Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP Destination Proto Unreachable to " << orig_pkt->src();
   sendICMPDestUnreach(ICMPPacket::kProtoUnreach, orig_pkt, orig_iface);
@@ -413,7 +413,7 @@ void ControlPlane::sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
 
 
 void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
-                                       IPPacket::Ptr orig_pkt,
+                                       IPPacket::PtrConst orig_pkt,
                                        Interface::PtrConst orig_iface) {
   // Send at most IP header + 8 bytes of data.
   const size_t max_data_len = orig_pkt->headerLen() + 8;

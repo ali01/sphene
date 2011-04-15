@@ -75,12 +75,12 @@ class ControlPlane : public Fwk::NamedInterface {
 
   void sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
                            Interface::PtrConst orig_iface);
-  void sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt,
+  void sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt,
                                Interface::PtrConst orig_iface);
-  void sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
+  void sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt,
                                 Interface::PtrConst orig_iface);
   void sendICMPDestUnreach(ICMPPacket::Code code,
-                           IPPacket::Ptr orig_pkt,
+                           IPPacket::PtrConst orig_pkt,
                            Interface::PtrConst orig_iface);
 
   Fwk::Log::Ptr log_;
