@@ -79,7 +79,12 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
   IPv4Addr next_hop_ip = r_entry->gateway();
 
   // Look up ARP entry for next hop.
-  ARPCache::Entry::Ptr arp_entry = arp_cache_->entry(next_hop_ip);
+  ARPCache::Entry::Ptr arp_entry;
+  {
+    ARPCache::Ptr cache = dp_->controlPlane()->arpCache();
+    ARPCache::ScopedLock lock(cache);
+    arp_entry = cache->entry(next_hop_ip);
+  }
   if (!arp_entry) {
     DLOG << "ARP Cache miss for " << string(next_hop_ip);
     sendARPRequest(next_hop_ip, out_iface);

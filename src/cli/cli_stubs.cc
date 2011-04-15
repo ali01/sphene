@@ -20,11 +20,14 @@ int arp_cache_static_entry_add(struct sr_instance* const sr,
                                const uint32_t ip,
                                const uint8_t* const mac) {
   ARPCache::Ptr cache = sr->cp->arpCache();
+
   ARPCache::Entry::Ptr cache_entry = ARPCache::Entry::New(ntohl(ip), mac);
   cache_entry->typeIs(ARPCache::Entry::kStatic);
-  cache->lockedIs(true);
-  cache->entryIs(cache_entry);
-  cache->lockedIs(false);
+
+  {
+    ARPCache::ScopedLock lock(cache);
+    cache->entryIs(cache_entry);
+  }
 
   // TODO(ms): Max number of entries.
   return 1;
@@ -34,16 +37,14 @@ int arp_cache_static_entry_add(struct sr_instance* const sr,
 int arp_cache_static_entry_remove(struct sr_instance* const sr,
                                   const uint32_t ip) {
   ARPCache::Ptr cache = sr->cp->arpCache();
-  cache->lockedIs(true);
+  ARPCache::ScopedLock lock(cache);
 
   ARPCache::Entry::Ptr cache_entry = cache->entry(ntohl(ip));
   if (!cache_entry || cache_entry->type() != ARPCache::Entry::kStatic) {
-    cache->lockedIs(false);
     return 0;
   }
 
   cache->entryDel(cache_entry);
-  cache->lockedIs(false);
   return 1;
 }
 
@@ -52,7 +53,7 @@ int arp_cache_static_entry_remove(struct sr_instance* const sr,
 static unsigned arp_cache_type_purge(struct sr_instance* const sr,
                                      const ARPCache::Entry::Type type) {
   ARPCache::Ptr cache = sr->cp->arpCache();
-  cache->lockedIs(true);
+  ARPCache::ScopedLock lock(cache);
 
   // Build list of entries to remove.
   vector<ARPCache::Entry::Ptr> entries;
@@ -68,7 +69,6 @@ static unsigned arp_cache_type_purge(struct sr_instance* const sr,
     cache->entryDel(*it);
   }
 
-  cache->lockedIs(false);
   return entries.size();
 }
 

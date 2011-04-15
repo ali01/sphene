@@ -61,6 +61,21 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
   typedef std::map<IPv4Addr,Entry::Ptr>::iterator iterator;
   typedef std::map<IPv4Addr,Entry::Ptr>::const_iterator const_iterator;
 
+  /* ScopedLock for safe locking of the ARP cache. */
+  class ScopedLock {
+   public:
+    ScopedLock(ARPCache::Ptr cache) : cache_(cache) {
+      cache_->lockedIs(true);
+    }
+    ~ScopedLock() {
+      cache_->lockedIs(false);
+      cache_ = NULL;
+    }
+
+   private:
+    ARPCache::Ptr cache_;
+  };
+
   static Ptr New() {
     return new ARPCache();
   }

@@ -135,8 +135,12 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   IPv4Addr next_hop_ip = r_entry->gateway();
 
   // Look up ARP entry for next hop.
-  ARPCache::Entry::Ptr arp_entry =
-      dp_->controlPlane()->arpCache()->entry(next_hop_ip);
+  ARPCache::Entry::Ptr arp_entry;
+  {
+    ARPCache::Ptr cache = dp_->controlPlane()->arpCache();
+    ARPCache::ScopedLock lock(cache);
+    arp_entry = cache->entry(next_hop_ip);
+  }
   if (!arp_entry) {
     // ARP cache miss. Send packet to control plane to be forwarded.
     dp_->controlPlane()->outputPacketNew(pkt, iface);
