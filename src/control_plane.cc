@@ -66,7 +66,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
     if (send_unreach) {
       // ICMP Destination Host Unreachable.
       // TODO(ms): eliminate second param if possible.
-      sendICMPDestHostUnreach(pkt, iface);
+      sendICMPDestHostUnreach(pkt);
     }
 
     return;
@@ -101,7 +101,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
     pkt->ttlIs(pkt->ttl() + 1);
     // TODO(ms): can we remove this second parameter? Maybe using the
     //   forwarding table.
-    sendICMPTTLExceeded(pkt, iface);
+    sendICMPTTLExceeded(pkt);
     return;
   }
 
@@ -246,7 +246,7 @@ void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
   // We don't handle UDP packets at all.
   if (pkt->protocol() == IPPacket::kUDP) {
     DLOG << "  protocol is UDP";
-    cp_->sendICMPDestProtoUnreach(pkt, iface);
+    cp_->sendICMPDestProtoUnreach(pkt);
     return;
   }
 
@@ -345,8 +345,7 @@ ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
 }
 
 
-void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
-                                       Interface::PtrConst orig_iface) {
+void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   DLOG << "sending ICMP TTL Exceeded message to " << orig_pkt->src();
 
   // Send at most IP header + 8 bytes of data.
@@ -360,6 +359,22 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
                           ICMPPacket::kHeaderLen +
                           data_len);
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+
+  // Look up routing table entry for packet source.
+  IPv4Addr dest_ip = orig_pkt->src();
+  RoutingTable::Entry::Ptr r_entry;
+  {
+    RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
+    RoutingTable::ScopedLock lock(rtable);
+    r_entry = rtable->lpm(dest_ip);
+  }
+  if (!r_entry) {
+    DLOG << "No route to " << dest_ip << ", giving up.";
+    return;
+  }
+
+  // Outgoing interface.
+  Interface::Ptr out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
   EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
@@ -375,7 +390,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->flagsAre(IPPacket::IP_DF);
   ip_pkt->fragmentOffsetIs(0);
-  ip_pkt->srcIs(orig_iface->ip());
+  ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
   // TODO(ms): Any reason to pick a better default?
   ip_pkt->ttlIs(64);
@@ -398,23 +413,20 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
 }
 
 
-void ControlPlane::sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt,
-                                           Interface::PtrConst orig_iface) {
+void ControlPlane::sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt) {
   DLOG << "sending ICMP Destination Host Unreachable to " << orig_pkt->src();
-  sendICMPDestUnreach(ICMPPacket::kHostUnreach, orig_pkt, orig_iface);
+  sendICMPDestUnreach(ICMPPacket::kHostUnreach, orig_pkt);
 }
 
 
-void ControlPlane::sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt,
-                                            Interface::PtrConst orig_iface) {
+void ControlPlane::sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt) {
   DLOG << "sending ICMP Destination Proto Unreachable to " << orig_pkt->src();
-  sendICMPDestUnreach(ICMPPacket::kProtoUnreach, orig_pkt, orig_iface);
+  sendICMPDestUnreach(ICMPPacket::kProtoUnreach, orig_pkt);
 }
 
 
 void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
-                                       IPPacket::PtrConst orig_pkt,
-                                       Interface::PtrConst orig_iface) {
+                                       IPPacket::PtrConst orig_pkt) {
   // Send at most IP header + 8 bytes of data.
   const size_t max_data_len = orig_pkt->headerLen() + 8;
   const size_t data_len =
@@ -426,6 +438,22 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
                           ICMPPacket::kHeaderLen +
                           data_len);
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+
+  // Look up routing table entry for packet source.
+  IPv4Addr dest_ip = orig_pkt->src();
+  RoutingTable::Entry::Ptr r_entry;
+  {
+    RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
+    RoutingTable::ScopedLock lock(rtable);
+    r_entry = rtable->lpm(dest_ip);
+  }
+  if (!r_entry) {
+    DLOG << "No route to " << dest_ip << ", giving up.";
+    return;
+  }
+
+  // Outgoing interface.
+  Interface::Ptr out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
   EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
@@ -441,7 +469,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->flagsAre(IPPacket::IP_DF);
   ip_pkt->fragmentOffsetIs(0);
-  ip_pkt->srcIs(orig_iface->ip());
+  ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
   ip_pkt->ttlIs(64);
 
