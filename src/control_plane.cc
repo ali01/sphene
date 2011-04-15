@@ -49,8 +49,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
     r_entry = rtable->lpm(dest_ip);
   }
   if (!r_entry) {
-    DLOG << "Route for " << string(dest_ip)
-         << " does not exist in RoutingTable.";
+    DLOG << "No route to " << dest_ip;
 
     bool send_unreach = true;
     if (pkt->protocol() == IPPacket::kICMP) {

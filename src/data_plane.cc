@@ -119,7 +119,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
     r_entry = rtable->lpm(dest_ip);
   }
   if (!r_entry) {
-    DLOG << "Routing table entry not found";
+    DLOG << "No route to " << dest_ip;
     // Send to control plane for error processing.
     dp_->controlPlane()->outputPacketNew(pkt, iface);
     return;
