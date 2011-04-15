@@ -36,8 +36,7 @@ void ControlPlane::packetNew(Packet::Ptr pkt,
 // valid). Therefore, packets enter this function only if they are not destined
 // for the router. ICMP error messages will be generated if the outgoing packet
 // cannot be forwarded.
-void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
-                                   Interface::PtrConst iface) {
+void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   DLOG << "outputPacketNew() in ControlPlane";
 
   // Look up routing table entry of the longest prefix match.
@@ -64,7 +63,6 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
 
     if (send_unreach) {
       // ICMP Destination Host Unreachable.
-      // TODO(ms): eliminate second param if possible.
       sendICMPDestHostUnreach(pkt);
     }
 
@@ -98,8 +96,6 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
   if (pkt->ttl() < 1) {
     // Send ICMP Time Exceeded Message to source.
     pkt->ttlIs(pkt->ttl() + 1);
-    // TODO(ms): can we remove this second parameter? Maybe using the
-    //   forwarding table.
     sendICMPTTLExceeded(pkt);
     return;
   }
@@ -233,7 +229,7 @@ void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
     ip_pkt->checksumReset();
 
     // Send the Echo Reply packet.
-    cp_->outputPacketNew(ip_pkt, NULL);
+    cp_->outputPacketNew(ip_pkt);
   }
 }
 
@@ -408,7 +404,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   ip_pkt->checksumReset();
 
   // Send packet.
-  outputPacketNew(ip_pkt, NULL);
+  outputPacketNew(ip_pkt);
 }
 
 
@@ -484,5 +480,5 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   ip_pkt->checksumReset();
 
   // Send packet.
-  outputPacketNew(ip_pkt, NULL);
+  outputPacketNew(ip_pkt);
 }

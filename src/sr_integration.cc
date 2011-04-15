@@ -281,7 +281,7 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
   ip_pkt->checksumReset();
 
   // Send packet.
-  sr->cp->outputPacketNew(ip_pkt, NULL);
+  sr->cp->outputPacketNew(ip_pkt);
 
   // The payload pointer was given to us.
   free(payload);

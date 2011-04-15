@@ -35,7 +35,7 @@ class ControlPlane : public Fwk::NamedInterface {
 
   /* Sends out the given IP_PACKET.
    * Makes ARP requests and updates the ARP cache if necessary. */
-  void outputPacketNew(Fwk::Ptr<IPPacket> ip_packet, Interface::PtrConst iface);
+  void outputPacketNew(Fwk::Ptr<IPPacket> ip_packet);
 
   // Returns the DataPlane.
   DataPlane::Ptr dataPlane() const { return dp_; }

@@ -121,7 +121,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   if (!r_entry) {
     DLOG << "No route to " << dest_ip;
     // Send to control plane for error processing.
-    dp_->controlPlane()->outputPacketNew(pkt, iface);
+    dp_->controlPlane()->outputPacketNew(pkt);
     return;
   }
 
@@ -143,7 +143,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   }
   if (!arp_entry) {
     // ARP cache miss. Send packet to control plane to be forwarded.
-    dp_->controlPlane()->outputPacketNew(pkt, iface);
+    dp_->controlPlane()->outputPacketNew(pkt);
     return;
   }
 
@@ -155,7 +155,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
     // Send ICMP Time Exceeded Message to source.
     pkt->ttlIs(pkt->ttl() + 1);
     // Send to control plane for error processing.
-    dp_->controlPlane()->outputPacketNew(pkt, iface);
+    dp_->controlPlane()->outputPacketNew(pkt);
     return;
   }
 
