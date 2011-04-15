@@ -42,7 +42,12 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt,
 
   // Look up routing table entry of the longest prefix match.
   IPv4Addr dest_ip = pkt->dst();
-  RoutingTable::Entry::Ptr r_entry = routing_table_->lpm(dest_ip);
+  RoutingTable::Entry::Ptr r_entry;
+  {
+    RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
+    RoutingTable::ScopedLock lock(rtable);
+    r_entry = rtable->lpm(dest_ip);
+  }
   if (!r_entry) {
     DLOG << "Route for " << string(dest_ip)
          << " does not exist in RoutingTable.";

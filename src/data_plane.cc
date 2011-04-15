@@ -112,8 +112,12 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   // Otherwise, we need to forward the packet.
 
   // Look up routing table entry of the longest prefix match.
-  RoutingTable::Entry::Ptr r_entry =
-      dp_->controlPlane()->routingTable()->lpm(dest_ip);
+  RoutingTable::Entry::Ptr r_entry;
+  {
+    RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
+    RoutingTable::ScopedLock lock(rtable);
+    r_entry = rtable->lpm(dest_ip);
+  }
   if (!r_entry) {
     DLOG << "Routing table entry not found";
     // Send to control plane for error processing.

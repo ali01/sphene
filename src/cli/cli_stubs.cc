@@ -146,9 +146,10 @@ void rtable_route_add(struct sr_instance* const sr,
                 RoutingTable::Entry::kStatic : RoutingTable::Entry::kDynamic);
 
   RoutingTable::Ptr rtable = sr->cp->routingTable();
-  rtable->lockedIs(true);
-  rtable->entryIs(entry);
-  rtable->lockedIs(false);
+  {
+    RoutingTable::ScopedLock lock(rtable);
+    rtable->entryIs(entry);
+  }
 
   fprintf(stdout, "Added route: %s/%s gw %s\n",
           string(entry->subnet()).c_str(),

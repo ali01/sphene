@@ -59,6 +59,21 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     Entry(const Entry&);
   };
 
+  /* ScopedLock for safe locking of the routing table. */
+  class ScopedLock {
+   public:
+    ScopedLock(RoutingTable::Ptr rtable) : rtable_(rtable) {
+      rtable_->lockedIs(true);
+    }
+    ~ScopedLock() {
+      rtable_->lockedIs(false);
+      rtable_ = NULL;
+    }
+
+   private:
+    RoutingTable::Ptr rtable_;
+  };
+
   static Ptr New() {
     return new RoutingTable();
   }
