@@ -23,6 +23,17 @@ class ICMPPacket : public Packet {
     kTimeExceeded = 11
   };
 
+  enum Code {
+    // Destination Unreachable codes.
+    kNetworkUnreach = 0,
+    kHostUnreach = 1,
+    kProtoUnreach = 2,
+    kPortUnreach = 3,
+
+    // Time Exceeded codes.
+    kTTLExceeded = 0
+  };
+
   static Ptr ICMPPacketNew(Fwk::Buffer::Ptr buffer,
                            unsigned int buffer_offset) {
     return new ICMPPacket(buffer, buffer_offset);
@@ -41,10 +52,10 @@ class ICMPPacket : public Packet {
   std::string typeName() const;
 
   // Returns the ICMP Code (subtype).
-  uint8_t code() const;
+  Code code() const;
 
   // Sets the ICMP Code (subtype).
-  void codeIs(uint8_t code);
+  void codeIs(Code code);
 
   // Returns ICMP header+data checksum.
   uint16_t checksum() const;

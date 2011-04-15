@@ -6,6 +6,7 @@
 #include "arp_cache.h"
 #include "arp_queue.h"
 #include "data_plane.h"
+#include "icmp_packet.h"
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
 #include "fwk/ptr.h"
@@ -17,7 +18,6 @@
 // Forward declarations.
 class ARPPacket;
 class EthernetPacket;
-class ICMPPacket;
 class IPPacket;
 class UnknownPacket;
 
@@ -79,6 +79,9 @@ class ControlPlane : public Fwk::NamedInterface {
                                Interface::PtrConst orig_iface);
   void sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
                                 Interface::PtrConst orig_iface);
+  void sendICMPDestUnreach(ICMPPacket::Code code,
+                           IPPacket::Ptr orig_pkt,
+                           Interface::PtrConst orig_iface);
 
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;

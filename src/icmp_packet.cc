@@ -54,12 +54,12 @@ std::string ICMPPacket::typeName() const {
 }
 
 
-uint8_t ICMPPacket::code() const {
-  return icmp_hdr_->code;
+ICMPPacket::Code ICMPPacket::code() const {
+  return (Code)icmp_hdr_->code;
 }
 
 
-void ICMPPacket::codeIs(const uint8_t code) {
+void ICMPPacket::codeIs(const Code code) {
   icmp_hdr_->code = code;
 }
 
@@ -110,7 +110,7 @@ ICMPTimeExceededPacket::ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer,
                                                unsigned int buffer_offset)
     : ICMPPacket(buffer, buffer_offset) {
   typeIs(kTimeExceeded);
-  codeIs(0);  // 0 = TTL exceeded
+  codeIs(kTTLExceeded);
   icmp_hdr_->rest = 0;
 }
 
@@ -119,7 +119,7 @@ ICMPTimeExceededPacket::ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer,
 ICMPTimeExceededPacket::ICMPTimeExceededPacket(ICMPPacket::Ptr icmp_pkt)
     : ICMPPacket(icmp_pkt->buffer(), icmp_pkt->bufferOffset()) {
   typeIs(kTimeExceeded);
-  codeIs(0);  // 0 = TTL exceeded
+  codeIs(kTTLExceeded);
   icmp_hdr_->rest = 0;
 }
 
@@ -146,7 +146,7 @@ ICMPDestUnreachablePacket::ICMPDestUnreachablePacket(Fwk::Buffer::Ptr buffer,
                                                      unsigned int buffer_offset)
     : ICMPPacket(buffer, buffer_offset) {
   typeIs(kDestUnreachable);
-  codeIs(1);  // 1 = Host unreachable
+  codeIs(kHostUnreach);
   icmp_hdr_->rest = 0;
 }
 
@@ -155,7 +155,7 @@ ICMPDestUnreachablePacket::ICMPDestUnreachablePacket(Fwk::Buffer::Ptr buffer,
 ICMPDestUnreachablePacket::ICMPDestUnreachablePacket(ICMPPacket::Ptr icmp_pkt)
     : ICMPPacket(icmp_pkt->buffer(), icmp_pkt->bufferOffset()) {
   typeIs(kDestUnreachable);
-  codeIs(1);  // 1 = Host unreachable
+  codeIs(kHostUnreach);
   icmp_hdr_->rest = 0;
 }
 

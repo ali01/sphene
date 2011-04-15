@@ -386,7 +386,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
   ICMPPacket::Ptr icmp_pkt = Ptr::st_cast<ICMPPacket>(ip_pkt->payload());
   ICMPTimeExceededPacket::Ptr icmp_te_pkt =
       ICMPTimeExceededPacket::New(icmp_pkt);
-  icmp_te_pkt->codeIs(0);  // TTL exceeded
+  icmp_te_pkt->codeIs(ICMPPacket::kTTLExceeded);
   icmp_te_pkt->originalPacketIs(orig_pkt);
 
   // Recompute checksums in reverse order.
@@ -401,13 +401,20 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt,
 void ControlPlane::sendICMPDestHostUnreach(IPPacket::Ptr orig_pkt,
                                            Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP Destination Host Unreachable to " << orig_pkt->src();
+  sendICMPDestUnreach(ICMPPacket::kHostUnreach, orig_pkt, orig_iface);
 }
 
 
 void ControlPlane::sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
                                             Interface::PtrConst orig_iface) {
   DLOG << "sending ICMP Destination Proto Unreachable to " << orig_pkt->src();
+  sendICMPDestUnreach(ICMPPacket::kProtoUnreach, orig_pkt, orig_iface);
+}
 
+
+void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
+                                       IPPacket::Ptr orig_pkt,
+                                       Interface::PtrConst orig_iface) {
   // Send at most IP header + 8 bytes of data.
   const size_t max_data_len = orig_pkt->headerLen() + 8;
   const size_t data_len =
@@ -442,7 +449,7 @@ void ControlPlane::sendICMPDestProtoUnreach(IPPacket::Ptr orig_pkt,
   ICMPPacket::Ptr icmp_pkt = Ptr::st_cast<ICMPPacket>(ip_pkt->payload());
   ICMPDestUnreachablePacket::Ptr icmp_du_pkt =
       ICMPDestUnreachablePacket::New(icmp_pkt);
-  icmp_du_pkt->codeIs(2);  // 2 = Protocol unreachable
+  icmp_du_pkt->codeIs(code);
   icmp_du_pkt->originalPacketIs(orig_pkt);
 
   // Recompute checksums in reverse order.

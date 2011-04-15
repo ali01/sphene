@@ -72,8 +72,8 @@ TEST_F(ICMPPacketTest, code) {
   EXPECT_EQ(header_->code, pkt_->code());
 
   // Ensure we can set the code.
-  pkt_->codeIs(0xFF);
-  EXPECT_EQ(0xFF, pkt_->code());
+  pkt_->codeIs(ICMPPacket::kProtoUnreach);
+  EXPECT_EQ(ICMPPacket::kProtoUnreach, pkt_->code());
 }
 
 
