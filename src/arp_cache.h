@@ -10,6 +10,9 @@
 #include "ethernet_packet.h"
 #include "ip_packet.h"
 
+
+/* Thread safety: in a threaded environment, methods of this class must be
+   accessed with lockedIs(true) or by using the ScopedLock. */
 class ARPCache : public Fwk::PtrInterface<ARPCache> {
  public:
   typedef Fwk::Ptr<const ARPCache> PtrConst;
