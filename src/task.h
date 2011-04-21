@@ -12,9 +12,7 @@ class Task : public Fwk::NamedInterface {
   typedef Fwk::Ptr<const Task> PtrConst;
   typedef Fwk::Ptr<Task> Ptr;
 
-  static Ptr New(const std::string& name) {
-    return new Task(name);
-  }
+  virtual void timeIs(const TimeEpoch& t) = 0;
 
  protected:
   Task(const std::string& name);
