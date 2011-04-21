@@ -9,32 +9,76 @@
 using std::string;
 
 
-class BasicTask : public Task {
+class BasicTask : public PeriodicTask {
  public:
   typedef Fwk::Ptr<const BasicTask> PtrConst;
   typedef Fwk::Ptr<BasicTask> Ptr;
 
   static Ptr New(const string& name) { return new BasicTask(name); }
 
-  void timeIs(const TimeEpoch& t) { }
+  int value() const { return value_; }
 
  protected:
-  BasicTask(const string& name) : Task(name) { }
+  BasicTask(const string& name) : PeriodicTask(name), value_(0) { }
+
+  void run() {
+    value_++;
+  }
+
+  int value_;
 };
 
 
-class TaskTest : public ::testing::Test {
+class PeriodicTaskTest : public ::testing::Test {
  protected:
   void SetUp() {
     task_ = BasicTask::New("task1");
     TimeEpoch now(time(NULL));
     task_->timeIs(now);
+    task_->periodIs(10);
   }
 
-  Task::Ptr task_;
+  BasicTask::Ptr task_;
 };
 
 
-TEST_F(TaskTest, Construct) {
+TEST_F(PeriodicTaskTest, construct) {
   ASSERT_TRUE(task_);
+
+  // Task should not have run yet.
+  EXPECT_EQ(0, task_->value());
+}
+
+
+TEST_F(PeriodicTaskTest, stepOneInterval) {
+  // Advance the clock by the period.
+  TimeEpoch now(time(NULL) + task_->period().value());
+  task_->timeIs(now);
+
+  // Task should have run once.
+  EXPECT_EQ(1, task_->value());
+}
+
+
+TEST_F(PeriodicTaskTest, stepTwoIntervals) {
+  TimeEpoch start(time(NULL));
+
+  // Advance the clock by the period.
+  TimeEpoch now(start.value() + task_->period().value());
+  task_->timeIs(now);
+  EXPECT_EQ(1, task_->value());
+
+  // Advance by half a period and ensure the task does not run.
+  now = now.value() + task_->period().value() / 2;
+  task_->timeIs(now);
+  EXPECT_EQ(1, task_->value());
+
+  // Advance to the second interval.
+  now = start.value() + task_->period().value() * 2;
+  task_->timeIs(now);
+  EXPECT_EQ(2, task_->value());
+
+  // timeIs should be idempotent.
+  task_->timeIs(now);
+  EXPECT_EQ(2, task_->value());
 }
