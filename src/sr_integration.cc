@@ -17,6 +17,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <string>
+#include <unistd.h>
 
 #include "fwk/buffer.h"
 #include "fwk/concurrent_deque.h"
@@ -29,6 +30,7 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "ip_packet.h"
+#include "lwtcp/lwip/sys.h"
 #include "routing_table.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
@@ -46,6 +48,8 @@ static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
 static Fwk::ConcurrentDeque<EthernetPacket::Ptr> pq;
 static TaskManager::Ptr tm;
+
+static void processing_thread(void* aux);
 
 
 /*-----------------------------------------------------------------------------
@@ -83,7 +87,23 @@ void sr_integ_init(struct sr_instance* sr)
 
   // Initialize task manager.
   tm = TaskManager::New();
+
+  // Start processing thread.
+  sys_thread_new(processing_thread, NULL);
 }
+
+
+/* Thread target for processing incoming packets and executing periodic
+   tasks. Started by sr_integ_init(). */
+static void processing_thread(void* aux) {
+  DLOG << "processing thread started";
+
+  for (;;) {
+    DLOG << "processing thread running";
+    sleep(10);
+  }
+}
+
 
 /*-----------------------------------------------------------------------------
  * Method: sr_integ_hw_setup(..)
