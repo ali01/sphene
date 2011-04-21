@@ -4,6 +4,7 @@
 #include <string>
 
 #include "fwk/named_interface.h"
+#include "time_types.h"
 
 
 class Task : public Fwk::NamedInterface {
