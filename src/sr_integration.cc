@@ -32,6 +32,7 @@
 #include "sr_vns.h"
 #include "sr_base_internal.h"
 #include "sw_data_plane.h"
+#include "task.h"
 
 #ifdef _CPUMODE_
 #include "sr_cpu_extension_nf2.h"
@@ -42,6 +43,7 @@ using std::string;
 static ControlPlane::Ptr cp;
 static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
+static TaskManager::Ptr tm;
 
 
 /*-----------------------------------------------------------------------------
@@ -76,6 +78,9 @@ void sr_integ_init(struct sr_instance* sr)
   // ControlPlane and DataPlane are parts of the router.
   sr->cp = cp.ptr();
   sr->dp = dp.ptr();
+
+  // Initialize task manager.
+  tm = TaskManager::New();
 }
 
 /*-----------------------------------------------------------------------------
