@@ -72,6 +72,9 @@ class TaskManager : public Fwk::PtrInterface<TaskManager> {
   void taskDel(Task::Ptr task);
   void taskDel(const std::string& name);
 
+  // Updates time on all tasks in the task set.
+  void timeIs(const TimeEpoch& t);
+
  protected:
   typedef std::map<std::string, Task::Ptr> TaskMap;
 

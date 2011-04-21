@@ -148,3 +148,31 @@ TEST_F(TaskManagerTest, delTaskByName) {
   EXPECT_EQ(Task::Ptr(NULL), tm_->task(task1_->name()).ptr());
   EXPECT_EQ(task2_.ptr(), tm_->task(task2_->name()).ptr());
 }
+
+
+TEST_F(TaskManagerTest, timeIs) {
+  TimeEpoch start(time(NULL));
+
+  // Add both tasks.
+  tm_->taskIs(task1_);
+  tm_->taskIs(task2_);
+
+  // Ensure both tasks have not run yet.
+  ASSERT_EQ(0, task1_->value());
+  ASSERT_EQ(0, task2_->value());
+
+  // Advance clock for both tasks.
+  Seconds large_interval = task1_->period().value() + task2_->period().value();
+  tm_->timeIs(start.value() + large_interval.value());
+
+  // Both tasks should have run once.
+  ASSERT_EQ(1, task1_->value());
+  ASSERT_EQ(1, task2_->value());
+
+  // Advance the clock by the smaller of the two task intervals.
+  tm_->timeIs(task1_->time().value() + task1_->period().value());
+
+  // Only one task should have run.
+  ASSERT_EQ(2, task1_->value());
+  ASSERT_EQ(1, task2_->value());
+}

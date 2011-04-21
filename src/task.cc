@@ -53,3 +53,9 @@ void TaskManager::taskDel(Task::Ptr task) {
 void TaskManager::taskDel(const std::string& name) {
   task_map_.erase(name);
 }
+
+
+void TaskManager::timeIs(const TimeEpoch& t) {
+  for (TaskMap::iterator it = task_map_.begin(); it != task_map_.end(); ++it)
+    it->second->timeIs(t);
+}
