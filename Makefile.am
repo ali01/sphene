@@ -144,6 +144,8 @@ libsr_base_a_SOURCES = \
                        src/sr_vns.h \
                        src/sw_data_plane.cc \
                        src/sw_data_plane.h \
+                       src/task.cc \
+                       src/task.h \
                        src/unknown_packet.cc \
                        src/unknown_packet.h \
                        src/vnscommand.h \
@@ -240,7 +242,8 @@ TESTS = \
         ip_packet_unittest \
         packet_unittest \
         routing_table_unittest \
-        sw_data_plane_unittest
+        sw_data_plane_unittest \
+        task_unittest
 
 bin_PROGRAMS += $(TESTS)
 
@@ -293,6 +296,10 @@ sw_data_plane_unittest_SOURCES = tests/sw_data_plane_unittest.cc \
                                  $(SR_SRCS_CLI)
 sw_data_plane_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sw_data_plane_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+task_unittest_SOURCES = tests/task_unittest.cc
+task_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+task_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 .PHONY: all deep-clean
 deep-clean: distclean
