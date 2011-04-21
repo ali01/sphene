@@ -82,3 +82,45 @@ TEST_F(PeriodicTaskTest, stepTwoIntervals) {
   task_->timeIs(now);
   EXPECT_EQ(2, task_->value());
 }
+
+
+class TaskManagerTest : public ::testing::Test {
+ protected:
+  void SetUp() {
+    tm_ = TaskManager::New();
+    task_ = BasicTask::New("task1");
+  }
+
+  TaskManager::Ptr tm_;
+  PeriodicTask::Ptr task_;
+};
+
+
+TEST_F(TaskManagerTest, addTask) {
+  ASSERT_EQ((size_t)0, tm_->tasks());
+  tm_->taskIs(task_);
+  EXPECT_EQ((size_t)1, tm_->tasks());
+  EXPECT_EQ(task_.ptr(), tm_->task(task_->name()).ptr());
+
+  // Test idempotency.
+  tm_->taskIs(task_);
+  EXPECT_EQ((size_t)1, tm_->tasks());
+};
+
+
+TEST_F(TaskManagerTest, delTask) {
+  tm_->taskIs(task_);
+  EXPECT_EQ((size_t)1, tm_->tasks());
+
+  tm_->taskDel(task_);
+  EXPECT_EQ((size_t)0, tm_->tasks());
+}
+
+
+TEST_F(TaskManagerTest, delTaskByName) {
+  tm_->taskIs(task_);
+  EXPECT_EQ((size_t)1, tm_->tasks());
+
+  tm_->taskDel(task_->name());
+  EXPECT_EQ((size_t)0, tm_->tasks());
+}

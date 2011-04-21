@@ -1,9 +1,12 @@
 #ifndef TASK_H_
 #define TASK_H_
 
+#include <map>
 #include <string>
 
 #include "fwk/named_interface.h"
+#include "fwk/ptr.h"
+#include "fwk/ptr_interface.h"
 #include "time_types.h"
 
 
@@ -46,6 +49,35 @@ class PeriodicTask : public Task {
  private:
   Seconds period_;
   TimeEpoch time_;
+};
+
+
+class TaskManager : public Fwk::PtrInterface<TaskManager> {
+ public:
+  typedef Fwk::Ptr<const TaskManager> PtrConst;
+  typedef Fwk::Ptr<TaskManager> Ptr;
+
+  static Ptr New() { return new TaskManager(); }
+
+  // Returns the number of tasks in the task set.
+  size_t tasks() const { return task_map_.size(); }
+
+  // Lookup a task by name.
+  Task::Ptr task(const std::string& name) const;
+
+  // Adds a task to the task set.
+  void taskIs(Task::Ptr task);
+
+  // Removes a task from the task set.
+  void taskDel(Task::Ptr task);
+  void taskDel(const std::string& name);
+
+ protected:
+  typedef std::map<std::string, Task::Ptr> TaskMap;
+
+  TaskManager() { }
+
+  TaskMap task_map_;
 };
 
 #endif
