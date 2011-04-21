@@ -88,39 +88,63 @@ class TaskManagerTest : public ::testing::Test {
  protected:
   void SetUp() {
     tm_ = TaskManager::New();
-    task_ = BasicTask::New("task1");
+    task1_ = BasicTask::New("task1");
+    task2_ = BasicTask::New("task2");
+    TimeEpoch now(time(NULL));
+    task1_->timeIs(now);
+    task2_->timeIs(now);
+    task1_->periodIs(10);
+    task2_->periodIs(20);
   }
 
   TaskManager::Ptr tm_;
-  PeriodicTask::Ptr task_;
+  BasicTask::Ptr task1_;
+  BasicTask::Ptr task2_;
 };
 
 
 TEST_F(TaskManagerTest, addTask) {
   ASSERT_EQ((size_t)0, tm_->tasks());
-  tm_->taskIs(task_);
+
+  // Add one task.
+  tm_->taskIs(task1_);
   EXPECT_EQ((size_t)1, tm_->tasks());
-  EXPECT_EQ(task_.ptr(), tm_->task(task_->name()).ptr());
+  EXPECT_EQ(task1_.ptr(), tm_->task(task1_->name()).ptr());
+
+  // Add second task.
+  tm_->taskIs(task2_);
+  EXPECT_EQ((size_t)2, tm_->tasks());
+  EXPECT_EQ(task2_.ptr(), tm_->task(task2_->name()).ptr());
 
   // Test idempotency.
-  tm_->taskIs(task_);
-  EXPECT_EQ((size_t)1, tm_->tasks());
+  tm_->taskIs(task2_);
+  EXPECT_EQ((size_t)2, tm_->tasks());
 };
 
 
 TEST_F(TaskManagerTest, delTask) {
-  tm_->taskIs(task_);
-  EXPECT_EQ((size_t)1, tm_->tasks());
+  // Add both tasks.
+  tm_->taskIs(task1_);
+  tm_->taskIs(task2_);
+  EXPECT_EQ((size_t)2, tm_->tasks());
 
-  tm_->taskDel(task_);
-  EXPECT_EQ((size_t)0, tm_->tasks());
+  // Delete task 1.
+  tm_->taskDel(task1_);
+  EXPECT_EQ((size_t)1, tm_->tasks());
+  EXPECT_EQ(Task::Ptr(NULL), tm_->task(task1_->name()).ptr());
+  EXPECT_EQ(task2_.ptr(), tm_->task(task2_->name()).ptr());
 }
 
 
 TEST_F(TaskManagerTest, delTaskByName) {
-  tm_->taskIs(task_);
-  EXPECT_EQ((size_t)1, tm_->tasks());
+  // Add both tasks.
+  tm_->taskIs(task1_);
+  tm_->taskIs(task2_);
+  EXPECT_EQ((size_t)2, tm_->tasks());
 
-  tm_->taskDel(task_->name());
-  EXPECT_EQ((size_t)0, tm_->tasks());
+  // Delete task 1.
+  tm_->taskDel(task1_->name());
+  EXPECT_EQ((size_t)1, tm_->tasks());
+  EXPECT_EQ(Task::Ptr(NULL), tm_->task(task1_->name()).ptr());
+  EXPECT_EQ(task2_.ptr(), tm_->task(task2_->name()).ptr());
 }
