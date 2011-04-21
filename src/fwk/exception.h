@@ -64,6 +64,16 @@ public:
     : ResourceException(entity, funcName, message) { }
 };
 
+
+class TimeoutException : public ResourceException {
+public:
+  TimeoutException(const string& funcName, const string& message)
+    : ResourceException(funcName, message) { }
+  TimeoutException(Fwk::NamedInterface *entity, const string& funcName,
+                   const string& message)
+    : ResourceException(entity, funcName, message) { }
+};
+
 }
 
 #endif
