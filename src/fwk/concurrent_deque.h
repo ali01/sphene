@@ -17,7 +17,7 @@ class ConcurrentDeque : public Fwk::PtrInterface<ConcurrentDeque<T> > {
   typedef Fwk::Ptr<ConcurrentDeque<T> const> PtrConst;
   typedef Fwk::Ptr<ConcurrentDeque<T> > Ptr;
 
-  static Ptr concurrentDequeNew() { return new ConcurrentDeque(); }
+  static Ptr New() { return new ConcurrentDeque(); }
   ConcurrentDeque() {
     pthread_cond_init(&cond_, NULL);
     pthread_mutex_init(&mutex_, NULL);

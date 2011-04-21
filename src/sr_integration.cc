@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <string>
 #include <unistd.h>
+#include <utility>
 
 #include "fwk/buffer.h"
 #include "fwk/concurrent_deque.h"
@@ -41,12 +42,14 @@
 #include "sr_cpu_extension_nf2.h"
 #endif
 
+using std::pair;
 using std::string;
 
 static ControlPlane::Ptr cp;
 static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
-static Fwk::ConcurrentDeque<EthernetPacket::Ptr> pq;
+static Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
+                                 Interface::PtrConst> >::Ptr pq;
 static TaskManager::Ptr tm;
 
 static void processing_thread(void* aux);
@@ -85,6 +88,10 @@ void sr_integ_init(struct sr_instance* sr)
   sr->cp = cp.ptr();
   sr->dp = dp.ptr();
 
+  // Initialize input packet queue.
+  pq = Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
+                                 Interface::PtrConst> >::New();
+
   // Initialize task manager.
   tm = TaskManager::New();
 
@@ -99,8 +106,13 @@ static void processing_thread(void* aux) {
   DLOG << "processing thread started";
 
   for (;;) {
-    DLOG << "processing thread running";
-    sleep(10);
+    pair<EthernetPacket::Ptr, Interface::PtrConst> p = pq->popFront();
+    EthernetPacket::Ptr eth_pkt = p.first;
+    Interface::PtrConst iface = p.second;
+    DLOG << "processing thread popped packet";
+
+    // TODO(ms): bypass dataplane here on _CPUMODE_?
+    dp->packetNew(eth_pkt, iface);
   }
 }
 
@@ -156,8 +168,8 @@ void sr_integ_input(struct sr_instance* sr,
   Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
   EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
 
-  // TODO(ms): bypass dataplane here on _CPUMODE_?
-  dp->packetNew(eth_pkt, iface);
+  // Insert packet into packet queue.
+  pq->pushBack(std::make_pair(eth_pkt, iface));
 }
 
 /*-----------------------------------------------------------------------------
