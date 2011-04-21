@@ -19,6 +19,7 @@
 #include <string>
 
 #include "fwk/buffer.h"
+#include "fwk/concurrent_deque.h"
 #include "fwk/log.h"
 
 #include "arp_cache.h"
@@ -43,6 +44,7 @@ using std::string;
 static ControlPlane::Ptr cp;
 static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
+static Fwk::ConcurrentDeque<EthernetPacket::Ptr> pq;
 static TaskManager::Ptr tm;
 
 
