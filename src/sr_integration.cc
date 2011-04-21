@@ -16,12 +16,14 @@
 
 #include <arpa/inet.h>
 #include <assert.h>
+#include <ctime>
 #include <string>
 #include <unistd.h>
 #include <utility>
 
 #include "fwk/buffer.h"
 #include "fwk/concurrent_deque.h"
+#include "fwk/exception.h"
 #include "fwk/log.h"
 
 #include "arp_cache.h"
@@ -104,15 +106,26 @@ void sr_integ_init(struct sr_instance* sr)
    tasks. Started by sr_integ_init(). */
 static void processing_thread(void* aux) {
   DLOG << "processing thread started";
+  struct timespec timeout_time;
 
+  pair<EthernetPacket::Ptr, Interface::PtrConst> p;
   for (;;) {
-    pair<EthernetPacket::Ptr, Interface::PtrConst> p = pq->popFront();
-    EthernetPacket::Ptr eth_pkt = p.first;
-    Interface::PtrConst iface = p.second;
-    DLOG << "processing thread popped packet";
+    // Update timeout time.
+    clock_gettime(CLOCK_REALTIME, &timeout_time);
+    timeout_time.tv_sec += 1;
 
-    // TODO(ms): bypass dataplane here on _CPUMODE_?
-    dp->packetNew(eth_pkt, iface);
+    try {
+      p = pq->timedPopFront(timeout_time);
+
+      EthernetPacket::Ptr eth_pkt = p.first;
+      Interface::PtrConst iface = p.second;
+      DLOG << "processing thread popped packet";
+
+      // TODO(ms): bypass dataplane here on _CPUMODE_?
+      dp->packetNew(eth_pkt, iface);
+    } catch (Fwk::TimeoutException& e) {
+      DLOG << "processing thread timeout";
+    }
   }
 }
 

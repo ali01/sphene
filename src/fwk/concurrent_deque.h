@@ -5,9 +5,12 @@
 #ifndef __FWK__CONCURRENTDEQUE_H__
 #define __FWK__CONCURRENTDEQUE_H__
 
+#include <cerrno>
 #include <pthread.h>
+#include <ctime>
 
 #include "deque.h"
+#include "exception.h"
 
 namespace Fwk {
 
@@ -73,6 +76,18 @@ class ConcurrentDeque : public Fwk::PtrInterface<ConcurrentDeque<T> > {
     ScopedLock lock(&mutex_);
     while (deque_.empty())
       pthread_cond_wait(&cond_, &mutex_);
+    T e = deque_.front();
+    deque_.popFront();
+    return e;
+  }
+
+  // TODO(ms): Use a different input type here.
+  T timedPopFront(const struct timespec& abstime) {
+    ScopedLock lock(&mutex_);
+    while (deque_.empty()) {
+      if (pthread_cond_timedwait(&cond_, &mutex_, &abstime) == ETIMEDOUT)
+        throw TimeoutException("timedPopFront", "timed out");
+    }
     T e = deque_.front();
     deque_.popFront();
     return e;
