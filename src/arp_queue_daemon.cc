@@ -28,8 +28,6 @@ void ARPQueueDaemon::run() {
   // Entries to be removed.
   vector<ARPQueue::Entry::Ptr> remove;
 
-  // TODO(ms): need locks here.
-
   for (ARPQueue::iterator it = queue->begin(); it != queue->end(); ++it) {
     ARPQueue::Entry::Ptr entry = it->second;
     if (entry->retries() >= kMaxRetries) {
