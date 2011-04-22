@@ -115,6 +115,7 @@ static void processing_thread(void* aux) {
   DLOG << "processing thread started";
   struct timespec last_time;
   struct timespec next_time;
+    clock_gettime(CLOCK_REALTIME, &last_time);
 
   pair<EthernetPacket::Ptr, Interface::PtrConst> p;
   for (;;) {
