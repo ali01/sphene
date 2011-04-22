@@ -417,6 +417,12 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
 }
 
 
+void ControlPlane::sendICMPDestNetworkUnreach(IPPacket::PtrConst orig_pkt) {
+  DLOG << "sending ICMP Destination Network Unreachable to " << orig_pkt->src();
+  sendICMPDestUnreach(ICMPPacket::kNetworkUnreach, orig_pkt);
+}
+
+
 void ControlPlane::sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt) {
   DLOG << "sending ICMP Destination Host Unreachable to " << orig_pkt->src();
   sendICMPDestUnreach(ICMPPacket::kHostUnreach, orig_pkt);

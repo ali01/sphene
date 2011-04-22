@@ -75,6 +75,7 @@ class ControlPlane : public Fwk::NamedInterface {
   void cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr);
 
   void sendICMPTTLExceeded(IPPacket::Ptr orig_pkt);
+  void sendICMPDestNetworkUnreach(IPPacket::PtrConst orig_pkt);
   void sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt);
   void sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt);
   void sendICMPDestUnreach(ICMPPacket::Code code, IPPacket::PtrConst orig_pkt);
