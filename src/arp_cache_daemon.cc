@@ -19,9 +19,6 @@ ARPCacheDaemon::ARPCacheDaemon(ARPCache::Ptr cache)
 
 
 void ARPCacheDaemon::run() {
-  // TODO(ms): Implement this.
-  DLOG << "ARP Cache Daemon running";
-
   vector<ARPCache::Entry::Ptr> remove;
 
   // Find old entries to remove.

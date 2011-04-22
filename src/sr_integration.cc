@@ -101,7 +101,7 @@ void sr_integ_init(struct sr_instance* sr)
 
   // Create ARP cache daemon and add it to the task manager.
   arp_cache_daemon = ARPCacheDaemon::New(arp_cache);
-  arp_cache_daemon->periodIs(30);
+  arp_cache_daemon->periodIs(1);  // check for stale entries every second
   tm->taskIs(arp_cache_daemon);
 
   // Start processing thread.
@@ -139,7 +139,7 @@ static void processing_thread(void* aux) {
       // TODO(ms): bypass dataplane here on _CPUMODE_?
       dp->packetNew(eth_pkt, iface);
     } catch (Fwk::TimeoutException& e) {
-      DLOG << "processing thread timeout";
+      // Timeout while waiting for a packet in the input queue. Ignore it.
     }
   }
 }
