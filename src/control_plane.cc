@@ -262,7 +262,7 @@ void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
 
 void ControlPlane::PacketFunctor::operator()(UnknownPacket* const pkt,
                                              const Interface::PtrConst iface) {
-
+  DLOG << "UnknownPacket dispatch in ControlPlane";
 }
 
 
