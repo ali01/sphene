@@ -54,6 +54,9 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     const IPv4Addr& ipAddr() const { return ip_; }
     Interface::PtrConst interface() const { return interface_; }
     EthernetPacket::PtrConst request() const { return request_; }
+    unsigned int retries() const { return retries_; }
+    void retriesInc() { retries_ += 1; }
+
     PacketWrapper::Ptr front() const { return packet_queue_.front(); }
 
     void packetIs(EthernetPacket::Ptr packet);
@@ -62,13 +65,14 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     Entry(const IPv4Addr& ip,
           Interface::PtrConst interface,
           EthernetPacket::PtrConst request)
-        : ip_(ip), interface_(interface), request_(request)  {}
+        : ip_(ip), interface_(interface), request_(request), retries_(0) { }
 
    private:
     /* Data members. */
     IPv4Addr ip_;
     Interface::PtrConst interface_;
     EthernetPacket::PtrConst request_;
+    unsigned int retries_;
     Fwk::LinkedList<PacketWrapper> packet_queue_;
 
     /* Operations disallowed. */
