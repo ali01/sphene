@@ -27,6 +27,7 @@
 #include "fwk/log.h"
 
 #include "arp_cache.h"
+#include "arp_cache_daemon.h"
 #include "control_plane.h"
 #include "data_plane.h"
 #include "ethernet_packet.h"
@@ -47,6 +48,7 @@
 using std::pair;
 using std::string;
 
+static ARPCacheDaemon::Ptr arp_cache_daemon;
 static ControlPlane::Ptr cp;
 static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
@@ -96,6 +98,11 @@ void sr_integ_init(struct sr_instance* sr)
 
   // Initialize task manager.
   tm = TaskManager::New();
+
+  // Create ARP cache daemon and add it to the task manager.
+  arp_cache_daemon = ARPCacheDaemon::New(arp_cache);
+  arp_cache_daemon->periodIs(5);
+  tm->taskIs(arp_cache_daemon);
 
   // Start processing thread.
   sys_thread_new(processing_thread, NULL);
