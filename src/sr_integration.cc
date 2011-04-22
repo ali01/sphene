@@ -106,16 +106,24 @@ void sr_integ_init(struct sr_instance* sr)
    tasks. Started by sr_integ_init(). */
 static void processing_thread(void* aux) {
   DLOG << "processing thread started";
-  struct timespec timeout_time;
+  struct timespec last_time;
+  struct timespec next_time;
 
   pair<EthernetPacket::Ptr, Interface::PtrConst> p;
   for (;;) {
-    // Update timeout time.
-    clock_gettime(CLOCK_REALTIME, &timeout_time);
-    timeout_time.tv_sec += 1;
+    // Get current time.
+    clock_gettime(CLOCK_REALTIME, &next_time);
+
+    // Ensure we run tasks in the task manager every second.
+    if (next_time.tv_sec - last_time.tv_sec >= 1) {
+      tm->timeIs(time(NULL));
+      last_time = next_time;
+    }
 
     try {
-      p = pq->timedPopFront(timeout_time);
+      // Bound the waiting time for a packet in the input queue.
+      next_time.tv_sec += 1;
+      p = pq->timedPopFront(next_time);
 
       EthernetPacket::Ptr eth_pkt = p.first;
       Interface::PtrConst iface = p.second;
