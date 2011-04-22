@@ -30,6 +30,7 @@
 
 #include "arp_cache.h"
 #include "arp_cache_daemon.h"
+#include "arp_queue_daemon.h"
 #include "control_plane.h"
 #include "data_plane.h"
 #include "ethernet_packet.h"
@@ -51,6 +52,7 @@ using std::pair;
 using std::string;
 
 static ARPCacheDaemon::Ptr arp_cache_daemon;
+static ARPQueueDaemon::Ptr arp_queue_daemon;
 static ControlPlane::Ptr cp;
 static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
@@ -162,6 +164,11 @@ void sr_integ_hw_setup(struct sr_instance* sr)
   arp_cache_daemon = ARPCacheDaemon::New(cp->arpCache());
   arp_cache_daemon->periodIs(1);  // check for stale entries every second
   tm->taskIs(arp_cache_daemon);
+
+  // Create ARP queue daemon and add it to the task manager.
+  arp_queue_daemon = ARPQueueDaemon::New(cp);
+  arp_queue_daemon->periodIs(1);
+  tm->taskIs(arp_queue_daemon);
 
   // Start processing thread.
   sys_thread_new(processing_thread, NULL);
