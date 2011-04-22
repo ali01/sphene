@@ -90,6 +90,8 @@ class ControlPlane : public Fwk::NamedInterface {
   // Operations disallowed.
   ControlPlane(const ControlPlane&);
   void operator=(const ControlPlane&);
+
+  friend class ARPQueueDaemon;
 };
 
 #endif
