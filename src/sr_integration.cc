@@ -17,6 +17,8 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <ctime>
+#include <fstream>
+#include <iostream>
 #include <string>
 #include <unistd.h>
 #include <utility>
@@ -57,6 +59,7 @@ static Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
 static TaskManager::Ptr tm;
 
 static void processing_thread(void* aux);
+static void read_rtable(struct sr_instance* sr);
 
 
 /*-----------------------------------------------------------------------------
@@ -149,6 +152,9 @@ void sr_integ_hw_setup(struct sr_instance* sr)
 {
   DLOG << "sw_integ_hw() called";
 
+  // Read in rtable file, if any.
+  read_rtable(sr);
+
   // Initialize task manager.
   tm = TaskManager::New();
 
@@ -160,6 +166,50 @@ void sr_integ_hw_setup(struct sr_instance* sr)
   // Start processing thread.
   sys_thread_new(processing_thread, NULL);
 }
+
+
+static void read_rtable(struct sr_instance* sr) {
+  RoutingTable::Ptr rt = cp->routingTable();
+  char subnet[16];
+  char gateway[16];
+  char mask[16];
+  char iface_name[16];
+
+  std::ifstream ifs(sr->rtable, std::ifstream::in);
+  if (ifs.good())
+    DLOG << "Reading rtable file: " << sr->rtable;
+
+  while (ifs.good()) {
+    ifs >> subnet >> gateway >> mask >> iface_name;
+    if (!ifs.good())
+      break;  // avoid entering the last route twice
+
+    // Lookup interface by name.
+    Interface::Ptr iface = dp->interfaceMap()->interface(iface_name);
+    if (!iface) {
+      WLOG << "No interface found by name " << iface_name << "; skipping";
+      continue;
+    }
+
+    // Add new routing entry.
+    RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
+    entry->subnetIs(subnet, mask);
+    entry->gatewayIs(gateway);
+    entry->interfaceIs(iface);
+    entry->typeIs(RoutingTable::Entry::kStatic);
+
+    {
+      RoutingTable::ScopedLock lock(rt);
+      rt->entryIs(entry);
+    }
+
+    DLOG << "Added route: " << entry->subnet() << "/" << entry->subnetMask()
+         << " gw " << entry->gateway();
+  }
+
+  ifs.close();
+}
+
 
 /*---------------------------------------------------------------------
  * Method: sr_integ_input(struct sr_instance*,
