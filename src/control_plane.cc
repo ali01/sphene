@@ -218,20 +218,7 @@ void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
 
   // Handle ICMP Echo Requests.
   if (pkt->type() == ICMPPacket::kEchoRequest) {
-    // Swap IP src/dst.
-    IPv4Addr sender = ip_pkt->src();
-    ip_pkt->srcIs(ip_pkt->dst());
-    ip_pkt->dstIs(sender);
-
-    // Change type to reply.
-    pkt->typeIs(ICMPPacket::kEchoReply);
-
-    // Recompute checksums.
-    pkt->checksumReset();
-    ip_pkt->checksumReset();
-
-    // Send the Echo Reply packet.
-    cp_->outputPacketNew(ip_pkt);
+    cp_->sendICMPEchoReply(ip_pkt);
   }
 }
 
@@ -349,6 +336,26 @@ ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
 
     arp_queue_->entryDel(queue_entry);
   }
+}
+
+
+void ControlPlane::sendICMPEchoReply(IPPacket::Ptr ip_pkt) {
+  ICMPPacket::Ptr pkt = Ptr::st_cast<ICMPPacket>(ip_pkt->payload());
+
+  // Swap IP src/dst.
+  IPv4Addr sender = ip_pkt->src();
+  ip_pkt->srcIs(ip_pkt->dst());
+  ip_pkt->dstIs(sender);
+
+  // Change type to reply.
+  pkt->typeIs(ICMPPacket::kEchoReply);
+
+  // Recompute checksums.
+  pkt->checksumReset();
+  ip_pkt->checksumReset();
+
+  // Send the Echo Reply packet.
+  outputPacketNew(ip_pkt);
 }
 
 

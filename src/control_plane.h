@@ -74,6 +74,7 @@ class ControlPlane : public Fwk::NamedInterface {
   void sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr);
   void updateARPCacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr);
 
+  void sendICMPEchoReply(IPPacket::Ptr echo_request);
   void sendICMPTTLExceeded(IPPacket::Ptr orig_pkt);
   void sendICMPDestNetworkUnreach(IPPacket::PtrConst orig_pkt);
   void sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt);
