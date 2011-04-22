@@ -101,7 +101,7 @@ void sr_integ_init(struct sr_instance* sr)
 
   // Create ARP cache daemon and add it to the task manager.
   arp_cache_daemon = ARPCacheDaemon::New(arp_cache);
-  arp_cache_daemon->periodIs(5);
+  arp_cache_daemon->periodIs(30);
   tm->taskIs(arp_cache_daemon);
 
   // Start processing thread.
