@@ -84,8 +84,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   }
   if (!arp_entry) {
     DLOG << "ARP Cache miss for " << string(next_hop_ip);
-    sendARPRequest(next_hop_ip, out_iface);
-    enqueuePacket(next_hop_ip, out_iface, pkt);
+    sendARPRequestAndEnqueuePacket(next_hop_ip, out_iface, pkt);
     return;
   }
 
@@ -263,47 +262,52 @@ void ControlPlane::PacketFunctor::operator()(UnknownPacket* const pkt,
 
 }
 
-void
-ControlPlane::sendARPRequest(IPv4Addr ip_addr, Interface::Ptr out_iface) {
-  size_t pkt_len = EthernetPacket::kHeaderSize + ARPPacket::kHeaderSize;
-
-  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
-  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
-
-  eth_pkt->srcIs(out_iface->mac());
-  eth_pkt->dstIs(EthernetAddr::kBroadcast);
-  eth_pkt->typeIs(EthernetPacket::kARP);
-
-  ARPPacket::Ptr arp_pkt = Ptr::st_cast<ARPPacket>(eth_pkt->payload());
-  arp_pkt->operationIs(ARPPacket::kRequest);
-  arp_pkt->senderHWAddrIs(out_iface->mac());
-  arp_pkt->senderPAddrIs(out_iface->ip());
-  arp_pkt->targetHWAddrIs(EthernetAddr::kZero);
-  arp_pkt->targetPAddrIs(ip_addr);
-
-  DLOG << "Sending ARP request for " << string(ip_addr);
-  DLOG << "  ARP sender HW addr: " << arp_pkt->senderHWAddr();
-  DLOG << "  ARP sender P addr:  " << arp_pkt->senderPAddr();
-  DLOG << "  ARP target HW addr: " << arp_pkt->targetHWAddr();
-  DLOG << "  ARP target P addr:  " << arp_pkt->targetPAddr();
-
-  dp_->outputPacketNew(eth_pkt, out_iface);
-}
 
 void
-ControlPlane::enqueuePacket(IPv4Addr next_hop_ip, Interface::Ptr out_iface,
-                            IPPacket::Ptr pkt) {
-  // Adding packet to ARP queue.
+ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
+                                             Interface::Ptr out_iface,
+                                             IPPacket::Ptr pkt) {
+  // Do we already have a packet queue for this next hop in the arp queue?
   ARPQueue::Entry::Ptr entry = arp_queue_->entry(next_hop_ip);
   if (entry == NULL) {
-    entry = ARPQueue::Entry::New(next_hop_ip, out_iface);
+    // No entry in the ARP queue yet.
+    size_t pkt_len = EthernetPacket::kHeaderSize + ARPPacket::kHeaderSize;
+
+    Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+    EthernetPacket::Ptr req_eth_pkt = EthernetPacket::New(buffer, 0);
+
+    req_eth_pkt->srcIs(out_iface->mac());
+    req_eth_pkt->dstIs(EthernetAddr::kBroadcast);
+    req_eth_pkt->typeIs(EthernetPacket::kARP);
+
+    ARPPacket::Ptr arp_pkt = Ptr::st_cast<ARPPacket>(req_eth_pkt->payload());
+    arp_pkt->operationIs(ARPPacket::kRequest);
+    arp_pkt->senderHWAddrIs(out_iface->mac());
+    arp_pkt->senderPAddrIs(out_iface->ip());
+    arp_pkt->targetHWAddrIs(EthernetAddr::kZero);
+    arp_pkt->targetPAddrIs(next_hop_ip);
+
+    // Send new ARP request immediately.
+    DLOG << "Sending ARP request for " << string(next_hop_ip);
+    DLOG << "  ARP sender HW addr: " << arp_pkt->senderHWAddr();
+    DLOG << "  ARP sender P addr:  " << arp_pkt->senderPAddr();
+    DLOG << "  ARP target HW addr: " << arp_pkt->targetHWAddr();
+    DLOG << "  ARP target P addr:  " << arp_pkt->targetPAddr();
+
+    dp_->outputPacketNew(req_eth_pkt, out_iface);
+
+    // Create an entry in the ARP queue for the next hop.
+    entry = ARPQueue::Entry::New(next_hop_ip, out_iface, req_eth_pkt);
     arp_queue_->entryIs(entry);
   }
 
+  // Add packet that generated this ARP request to the ARP queue.
+  DLOG << "queueing packet for " << pkt->dst() << " pending ARP reply";
   EthernetPacket::Ptr eth_pkt =
-    Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+      Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
   entry->packetIs(eth_pkt);
 }
+
 
 void
 ControlPlane::cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr) {
@@ -318,19 +322,24 @@ ControlPlane::cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr) {
   }
 }
 
+
 void
 ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
+  DLOG << "Flushing ARP queue for " << ip_addr;
+
   ARPQueue::Entry::Ptr queue_entry = arp_queue_->entry(ip_addr);
   if (queue_entry) {
-    EthernetPacket::Ptr pkt;
-    Interface::Ptr out_iface = queue_entry->interface();
-    ARPQueue::PacketWrapper::Ptr pkt_wrapper = queue_entry->front();
-    while (pkt_wrapper != NULL) {
-      pkt = pkt_wrapper->packet();
-      pkt->dstIs(eth_addr);
+    Interface::PtrConst out_iface = queue_entry->interface();
+    DLOG << "  out iface: " << out_iface->name();
 
-      DLOG << "Forwarding queued packet to " << ip_addr;
-      dp_->outputPacketNew(pkt, out_iface);
+    ARPQueue::PacketWrapper::Ptr pkt_wrapper = queue_entry->front();
+    EthernetPacket::Ptr eth_pkt;
+    while (pkt_wrapper != NULL) {
+      eth_pkt = pkt_wrapper->packet();
+      eth_pkt->dstIs(eth_addr);
+
+      DLOG << "  forwarding queued packet to " << ip_addr;
+      dp_->outputPacketNew(eth_pkt, out_iface);
 
       pkt_wrapper = pkt_wrapper->next();
     }

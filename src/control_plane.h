@@ -67,10 +67,10 @@ class ControlPlane : public Fwk::NamedInterface {
     Fwk::Log::Ptr log_;
   };
 
-  void sendARPRequest(IPv4Addr next_hop_ip, Interface::Ptr out_iface);
+  void sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
+                                      Interface::Ptr out_iface,
+                                      IPPacket::Ptr pkt);
   void sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr);
-  void enqueuePacket(IPv4Addr next_hop_ip, Interface::Ptr out_iface,
-                     IPPacket::Ptr pkt);
   void cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr);
 
   void sendICMPTTLExceeded(IPPacket::Ptr orig_pkt);

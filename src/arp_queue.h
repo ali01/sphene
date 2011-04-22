@@ -45,24 +45,30 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     typedef Fwk::Ptr<const Entry> PtrConst;
     typedef Fwk::Ptr<Entry> Ptr;
 
-    static Ptr New(const IPv4Addr& ip, Interface::Ptr interface) {
-      return new Entry(ip, interface);
+    static Ptr New(const IPv4Addr& ip,
+                   Interface::PtrConst interface,
+                   EthernetPacket::PtrConst request) {
+      return new Entry(ip, interface, request);
     }
 
     const IPv4Addr& ipAddr() const { return ip_; }
-    Interface::Ptr interface() const { return interface_; }
+    Interface::PtrConst interface() const { return interface_; }
+    EthernetPacket::PtrConst request() const { return request_; }
     PacketWrapper::Ptr front() const { return packet_queue_.front(); }
 
     void packetIs(EthernetPacket::Ptr packet);
 
    protected:
-    Entry(const IPv4Addr& ip, Interface::Ptr interface)
-        : ip_(ip), interface_(interface)  {}
+    Entry(const IPv4Addr& ip,
+          Interface::PtrConst interface,
+          EthernetPacket::PtrConst request)
+        : ip_(ip), interface_(interface), request_(request)  {}
 
    private:
     /* Data members. */
     IPv4Addr ip_;
-    Interface::Ptr interface_;
+    Interface::PtrConst interface_;
+    EthernetPacket::PtrConst request_;
     Fwk::LinkedList<PacketWrapper> packet_queue_;
 
     /* Operations disallowed. */
