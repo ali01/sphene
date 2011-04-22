@@ -95,17 +95,6 @@ void sr_integ_init(struct sr_instance* sr)
   // Initialize input packet queue.
   pq = Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
                                  Interface::PtrConst> >::New();
-
-  // Initialize task manager.
-  tm = TaskManager::New();
-
-  // Create ARP cache daemon and add it to the task manager.
-  arp_cache_daemon = ARPCacheDaemon::New(arp_cache);
-  arp_cache_daemon->periodIs(1);  // check for stale entries every second
-  tm->taskIs(arp_cache_daemon);
-
-  // Start processing thread.
-  sys_thread_new(processing_thread, NULL);
 }
 
 
@@ -159,6 +148,17 @@ static void processing_thread(void* aux) {
 void sr_integ_hw_setup(struct sr_instance* sr)
 {
   DLOG << "sw_integ_hw() called";
+
+  // Initialize task manager.
+  tm = TaskManager::New();
+
+  // Create ARP cache daemon and add it to the task manager.
+  arp_cache_daemon = ARPCacheDaemon::New(cp->arpCache());
+  arp_cache_daemon->periodIs(1);  // check for stale entries every second
+  tm->taskIs(arp_cache_daemon);
+
+  // Start processing thread.
+  sys_thread_new(processing_thread, NULL);
 }
 
 /*---------------------------------------------------------------------
