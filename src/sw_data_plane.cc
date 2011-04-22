@@ -18,7 +18,7 @@ SWDataPlane::SWDataPlane(struct sr_instance *sr,
 }
 
 
-void SWDataPlane::outputPacketNew(EthernetPacket::Ptr pkt,
+void SWDataPlane::outputPacketNew(EthernetPacket::PtrConst pkt,
                                   Interface::PtrConst iface) {
   DLOG << "outputPacketNew() in SWDataPlane";
   DLOG << "  iface: " << iface->name();

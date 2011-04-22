@@ -26,7 +26,7 @@ class SWDataPlane : public DataPlane {
     return new SWDataPlane(sr, routing_table, arp_cache);
   }
 
-  virtual void outputPacketNew(Fwk::Ptr<EthernetPacket> pkt,
+  virtual void outputPacketNew(Fwk::Ptr<EthernetPacket const> pkt,
                                Interface::PtrConst iface);
 
  protected:
