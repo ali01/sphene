@@ -136,9 +136,11 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
   bool merge_flag = false;
 
   // Update <sender IP, sender MAC> pair in ARP cache if it exists.
-  cp_->arpCache()->lockedIs(true);
-  ARPCache::Entry::Ptr cache_entry = cp_->arpCache()->entry(sender_ip);
-  cp_->arpCache()->lockedIs(false);
+  ARPCache::Entry::Ptr cache_entry;
+  {
+    ARPCache::ScopedLock lock(cp_->arpCache());
+    cache_entry = cp_->arpCache()->entry(sender_ip);
+  }
   if (cache_entry) {
     cache_entry->ethernetAddrIs(sender_eth);
     cache_entry->ageIs(0);
@@ -153,7 +155,8 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
     if (!merge_flag) {
       cache_entry = ARPCache::Entry::New(sender_ip, sender_eth);
       cache_entry->typeIs(ARPCache::Entry::kDynamic);
-      cp_->arpCache()->lockedIs(true);
+
+      ARPCache::ScopedLock lock(cp_->arpCache());
       cp_->arpCache()->entryIs(cache_entry);
       cp_->arpCache()->lockedIs(false);
     }
