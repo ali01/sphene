@@ -72,7 +72,7 @@ class ControlPlane : public Fwk::NamedInterface {
                                       Interface::Ptr out_iface,
                                       IPPacket::Ptr pkt);
   void sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr);
-  void cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr);
+  void updateARPCacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr);
 
   void sendICMPTTLExceeded(IPPacket::Ptr orig_pkt);
   void sendICMPDestNetworkUnreach(IPPacket::PtrConst orig_pkt);

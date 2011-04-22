@@ -188,9 +188,9 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
       IPv4Addr ip_addr = pkt->senderPAddr();
       EthernetAddr eth_addr = pkt->senderHWAddr();
 
-      DLOG << "ARP reply for " << ip_addr << " received.";
+      DLOG << "ARP reply for " << ip_addr << " received";
 
-      cp_->cacheMapping(ip_addr, eth_addr);
+      cp_->updateARPCacheMapping(ip_addr, eth_addr);
       cp_->sendEnqueued(ip_addr, eth_addr);
     }
   }
@@ -313,8 +313,8 @@ ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
 
 
 void
-ControlPlane::cacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr) {
-  // Adding mapping to ARP cache.
+ControlPlane::updateARPCacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr) {
+  ARPCache::ScopedLock lock(arp_cache_);
   ARPCache::Entry::Ptr entry = arp_cache_->entry(ip_addr);
   if (entry == NULL) {
     entry = ARPCache::Entry::New(ip_addr, eth_addr);
