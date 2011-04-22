@@ -2,7 +2,7 @@
 #define ARP_CACHE_DAEMON_H_
 
 #include "fwk/log.h"
-#include "fwk/ptr_interface.h"
+#include "fwk/ptr.h"
 
 #include "arp_cache.h"
 #include "task.h"
