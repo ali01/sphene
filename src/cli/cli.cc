@@ -279,8 +279,19 @@ void cli_show_ip_route() {
   struct sr_instance* sr = get_sr();
   RoutingTable::Ptr rtable = sr->cp->routingTable();
 
+  // Buffer for proper formatting.
+  char line_buf[256];
+
+  // Line format.
+  const char* const format = "  %-16s %-16s %-16s %-11s %-9s\n";
+
+  // Output header.
   cli_send_str("Routing table:\n");
-  cli_send_str("  Destination\tGateway\tMask\tIface\tType\n");
+  snprintf(line_buf, sizeof(line_buf), format,
+           "Destination", "Gateway", "Mask", "Interface", "Type");
+  cli_send_str(line_buf);
+
+  // Output each routing table entry.
   rtable->lockedIs(true);
   for (RoutingTable::Entry::Ptr entry = rtable->front();
        entry; entry = entry->next()) {
@@ -290,19 +301,11 @@ void cli_show_ip_route() {
     const string& if_name = entry->interface()->name();
     const RoutingTable::Entry::Type type = entry->type();
 
-    // TODO(ms): The alignment here is poor.
-    cli_send_str("  ");
-    cli_send_str(subnet.c_str());
-    cli_send_str("\t");
-    cli_send_str(gateway.c_str());
-    cli_send_str("\t");
-    cli_send_str(mask.c_str());
-    cli_send_str("\t");
-    cli_send_str(if_name.c_str());
-    cli_send_str("\t");
-    cli_send_str((type == RoutingTable::Entry::kStatic) ? "static" :
-                 "dynamic");
-    cli_send_str("\n");
+    snprintf(line_buf, sizeof(line_buf), format,
+             subnet.c_str(), gateway.c_str(), mask.c_str(), if_name.c_str(),
+             ((type == RoutingTable::Entry::kStatic) ? "static" : "dynamic"));
+
+    cli_send_str(line_buf);
   }
   rtable->lockedIs(false);
 }
