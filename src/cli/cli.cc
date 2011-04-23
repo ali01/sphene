@@ -250,7 +250,19 @@ void cli_show_ip_intf() {
   struct sr_instance* sr = get_sr();
   InterfaceMap::Ptr ifaces = sr->dp->interfaceMap();
 
+  // Buffer for proper formatting.
+  char line_buf[256];
+
+  // Line format.
+  const char* const format = "  %-6s %-16s %-16s %-19s %-6s\n";
+
+  // Output header.
   cli_send_str("Interfaces:\n");
+  snprintf(line_buf, sizeof(line_buf), format,
+           "Name", "IP address", "Mask", "MAC address", "Status");
+  cli_send_str(line_buf);
+
+  // Output each interface.
   for (InterfaceMap::const_iterator it = ifaces->begin();
        it != ifaces->end(); ++it) {
     Interface::Ptr iface = it->second;
@@ -259,17 +271,11 @@ void cli_show_ip_intf() {
     const string& mask = iface->subnetMask();
     const string& mac = iface->mac();
     const bool enabled = iface->enabled();
-    cli_send_str("  ");
-    cli_send_str(name.c_str());
-    cli_send_str("\t");
-    cli_send_str(ip.c_str());
-    cli_send_str("\t");
-    cli_send_str(mask.c_str());
-    cli_send_str("\t");
-    cli_send_str(mac.c_str());
-    cli_send_str("\t");
-    cli_send_str(enabled ? "up" : "down");
-    cli_send_str("\n");
+
+    snprintf(line_buf, sizeof(line_buf), format,
+             name.c_str(), ip.c_str(), mask.c_str(), mac.c_str(),
+             (enabled ? "up" : "down"));
+    cli_send_str(line_buf);
   }
 }
 
