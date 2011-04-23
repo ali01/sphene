@@ -230,7 +230,7 @@ void cli_show_ip() {
 void cli_show_ip_arp() {
   struct sr_instance* sr = get_sr();
   ARPCache::Ptr cache = sr->cp->arpCache();
-  cache->lockedIs(true);
+  ARPCache::ScopedLock lock(cache);
 
   cli_send_str("ARP cache:\n");
   for (ARPCache::iterator it = cache->begin(); it != cache->end(); ++it) {
@@ -244,8 +244,6 @@ void cli_show_ip_arp() {
     cli_send_str(mac.c_str());
     cli_send_str("\n");
   }
-
-  cache->lockedIs(false);
 }
 
 void cli_show_ip_intf() {
@@ -292,7 +290,7 @@ void cli_show_ip_route() {
   cli_send_str(line_buf);
 
   // Output each routing table entry.
-  rtable->lockedIs(true);
+  RoutingTable::ScopedLock lock(rtable);
   for (RoutingTable::Entry::Ptr entry = rtable->front();
        entry; entry = entry->next()) {
     const string& subnet = entry->subnet();
@@ -307,7 +305,6 @@ void cli_show_ip_route() {
 
     cli_send_str(line_buf);
   }
-  rtable->lockedIs(false);
 }
 
 void cli_show_opt() {
