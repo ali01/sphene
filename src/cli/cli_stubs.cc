@@ -177,7 +177,7 @@ int rtable_route_remove(struct sr_instance* const sr,
                           RoutingTable::Entry::kDynamic)) {
       rtable->entryDel(entry);
 
-      fprintf(stdout, "Remove route: %s/%s gw %s\n",
+      fprintf(stdout, "Removed route: %s/%s gw %s\n",
           string(entry->subnet()).c_str(),
           string(entry->subnetMask()).c_str(),
           string(entry->gateway()).c_str());
@@ -190,16 +190,43 @@ int rtable_route_remove(struct sr_instance* const sr,
 }
 
 
-void rtable_purge_all(struct sr_instance* const sr) {
+static void rtable_purge_type(struct sr_instance* const sr,
+                              const RoutingTable::Entry::Type type) {
   RoutingTable::Ptr rtable = sr->cp->routingTable();
   RoutingTable::ScopedLock lock(rtable);
 
+  // List of entries to remove.
+  vector<RoutingTable::Entry::Ptr> remove;
+
+  // Find candidate entries to remove.
   RoutingTable::Entry::Ptr entry;
-  while ((entry = rtable->front()) != NULL)
+  for (entry = rtable->front(); entry; entry = entry->next()) {
+    if (entry->type() == type)
+      remove.push_back(entry);
+  }
+
+  // Remove entries.
+  vector<RoutingTable::Entry::Ptr>::iterator it;
+  for (it = remove.begin(); it != remove.end(); ++it) {
+    entry = *it;
     rtable->entryDel(entry);
+
+    fprintf(stdout, "Removed route: %s/%s gw %s\n",
+            string(entry->subnet()).c_str(),
+            string(entry->subnetMask()).c_str(),
+            string(entry->gateway()).c_str());
+  }
+}
+
+
+void rtable_purge_all(struct sr_instance* const sr) {
+  rtable_purge_type(sr, RoutingTable::Entry::kStatic);
+  rtable_purge_type(sr, RoutingTable::Entry::kDynamic);
 }
 
 
 void rtable_purge(struct sr_instance* const sr, const int is_static) {
-    fprintf( stderr, "not yet implemented: rtable_purge\n" );
+  rtable_purge_type(sr, (is_static ?
+                         RoutingTable::Entry::kStatic :
+                         RoutingTable::Entry::kDynamic));
 }
