@@ -162,8 +162,31 @@ int rtable_route_remove(struct sr_instance* const sr,
                         const uint32_t dest,
                         const uint32_t mask,
                         const int is_static) {
-    fprintf( stderr, "not yet implemented: rtable_route_remove\n" );
-    return 0 /* fail */;
+  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::ScopedLock lock(rtable);
+
+  // TODO(ms): I'm not sure if this matches on type (static/dynamic) correctly.
+  //   Specifically, what happens when we learn about a route that exists as
+  //   static in the routing table? And vice versa?
+  RoutingTable::Entry::Ptr entry;
+  for (entry = rtable->front(); entry; entry = entry->next()) {
+    if (entry->subnet() == ntohl(dest) &&
+        entry->subnetMask() == ntohl(mask) &&
+        entry->type() == (is_static ?
+                          RoutingTable::Entry::kStatic :
+                          RoutingTable::Entry::kDynamic)) {
+      rtable->entryDel(entry);
+
+      fprintf(stdout, "Remove route: %s/%s gw %s\n",
+          string(entry->subnet()).c_str(),
+          string(entry->subnetMask()).c_str(),
+          string(entry->gateway()).c_str());
+
+      return 1;
+    }
+  }
+
+  return 0;  // failed to find given route
 }
 
 
