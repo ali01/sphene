@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <vector>
 
+#include "fwk/scoped_lock.h"
+
 #include "arp_cache.h"
 #include "control_plane.h"
 #include "data_plane.h"
@@ -25,7 +27,7 @@ int arp_cache_static_entry_add(struct sr_instance* const sr,
   cache_entry->typeIs(ARPCache::Entry::kStatic);
 
   {
-    ARPCache::ScopedLock lock(cache);
+    Fwk::ScopedLock<ARPCache> lock(cache);
     cache->entryIs(cache_entry);
   }
 
@@ -37,7 +39,7 @@ int arp_cache_static_entry_add(struct sr_instance* const sr,
 int arp_cache_static_entry_remove(struct sr_instance* const sr,
                                   const uint32_t ip) {
   ARPCache::Ptr cache = sr->cp->arpCache();
-  ARPCache::ScopedLock lock(cache);
+  Fwk::ScopedLock<ARPCache> lock(cache);
 
   ARPCache::Entry::Ptr cache_entry = cache->entry(ntohl(ip));
   if (!cache_entry || cache_entry->type() != ARPCache::Entry::kStatic) {
@@ -53,7 +55,7 @@ int arp_cache_static_entry_remove(struct sr_instance* const sr,
 static unsigned arp_cache_type_purge(struct sr_instance* const sr,
                                      const ARPCache::Entry::Type type) {
   ARPCache::Ptr cache = sr->cp->arpCache();
-  ARPCache::ScopedLock lock(cache);
+  Fwk::ScopedLock<ARPCache> lock(cache);
 
   // Build list of entries to remove.
   vector<ARPCache::Entry::Ptr> entries;
@@ -147,7 +149,7 @@ void rtable_route_add(struct sr_instance* const sr,
 
   RoutingTable::Ptr rtable = sr->cp->routingTable();
   {
-    RoutingTable::ScopedLock lock(rtable);
+    Fwk::ScopedLock<RoutingTable> lock(rtable);
     rtable->entryIs(entry);
   }
 
@@ -163,7 +165,7 @@ int rtable_route_remove(struct sr_instance* const sr,
                         const uint32_t mask,
                         const int is_static) {
   RoutingTable::Ptr rtable = sr->cp->routingTable();
-  RoutingTable::ScopedLock lock(rtable);
+  Fwk::ScopedLock<RoutingTable> lock(rtable);
 
   // TODO(ms): I'm not sure if this matches on type (static/dynamic) correctly.
   //   Specifically, what happens when we learn about a route that exists as
@@ -193,7 +195,7 @@ int rtable_route_remove(struct sr_instance* const sr,
 static void rtable_purge_type(struct sr_instance* const sr,
                               const RoutingTable::Entry::Type type) {
   RoutingTable::Ptr rtable = sr->cp->routingTable();
-  RoutingTable::ScopedLock lock(rtable);
+  Fwk::ScopedLock<RoutingTable> lock(rtable);
 
   // List of entries to remove.
   vector<RoutingTable::Entry::Ptr> remove;

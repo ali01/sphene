@@ -27,6 +27,7 @@
 #include "fwk/concurrent_deque.h"
 #include "fwk/exception.h"
 #include "fwk/log.h"
+#include "fwk/scoped_lock.h"
 
 #include "arp_cache.h"
 #include "arp_cache_daemon.h"
@@ -206,7 +207,7 @@ static void read_rtable(struct sr_instance* sr) {
     entry->typeIs(RoutingTable::Entry::kStatic);
 
     {
-      RoutingTable::ScopedLock lock(rt);
+      Fwk::ScopedLock<RoutingTable>lock(rt);
       rt->entryIs(entry);
     }
 

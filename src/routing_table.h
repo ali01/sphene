@@ -6,6 +6,7 @@
 
 #include "fwk/ptr_interface.h"
 #include "fwk/linked_list.h"
+#include "fwk/scoped_lock.h"
 
 #include "ip_packet.h"
 #include "interface.h"
@@ -59,21 +60,6 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
 
     /* Operations disallowed */
     Entry(const Entry&);
-  };
-
-  /* ScopedLock for safe locking of the routing table. */
-  class ScopedLock {
-   public:
-    ScopedLock(RoutingTable::Ptr rtable) : rtable_(rtable) {
-      rtable_->lockedIs(true);
-    }
-    ~ScopedLock() {
-      rtable_->lockedIs(false);
-      rtable_ = NULL;
-    }
-
-   private:
-    RoutingTable::Ptr rtable_;
   };
 
   static Ptr New() {

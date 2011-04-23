@@ -1,8 +1,10 @@
 #include "data_plane.h"
 
 #include <string>
+
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
+#include "fwk/scoped_lock.h"
 
 #include "arp_packet.h"
 #include "control_plane.h"
@@ -121,7 +123,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   RoutingTable::Entry::Ptr r_entry;
   {
     RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
-    RoutingTable::ScopedLock lock(rtable);
+    Fwk::ScopedLock<RoutingTable>lock(rtable);
     r_entry = rtable->lpm(dest_ip);
   }
   if (!r_entry) {
@@ -144,7 +146,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   ARPCache::Entry::Ptr arp_entry;
   {
     ARPCache::Ptr cache = dp_->controlPlane()->arpCache();
-    ARPCache::ScopedLock lock(cache);
+    Fwk::ScopedLock<ARPCache>lock(cache);
     arp_entry = cache->entry(next_hop_ip);
   }
   if (!arp_entry) {

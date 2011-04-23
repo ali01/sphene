@@ -4,6 +4,7 @@
 #include "fwk/buffer.h"
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
+#include "fwk/scoped_lock.h"
 
 #include "arp_packet.h"
 #include "ethernet_packet.h"
@@ -44,7 +45,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   RoutingTable::Entry::Ptr r_entry;
   {
     RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
-    RoutingTable::ScopedLock lock(rtable);
+    Fwk::ScopedLock<RoutingTable> lock(rtable);
     r_entry = rtable->lpm(dest_ip);
   }
   if (!r_entry) {
@@ -79,7 +80,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   ARPCache::Entry::Ptr arp_entry;
   {
     ARPCache::Ptr cache = dp_->controlPlane()->arpCache();
-    ARPCache::ScopedLock lock(cache);
+    Fwk::ScopedLock<ARPCache> lock(cache);
     arp_entry = cache->entry(next_hop_ip);
   }
   if (!arp_entry) {
@@ -138,7 +139,7 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
   // Update <sender IP, sender MAC> pair in ARP cache if it exists.
   ARPCache::Entry::Ptr cache_entry;
   {
-    ARPCache::ScopedLock lock(cp_->arpCache());
+    Fwk::ScopedLock<ARPCache> lock(cp_->arpCache());
     cache_entry = cp_->arpCache()->entry(sender_ip);
   }
   if (cache_entry) {
@@ -156,7 +157,7 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
       cache_entry = ARPCache::Entry::New(sender_ip, sender_eth);
       cache_entry->typeIs(ARPCache::Entry::kDynamic);
 
-      ARPCache::ScopedLock lock(cp_->arpCache());
+      Fwk::ScopedLock<ARPCache> lock(cp_->arpCache());
       cp_->arpCache()->entryIs(cache_entry);
       cp_->arpCache()->lockedIs(false);
     }
@@ -301,7 +302,7 @@ ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
 
 void
 ControlPlane::updateARPCacheMapping(IPv4Addr ip_addr, EthernetAddr eth_addr) {
-  ARPCache::ScopedLock lock(arp_cache_);
+  Fwk::ScopedLock<ARPCache> lock(arp_cache_);
   ARPCache::Entry::Ptr entry = arp_cache_->entry(ip_addr);
   if (entry == NULL) {
     entry = ARPCache::Entry::New(ip_addr, eth_addr);
@@ -379,7 +380,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   RoutingTable::Entry::Ptr r_entry;
   {
     RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
-    RoutingTable::ScopedLock lock(rtable);
+    Fwk::ScopedLock<RoutingTable> lock(rtable);
     r_entry = rtable->lpm(dest_ip);
   }
   if (!r_entry) {
@@ -464,7 +465,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   RoutingTable::Entry::Ptr r_entry;
   {
     RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
-    RoutingTable::ScopedLock lock(rtable);
+    Fwk::ScopedLock<RoutingTable> lock(rtable);
     r_entry = rtable->lpm(dest_ip);
   }
   if (!r_entry) {

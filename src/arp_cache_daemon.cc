@@ -2,8 +2,10 @@
 
 #include <vector>
 
-#include "arp_cache.h"
 #include "fwk/log.h"
+#include "fwk/scoped_lock.h"
+
+#include "arp_cache.h"
 #include "task.h"
 #include "time_types.h"
 
@@ -22,7 +24,7 @@ void ARPCacheDaemon::run() {
   vector<ARPCache::Entry::Ptr> remove;
 
   // Find old entries to remove.
-  ARPCache::ScopedLock lock(cache_);
+  Fwk::ScopedLock<ARPCache> lock(cache_);
   for (ARPCache::iterator it = cache_->begin(); it != cache_->end(); ++it) {
     ARPCache::Entry::Ptr entry = it->second;
 

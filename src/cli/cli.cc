@@ -8,6 +8,9 @@
 #include <string>
 #include <sys/time.h>            /* struct timeval                    */
 #include <unistd.h>              /* sleep()                           */
+
+#include "fwk/scoped_lock.h"
+
 #include "cli.h"
 #include "cli_network.h"         /* make_thread()                     */
 #include "helper.h"
@@ -230,7 +233,7 @@ void cli_show_ip() {
 void cli_show_ip_arp() {
   struct sr_instance* sr = get_sr();
   ARPCache::Ptr cache = sr->cp->arpCache();
-  ARPCache::ScopedLock lock(cache);
+  Fwk::ScopedLock<ARPCache> lock(cache);
 
   cli_send_str("ARP cache:\n");
   for (ARPCache::iterator it = cache->begin(); it != cache->end(); ++it) {
@@ -296,7 +299,7 @@ void cli_show_ip_route() {
   cli_send_str(line_buf);
 
   // Output each routing table entry.
-  RoutingTable::ScopedLock lock(rtable);
+  Fwk::ScopedLock<RoutingTable> lock(rtable);
   for (RoutingTable::Entry::Ptr entry = rtable->front();
        entry; entry = entry->next()) {
     const string& subnet = entry->subnet();
