@@ -191,7 +191,12 @@ int rtable_route_remove(struct sr_instance* const sr,
 
 
 void rtable_purge_all(struct sr_instance* const sr) {
-    fprintf( stderr, "not yet implemented: rtable_purge_all\n" );
+  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::ScopedLock lock(rtable);
+
+  RoutingTable::Entry::Ptr entry;
+  while ((entry = rtable->front()) != NULL)
+    rtable->entryDel(entry);
 }
 
 
