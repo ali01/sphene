@@ -37,13 +37,16 @@ RoutingTable::RoutingTable() {
 RoutingTable::Entry::Ptr
 RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   Entry::Ptr lpm = NULL;
-  Entry::Ptr curr = rtable_.front();
-  while (curr)  {
-    if (curr->subnet() == (dest_ip & curr->subnetMask())) {
-      if (lpm == NULL || curr->subnetMask() > lpm->subnetMask())
-        lpm = curr;
+  Entry::Ptr entry;
+  for (entry = rtable_.front(); entry; entry = entry->next()) {
+    // Routes on disabled interfaces are ignored; packets can't go out them.
+    if (!entry->interface()->enabled())
+      continue;
+
+    if (entry->subnet() == (dest_ip & entry->subnetMask())) {
+      if (lpm == NULL || entry->subnetMask() > entry->subnetMask())
+        lpm = entry;
     }
-    curr = curr->next();
   }
 
   return lpm;
