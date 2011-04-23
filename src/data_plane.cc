@@ -28,6 +28,12 @@ DataPlane::DataPlane(const std::string& name,
 
 void DataPlane::packetNew(Packet::Ptr pkt,
                           const Interface::PtrConst iface) {
+  // Ignore packets on a disabled interface.
+  if (!iface->enabled()) {
+    DLOG << "Ignoring packet on disabled interface " << iface->name();
+    return;
+  }
+
   // Dispatch packet using double-dispatch.
   (*pkt)(&functor_, iface);
 }
