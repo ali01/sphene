@@ -3,6 +3,7 @@
 #include <ostream>
 #include <string>
 
+#include "interface.h"
 #include "routing_table.h"
 
 using std::string;
@@ -31,6 +32,11 @@ class RoutingTableTest : public ::testing::Test {
     eth2_ = RoutingTable::Entry::New();
     eth3_ = RoutingTable::Entry::New();
     eth4_ = RoutingTable::Entry::New();
+    if_eth0_ = Interface::InterfaceNew("eth0");
+    if_eth1_ = Interface::InterfaceNew("eth1");
+    if_eth2_ = Interface::InterfaceNew("eth2");
+    if_eth3_ = Interface::InterfaceNew("eth3");
+    if_eth4_ = Interface::InterfaceNew("eth4");
 
     // Destination   Gateway        Mask               Iface
     // 0.0.0.0       172.24.74.17   0.0.0.0            eth0
@@ -41,18 +47,23 @@ class RoutingTableTest : public ::testing::Test {
 
     eth0_->subnetIs("0.0.0.0", "0.0.0.0");
     eth0_->gatewayIs("172.24.74.17");
+    eth0_->interfaceIs(if_eth0_);
 
     eth1_->subnetIs("10.3.0.29", "255.255.255.255");
     eth1_->gatewayIs("10.3.0.29");
+    eth1_->interfaceIs(if_eth1_);
 
     eth2_->subnetIs("10.3.0.31", "255.255.255.255");
     eth2_->gatewayIs("10.3.0.31");
+    eth2_->interfaceIs(if_eth2_);
 
     eth3_->subnetIs("10.99.0.0", "255.255.0.0");
     eth3_->gatewayIs("10.99.0.1");
+    eth3_->interfaceIs(if_eth3_);
 
     eth4_->subnetIs("10.99.1.0", "255.255.255.0");
     eth4_->gatewayIs("10.99.1.1");
+    eth4_->interfaceIs(if_eth4_);
   }
 
   RoutingTable::Ptr routing_table_;
@@ -61,6 +72,11 @@ class RoutingTableTest : public ::testing::Test {
   RoutingTable::Entry::Ptr eth2_;
   RoutingTable::Entry::Ptr eth3_;
   RoutingTable::Entry::Ptr eth4_;
+  Interface::Ptr if_eth0_;
+  Interface::Ptr if_eth1_;
+  Interface::Ptr if_eth2_;
+  Interface::Ptr if_eth3_;
+  Interface::Ptr if_eth4_;
 };
 
 
@@ -115,6 +131,16 @@ TEST_F(RoutingTableTest, deletion) {
   entry = routing_table_->lpm("10.3.0.29");
   EXPECT_EQ(eth1_, entry);
 
+  // Ensure default route is used if the specific route's interface is down.
+  if_eth1_->enabledIs(false);
+  entry = routing_table_->lpm("10.3.0.29");
+  EXPECT_EQ(eth0_, entry);
+
+  // Re-enable the interface. Make sure static route still exists.
+  if_eth1_->enabledIs(true);
+  entry = routing_table_->lpm("10.3.0.29");
+  EXPECT_EQ(eth1_, entry);
+
   // Ensure default route is used after deletion of specific route.
   routing_table_->entryDel(eth1_);
   EXPECT_EQ((size_t)1, routing_table_->entries());
@@ -149,6 +175,7 @@ TEST_F(RoutingTableTest, duplicate) {
   RoutingTable::Entry::Ptr eth0_dup = RoutingTable::Entry::New();
   eth0_dup->subnetIs(eth0_->subnet(), eth0_->subnetMask());
   eth0_dup->gatewayIs(eth0_->gateway());
+  eth0_dup->interfaceIs(eth0_->interface());
 
   // Add it. The routing table should not grow.
   routing_table_->entryIs(eth0_dup);
@@ -167,6 +194,7 @@ TEST_F(RoutingTableTest, updateRoute) {
   RoutingTable::Entry::Ptr eth0_dup = RoutingTable::Entry::New();
   eth0_dup->subnetIs(eth0_->subnet(), eth0_->subnetMask());
   eth0_dup->gatewayIs("4.2.2.1");
+  eth0_dup->interfaceIs(eth0_->interface());
 
   // Add the duplicated default route to update the existing default route.
   routing_table_->entryIs(eth0_dup);
