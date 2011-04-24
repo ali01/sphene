@@ -13,6 +13,7 @@ class EthernetPacket;
 class ICMPPacket;
 class Interface;
 class IPPacket;
+class OSPFPacket;
 class UnknownPacket;
 
 
@@ -27,6 +28,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
     virtual void operator()(EthernetPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(ICMPPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(IPPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(OSPFPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(UnknownPacket*, Fwk::Ptr<const Interface>) { }
 
     virtual ~Functor() { }
