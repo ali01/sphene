@@ -91,11 +91,7 @@ void sr_integ_init(struct sr_instance* sr)
   ARPCache::Ptr arp_cache = cp->arpCache();
   dp = SWDataPlane::SWDataPlaneNew(sr, routing_table, arp_cache);
 
-  Router::Ptr router = Router::New("Router", cp, dp);
-
-  // ControlPlane and DataPlane are parts of the router.
-  sr->cp = cp.ptr();
-  sr->dp = dp.ptr();
+  sr->router = Router::New("Router", cp, dp);
 
   // Initialize input packet queue.
   pq = Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
@@ -340,7 +336,7 @@ void sr_integ_destroy(struct sr_instance* sr)
 uint32_t sr_integ_findsrcip(uint32_t dest /* nbo */)
 {
   struct sr_instance* sr = sr_get_global_instance(NULL);
-  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
 
   // Find routing table entry for destination.
   IPv4Addr dest_ip(ntohl(dest));
@@ -406,7 +402,7 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
   ip_pkt->checksumReset();
 
   // Send packet.
-  sr->cp->outputPacketNew(ip_pkt);
+  sr->router->controlPlane()->outputPacketNew(ip_pkt);
 
   // The payload pointer was given to us.
   free(payload);

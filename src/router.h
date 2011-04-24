@@ -21,6 +21,9 @@ class Router : public Fwk::NamedInterface {
     return new Router(name, cp, dp);
   }
 
+  ControlPlane::Ptr controlPlane() const { return cp_; }
+  DataPlane::Ptr dataPlane() const { return dp_; }
+
  protected:
   Router(const std::string& name,
          ControlPlane::Ptr cp,
