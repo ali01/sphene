@@ -58,7 +58,6 @@ static ARPQueueDaemon::Ptr arp_queue_daemon;
 static Fwk::Log::Ptr log_;
 static Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
                                  Interface::PtrConst> >::Ptr pq;
-static TaskManager::Ptr tm;
 
 static void processing_thread(void* _sr);
 static void read_rtable(struct sr_instance* sr);
@@ -88,8 +87,11 @@ void sr_integ_init(struct sr_instance* sr)
   DataPlane::Ptr dp =
       SWDataPlane::SWDataPlaneNew(sr, cp->routingTable(), cp->arpCache());
 
+  // Initialize task manager.
+  TaskManager::Ptr tm = TaskManager::New();
+
   // Create Router in the given sr_instance.
-  sr->router = Router::New("Router", cp, dp);
+  sr->router = Router::New("Router", cp, dp, tm);
 
   // TODO(ms): This should go in the sr_instance as well.
   // Initialize input packet queue.
@@ -102,6 +104,7 @@ void sr_integ_init(struct sr_instance* sr)
    tasks. Started by sr_integ_init(). */
 static void processing_thread(void* _sr) {
   struct sr_instance* sr = (struct sr_instance*)_sr;
+  Router::Ptr router = sr->router;
 
   DLOG << "processing thread started";
   struct timespec last_time;
@@ -115,7 +118,7 @@ static void processing_thread(void* _sr) {
 
     // Ensure we run tasks in the task manager every second.
     if (next_time.tv_sec - last_time.tv_sec >= 1) {
-      tm->timeIs(time(NULL));
+      router->taskManager()->timeIs(time(NULL));
       last_time = next_time;
     }
 
@@ -129,7 +132,7 @@ static void processing_thread(void* _sr) {
       DLOG << "processing thread popped packet";
 
       // TODO(ms): bypass dataplane here on _CPUMODE_?
-      sr->router->dataPlane()->packetNew(eth_pkt, iface);
+      router->dataPlane()->packetNew(eth_pkt, iface);
     } catch (Fwk::TimeoutException& e) {
       // Timeout while waiting for a packet in the input queue. Ignore it.
     }
@@ -155,18 +158,15 @@ void sr_integ_hw_setup(struct sr_instance* sr)
   // Read in rtable file, if any.
   read_rtable(sr);
 
-  // Initialize task manager.
-  tm = TaskManager::New();
-
   // Create ARP cache daemon and add it to the task manager.
   arp_cache_daemon = ARPCacheDaemon::New(router->controlPlane()->arpCache());
   arp_cache_daemon->periodIs(1);  // check for stale entries every second
-  tm->taskIs(arp_cache_daemon);
+  router->taskManager()->taskIs(arp_cache_daemon);
 
   // Create ARP queue daemon and add it to the task manager.
   arp_queue_daemon = ARPQueueDaemon::New(router->controlPlane());
   arp_queue_daemon->periodIs(1);
-  tm->taskIs(arp_queue_daemon);
+  router->taskManager()->taskIs(arp_queue_daemon);
 
   // Start processing thread.
   sys_thread_new(processing_thread, sr);
