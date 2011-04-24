@@ -73,7 +73,6 @@ void sr_integ_init(struct sr_instance* sr)
 {
   log_ = Fwk::Log::LogNew("root");
   log_->levelIs(log_->debug());
-  ILOG << "Initializing";
 
   // Create ControlPlane.
   ControlPlane::Ptr cp = ControlPlane::ControlPlaneNew();
@@ -101,7 +100,7 @@ static void processing_thread(void* _sr) {
   Router::Ptr router = sr->router;
 
   sr->processing_thread_running = true;
-  DLOG << "processing thread started";
+  DLOG << "Processing thread started";
   struct timespec last_time;
   struct timespec next_time;
   clock_gettime(CLOCK_REALTIME, &last_time);
@@ -124,7 +123,7 @@ static void processing_thread(void* _sr) {
 
       EthernetPacket::Ptr eth_pkt = p.first;
       Interface::PtrConst iface = p.second;
-      DLOG << "processing thread popped packet";
+      DLOG << "Processing thread popped packet";
 
       // TODO(ms): bypass dataplane here on _CPUMODE_?
       router->dataPlane()->packetNew(eth_pkt, iface);
@@ -134,7 +133,7 @@ static void processing_thread(void* _sr) {
   }
 
   sr->processing_thread_running = false;
-  DLOG << "processing thread exiting";
+  DLOG << "Processing thread exiting";
 }
 
 
@@ -150,7 +149,6 @@ static void processing_thread(void* _sr) {
 
 void sr_integ_hw_setup(struct sr_instance* sr)
 {
-  DLOG << "sw_integ_hw() called";
   Router::Ptr router = sr->router;
 
   // Read in rtable file, if any.
@@ -241,7 +239,7 @@ void sr_integ_input(struct sr_instance* sr,
                     unsigned int len,
                     const char* interface/* borrowed */)
 {
-  DLOG << "sr_integ_input() called";
+  DLOG << "Received packet";
 
   // Find incoming interface.
   Interface::PtrConst iface =
@@ -326,8 +324,6 @@ int sr_integ_low_level_output(struct sr_instance* sr /* borrowed */,
 
 void sr_integ_destroy(struct sr_instance* sr)
 {
-  DLOG << "sr_integ_destroy() called";
-
   // Kill processing thread.
   sr->quit = true;
   while (sr->processing_thread_running)
