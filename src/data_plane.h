@@ -16,6 +16,7 @@
 class ARPPacket;
 class ControlPlane;
 class EthernetPacket;
+class GREPacket;
 class ICMPPacket;
 class IPPacket;
 class UnknownPacket;
@@ -63,6 +64,7 @@ class DataPlane : public Fwk::NamedInterface {
 
     void operator()(ARPPacket*, Interface::PtrConst);
     void operator()(EthernetPacket*, Interface::PtrConst);
+    void operator()(GREPacket*, Interface::PtrConst);
     void operator()(ICMPPacket*, Interface::PtrConst);
     void operator()(IPPacket*, Interface::PtrConst);
     void operator()(UnknownPacket*, Interface::PtrConst);
