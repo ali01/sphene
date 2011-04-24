@@ -54,8 +54,6 @@ using std::pair;
 using std::string;
 
 static Fwk::Log::Ptr log_;
-static Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
-                                 Interface::PtrConst> >::Ptr pq;
 
 static void processing_thread(void* _sr);
 static void read_rtable(struct sr_instance* sr);
@@ -91,10 +89,8 @@ void sr_integ_init(struct sr_instance* sr)
   // Create Router in the given sr_instance.
   sr->router = Router::New("Router", cp, dp, tm);
 
-  // TODO(ms): This should go in the sr_instance as well.
   // Initialize input packet queue.
-  pq = Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
-                                 Interface::PtrConst> >::New();
+  sr->input_queue = sr_instance::PacketQueue::New();
 }
 
 
@@ -123,7 +119,7 @@ static void processing_thread(void* _sr) {
     try {
       // Bound the waiting time for a packet in the input queue.
       next_time.tv_sec += 1;
-      p = pq->timedPopFront(next_time);
+      p = sr->input_queue->timedPopFront(next_time);
 
       EthernetPacket::Ptr eth_pkt = p.first;
       Interface::PtrConst iface = p.second;
@@ -255,7 +251,7 @@ void sr_integ_input(struct sr_instance* sr,
   EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
 
   // Insert packet into packet queue.
-  pq->pushBack(std::make_pair(eth_pkt, iface));
+  sr->input_queue->pushBack(std::make_pair(eth_pkt, iface));
 }
 
 /*-----------------------------------------------------------------------------

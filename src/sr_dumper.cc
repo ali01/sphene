@@ -26,7 +26,7 @@ void sr_log_packet(struct sr_instance* sr, uint8_t* buf, int len )
     if(!sr->logfile)
     {return; }
 
-    size = min(SR_PACKET_DUMP_SIZE, len);
+    size = (SR_PACKET_DUMP_SIZE <= len) ? SR_PACKET_DUMP_SIZE : len;
 
     gettimeofday(&h.ts, 0);
     h.caplen = size;
