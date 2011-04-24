@@ -53,8 +53,6 @@
 using std::pair;
 using std::string;
 
-static ARPCacheDaemon::Ptr arp_cache_daemon;
-static ARPQueueDaemon::Ptr arp_queue_daemon;
 static Fwk::Log::Ptr log_;
 static Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
                                  Interface::PtrConst> >::Ptr pq;
@@ -159,12 +157,14 @@ void sr_integ_hw_setup(struct sr_instance* sr)
   read_rtable(sr);
 
   // Create ARP cache daemon and add it to the task manager.
-  arp_cache_daemon = ARPCacheDaemon::New(router->controlPlane()->arpCache());
+  ARPCacheDaemon::Ptr arp_cache_daemon =
+      ARPCacheDaemon::New(router->controlPlane()->arpCache());
   arp_cache_daemon->periodIs(1);  // check for stale entries every second
   router->taskManager()->taskIs(arp_cache_daemon);
 
   // Create ARP queue daemon and add it to the task manager.
-  arp_queue_daemon = ARPQueueDaemon::New(router->controlPlane());
+  ARPQueueDaemon::Ptr arp_queue_daemon =
+      ARPQueueDaemon::New(router->controlPlane());
   arp_queue_daemon->periodIs(1);
   router->taskManager()->taskIs(arp_queue_daemon);
 
