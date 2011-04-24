@@ -39,6 +39,7 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "lwtcp/lwip/sys.h"
+#include "router.h"
 #include "routing_table.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
@@ -90,9 +91,7 @@ void sr_integ_init(struct sr_instance* sr)
   ARPCache::Ptr arp_cache = cp->arpCache();
   dp = SWDataPlane::SWDataPlaneNew(sr, routing_table, arp_cache);
 
-  // Initialize pointers between ControlPlane and DataPlane.
-  cp->dataPlaneIs(dp);
-  dp->controlPlaneIs(cp.ptr());  // weak pointer to prevent circular reference
+  Router::Ptr router = Router::New("Router", cp, dp);
 
   // ControlPlane and DataPlane are parts of the router.
   sr->cp = cp.ptr();
