@@ -34,6 +34,11 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <netinet/in.h>
+#include <utility>
+
+#include "fwk/concurrent_deque.h"
+#include "fwk/ptr.h"
+
 
 #define SR_NAMELEN 32
 
@@ -53,8 +58,9 @@
 #define DebugMAC(x) do{}while(0)
 #endif
 
-class DataPlane;
-class ControlPlane;
+class EthernetPacket;
+class Interface;
+class Router;
 
 
 /* ----------------------------------------------------------------------------
@@ -82,8 +88,14 @@ struct sr_vns_if
 
 struct sr_instance
 {
-    ControlPlane* cp;
-    DataPlane* dp;
+    typedef std::pair<Fwk::Ptr<EthernetPacket>,
+                      Fwk::Ptr<Interface const> > EthernetPacketInterfacePair;
+    typedef Fwk::ConcurrentDeque<EthernetPacketInterfacePair> PacketQueue;
+
+    Fwk::Ptr<Router> router;
+    Fwk::Ptr<PacketQueue> input_queue;
+    bool quit;
+    bool processing_thread_running;
 
     /* VNS specific */
     int  sockfd;    /* socket to server */

@@ -47,7 +47,7 @@ class DataPlane : public Fwk::NamedInterface {
 
  protected:
   DataPlane(const std::string& name,
-            struct sr_instance *sr,
+            struct sr_instance* sr,
             RoutingTable::Ptr routing_table,
             ARPCache::Ptr arp_cache);
   virtual ~DataPlane() {}
@@ -78,7 +78,7 @@ class DataPlane : public Fwk::NamedInterface {
   RoutingTable::Ptr routing_table_;
   ARPCache::Ptr arp_cache_;
   ControlPlane* cp_;
-  struct sr_instance* sr_;  
+  struct sr_instance* sr_;
 };
 
 #endif

@@ -6,6 +6,8 @@
 #define PTRINTERFACE_H_VGPMQRTI
 
 /* stl includes */
+#include <inttypes.h>
+#include "atomic.h"
 #include "ptr.h"
 
 namespace Fwk {
@@ -13,7 +15,7 @@ namespace Fwk {
 template <typename T>
 class PtrInterface {
  public:
-  unsigned long references() const {
+  uint64_t references() const {
     return ref_;
   }
 
@@ -36,7 +38,7 @@ class PtrInterface {
   virtual ~PtrInterface() {}
   virtual void onZeroReferences() const { delete this; }
 
-  mutable unsigned long ref_;
+  mutable AtomicUInt64 ref_;
 
  private:
   friend class Ptr<T>;

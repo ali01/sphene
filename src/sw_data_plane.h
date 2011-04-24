@@ -20,7 +20,7 @@ class SWDataPlane : public DataPlane {
   typedef Fwk::Ptr<const SWDataPlane> PtrConst;
   typedef Fwk::Ptr<SWDataPlane> Ptr;
 
-  static Ptr SWDataPlaneNew(struct sr_instance *sr,
+  static Ptr SWDataPlaneNew(struct sr_instance* sr,
                             RoutingTable::Ptr routing_table,
                             ARPCache::Ptr arp_cache) {
     return new SWDataPlane(sr, routing_table, arp_cache);
@@ -30,7 +30,7 @@ class SWDataPlane : public DataPlane {
                                Interface::PtrConst iface);
 
  protected:
-  SWDataPlane(struct sr_instance *sr,
+  SWDataPlane(struct sr_instance* sr,
               RoutingTable::Ptr routing_table,
               ARPCache::Ptr arp_cache);
 

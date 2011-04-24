@@ -12,6 +12,7 @@
 #include "data_plane.h"
 #include "interface.h"
 #include "interface_map.h"
+#include "router.h"
 #include "sr_base_internal.h"
 #include "routing_table.h"
 
@@ -21,7 +22,7 @@ using std::vector;
 int arp_cache_static_entry_add(struct sr_instance* const sr,
                                const uint32_t ip,
                                const uint8_t* const mac) {
-  ARPCache::Ptr cache = sr->cp->arpCache();
+  ARPCache::Ptr cache = sr->router->controlPlane()->arpCache();
 
   ARPCache::Entry::Ptr cache_entry = ARPCache::Entry::New(ntohl(ip), mac);
   cache_entry->typeIs(ARPCache::Entry::kStatic);
@@ -38,7 +39,7 @@ int arp_cache_static_entry_add(struct sr_instance* const sr,
 
 int arp_cache_static_entry_remove(struct sr_instance* const sr,
                                   const uint32_t ip) {
-  ARPCache::Ptr cache = sr->cp->arpCache();
+  ARPCache::Ptr cache = sr->router->controlPlane()->arpCache();
   Fwk::ScopedLock<ARPCache> lock(cache);
 
   ARPCache::Entry::Ptr cache_entry = cache->entry(ntohl(ip));
@@ -54,7 +55,7 @@ int arp_cache_static_entry_remove(struct sr_instance* const sr,
 // Removes all entries from the ARP Cache of the specified type.
 static unsigned arp_cache_type_purge(struct sr_instance* const sr,
                                      const ARPCache::Entry::Type type) {
-  ARPCache::Ptr cache = sr->cp->arpCache();
+  ARPCache::Ptr cache = sr->router->controlPlane()->arpCache();
   Fwk::ScopedLock<ARPCache> lock(cache);
 
   // Build list of entries to remove.
@@ -88,7 +89,7 @@ unsigned arp_cache_dynamic_purge(struct sr_instance* const sr) {
 int router_interface_set_enabled(struct sr_instance* const sr,
                                  const char* const name,
                                  const int enabled) {
-  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
   Interface::Ptr iface = if_map->interface(name);
 
   if (!iface)
@@ -103,14 +104,14 @@ int router_interface_set_enabled(struct sr_instance* const sr,
 
 Interface::Ptr router_lookup_interface_via_ip(struct sr_instance* const sr,
                                               const uint32_t ip) {
-  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
   return if_map->interfaceAddr(ntohl(ip));
 }
 
 
 Interface::Ptr router_lookup_interface_via_name(struct sr_instance* const sr,
                                                 const char* name) {
-  InterfaceMap::Ptr if_map = sr->dp->interfaceMap();
+  InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
   return if_map->interface(name);
 }
 
@@ -147,7 +148,7 @@ void rtable_route_add(struct sr_instance* const sr,
   entry->typeIs(is_static_route ?
                 RoutingTable::Entry::kStatic : RoutingTable::Entry::kDynamic);
 
-  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
   {
     Fwk::ScopedLock<RoutingTable> lock(rtable);
     rtable->entryIs(entry);
@@ -164,7 +165,7 @@ int rtable_route_remove(struct sr_instance* const sr,
                         const uint32_t dest,
                         const uint32_t mask,
                         const int is_static) {
-  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
   Fwk::ScopedLock<RoutingTable> lock(rtable);
 
   // TODO(ms): I'm not sure if this matches on type (static/dynamic) correctly.
@@ -194,7 +195,7 @@ int rtable_route_remove(struct sr_instance* const sr,
 
 static void rtable_purge_type(struct sr_instance* const sr,
                               const RoutingTable::Entry::Type type) {
-  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
   Fwk::ScopedLock<RoutingTable> lock(rtable);
 
   // List of entries to remove.

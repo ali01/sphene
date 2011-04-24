@@ -39,6 +39,7 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "lwtcp/lwip/sys.h"
+#include "router.h"
 #include "routing_table.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
@@ -52,16 +53,9 @@
 using std::pair;
 using std::string;
 
-static ARPCacheDaemon::Ptr arp_cache_daemon;
-static ARPQueueDaemon::Ptr arp_queue_daemon;
-static ControlPlane::Ptr cp;
-static DataPlane::Ptr dp;
 static Fwk::Log::Ptr log_;
-static Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
-                                 Interface::PtrConst> >::Ptr pq;
-static TaskManager::Ptr tm;
 
-static void processing_thread(void* aux);
+static void processing_thread(void* _sr);
 static void read_rtable(struct sr_instance* sr);
 
 
@@ -79,65 +73,67 @@ void sr_integ_init(struct sr_instance* sr)
 {
   log_ = Fwk::Log::LogNew("root");
   log_->levelIs(log_->debug());
-  ILOG << "Initializing";
 
   // Create ControlPlane.
-  cp = ControlPlane::ControlPlaneNew();
+  ControlPlane::Ptr cp = ControlPlane::ControlPlaneNew();
 
   // Create DataPlane.
   // TODO(ms): Differentiate based on _CPUMODE_.
-  RoutingTable::Ptr routing_table = cp->routingTable();
-  ARPCache::Ptr arp_cache = cp->arpCache();
-  dp = SWDataPlane::SWDataPlaneNew(sr, routing_table, arp_cache);
+  DataPlane::Ptr dp =
+      SWDataPlane::SWDataPlaneNew(sr, cp->routingTable(), cp->arpCache());
 
-  // Initialize pointers between ControlPlane and DataPlane.
-  cp->dataPlaneIs(dp);
-  dp->controlPlaneIs(cp.ptr());  // weak pointer to prevent circular reference
+  // Initialize task manager.
+  TaskManager::Ptr tm = TaskManager::New();
 
-  // ControlPlane and DataPlane are parts of the router.
-  sr->cp = cp.ptr();
-  sr->dp = dp.ptr();
+  // Create Router in the given sr_instance.
+  sr->router = Router::New("Router", cp, dp, tm);
 
   // Initialize input packet queue.
-  pq = Fwk::ConcurrentDeque<pair<EthernetPacket::Ptr,
-                                 Interface::PtrConst> >::New();
+  sr->input_queue = sr_instance::PacketQueue::New();
 }
 
 
 /* Thread target for processing incoming packets and executing periodic
    tasks. Started by sr_integ_init(). */
-static void processing_thread(void* aux) {
-  DLOG << "processing thread started";
+static void processing_thread(void* _sr) {
+  struct sr_instance* sr = (struct sr_instance*)_sr;
+  Router::Ptr router = sr->router;
+
+  sr->processing_thread_running = true;
+  DLOG << "Processing thread started";
   struct timespec last_time;
   struct timespec next_time;
   clock_gettime(CLOCK_REALTIME, &last_time);
 
   pair<EthernetPacket::Ptr, Interface::PtrConst> p;
-  for (;;) {
+  while (!sr->quit) {
     // Get current time.
     clock_gettime(CLOCK_REALTIME, &next_time);
 
     // Ensure we run tasks in the task manager every second.
     if (next_time.tv_sec - last_time.tv_sec >= 1) {
-      tm->timeIs(time(NULL));
+      router->taskManager()->timeIs(time(NULL));
       last_time = next_time;
     }
 
     try {
       // Bound the waiting time for a packet in the input queue.
       next_time.tv_sec += 1;
-      p = pq->timedPopFront(next_time);
+      p = sr->input_queue->timedPopFront(next_time);
 
       EthernetPacket::Ptr eth_pkt = p.first;
       Interface::PtrConst iface = p.second;
-      DLOG << "processing thread popped packet";
+      DLOG << "Processing thread popped packet";
 
       // TODO(ms): bypass dataplane here on _CPUMODE_?
-      dp->packetNew(eth_pkt, iface);
+      router->dataPlane()->packetNew(eth_pkt, iface);
     } catch (Fwk::TimeoutException& e) {
       // Timeout while waiting for a packet in the input queue. Ignore it.
     }
   }
+
+  sr->processing_thread_running = false;
+  DLOG << "Processing thread exiting";
 }
 
 
@@ -153,31 +149,31 @@ static void processing_thread(void* aux) {
 
 void sr_integ_hw_setup(struct sr_instance* sr)
 {
-  DLOG << "sw_integ_hw() called";
+  Router::Ptr router = sr->router;
 
   // Read in rtable file, if any.
   read_rtable(sr);
 
-  // Initialize task manager.
-  tm = TaskManager::New();
-
   // Create ARP cache daemon and add it to the task manager.
-  arp_cache_daemon = ARPCacheDaemon::New(cp->arpCache());
+  ARPCacheDaemon::Ptr arp_cache_daemon =
+      ARPCacheDaemon::New(router->controlPlane()->arpCache());
   arp_cache_daemon->periodIs(1);  // check for stale entries every second
-  tm->taskIs(arp_cache_daemon);
+  router->taskManager()->taskIs(arp_cache_daemon);
 
   // Create ARP queue daemon and add it to the task manager.
-  arp_queue_daemon = ARPQueueDaemon::New(cp);
+  ARPQueueDaemon::Ptr arp_queue_daemon =
+      ARPQueueDaemon::New(router->controlPlane());
   arp_queue_daemon->periodIs(1);
-  tm->taskIs(arp_queue_daemon);
+  router->taskManager()->taskIs(arp_queue_daemon);
 
   // Start processing thread.
-  sys_thread_new(processing_thread, NULL);
+  sr->quit = false;
+  sys_thread_new(processing_thread, sr);
 }
 
 
 static void read_rtable(struct sr_instance* sr) {
-  RoutingTable::Ptr rt = cp->routingTable();
+  RoutingTable::Ptr rt = sr->router->controlPlane()->routingTable();
   char subnet[16];
   char gateway[16];
   char mask[16];
@@ -193,7 +189,8 @@ static void read_rtable(struct sr_instance* sr) {
       break;  // avoid entering the last route twice
 
     // Lookup interface by name.
-    Interface::Ptr iface = dp->interfaceMap()->interface(iface_name);
+    Interface::Ptr iface =
+        sr->router->dataPlane()->interfaceMap()->interface(iface_name);
     if (!iface) {
       WLOG << "No interface found by name " << iface_name << "; skipping";
       continue;
@@ -242,10 +239,11 @@ void sr_integ_input(struct sr_instance* sr,
                     unsigned int len,
                     const char* interface/* borrowed */)
 {
-  DLOG << "sr_integ_input() called";
+  DLOG << "Received packet";
 
   // Find incoming interface.
-  Interface::PtrConst iface = dp->interfaceMap()->interface(interface);
+  Interface::PtrConst iface =
+      sr->router->dataPlane()->interfaceMap()->interface(interface);
   if (!iface) {
     ELOG << "received packet on interface " << interface
          << ", but failed to find associated Interface object.";
@@ -256,7 +254,7 @@ void sr_integ_input(struct sr_instance* sr,
   EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
 
   // Insert packet into packet queue.
-  pq->pushBack(std::make_pair(eth_pkt, iface));
+  sr->input_queue->pushBack(std::make_pair(eth_pkt, iface));
 }
 
 /*-----------------------------------------------------------------------------
@@ -279,7 +277,7 @@ void sr_integ_add_interface(struct sr_instance* sr,
   iface->speedIs(vns_if->speed);
 
   // Add the interface to the data plane.
-  dp->interfaceMap()->interfaceIs(iface);
+  sr->router->dataPlane()->interfaceMap()->interfaceIs(iface);
 
   DLOG << "Added interface " << iface->name();
   DLOG << "  mac: " << iface->mac();
@@ -326,7 +324,17 @@ int sr_integ_low_level_output(struct sr_instance* sr /* borrowed */,
 
 void sr_integ_destroy(struct sr_instance* sr)
 {
-  DLOG << "sr_integ_destroy() called";
+  // Kill processing thread.
+  sr->quit = true;
+  while (sr->processing_thread_running)
+    sleep(1);
+
+  // Destroy queue.
+  sr->input_queue->clear();
+  sr->input_queue = NULL;
+
+  // Destroy router.
+  sr->router = NULL;
 }
 
 /*-----------------------------------------------------------------------------
@@ -341,7 +349,7 @@ void sr_integ_destroy(struct sr_instance* sr)
 uint32_t sr_integ_findsrcip(uint32_t dest /* nbo */)
 {
   struct sr_instance* sr = sr_get_global_instance(NULL);
-  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
 
   // Find routing table entry for destination.
   IPv4Addr dest_ip(ntohl(dest));
@@ -407,7 +415,7 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
   ip_pkt->checksumReset();
 
   // Send packet.
-  sr->cp->outputPacketNew(ip_pkt);
+  sr->router->controlPlane()->outputPacketNew(ip_pkt);
 
   // The payload pointer was given to us.
   free(payload);

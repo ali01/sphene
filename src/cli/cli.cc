@@ -21,6 +21,7 @@
 #include "control_plane.h"
 #include "interface.h"
 #include "interface_map.h"
+#include "router.h"
 #include "routing_table.h"
 
 #include "cli_stubs.h"
@@ -232,7 +233,7 @@ void cli_show_ip() {
 
 void cli_show_ip_arp() {
   struct sr_instance* sr = get_sr();
-  ARPCache::Ptr cache = sr->cp->arpCache();
+  ARPCache::Ptr cache = sr->router->controlPlane()->arpCache();
   Fwk::ScopedLock<ARPCache> lock(cache);
 
   cli_send_str("ARP cache:\n");
@@ -251,7 +252,7 @@ void cli_show_ip_arp() {
 
 void cli_show_ip_intf() {
   struct sr_instance* sr = get_sr();
-  InterfaceMap::Ptr ifaces = sr->dp->interfaceMap();
+  InterfaceMap::Ptr ifaces = sr->router->dataPlane()->interfaceMap();
 
   // Buffer for proper formatting.
   char line_buf[256];
@@ -284,7 +285,7 @@ void cli_show_ip_intf() {
 
 void cli_show_ip_route() {
   struct sr_instance* sr = get_sr();
-  RoutingTable::Ptr rtable = sr->cp->routingTable();
+  RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
 
   // Buffer for proper formatting.
   char line_buf[256];
