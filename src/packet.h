@@ -14,6 +14,8 @@ class ICMPPacket;
 class Interface;
 class IPPacket;
 class OSPFPacket;
+class OSPFHelloPacket;
+class OSPFLSUPacket;
 class UnknownPacket;
 
 
@@ -29,6 +31,8 @@ class Packet : public Fwk::PtrInterface<Packet> {
     virtual void operator()(ICMPPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(IPPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(OSPFPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(OSPFHelloPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(OSPFLSUPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(UnknownPacket*, Fwk::Ptr<const Interface>) { }
 
     virtual ~Functor() { }
