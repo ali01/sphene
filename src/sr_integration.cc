@@ -100,13 +100,14 @@ static void processing_thread(void* _sr) {
   struct sr_instance* sr = (struct sr_instance*)_sr;
   Router::Ptr router = sr->router;
 
+  sr->processing_thread_running = true;
   DLOG << "processing thread started";
   struct timespec last_time;
   struct timespec next_time;
   clock_gettime(CLOCK_REALTIME, &last_time);
 
   pair<EthernetPacket::Ptr, Interface::PtrConst> p;
-  for (;;) {
+  while (!sr->quit) {
     // Get current time.
     clock_gettime(CLOCK_REALTIME, &next_time);
 
@@ -131,6 +132,9 @@ static void processing_thread(void* _sr) {
       // Timeout while waiting for a packet in the input queue. Ignore it.
     }
   }
+
+  sr->processing_thread_running = false;
+  DLOG << "processing thread exiting";
 }
 
 
@@ -165,6 +169,7 @@ void sr_integ_hw_setup(struct sr_instance* sr)
   router->taskManager()->taskIs(arp_queue_daemon);
 
   // Start processing thread.
+  sr->quit = false;
   sys_thread_new(processing_thread, sr);
 }
 
@@ -322,6 +327,18 @@ int sr_integ_low_level_output(struct sr_instance* sr /* borrowed */,
 void sr_integ_destroy(struct sr_instance* sr)
 {
   DLOG << "sr_integ_destroy() called";
+
+  // Kill processing thread.
+  sr->quit = true;
+  while (sr->processing_thread_running)
+    sleep(1);
+
+  // Destroy queue.
+  sr->input_queue->clear();
+  sr->input_queue = NULL;
+
+  // Destroy router.
+  sr->router = NULL;
 }
 
 /*-----------------------------------------------------------------------------

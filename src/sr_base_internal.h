@@ -94,6 +94,8 @@ struct sr_instance
 
     Fwk::Ptr<Router> router;
     Fwk::Ptr<PacketQueue> input_queue;
+    bool quit;
+    bool processing_thread_running;
 
     /* VNS specific */
     int  sockfd;    /* socket to server */

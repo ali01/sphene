@@ -32,6 +32,7 @@ class Router : public Fwk::NamedInterface {
          ControlPlane::Ptr cp,
          DataPlane::Ptr dp,
          TaskManager::Ptr tm);
+  ~Router();
 
   ControlPlane::Ptr cp_;
   DataPlane::Ptr dp_;

@@ -26,3 +26,8 @@ Router::Router(const string& name,
   cp->dataPlaneIs(dp);
   dp->controlPlaneIs(cp.ptr());  // weak pointer to prevent circular reference
 }
+
+
+Router::~Router() {
+  DLOG << "Destroying";
+}
