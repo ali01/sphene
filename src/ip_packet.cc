@@ -235,7 +235,7 @@ IPPacket::checksumIs(uint16_t ck) {
 uint16_t
 IPPacket::checksumReset() {
   checksumIs(0);
-  checksumIs(compute_cksum());
+  checksumIs(compute_cksum(ip_hdr_, sizeof(struct ip_hdr)));
   return checksum();
 }
 
@@ -249,17 +249,17 @@ IPPacket::checksumValid() const {
   return pkt_cksum == actual_cksum;
 }
 
+template <typename PacketBuffer>
 uint16_t
-IPPacket::compute_cksum() const {
+IPPacket::compute_cksum(const PacketBuffer* pkt, unsigned int len) {
   uint32_t sum;
-  unsigned int len = sizeof(struct ip_hdr);
-  const uint8_t *header = (const uint8_t *)ip_hdr_;
+  const uint8_t* buffer = (const uint8_t*)pkt;
 
-  for (sum = 0; len >= 2; header += 2, len -= 2)
-    sum += header[0] << 8 | header[1];
+  for (sum = 0; len >= 2; buffer += 2, len -= 2)
+    sum += buffer[0] << 8 | buffer[1];
 
   if (len > 0)
-    sum += header[0] << 8;
+    sum += buffer[0] << 8;
 
   while (sum > 0xFFFF)
     sum = (sum >> 16) + (sum & 0xFFFF);

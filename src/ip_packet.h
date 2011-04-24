@@ -123,13 +123,15 @@ class IPPacket : public Packet {
   // Returns the IPv4 header length without options.
   uint8_t headerLen() const { return 20; }
 
+  /* accepts any pointer type as PacketBuffer */
+  template <typename PacketBuffer>
+  static uint16_t compute_cksum(const PacketBuffer* buffer, unsigned int len);
+
  protected:
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
   struct ip_hdr* ip_hdr_;
-
-  uint16_t compute_cksum() const;
 };
 
 #endif
