@@ -213,7 +213,6 @@ int sr_handle_hwinfo(struct sr_instance* sr, c_hwinfo* hwinfo)
     assert(hwinfo);
 
     num_entries = (ntohl(hwinfo->mLen) - (2*sizeof(uint32_t)))/sizeof(c_hw_entry);
-    fprintf(stderr,"Received Hardware Info with %d entries\n",num_entries);
 
     vns_if.name[0] = 0;
 
@@ -226,35 +225,23 @@ int sr_handle_hwinfo(struct sr_instance* sr, c_hwinfo* hwinfo)
                             *((struct in_addr*)(hwinfo->mHWInfo[i].value))));
                 break;
             case HWINTERFACE:
-                fprintf(stderr,"Interface: %s\n",hwinfo->mHWInfo[i].value);
                 if (vns_if.name[0])
                 { sr_integ_add_interface(sr, &vns_if); vns_if.name[0] = 0; }
                 strncpy(vns_if.name, hwinfo->mHWInfo[i].value, SR_NAMELEN);
                 break;
             case HWSPEED:
-                fprintf(stderr,"Speed: %d\n",
-                        ntohl(*((unsigned int*)hwinfo->mHWInfo[i].value)));
                 vns_if.speed =
                     ntohl(*((unsigned int*)hwinfo->mHWInfo[i].value));
                 break;
             case HWSUBNET:
-                fprintf(stderr,"Subnet: %s\n",inet_ntoa(
-                            *((struct in_addr*)(hwinfo->mHWInfo[i].value))));
                 break;
             case HWMASK:
-                fprintf(stderr,"Mask: %s\n",inet_ntoa(
-                            *((struct in_addr*)(hwinfo->mHWInfo[i].value))));
                 vns_if.mask = *((uint32_t*)hwinfo->mHWInfo[i].value);
                 break;
             case HWETHIP:
-                fprintf(stderr,"Ethernet IP: %s\n",inet_ntoa(
-                            *((struct in_addr*)(hwinfo->mHWInfo[i].value))));
                 vns_if.ip = *((uint32_t*)hwinfo->mHWInfo[i].value);
                 break;
             case HWETHER:
-                fprintf(stderr,"Hardware Address: ");
-                DebugMAC(hwinfo->mHWInfo[i].value);
-                fprintf(stderr,"\n");
                 memcpy(vns_if.addr,
                         (unsigned char*)hwinfo->mHWInfo[i].value, 6);
                 break;
