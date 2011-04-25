@@ -78,13 +78,18 @@ TEST_F(GREPacketTest, checksum) {
   pkt_->checksumIs(0xDEAD);
   EXPECT_EQ(0xDEAD, pkt_->checksum());
 
-  // Reset the checksum. Only the checksum field should have changed, so the
-  // checksum should reset back to what we expect.
-  EXPECT_EQ(expected, pkt_->checksumReset());
-
   // Checksum is essentially 0 if it is not present.
   pkt_->checksumPresentIs(false);
   EXPECT_EQ(0, pkt_->checksum());
+
+  // Changing the checksum is a no-op if the checksum present bit is 0.
+  pkt_->checksumIs(0xBEEF);
+  pkt_->checksumPresentIs(true);
+  EXPECT_EQ(0xDEAD, pkt_->checksum());
+
+  // Reset the checksum. Only the checksum field should have changed, so the
+  // checksum should reset back to what we expect.
+  EXPECT_EQ(expected, pkt_->checksumReset());
 }
 
 
