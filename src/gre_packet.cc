@@ -9,7 +9,8 @@
 #include "unknown_packet.h"
 
 
-GREPacket::GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
+GREPacket::GREPacket(const Fwk::Buffer::Ptr buffer,
+                     const unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       gre_hdr_((struct GREHeader *)offsetAddress(0)) { }
 
@@ -160,7 +161,7 @@ EthernetPacket::EthernetType GREPacket::protocol() const {
 }
 
 
-void GREPacket::protocolIs(EthernetPacket::EthernetType ptype) {
+void GREPacket::protocolIs(const EthernetPacket::EthernetType ptype) {
   gre_hdr_->ptype = htons(ptype);
 }
 
