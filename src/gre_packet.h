@@ -43,7 +43,8 @@ class GREPacket : public Packet {
   bool checksumValid() const;
 
   // Recomputes the checksum and updates the packet. Does nothing if the C
-  // (checksum) bit is not enabled.
+  // (checksum) bit is not enabled. Returns the computed checksum or zero if
+  // the C bit is not enabled.
   uint16_t checksumReset();
 
   // Returns the value in the Reserved0 field of the packet.

@@ -27,9 +27,11 @@ struct GREHeader {
 class GREPacketTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
-    uint8_t gre_packet[] = { 0x00,          // Checksum not present
+    uint8_t gre_packet[] = { 0x80,          // Checksum is present
                              0x00,          // Version = 0
-                             0x08, 0x00 };  // Ptype = IP
+                             0x08, 0x00,    // Ptype = IP
+                             0xCC, 0xCC,    // Checksum (currently bogus)
+                             0x00, 0x00 };  // Reserved1
 
     // Put a packet in a buffer.
     buf_ = Fwk::Buffer::BufferNew(gre_packet, sizeof(gre_packet));
@@ -45,3 +47,23 @@ class GREPacketTest : public ::testing::Test {
   struct GREHeader* header_;
   GREPacket::Ptr pkt_;
 };
+
+
+TEST_F(GREPacketTest, checksumPresent) {
+  // Checksum bit is enabled.
+  EXPECT_TRUE(pkt_->checksumPresent());
+
+  // Save previous checksum.
+  uint16_t ck = pkt_->checksumReset();
+
+  // Disable the C bit.
+  pkt_->checksumPresentIs(false);
+  EXPECT_FALSE(pkt_->checksumPresent());
+
+  // Re-enable the C bit.
+  pkt_->checksumPresentIs(true);
+  EXPECT_TRUE(pkt_->checksumPresent());
+
+  // Checksum should not have changed after both operations.
+  EXPECT_EQ(ck, pkt_->checksumReset());
+}
