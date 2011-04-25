@@ -114,6 +114,8 @@ libsr_base_a_SOURCES = \
                        src/ethernet_packet.cc \
                        src/ethernet_packet.h \
                        src/getarg.cc \
+                       src/gre_packet.cc \
+                       src/gre_packet.h \
                        src/icmp_packet.cc \
                        src/icmp_packet.h \
                        src/interface.cc \
@@ -244,6 +246,7 @@ TESTS = \
         atomic_unittest \
         buffer_unittest \
         ethernet_packet_unittest \
+        gre_packet_unittest \
         icmp_packet_unittest \
         interface_unittest \
         interface_map_unittest \
@@ -274,6 +277,10 @@ buffer_unittest_LDADD = libgtest.a $(USER_LIBS)
 ethernet_packet_unittest_SOURCES = tests/ethernet_packet_unittest.cc $(FWK_SRCS)
 ethernet_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 ethernet_packet_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+gre_packet_unittest_SOURCES = tests/gre_packet_unittest.cc $(FWK_SRCS)
+gre_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+gre_packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 icmp_packet_unittest_SOURCES = tests/icmp_packet_unittest.cc $(FWK_SRCS)
 icmp_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include

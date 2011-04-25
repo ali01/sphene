@@ -10,6 +10,7 @@
 /* Forward declarations. */
 class ARPPacket;
 class EthernetPacket;
+class GREPacket;
 class ICMPPacket;
 class Interface;
 class IPPacket;
@@ -29,6 +30,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
    public:
     virtual void operator()(ARPPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(EthernetPacket*, Fwk::Ptr<const Interface>) { }
+    virtual void operator()(GREPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(ICMPPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(IPPacket*, Fwk::Ptr<const Interface>) { }
     virtual void operator()(OSPFPacket*, Fwk::Ptr<const Interface>) { }

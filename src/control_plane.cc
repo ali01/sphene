@@ -208,6 +208,12 @@ void ControlPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
 }
 
 
+void ControlPlane::PacketFunctor::operator()(GREPacket* const pkt,
+                                             const Interface::PtrConst iface) {
+  DLOG << "GREPacket dispatch in ControlPlane";
+}
+
+
 void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
                                              const Interface::PtrConst iface) {
   // TODO(ms): Further dispatch of ICMPPacket types should probably be here.

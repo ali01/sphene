@@ -74,6 +74,12 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
 }
 
 
+void DataPlane::PacketFunctor::operator()(GREPacket* const pkt,
+                                          const Interface::PtrConst iface) {
+  DLOG << "GREPacket dispatch in DataPlane";
+}
+
+
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "ICMPPacket dispatch in DataPlane";
