@@ -35,7 +35,7 @@ RoutingTable::RoutingTable() {
 
 
 RoutingTable::Entry::Ptr
-RoutingTable::lpm(const IPv4Addr& dest_ip) const {
+RoutingTable::lpm(const IPv4Addr& dest_ip) {
   Entry::Ptr lpm = NULL;
   Entry::Ptr entry;
   for (entry = rtable_.front(); entry; entry = entry->next()) {
@@ -50,6 +50,12 @@ RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   }
 
   return lpm;
+}
+
+RoutingTable::Entry::PtrConst
+RoutingTable::lpm(const IPv4Addr& dest_ip) const {
+  RoutingTable* self = const_cast<RoutingTable*>(this);
+  return self->lpm(dest_ip);
 }
 
 

@@ -57,7 +57,8 @@ class ARPQueue : public Fwk::PtrInterface<ARPQueue> {
     unsigned int retries() const { return retries_; }
     void retriesInc() { retries_ += 1; }
 
-    PacketWrapper::Ptr front() const { return packet_queue_.front(); }
+    PacketWrapper::Ptr front() { return packet_queue_.front(); }
+    PacketWrapper::PtrConst front() const { return packet_queue_.front(); }
 
     void packetIs(EthernetPacket::Ptr packet);
 
