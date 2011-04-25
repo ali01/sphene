@@ -85,6 +85,8 @@ class OSPFHelloPacket : public OSPFPacket {
   typedef Fwk::Ptr<const OSPFHelloPacket> PtrConst;
   typedef Fwk::Ptr<OSPFHelloPacket> Ptr;
 
+  static const IPv4Addr kBroadcastAddr;
+
   static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFHelloPacket(buffer, buffer_offset);
   }

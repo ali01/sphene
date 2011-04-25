@@ -185,6 +185,8 @@ OSPFPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 /* OSPFHelloPacket */
 
+const IPv4Addr OSPFHelloPacket::kBroadcastAddr(0xe0000005);
+
 OSPFHelloPacket::OSPFHelloPacket(Fwk::Buffer::Ptr buffer,
                                  unsigned int buffer_offset)
     : OSPFPacket(buffer, buffer_offset),
