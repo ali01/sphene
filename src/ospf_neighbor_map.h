@@ -54,8 +54,8 @@ class OSPFNeighborMap : public Fwk::PtrInterface<OSPFNeighborMap> {
 
     uint16_t helloint() const { return helloint_; }
 
-    Neighbor::PtrConst neighborFront() const { return neighbor_list_.front(); }
-    void neighborIs(Neighbor::Ptr _n) { neighbor_list_.pushBack(_n); }
+    Neighbor::PtrConst neighborFront() const { return neighbors_.front(); }
+    void neighborIs(Neighbor::Ptr _n) { neighbors_.pushBack(_n); }
 
    private:
     InterfaceDesc(Interface::Ptr iface, uint16_t helloint);
@@ -63,7 +63,7 @@ class OSPFNeighborMap : public Fwk::PtrInterface<OSPFNeighborMap> {
     /* Data members. */
     Interface::Ptr iface_;
     uint16_t helloint_;
-    Fwk::LinkedList<Neighbor> neighbor_list_;
+    Fwk::LinkedList<Neighbor> neighbors_;
 
     /* Operations disallowed. */
     InterfaceDesc(const InterfaceDesc&);
