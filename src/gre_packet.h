@@ -22,6 +22,30 @@ class GREPacket : public Packet {
 
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
+  // Returns true if the C (checksum) bit) is enabled. Per RFC2784, this bit
+  // determines the presence of the Checksum and Reserved1 fields.
+  bool checksumPresent() const;
+
+  // Sets the C (checksum) bit. Per RFC2784, this bit determines the presence
+  // of the Checksum and Reserved1 fields.
+  void checksumPresentIs(bool value);
+
+  // Returns the checksum in the Checksum field or 0 if the checksum is not
+  // present.
+  uint16_t checksum() const;
+
+  // Sets the checksum value in the packet. Does nothing if the C (checksum)
+  // bit is not enabled.
+  void checksumIs(uint16_t ck);
+
+  // Returns true if the checksum in the packet is correct, or the checksum
+  // field is not present.
+  bool checksumValid() const;
+
+  // Recomputes the checksum and updates the packet. Does nothing if the C
+  // (checksum) bit is not enabled.
+  uint16_t checksumReset();
+
  protected:
   GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
@@ -32,6 +56,8 @@ class GREPacket : public Packet {
     uint16_t cksum;        // checksum of header and payload (optional)
     uint16_t resv1;        // Reserved1 (optional)
   } __attribute__((packed));
+
+  uint16_t computeChecksum() const;
 
   struct GREHeader* gre_hdr_;
 };
