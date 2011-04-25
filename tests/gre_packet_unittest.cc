@@ -112,3 +112,24 @@ TEST_F(GREPacketTest, checksumReset) {
   pkt_->checksumPresentIs(false);
   EXPECT_EQ(0, pkt_->checksumReset());
 }
+
+
+TEST_F(GREPacketTest, reserved0) {
+  // Save original checksum.
+  uint16_t cksum = pkt_->checksum();
+
+  // Query the reserved0 bits.
+  EXPECT_EQ(0, pkt_->reserved0());
+
+  // Set the reserved0 bits.
+  pkt_->reserved0Is(0x0FFF);  // 12 bits
+  EXPECT_EQ(0x0FFF, pkt_->reserved0());
+
+  // Try to set more than 12 bits.
+  pkt_->reserved0Is(0xFFFF);
+  EXPECT_EQ(0x0FFF, pkt_->reserved0());
+
+  // Reset. Only the reserved0 field should have changed.
+  pkt_->reserved0Is(0);
+  EXPECT_EQ(cksum, pkt_->checksumReset());
+}
