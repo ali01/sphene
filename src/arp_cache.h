@@ -18,6 +18,9 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
   typedef Fwk::Ptr<const ARPCache> PtrConst;
   typedef Fwk::Ptr<ARPCache> Ptr;
 
+  typedef std::map<IPv4Addr,Entry::Ptr>::iterator iterator;
+  typedef std::map<IPv4Addr,Entry::Ptr>::const_iterator const_iterator;
+
   /* Nested cache entry class. */
   class Entry : public Fwk::PtrInterface<Entry> {
    public:
@@ -60,9 +63,6 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
     Entry(const Entry&);
     void operator=(const Entry&);
   };
-
-  typedef std::map<IPv4Addr,Entry::Ptr>::iterator iterator;
-  typedef std::map<IPv4Addr,Entry::Ptr>::const_iterator const_iterator;
 
   static Ptr New() {
     return new ARPCache();
