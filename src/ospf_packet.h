@@ -50,8 +50,11 @@ class OSPFPacket : public Packet {
   void checksumIs(uint16_t ck);
   bool checksumValid() const;
 
+  /* zero autype and auth fields */
+  void autypeAndAuthAreZero();
+
   /* returns an instance of either OSPFHelloPacket or OSPFLSUPacket depending
-   * on the value of the packet's type. */ 
+   * on the value of the packet's type. */
   virtual OSPFPacket::Ptr derivedInstance();
 
   /* Double-dispatch support. */
@@ -85,7 +88,9 @@ class OSPFHelloPacket : public OSPFPacket {
   uint16_t helloint() const;
   void hellointIs(uint16_t helloint);
 
-  /* override */
+  void paddingIsZero();
+
+  /* Override. */
   virtual OSPFPacket::Ptr derivedInstance() { return this; }
 
   /* Double-dispatch support. */
@@ -108,6 +113,7 @@ class OSPFLSUPacket : public OSPFPacket {
   typedef Fwk::Ptr<const OSPFLSUPacket> PtrConst;
   typedef Fwk::Ptr<OSPFLSUPacket> Ptr;
 
+  /* OSPFLSUPacket factory constructor. */
   static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFLSUPacket(buffer, buffer_offset);
   }
@@ -118,7 +124,13 @@ class OSPFLSUPacket : public OSPFPacket {
   uint16_t ttl() const;
   void ttlIs(uint16_t ttl);
 
-  /* override */
+  uint32_t advCount() const;
+  void advCountIs(uint32_t count);
+
+  Fwk::Ptr<OSPFLSUAdvertisement> advertisement(uint32_t index);
+  Fwk::Ptr<const OSPFLSUAdvertisement> advertisement(uint32_t index) const;
+
+  /* Override. */
   virtual OSPFPacket::Ptr derivedInstance() { return this; }
 
   /* Double-dispatch support. */
@@ -127,12 +139,45 @@ class OSPFLSUPacket : public OSPFPacket {
  private:
   OSPFLSUPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
-  /* Data memebrs. */
+  /* Data members. */
   struct ospf_lsu_hdr* ospf_lsu_hdr_;
 
   /* Operations disallowed */
   OSPFLSUPacket(const OSPFLSUPacket&);
   void operator=(const OSPFLSUPacket&);
+};
+
+
+class OSPFLSUAdvertisement : public Packet {
+ public:
+  typedef Fwk::Ptr<const OSPFLSUAdvertisement> PtrConst;
+  typedef Fwk::Ptr<OSPFLSUAdvertisement> Ptr;
+
+  static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
+    return new OSPFLSUAdvertisement(buffer, buffer_offset);
+  }
+
+  IPv4Addr subnet() const;
+  void subnetIs(const IPv4Addr& subnet);
+
+  IPv4Addr subnetMask() const;
+  void subnetMaskIs(const IPv4Addr& mask);
+
+  uint32_t routerID() const;
+  void routerIDIs(uint32_t id);
+
+  /* Double-dispatch support. */
+  virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+ private:
+  OSPFLSUAdvertisement(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+
+  /* Data members. */
+  struct ospf_lsu_adv* ospf_lsu_adv_;
+
+  /* Operations disallowed. */
+  OSPFLSUAdvertisement(const OSPFLSUAdvertisement&);
+  void operator=(const OSPFLSUAdvertisement&);
 };
 
 #endif

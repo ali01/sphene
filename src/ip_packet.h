@@ -6,6 +6,7 @@
 #include "fwk/buffer.h"
 #include "fwk/ordinal.h"
 
+#include "ipv4_addr.h"
 #include "packet.h"
 
 /* Typedefs. */
@@ -18,35 +19,6 @@ typedef uint8_t IPFlags;
 /* Forward declarations. */
 class Interface;
 struct ip_hdr;
-
-
-class IPv4Addr : public Fwk::Ordinal<IPv4Addr,uint32_t> {
- public:
-  IPv4Addr();
-
-  /* Expects an IP address in host byte order */
-  IPv4Addr(uint32_t addr);
-
-  /* Construct from the dotted string representation. */
-  IPv4Addr(const std::string& addr);
-  IPv4Addr(const char* addr);
-
-  /* Masking operators */
-  IPv4Addr operator&(uint32_t other) const;
-  IPv4Addr operator&(const IPv4Addr& other) const;
-
-  IPv4Addr& operator&=(uint32_t other);
-  IPv4Addr& operator&=(const IPv4Addr& other);
-
-  /* Returns IP address in network byte order */
-  uint32_t nbo() const;
-
-  /* Returns string representation of IP address. */
-  operator std::string() const;
-
-  /* Address length in bytes. */
-  static const int kAddrLen = 4;
-};
 
 
 class IPPacket : public Packet {

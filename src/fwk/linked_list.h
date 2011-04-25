@@ -23,8 +23,11 @@ class LinkedList : public PtrInterface<LinkedList<NodeType> > {
       return new Node();
     }
 
-    Fwk::Ptr<NodeType> next() const { return next_; }
-    Fwk::Ptr<NodeType> prev() const { return prev_; }
+    Fwk::Ptr<const NodeType> next() const { return next_; }
+    Fwk::Ptr<const NodeType> prev() const { return prev_; }
+
+    Fwk::Ptr<NodeType> next() { return next_; }
+    Fwk::Ptr<NodeType> prev() { return prev_; }
 
    protected:
     Node() : next_(NULL), prev_(NULL) {}
@@ -33,6 +36,7 @@ class LinkedList : public PtrInterface<LinkedList<NodeType> > {
     Fwk::Ptr<NodeType> next_;
     NodeType* prev_; /* weak pointer to prevent circular references */
 
+    template <typename N>
     friend class LinkedList;
 
     /* Operations disallowed */
@@ -47,8 +51,11 @@ class LinkedList : public PtrInterface<LinkedList<NodeType> > {
     return new LinkedList();
   }
 
-  Fwk::Ptr<NodeType> front() const { return front_; }
-  Fwk::Ptr<NodeType> back() const { return back_; }
+  Fwk::Ptr<const NodeType> front() const { return front_; }
+  Fwk::Ptr<const NodeType> back() const { return back_; }
+
+  Fwk::Ptr<NodeType> front() { return front_; }
+  Fwk::Ptr<NodeType> back() { return back_; }
 
   void pushFront(Fwk::Ptr<NodeType> node);
   void pushBack(Fwk::Ptr<NodeType> node);
@@ -62,7 +69,7 @@ class LinkedList : public PtrInterface<LinkedList<NodeType> > {
   /* Data members. */
   Fwk::Ptr<NodeType> front_;
   Fwk::Ptr<NodeType> back_;
-  std::set<Node*> node_set_; /* Prevents double insertion of a node. */
+  std::set<NodeType*> node_set_; /* Prevents double insertion of a node. */
 
   /* Operations disallowed. */
   LinkedList(const LinkedList&);

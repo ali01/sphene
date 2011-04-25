@@ -16,7 +16,7 @@ struct ospf_pkt {
 } __attribute__((packed));
 
 struct ospf_hello_pkt {
-  struct ospf_pkt opsf_pkt;
+  struct ospf_pkt ospf_pkt;
   uint32_t mask;            /* network mask associated with this interface */
   uint16_t helloint;        /* number of seconds between hello packets */
   uint16_t padding;         /* zero */
@@ -121,6 +121,12 @@ OSPFPacket::checksumValid() const {
   return pkt_cksum == actual_cksum;
 }
 
+void
+OSPFPacket::autypeAndAuthAreZero() {
+  ospf_pkt_->autype = 0x0;
+  ospf_pkt_->auth = 0x0;
+}
+
 OSPFPacket::Ptr
 OSPFPacket::derivedInstance() {
   OSPFPacket::Ptr pkt;
@@ -173,6 +179,11 @@ OSPFHelloPacket::hellointIs(uint16_t helloint) {
 }
 
 void
+OSPFHelloPacket::paddingIsZero() {
+  ospf_hello_pkt_->padding = 0x0;
+}
+
+void
 OSPFHelloPacket::operator()(Functor* const f,
                             const Interface::PtrConst iface) {
   (*f)(this, iface);
@@ -206,7 +217,75 @@ OSPFLSUPacket::ttlIs(uint16_t ttl) {
   ospf_lsu_hdr_->ttl = htons(ttl);
 }
 
+uint32_t
+OSPFLSUPacket::advCount() const {
+  return ntohl(ospf_lsu_hdr_->adv_count);
+}
+
+void
+OSPFLSUPacket::advCountIs(uint32_t count) {
+  ospf_lsu_hdr_->adv_count = htonl(count);
+}
+
+OSPFLSUAdvertisement::Ptr
+OSPFLSUPacket::advertisement(uint32_t index) {
+  unsigned int off = bufferOffset() +
+                     sizeof(struct ospf_lsu_hdr) +
+                     index * sizeof(struct ospf_lsu_adv);
+  return OSPFLSUAdvertisement::New(buffer(), off);
+}
+
+OSPFLSUAdvertisement::PtrConst
+OSPFLSUPacket::advertisement(uint32_t index) const {
+  OSPFLSUPacket* self = const_cast<OSPFLSUPacket*>(this);
+  return self->advertisement(index);
+}
+
 void
 OSPFLSUPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
+  (*f)(this, iface);
+}
+
+
+/* OSPFLSUAdvertisement */
+
+OSPFLSUAdvertisement::OSPFLSUAdvertisement(Fwk::Buffer::Ptr buffer,
+                                           unsigned int buffer_offset)
+    : Packet(buffer, buffer_offset),
+      ospf_lsu_adv_((struct ospf_lsu_adv*)offsetAddress(0)) {}
+
+IPv4Addr
+OSPFLSUAdvertisement::subnet() const {
+  return ntohl(ospf_lsu_adv_->subnet);
+}
+
+void
+OSPFLSUAdvertisement::subnetIs(const IPv4Addr& subnet) {
+  ospf_lsu_adv_->subnet = subnet.nbo();
+}
+
+IPv4Addr
+OSPFLSUAdvertisement::subnetMask() const {
+  return ntohl(ospf_lsu_adv_->mask);
+}
+
+void
+OSPFLSUAdvertisement::subnetMaskIs(const IPv4Addr& mask) {
+  ospf_lsu_adv_->mask = mask.nbo();
+}
+
+uint32_t
+OSPFLSUAdvertisement::routerID() const {
+  return ntohl(ospf_lsu_adv_->router_id);
+}
+
+void
+OSPFLSUAdvertisement::routerIDIs(uint32_t id) {
+  ospf_lsu_adv_->mask = htonl(id);
+}
+
+void
+OSPFLSUAdvertisement::operator()(Functor* const f,
+                                 const Interface::PtrConst iface) {
   (*f)(this, iface);
 }

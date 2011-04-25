@@ -66,17 +66,20 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
     return new RoutingTable();
   }
 
-  /* Locking for thread safety. */
-  void lockedIs(bool locked);
+  Entry::Ptr lpm(const IPv4Addr& dest_ip);
+  Entry::Ptr front() { return rtable_.front(); }
 
-  Entry::Ptr lpm(const IPv4Addr& dest_ip) const;
-  Entry::Ptr front() const { return rtable_.front(); }
+  Entry::PtrConst lpm(const IPv4Addr& dest_ip) const;
+  Entry::PtrConst front() const { return rtable_.front(); }
 
   void entryIs(Entry::Ptr entry);
   Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
 
   /* Returns number of entries in routing table. */
   size_t entries() const { return rtable_.size(); }
+
+  /* Locking for thread safety. */
+  void lockedIs(bool locked);
 
  protected:
   RoutingTable();
