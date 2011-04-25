@@ -124,6 +124,7 @@ libsr_base_a_SOURCES = \
                        src/interface_map.h \
                        src/ip_packet.cc \
                        src/ip_packet.h \
+                       src/ipv4_addr.cc \
                        src/nf2.h \
                        src/nf2util.cc \
                        src/nf2util.h \
