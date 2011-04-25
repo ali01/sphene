@@ -52,12 +52,6 @@ class Ptr {
     return ptr_ ? &PointerConversion::valid : 0;
   }
 
-  /* enable use with Simone::ConcurrentCollection */
-  template <typename Collection>
-  void collectionIs(Collection *_c) const {
-    ptr_->collectionIs(_c);
-  }
-
   template <typename TargetS, typename SourceS>
   static Ptr<TargetS> st_cast(Ptr<SourceS> _o) {
     return static_cast<TargetS*>(_o.ptr());
