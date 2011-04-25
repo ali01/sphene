@@ -99,3 +99,56 @@ uint16_t GREPacket::computeChecksum() const {
 
   return sum;
 }
+
+
+uint16_t GREPacket::reserved0() const {
+  uint16_t field = ntohs(gre_hdr_->c_resv0_ver);
+
+  // First 16 bits of the header:
+  //  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+  // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  // |C|       Reserved0       | Ver |
+  // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+  const int resv0_mask = (0x0FFF << 3);
+
+  return ((field & resv0_mask) >> 3);
+}
+
+
+void GREPacket::reserved0Is(uint16_t value) {
+  // Get current value.
+  uint16_t field = ntohs(gre_hdr_->c_resv0_ver);
+
+  // Clear Reserved0 field.
+  const int resv0_mask = (0x0FFF << 3);
+  field &= ~resv0_mask;
+
+  // We will use only the lower 12 bits of value.
+  value &= 0x0FFF;
+
+  // Set Reserved0 field to value.
+  field |= (value << 3);
+  gre_hdr_->c_resv0_ver = htons(field);
+}
+
+
+uint8_t GREPacket::version() const {
+  // Lower three bits.
+  uint16_t field = ntohs(gre_hdr_->c_resv0_ver);
+  return (field & 0x07);
+}
+
+
+void GREPacket::versionIs(uint8_t value) {
+  // Get current value.
+  uint16_t field = ntohs(gre_hdr_->c_resv0_ver);
+
+  // Clear version field.
+  field &= ~0x07;
+
+  // Set version field.
+  value &= 0x07;
+  field |= value;
+  gre_hdr_->c_resv0_ver = htons(field);
+}
