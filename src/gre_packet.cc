@@ -152,3 +152,17 @@ void GREPacket::versionIs(uint8_t value) {
   field |= value;
   gre_hdr_->c_resv0_ver = htons(field);
 }
+
+
+uint16_t GREPacket::reserved1() const {
+  return (checksumPresent()) ? ntohs(gre_hdr_->resv1) : 0;
+}
+
+
+void GREPacket::reserved1Is(const uint16_t value) {
+  // No-op if checksum bit isn't set.
+  if (!checksumPresent())
+    return;
+
+  gre_hdr_->resv1 = htons(value);
+}

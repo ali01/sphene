@@ -59,6 +59,13 @@ class GREPacket : public Packet {
   // Sets the version value.
   void versionIs(uint8_t value);
 
+  // Returns the value in the Reserved1 field of the packet, or zero if the
+  // checksum bit is not enabled.
+  uint16_t reserved1() const;
+
+  // Sets the Reserved1 field. Does nothing if the checksum bit is not enabled.
+  void reserved1Is(uint16_t value);
+
  protected:
   GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 

@@ -154,3 +154,29 @@ TEST_F(GREPacketTest, version) {
   pkt_->versionIs(0);
   EXPECT_EQ(cksum, pkt_->checksumReset());
 }
+
+
+TEST_F(GREPacketTest, reserved1) {
+  // Save original checksum.
+  uint16_t cksum = pkt_->checksum();
+
+  // Check reserved1 value.
+  EXPECT_EQ(0, pkt_->reserved1());
+
+  // Set reserved1.
+  pkt_->reserved1Is(0xDEAD);
+  EXPECT_EQ(0xDEAD, pkt_->reserved1());
+
+  // Reserved1 should not be present if the checksum bit is not present.
+  pkt_->checksumPresentIs(false);
+  EXPECT_EQ(0, pkt_->reserved1());
+
+  // Setting the reserved1 field is a no-op if checksum bit is not present.
+  pkt_->reserved1Is(0xBEEF);
+  pkt_->checksumPresentIs(true);
+  EXPECT_EQ(0xDEAD, pkt_->reserved1());
+
+  // Reset.
+  pkt_->reserved1Is(0);
+  EXPECT_EQ(cksum, pkt_->checksumReset());
+}
