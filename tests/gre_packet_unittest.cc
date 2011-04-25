@@ -133,3 +133,24 @@ TEST_F(GREPacketTest, reserved0) {
   pkt_->reserved0Is(0);
   EXPECT_EQ(cksum, pkt_->checksumReset());
 }
+
+
+TEST_F(GREPacketTest, version) {
+  // Save original checksum.
+  uint16_t cksum = pkt_->checksum();
+
+  // Query the version bits.
+  EXPECT_EQ(0, pkt_->version());
+
+  // Set the version bits.
+  pkt_->versionIs(0x07);  // 3 bits
+  EXPECT_EQ(0x07, pkt_->version());
+
+  // Try to set more than 3 bits.
+  pkt_->versionIs(0xFF);
+  EXPECT_EQ(0x07, pkt_->version());
+
+  // Reset. Only the version field should have changed.
+  pkt_->versionIs(0);
+  EXPECT_EQ(cksum, pkt_->checksumReset());
+}
