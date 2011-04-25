@@ -227,6 +227,12 @@ OSPFHelloPacket::valid() const {
     return false;
   }
 
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(enclosingPacket());
+  if (ip_pkt->dst() != kBroadcastAddr) {
+    DLOG << "Destination address is not the broadcast address";
+    return false;
+  }
+
   return true;
 }
 
