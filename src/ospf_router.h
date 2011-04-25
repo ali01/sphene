@@ -17,7 +17,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   typedef Fwk::Ptr<const OSPFRouter> PtrConst;
   typedef Fwk::Ptr<OSPFRouter> Ptr;
 
-  static Ptr OSPFRouterNew() {
+  static Ptr New() {
     return new OSPFRouter();
   }
 
