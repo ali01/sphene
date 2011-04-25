@@ -73,6 +73,9 @@ class GREPacket : public Packet {
   // Sets the Reserved1 field. Does nothing if the checksum bit is not enabled.
   void reserved1Is(uint16_t value);
 
+  // Returns the encapsulated packet.
+  Packet::Ptr payload();
+
  protected:
   GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 

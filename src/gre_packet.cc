@@ -2,9 +2,11 @@
 
 #include <arpa/inet.h>
 #include <inttypes.h>
+#include "arp_packet.h"
 #include "ethernet_packet.h"
 #include "fwk/buffer.h"
 #include "interface.h"
+#include "unknown_packet.h"
 
 
 GREPacket::GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
@@ -174,4 +176,27 @@ void GREPacket::reserved1Is(const uint16_t value) {
     return;
 
   gre_hdr_->resv1 = htons(value);
+}
+
+
+Packet::Ptr GREPacket::payload() {
+  const uint16_t header_len = checksumPresent() ? 8 : 4;
+  const uint16_t payload_offset = buffer_offset_ + header_len;
+  Packet::Ptr pkt;
+
+  switch (protocol()) {
+    case EthernetPacket::kARP:
+      pkt = ARPPacket::ARPPacketNew(buffer_, payload_offset);
+      break;
+    case EthernetPacket::kIP:
+      pkt = IPPacket::IPPacketNew(buffer_, payload_offset);
+      break;
+    default:
+      pkt = UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
+      break;
+  }
+
+  // Chain the packets together.
+  pkt->enclosingPacketIs(this);
+  return pkt;
 }

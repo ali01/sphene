@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <string>
 
+#include "arp_packet.h"
 #include "ethernet_packet.h"
 #include "gre_packet.h"
 #include "fwk/buffer.h"
@@ -211,4 +212,16 @@ TEST_F(GREPacketTest, reserved1) {
   // Reset.
   pkt_->reserved1Is(0);
   EXPECT_EQ(cksum, pkt_->checksumReset());
+}
+
+
+TEST_F(GREPacketTest, payload) {
+  // Extract the excapsulated packet.
+  Packet::Ptr payload = pkt_->payload();
+  ASSERT_NE((Packet*)NULL, payload.ptr());
+
+  // Ensure we extracted the expected payload.
+  ASSERT_TRUE(dynamic_cast<ARPPacket*>(payload.ptr()));
+  ARPPacket::Ptr arp_pkt = ARPPacket::Ptr::st_cast<ARPPacket>(payload);
+  EXPECT_EQ("4.2.2.1", (string)arp_pkt->senderPAddr());
 }
