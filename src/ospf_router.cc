@@ -21,17 +21,26 @@ OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
 void
 OSPFRouter::PacketFunctor::operator()(OSPFPacket* pkt,
                                       Interface::PtrConst iface) {
-  
+  /* Double dispatch on more specific OSPFPacket. */
+  OSPFPacket::Ptr derived_pkt = pkt->derivedInstance();
+  (*derived_pkt)(this, iface);
 }
 
 void
 OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
                                       Interface::PtrConst iface) {
-  
+
 }
+
+void
+OSPFRouter::PacketFunctor::operator()(OSPFLSUAdvertisement* pkt,
+                                      Interface::PtrConst iface) {
+
+}
+
 
 void
 OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
                                       Interface::PtrConst iface) {
-  
+
 }
