@@ -27,6 +27,14 @@ ARPPacket::ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
   //   validation to be done by the users of this interface.
 }
 
+// Packet validation.
+// TODO(ali): implement.
+bool
+ARPPacket::valid() const {
+  throw Fwk::NotImplementedException("ARPPacket::valid()", "not implemented");
+  return false;
+}
+
 
 void ARPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);

@@ -5,6 +5,7 @@
 #include "arp_packet.h"
 #include "ethernet_packet.h"
 #include "fwk/buffer.h"
+#include "fwk/exception.h"
 #include "interface.h"
 #include "unknown_packet.h"
 
@@ -14,6 +15,12 @@ GREPacket::GREPacket(const Fwk::Buffer::Ptr buffer,
     : Packet(buffer, buffer_offset),
       gre_hdr_((struct GREHeader *)offsetAddress(0)) { }
 
+// Packet validation.
+// TODO(ali): implement.
+bool GREPacket::valid() const {
+  throw Fwk::NotImplementedException("GREPacket::valid()", "not implemented");
+  return false;
+}
 
 void GREPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);

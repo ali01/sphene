@@ -68,6 +68,10 @@ class EthernetPacket : public Packet {
     return new EthernetPacket(buffer, buffer_offset);
   }
 
+  // Packet validation.
+  // TODO(ali): implement. currently throws NotImplementedException.
+  virtual bool valid() const;
+
   // Functor for double-dispatch.
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 

@@ -42,6 +42,10 @@ class ICMPPacket : public Packet {
   // Double-dispatch support.
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
+  // Packet validation.
+  // TODO(ali): implement, currently throws NotImplementedException
+  virtual bool valid() const;
+
   // Returns the ICMP Type.
   Type type() const;
 

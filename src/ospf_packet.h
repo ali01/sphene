@@ -2,6 +2,7 @@
 #define OSPF_PACKET_H_7R33RO3C
 
 #include "fwk/buffer.h"
+#include "fwk/log.h"
 
 #include "packet.h"
 #include "ip_packet.h"
@@ -57,11 +58,17 @@ class OSPFPacket : public Packet {
    * on the value of the packet's type. */
   virtual OSPFPacket::Ptr derivedInstance();
 
+  /* Packet validation. */
+  virtual bool valid() const;
+
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  protected:
   OSPFPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+
+  /* Data members. */
+  mutable Fwk::Log::Ptr log_;
 
  private:
   /* Data members */
@@ -92,6 +99,9 @@ class OSPFHelloPacket : public OSPFPacket {
 
   /* Override. */
   virtual OSPFPacket::Ptr derivedInstance() { return this; }
+
+  /* Packet validation. */
+  virtual bool valid() const;
 
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
@@ -133,6 +143,9 @@ class OSPFLSUPacket : public OSPFPacket {
   /* Override. */
   virtual OSPFPacket::Ptr derivedInstance() { return this; }
 
+  /* Packet valiation */
+  virtual bool valid() const;
+
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
@@ -166,13 +179,15 @@ class OSPFLSUAdvertisement : public Packet {
   uint32_t routerID() const;
   void routerIDIs(uint32_t id);
 
+  /* Packet validation. */
+  virtual bool valid() const { return true; }
+
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  private:
   OSPFLSUAdvertisement(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
-  /* Data members. */
   struct ospf_lsu_adv* ospf_lsu_adv_;
 
   /* Operations disallowed. */

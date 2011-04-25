@@ -92,6 +92,14 @@ EthernetPacket::EthernetPacket(const Fwk::Buffer::Ptr buffer,
       eth_hdr((struct ether_header*)offsetAddress(0)) { }
 
 
+// Packet validation.
+// TODO(ali): implement.
+bool EthernetPacket::valid() const {
+  throw Fwk::NotImplementedException("EthernetPacket::valid()",
+                                     "not implemented");
+  return false;
+}
+
 void EthernetPacket::operator()(Functor* const f,
                                 const Interface::PtrConst iface) {
   (*f)(this, iface);

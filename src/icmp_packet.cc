@@ -20,6 +20,11 @@ void ICMPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);
 }
 
+// TODO: implement.
+bool ICMPPacket::valid() const {
+  throw Fwk::NotImplementedException("ICMPPacket::valid()", "not implemented");
+  return false;
+}
 
 ICMPPacket::Type ICMPPacket::type() const {
   return (Type)(icmp_hdr_->type);
@@ -83,6 +88,10 @@ void ICMPPacket::checksumReset() {
 // TODO(ms): This should be moved to a util.h/util.cc pair.
 // TODO(ms): This is not correct. Checksums in ICMP are calculated over the
 //   header and data, which is not yet part of the above implementation.
+// NOTE(ali): IPPacket now exposes a public static compute_checksum() function
+//   that can be used to implement this. After all, this is widely known to be
+//   "The IP Checksum." See the implementation of the OSPFPackets checksum
+//   functions.
 uint16_t ICMPPacket::computeChecksum() const {
   uint32_t sum;
   unsigned int length = len();

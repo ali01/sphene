@@ -4,6 +4,7 @@
 #include <string>
 
 #include "fwk/buffer.h"
+#include "fwk/log.h"
 #include "fwk/ordinal.h"
 
 #include "ipv4_addr.h"
@@ -49,6 +50,9 @@ class IPPacket : public Packet {
 
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+  /* Packet validation. */
+  virtual bool valid() const;
 
   IPVersion version() const;
   void versionIs(const IPVersion& version);
@@ -103,6 +107,7 @@ class IPPacket : public Packet {
   IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
+  mutable Fwk::Log::Ptr log_;
   struct ip_hdr* ip_hdr_;
 };
 

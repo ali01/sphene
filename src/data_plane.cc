@@ -95,23 +95,9 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
 
-  // Packet validation.
-  if (pkt->buffer()->len() < 5) {
-    DLOG << "  packet buffer too small: " << (uint32_t)pkt->buffer()->len();
+  /* IPPacket validation. */
+  if (!pkt->valid())
     return;
-  }
-  if (pkt->headerLength() < 5) {  // in words, not bytes
-    DLOG << "  header length too small: " << (uint32_t)pkt->headerLength();
-    return;
-  }
-  if (pkt->version() != 4) {
-    DLOG << "  invalid IP version: " << (uint32_t)pkt->version();
-    return;
-  }
-  if (!pkt->checksumValid()) {
-    DLOG << "  invalid checksum";
-    return;
-  }
 
   // Look up IP Packet's destination.
   IPv4Addr dest_ip = pkt->dst();

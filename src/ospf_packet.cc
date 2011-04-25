@@ -43,6 +43,7 @@ struct ospf_lsu_adv {
 
 OSPFPacket::OSPFPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
+      log_(Fwk::Log::LogNew("OSPFPacket")),
       ospf_pkt_((struct ospf_pkt*)offsetAddress(0)) {}
 
 uint8_t
@@ -145,6 +146,37 @@ OSPFPacket::derivedInstance() {
   return pkt;
 }
 
+bool
+OSPFPacket::valid() const {
+  size_t mem_size = buffer()->len() - bufferOffset();
+  if (mem_size < sizeof(struct ospf_pkt) || mem_size < len()){
+    DLOG << "Packet buffer too small.";
+    return false;
+  }
+
+  if (version() != kVersion) {
+    DLOG << "Unsupported OSPF version.";
+    return false;
+  }
+
+  if (ospf_pkt_->autype != 0 || ospf_pkt_->auth != 0) {
+    DLOG << "Autype or auth fields are not zero.";
+    return false;
+  }
+
+  if (ospf_pkt_->type != kHello && ospf_pkt_->type != kLSU) {
+    DLOG << "Invalid value in type field.";
+    return false;
+  }
+
+  if (!checksumValid()) {
+    DLOG << "Invalid checksum.";
+    return false;
+  }
+
+  return true;
+}
+
 void
 OSPFPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);
@@ -181,6 +213,19 @@ OSPFHelloPacket::hellointIs(uint16_t helloint) {
 void
 OSPFHelloPacket::paddingIsZero() {
   ospf_hello_pkt_->padding = 0x0;
+}
+
+bool
+OSPFHelloPacket::valid() const {
+  if (!OSPFPacket::valid())
+    return false;
+
+  if (ospf_hello_pkt_->padding != 0) {
+    DLOG << "Padding is not zero.";
+    return false;
+  }
+
+  return true;
 }
 
 void
@@ -239,6 +284,14 @@ OSPFLSUAdvertisement::PtrConst
 OSPFLSUPacket::advertisement(uint32_t index) const {
   OSPFLSUPacket* self = const_cast<OSPFLSUPacket*>(this);
   return self->advertisement(index);
+}
+
+bool
+OSPFLSUPacket::valid() const {
+  if (!OSPFPacket::valid())
+    return false;
+
+  return true;
 }
 
 void

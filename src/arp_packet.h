@@ -30,6 +30,10 @@ class ARPPacket : public Packet {
     return new ARPPacket(buffer, buffer_offset);
   }
 
+  // Packet validation.
+  // TODO(ali): implement. Currently throws NotImplementedException.
+  virtual bool valid() const;
+
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
   // Returns the operation of the ARP packet.

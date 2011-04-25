@@ -48,6 +48,9 @@ class Packet : public Fwk::PtrInterface<Packet> {
   Fwk::Buffer::Ptr buffer() const { return buffer_; }
   unsigned int bufferOffset() const { return buffer_offset_; }
 
+  /* Packet validation. */
+  virtual bool valid() const = 0;
+
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface) = 0;
 
