@@ -5,6 +5,7 @@
 
 #include "fwk/buffer.h"
 
+#include "ethernet_packet.h"
 #include "packet.h"
 
 class Interface;
@@ -58,6 +59,12 @@ class GREPacket : public Packet {
 
   // Sets the version value.
   void versionIs(uint8_t value);
+
+  // Returns the encapsulated protocol type.
+  EthernetPacket::EthernetType protocol() const;
+
+  // Sets the encapsulated protocol type.
+  void protocolIs(EthernetPacket::EthernetType ptype);
 
   // Returns the value in the Reserved1 field of the packet, or zero if the
   // checksum bit is not enabled.

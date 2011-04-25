@@ -5,7 +5,6 @@
 #include "ethernet_packet.h"
 #include "fwk/buffer.h"
 #include "interface.h"
-#include "ip_packet.h"
 
 
 GREPacket::GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
@@ -151,6 +150,16 @@ void GREPacket::versionIs(uint8_t value) {
   value &= 0x07;
   field |= value;
   gre_hdr_->c_resv0_ver = htons(field);
+}
+
+
+EthernetPacket::EthernetType GREPacket::protocol() const {
+  return (EthernetPacket::EthernetType)ntohs(gre_hdr_->ptype);
+}
+
+
+void GREPacket::protocolIs(EthernetPacket::EthernetType ptype) {
+  gre_hdr_->ptype = htons(ptype);
 }
 
 

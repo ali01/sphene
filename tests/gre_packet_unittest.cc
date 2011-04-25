@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <string>
 
+#include "ethernet_packet.h"
 #include "gre_packet.h"
 #include "fwk/buffer.h"
 #include "fwk/exception.h"
@@ -157,6 +158,23 @@ TEST_F(GREPacketTest, version) {
 
   // Reset. Only the version field should have changed.
   pkt_->versionIs(0);
+  EXPECT_EQ(cksum, pkt_->checksumReset());
+}
+
+
+TEST_F(GREPacketTest, ptype) {
+  // Save original checksum.
+  uint16_t cksum = pkt_->checksum();
+
+  // Query the protocol type.
+  EXPECT_EQ(EthernetPacket::kIP, pkt_->protocol());
+
+  // Change the protocol.
+  pkt_->protocolIs(EthernetPacket::kARP);
+  EXPECT_EQ(EthernetPacket::kARP, pkt_->protocol());
+
+  // Reset. Only the protocol field should have changed.
+  pkt_->protocolIs(EthernetPacket::kIP);
   EXPECT_EQ(cksum, pkt_->checksumReset());
 }
 
