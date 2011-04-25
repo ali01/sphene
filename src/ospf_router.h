@@ -6,6 +6,7 @@
 
 #include "interface.h"
 #include "ospf_packet.h"
+#include "ospf_neighbor_map.h"
 
 
 /* Forward declarations. */
@@ -44,6 +45,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   /* data members */
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
+
+  OSPFNeighborMap neighbors_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);
