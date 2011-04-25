@@ -8,9 +8,6 @@
 #include "ip_packet.h"
 
 
-const size_t GREPacket::kHeaderSize = sizeof(struct GREHeader);
-
-
 GREPacket::GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       gre_hdr_((struct GREHeader *)offsetAddress(0)) { }
