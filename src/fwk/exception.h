@@ -74,6 +74,17 @@ public:
     : ResourceException(entity, funcName, message) { }
 };
 
+
+class NotImplementedException : public Exception {
+public:
+  NotImplementedException(const string& funcName, const string& message)
+    : Exception(funcName, message) { }
+
+  NotImplementedException(Fwk::NamedInterface *entity, const string& funcName,
+                          const string& message)
+    : Exception(entity, funcName, message) { }
+};
+
 }
 
 #endif
