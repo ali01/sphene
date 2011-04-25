@@ -50,6 +50,9 @@ class OSPFPacket : public Packet {
   void checksumIs(uint16_t ck);
   bool checksumValid() const;
 
+  /* zero autype and auth fields */
+  void autypeAndAuthAreZero();
+
   /* returns an instance of either OSPFHelloPacket or OSPFLSUPacket depending
    * on the value of the packet's type. */ 
   virtual OSPFPacket::Ptr derivedInstance();
@@ -84,6 +87,8 @@ class OSPFHelloPacket : public OSPFPacket {
 
   uint16_t helloint() const;
   void hellointIs(uint16_t helloint);
+
+  void paddingIsZero();
 
   /* override */
   virtual OSPFPacket::Ptr derivedInstance() { return this; }

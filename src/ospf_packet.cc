@@ -16,7 +16,7 @@ struct ospf_pkt {
 } __attribute__((packed));
 
 struct ospf_hello_pkt {
-  struct ospf_pkt opsf_pkt;
+  struct ospf_pkt ospf_pkt;
   uint32_t mask;            /* network mask associated with this interface */
   uint16_t helloint;        /* number of seconds between hello packets */
   uint16_t padding;         /* zero */
@@ -121,6 +121,12 @@ OSPFPacket::checksumValid() const {
   return pkt_cksum == actual_cksum;
 }
 
+void
+OSPFPacket::autypeAndAuthAreZero() {
+  ospf_pkt_->autype = 0x0;
+  ospf_pkt_->auth = 0x0;
+}
+
 OSPFPacket::Ptr
 OSPFPacket::derivedInstance() {
   OSPFPacket::Ptr pkt;
@@ -170,6 +176,11 @@ OSPFHelloPacket::helloint() const {
 void
 OSPFHelloPacket::hellointIs(uint16_t helloint) {
   ospf_hello_pkt_->helloint = htons(helloint);
+}
+
+void
+OSPFHelloPacket::paddingIsZero() {
+  ospf_hello_pkt_->padding = 0x0;
 }
 
 void
