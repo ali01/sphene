@@ -30,9 +30,18 @@ class GREPacketTest : public ::testing::Test {
   virtual void SetUp() {
     uint8_t gre_packet[] = { 0x80,          // Checksum is present
                              0x00,          // Version = 0
-                             0x08, 0x00,    // Ptype = IP
-                             0x77, 0xFF,    // Checksum
-                             0x00, 0x00 };  // Reserved1
+                             0x08, 0x06,    // Ptype = ARP
+                             0x4F, 0xD8,    // Checksum
+                             0x00, 0x00,    // Reserved1
+                             // The following is an ARP packet.
+                             0x00, 0x01,    // Ethernet = 0x0001
+                             0x08, 0x00,    // IP = 0x0800
+                             0x06, 0x04,    // hlen = 6, plen = 4
+                             0x00, 0x01,    // request packet
+                             0xDE, 0xAD, 0xBE, 0xEF, 0xBA, 0xBE,  // Sender HW
+                             0x04, 0x02, 0x02, 0x01,              // Sender P
+                             0xC0, 0xFF, 0xEE, 0xC0, 0xFF, 0xEE,  // Target HW
+                             0x08, 0x08, 0x04, 0x04 };            // Targer P
 
     // Put a packet in a buffer.
     buf_ = Fwk::Buffer::BufferNew(gre_packet, sizeof(gre_packet));
@@ -167,14 +176,14 @@ TEST_F(GREPacketTest, ptype) {
   uint16_t cksum = pkt_->checksum();
 
   // Query the protocol type.
-  EXPECT_EQ(EthernetPacket::kIP, pkt_->protocol());
-
-  // Change the protocol.
-  pkt_->protocolIs(EthernetPacket::kARP);
   EXPECT_EQ(EthernetPacket::kARP, pkt_->protocol());
 
-  // Reset. Only the protocol field should have changed.
+  // Change the protocol.
   pkt_->protocolIs(EthernetPacket::kIP);
+  EXPECT_EQ(EthernetPacket::kIP, pkt_->protocol());
+
+  // Reset. Only the protocol field should have changed.
+  pkt_->protocolIs(EthernetPacket::kARP);
   EXPECT_EQ(cksum, pkt_->checksumReset());
 }
 
