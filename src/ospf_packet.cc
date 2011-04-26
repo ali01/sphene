@@ -185,6 +185,8 @@ OSPFPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 /* OSPFHelloPacket */
 
+const IPv4Addr OSPFHelloPacket::kBroadcastAddr(0xe0000005);
+
 OSPFHelloPacket::OSPFHelloPacket(Fwk::Buffer::Ptr buffer,
                                  unsigned int buffer_offset)
     : OSPFPacket(buffer, buffer_offset),
@@ -222,6 +224,12 @@ OSPFHelloPacket::valid() const {
 
   if (ospf_hello_pkt_->padding != 0) {
     DLOG << "Padding is not zero.";
+    return false;
+  }
+
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(enclosingPacket());
+  if (ip_pkt->dst() != kBroadcastAddr) {
+    DLOG << "Destination address is not the broadcast address";
     return false;
   }
 
