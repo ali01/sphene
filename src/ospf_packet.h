@@ -40,6 +40,7 @@ class OSPFPacket : public Packet {
   uint16_t len() const;
   void lenIs(uint16_t len);
 
+  /* Router ID of the sender of this OSPF Packet. */
   uint32_t routerID() const;
   void routerIDIs(uint32_t id);
 
@@ -71,10 +72,10 @@ class OSPFPacket : public Packet {
   mutable Fwk::Log::Ptr log_;
 
  private:
-  /* Data members */
+  /* Data members. */
   struct ospf_pkt* ospf_pkt_;
 
-  /* Operations disallowed */
+  /* Operations disallowed. */
   OSPFPacket(const OSPFPacket&);
   void operator=(const OSPFPacket&);
 };
@@ -91,6 +92,7 @@ class OSPFHelloPacket : public OSPFPacket {
     return new OSPFHelloPacket(buffer, buffer_offset);
   }
 
+  /* Subnet mask of the interface through which this packet was sent. */
   IPv4Addr subnetMask() const;
   void subnetMaskIs(const IPv4Addr& addr);
 
