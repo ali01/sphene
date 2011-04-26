@@ -135,13 +135,10 @@ void sr_integ_init(struct sr_instance* );
 void sr_integ_hw_setup(struct sr_instance* ); /* called after hwinfo */
 void sr_integ_destroy(struct sr_instance* );
 void sr_integ_input(struct sr_instance* sr,
-                   const uint8_t * packet/* borrowed */,
-                   unsigned int len,
-#ifdef _CPUMODE_
-                    interface_t* intf );
-#else
-                    const char* interface );
-#endif
+                    const uint8_t * packet/* borrowed */,
+                    unsigned int len,
+                    const char* interface /* borrowed */);
+
 void sr_integ_add_interface(struct sr_instance*,
                             struct sr_vns_if* /* borrowed */);
 
