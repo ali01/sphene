@@ -1,6 +1,7 @@
 #include "ospf_interface_desc.h"
 
-OSPFInterfaceDesc::OSPFInterfaceDesc(Interface::Ptr iface, uint16_t helloint)
+OSPFInterfaceDesc::OSPFInterfaceDesc(Interface::PtrConst iface,
+                                     uint16_t helloint)
     : iface_(iface), helloint_(helloint) {}
 
 OSPFNeighbor::PtrConst
