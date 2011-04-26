@@ -17,19 +17,42 @@ class PacketBuffer : public Fwk::PtrInterface<PacketBuffer> {
   typedef Fwk::Ptr<const PacketBuffer> PtrConst;
   typedef Fwk::Ptr<PacketBuffer> Ptr;
 
-  // Constructs a new PacketBuffer. The contents of buffer are copied into the
-  // new PacketBuffer.
+  // Constructs a new PacketBuffer. The 'len' bytes of 'buffer' are copied into
+  // the new PacketBuffer. The new PacketBuffer will be of at least 'len' bytes
+  // in size.
   static Ptr New(const void* buffer, size_t len) {
     return new PacketBuffer(buffer, len);
   }
 
-  // Constructs a new PacketBuffer with an internal buffer of at least len
+  // Constructs a new PacketBuffer with an internal buffer of at least 'len'
   // bytes.
   static Ptr New(size_t len) {
     return new PacketBuffer(len);
   }
 
+  // Guarantees that the internal buffer is at least 'len' bytes in size,
+  // growing the internal buffer if necessary. This is useful when prepending a
+  // header to the packet inside the buffer.
+  void minimumSizeIs(size_t min_len) {
+    if (min_len <= size())
+      return;  // nothing to do
+
+    // Create a new buffer of the next largest size.
+    const size_t new_size = nextPowerOf2(min_len, 512);
+    Fwk::Buffer::Ptr new_buf = Fwk::Buffer::BufferNew(new_size);
+
+    // Copy data.
+    memcpy(new_buf->data() + new_size - size(), data(), size());
+
+    // Swap buffers.
+    buffer_ = new_buf;
+  }
+
+  // Returns a pointer to the internal buffer. This pointer may change across
+  // non-const calls to this object.
   uint8_t* data() const { return buffer_->data(); }
+
+  // Returns the size of the internal buffer.
   size_t len() const { return buffer_->len(); }
   size_t size() const { return buffer_->len(); }
 
