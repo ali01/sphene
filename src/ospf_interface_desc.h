@@ -7,6 +7,7 @@
 
 #include "interface.h"
 #include "ospf_neighbor.h"
+#include "time_types.h"
 
 
 class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
@@ -23,7 +24,7 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   }
 
   Interface::PtrConst interface() const { return iface_; }
-  uint16_t helloint() const { return helloint_; }
+  Seconds helloint() const { return helloint_; }
 
   OSPFNeighbor::Ptr neighbor(uint32_t router_id) const;
 

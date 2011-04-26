@@ -7,6 +7,8 @@
 #include "fwk/ordinal.h"
 
 
+// TODO(ali): make of type Fwk::Numeric
+
 class Seconds : public Fwk::Ordinal<Seconds, int32_t> {
  public:
   Seconds(const int32_t s) : Fwk::Ordinal<Seconds, int32_t>(s) { }
