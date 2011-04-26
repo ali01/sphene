@@ -1,11 +1,12 @@
 #include "ospf_interface_desc.h"
 
-OSPFInterfaceDesc::OSPFInterfaceDesc(Interface::Ptr iface, uint16_t helloint)
+OSPFInterfaceDesc::OSPFInterfaceDesc(Interface::PtrConst iface,
+                                     uint16_t helloint)
     : iface_(iface), helloint_(helloint) {}
 
-OSPFNeighbor::PtrConst
+OSPFNeighbor::Ptr
 OSPFInterfaceDesc::neighbor(uint32_t router_id) const {
-  OSPFNeighbor::PtrConst neighbor = NULL;
+  OSPFNeighbor::Ptr neighbor = NULL;
   const_iterator it = neighbors_.find(router_id);
   if (it != this->end())
     neighbor = it->second;
@@ -14,7 +15,7 @@ OSPFInterfaceDesc::neighbor(uint32_t router_id) const {
 }
 
 void
-OSPFInterfaceDesc::neighborIs(OSPFNeighbor::PtrConst nb) {
+OSPFInterfaceDesc::neighborIs(OSPFNeighbor::Ptr nb) {
   if (nb) {
     uint32_t key = nb->routerId();
     neighbors_[key] = nb;
@@ -22,7 +23,7 @@ OSPFInterfaceDesc::neighborIs(OSPFNeighbor::PtrConst nb) {
 }
 
 void
-OSPFInterfaceDesc::neighborDel(OSPFNeighbor::PtrConst nb) {
+OSPFInterfaceDesc::neighborDel(OSPFNeighbor::Ptr nb) {
   if (nb == NULL)
     return;
 
