@@ -56,7 +56,7 @@ class OSPFPacket : public Packet {
   void autypeAndAuthAreZero();
 
   /* returns an instance of either OSPFHelloPacket or OSPFLSUPacket depending
-   * on the value of the packet's type. */
+   * on the value of the packet's type field. */
   virtual OSPFPacket::Ptr derivedInstance();
 
   /* Packet validation. */
