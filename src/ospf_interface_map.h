@@ -12,20 +12,20 @@
 #include "ospf_neighbor.h"
 
 
-class OSPFNeighborMap : public Fwk::PtrInterface<OSPFNeighborMap> {
+class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
  public:
-  typedef Fwk::Ptr<const OSPFNeighborMap> PtrConst;
-  typedef Fwk::Ptr<OSPFNeighborMap> Ptr;
+  typedef Fwk::Ptr<const OSPFInterfaceMap> PtrConst;
+  typedef Fwk::Ptr<OSPFInterfaceMap> Ptr;
 
   typedef std::map<IPv4Addr,OSPFInterfaceDesc::Ptr>::iterator iterator;
   typedef std::map<IPv4Addr,OSPFInterfaceDesc::Ptr>::const_iterator
     const_iterator;
 
   /* Public constructor allows compile-time allocation. */
-  OSPFNeighborMap() {}
+  OSPFInterfaceMap() {}
 
-  static Ptr OSPFNeighborMapNew() {
-    return new OSPFNeighborMap();
+  static Ptr OSPFInterfaceMapNew() {
+    return new OSPFInterfaceMap();
   }
 
   OSPFInterfaceDesc::PtrConst interfaceDesc(const IPv4Addr& addr) const;
@@ -45,8 +45,8 @@ class OSPFNeighborMap : public Fwk::PtrInterface<OSPFNeighborMap> {
   std::map<IPv4Addr,OSPFInterfaceDesc::Ptr> interfaces_;
 
   /* Operations disallowed. */
-  OSPFNeighborMap(const OSPFNeighborMap&);
-  void operator=(const OSPFNeighborMap&);
+  OSPFInterfaceMap(const OSPFInterfaceMap&);
+  void operator=(const OSPFInterfaceMap&);
 };
 
 #endif

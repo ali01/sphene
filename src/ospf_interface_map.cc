@@ -1,15 +1,15 @@
-#include "ospf_neighbor_map.h"
+#include "ospf_interface_map.h"
 
-/* OSPFNeighborMap */
+/* OSPFInterfaceMap */
 
 OSPFInterfaceDesc::PtrConst
-OSPFNeighborMap::interfaceDesc(const IPv4Addr& addr) const {
-  OSPFNeighborMap* self = const_cast<OSPFNeighborMap*>(this);
+OSPFInterfaceMap::interfaceDesc(const IPv4Addr& addr) const {
+  OSPFInterfaceMap* self = const_cast<OSPFInterfaceMap*>(this);
   return self->interfaceDesc(addr);
 }
 
 OSPFInterfaceDesc::Ptr
-OSPFNeighborMap::interfaceDesc(const IPv4Addr& addr) {
+OSPFInterfaceMap::interfaceDesc(const IPv4Addr& addr) {
   OSPFInterfaceDesc::Ptr if_desc = NULL;
   const_iterator it = interfaces_.find(addr);
   if (it != this->end())
@@ -19,7 +19,7 @@ OSPFNeighborMap::interfaceDesc(const IPv4Addr& addr) {
 }
 
 void
-OSPFNeighborMap::interfaceDescIs(OSPFInterfaceDesc::Ptr iface_desc) {
+OSPFInterfaceMap::interfaceDescIs(OSPFInterfaceDesc::Ptr iface_desc) {
   if (iface_desc) {
     IPv4Addr key = iface_desc->interface()->ip();
     interfaces_[key] = iface_desc;
@@ -27,7 +27,7 @@ OSPFNeighborMap::interfaceDescIs(OSPFInterfaceDesc::Ptr iface_desc) {
 }
 
 void
-OSPFNeighborMap::interfaceDescDel(OSPFInterfaceDesc::Ptr iface_desc) {
+OSPFInterfaceMap::interfaceDescDel(OSPFInterfaceDesc::Ptr iface_desc) {
   if (iface_desc == NULL)
     return;
 
@@ -36,7 +36,7 @@ OSPFNeighborMap::interfaceDescDel(OSPFInterfaceDesc::Ptr iface_desc) {
 }
 
 void
-OSPFNeighborMap::interfaceDescDel(const IPv4Addr& addr) {
+OSPFInterfaceMap::interfaceDescDel(const IPv4Addr& addr) {
   interfaces_.erase(addr);
 }
 

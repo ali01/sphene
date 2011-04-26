@@ -19,7 +19,7 @@ OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
 
 OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
     : ospf_router_(ospf_router),
-      neighbors_(&ospf_router->neighbors_),
+      interfaces_(&ospf_router->interfaces_),
       log_(ospf_router->log_) {}
 
 void
@@ -53,7 +53,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   // TODO(ali): Interfaces must be manually removed from OSPFRouter if they
   //   cease to exist. One approach could be to make use of notifications.
   OSPFInterfaceDesc::Ptr ifd;
-  ifd = neighbors_->interfaceDesc(iface->ip());
+  ifd = interfaces_->interfaceDesc(iface->ip());
 
   if (ifd == NULL) {
     // TODO(ali): Could just drop packet here.
@@ -64,7 +64,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
      * Creating a new interface description object and
      * adding it to the neighbor map. */
     ifd = OSPFInterfaceDesc::New(iface, kDefaultHelloInterval);
-    neighbors_->interfaceDescIs(ifd);
+    interfaces_->interfaceDescIs(ifd);
   }
 
   if (ifd->helloint() != pkt->helloint()) {
