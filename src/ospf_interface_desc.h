@@ -1,8 +1,7 @@
 #ifndef OSPF_INTERFACE_DESC_H_6WPUE39N
 #define OSPF_INTERFACE_DESC_H_6WPUE39N
 
-#include <map>
-
+#include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
 #include "interface.h"
@@ -15,8 +14,8 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   typedef Fwk::Ptr<const OSPFInterfaceDesc> PtrConst;
   typedef Fwk::Ptr<OSPFInterfaceDesc> Ptr;
 
-  typedef std::map<uint32_t,OSPFNeighbor::Ptr>::iterator iterator;
-  typedef std::map<uint32_t,OSPFNeighbor::Ptr>::const_iterator
+  typedef Fwk::Map<uint32_t,OSPFNeighbor>::iterator iterator;
+  typedef Fwk::Map<uint32_t,OSPFNeighbor>::const_iterator
     const_iterator;
 
   static Ptr New(Interface::PtrConst iface, uint16_t helloint) {
@@ -26,7 +25,8 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   Interface::PtrConst interface() const { return iface_; }
   Seconds helloint() const { return helloint_; }
 
-  OSPFNeighbor::Ptr neighbor(uint32_t router_id) const;
+  OSPFNeighbor::Ptr neighbor(uint32_t router_id);
+  OSPFNeighbor::PtrConst neighbor(uint32_t router_id) const;
 
   void neighborIs(OSPFNeighbor::Ptr nb);
   void neighborDel(OSPFNeighbor::Ptr nb);
@@ -43,7 +43,7 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   /* Data members. */
   Interface::PtrConst iface_;
   uint16_t helloint_;
-  std::map<uint32_t,OSPFNeighbor::Ptr> neighbors_;
+  Fwk::Map<uint32_t,OSPFNeighbor> neighbors_;
 
   /* Operations disallowed. */
   OSPFInterfaceDesc(const OSPFInterfaceDesc&);

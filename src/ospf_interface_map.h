@@ -1,9 +1,8 @@
 #ifndef OSPF_NEIGHBOR_MAP_H_596RSZ34
 #define OSPF_NEIGHBOR_MAP_H_596RSZ34
 
-#include <map>
-
 #include "fwk/linked_list.h"
+#include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
 #include "interface.h"
@@ -17,8 +16,8 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   typedef Fwk::Ptr<const OSPFInterfaceMap> PtrConst;
   typedef Fwk::Ptr<OSPFInterfaceMap> Ptr;
 
-  typedef std::map<IPv4Addr,OSPFInterfaceDesc::Ptr>::iterator iterator;
-  typedef std::map<IPv4Addr,OSPFInterfaceDesc::Ptr>::const_iterator
+  typedef Fwk::Map<IPv4Addr,OSPFInterfaceDesc>::iterator iterator;
+  typedef Fwk::Map<IPv4Addr,OSPFInterfaceDesc>::const_iterator
     const_iterator;
 
   /* Public constructor allows compile-time allocation. */
@@ -42,7 +41,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
  private:
   /* Data members. */
-  std::map<IPv4Addr,OSPFInterfaceDesc::Ptr> interfaces_;
+  Fwk::Map<IPv4Addr,OSPFInterfaceDesc> interfaces_;
 
   /* Operations disallowed. */
   OSPFInterfaceMap(const OSPFInterfaceMap&);

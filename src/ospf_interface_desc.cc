@@ -5,21 +5,22 @@ OSPFInterfaceDesc::OSPFInterfaceDesc(Interface::PtrConst iface,
     : iface_(iface), helloint_(helloint) {}
 
 OSPFNeighbor::Ptr
-OSPFInterfaceDesc::neighbor(uint32_t router_id) const {
-  OSPFNeighbor::Ptr neighbor = NULL;
-  const_iterator it = neighbors_.find(router_id);
-  if (it != this->end())
-    neighbor = it->second;
+OSPFInterfaceDesc::neighbor(uint32_t router_id) {
+  return neighbors_.elem(router_id);
+}
 
-  return neighbor;
+OSPFNeighbor::PtrConst
+OSPFInterfaceDesc::neighbor(uint32_t router_id) const {
+  OSPFInterfaceDesc* self = const_cast<OSPFInterfaceDesc*>(this);
+  return self->neighbor(router_id);
 }
 
 void
 OSPFInterfaceDesc::neighborIs(OSPFNeighbor::Ptr nb) {
-  if (nb) {
-    uint32_t key = nb->routerId();
-    neighbors_[key] = nb;
-  }
+  if (nb == NULL)
+    return;
+
+  neighbors_[nb->routerId()] = nb;
 }
 
 void
@@ -27,11 +28,10 @@ OSPFInterfaceDesc::neighborDel(OSPFNeighbor::Ptr nb) {
   if (nb == NULL)
     return;
 
-  uint32_t key = nb->routerId();
-  this->neighborDel(key);
+  this->neighborDel(nb->routerId());
 }
 
 void
 OSPFInterfaceDesc::neighborDel(uint32_t router_id) {
-  neighbors_.erase(router_id);
+  neighbors_.elemDel(router_id);
 }

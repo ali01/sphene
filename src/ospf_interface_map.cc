@@ -10,20 +10,16 @@ OSPFInterfaceMap::interfaceDesc(const IPv4Addr& addr) const {
 
 OSPFInterfaceDesc::Ptr
 OSPFInterfaceMap::interfaceDesc(const IPv4Addr& addr) {
-  OSPFInterfaceDesc::Ptr if_desc = NULL;
-  const_iterator it = interfaces_.find(addr);
-  if (it != this->end())
-    if_desc = it->second;
-
-  return if_desc;
+  return interfaces_.elem(addr);
 }
 
 void
 OSPFInterfaceMap::interfaceDescIs(OSPFInterfaceDesc::Ptr iface_desc) {
-  if (iface_desc) {
-    IPv4Addr key = iface_desc->interface()->ip();
-    interfaces_[key] = iface_desc;
-  }
+  if (iface_desc == NULL)
+    return;
+
+  IPv4Addr key = iface_desc->interface()->ip();
+  interfaces_[key] = iface_desc;
 }
 
 void
@@ -37,6 +33,5 @@ OSPFInterfaceMap::interfaceDescDel(OSPFInterfaceDesc::Ptr iface_desc) {
 
 void
 OSPFInterfaceMap::interfaceDescDel(const IPv4Addr& addr) {
-  interfaces_.erase(addr);
+  interfaces_.elemDel(addr);
 }
-
