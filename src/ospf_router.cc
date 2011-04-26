@@ -55,28 +55,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   OSPFInterfaceDesc::Ptr ifd;
   ifd = neighbors_->interfaceDesc(iface->ip());
 
-  if (ifd) {
-    if (ifd->helloint() != pkt->helloint()) {
-      DLOG << "Ignoring packet: helloint does not match that of "
-           << "receiving interface";
-      return;
-    }
-
-    uint32_t neighbor_id = pkt->routerID();
-    OSPFNeighbor::Ptr neighbor = ifd->neighbor(neighbor_id);
-
-    if (neighbor == NULL) {
-      /* Packet was sent by a new neighbor.
-       * Creating neighbor object and adding it to the interface description */
-      IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-      IPv4Addr neighbor_addr = ip_pkt->src();
-      neighbor = OSPFNeighbor::New(neighbor_id, neighbor_addr);
-      ifd->neighborIs(neighbor);
-    }
-
-    neighbor->ageIs(0);
-
-  } else {
+  if (ifd == NULL) {
     /* Packet was received on an interface that the dynamic router
      * was unaware about -- possibly a newly created virtual interface.
      * Creating a new interface description object and
@@ -84,6 +63,27 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     ifd = OSPFInterfaceDesc::New(iface, kDefaultHelloInterval);
     neighbors_->interfaceDescIs(ifd);
   }
+
+  if (ifd->helloint() != pkt->helloint()) {
+    DLOG << "Ignoring packet: helloint does not match that of "
+         << "receiving interface";
+    return;
+  }
+
+  uint32_t neighbor_id = pkt->routerID();
+  OSPFNeighbor::Ptr neighbor = ifd->neighbor(neighbor_id);
+
+  if (neighbor == NULL) {
+    /* Packet was sent by a new neighbor.
+     * Creating neighbor object and adding it to the interface description */
+    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+    IPv4Addr neighbor_addr = ip_pkt->src();
+    neighbor = OSPFNeighbor::New(neighbor_id, neighbor_addr);
+    ifd->neighborIs(neighbor);
+  }
+
+  /* Refresh neighbor's age. */
+  neighbor->ageIs(0);
 }
 
 void
