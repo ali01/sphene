@@ -1,7 +1,6 @@
 #include "control_plane.h"
 
 #include <string>
-#include "fwk/buffer.h"
 #include "fwk/log.h"
 #include "fwk/named_interface.h"
 #include "fwk/scoped_lock.h"
@@ -12,6 +11,8 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "ip_packet.h"
+#include "packet_buffer.h"
+
 
 // Input to TCP stack.
 void sr_transport_input(uint8_t* packet);
@@ -270,8 +271,9 @@ ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
     // No entry in the ARP queue yet.
     size_t pkt_len = EthernetPacket::kHeaderSize + ARPPacket::kHeaderSize;
 
-    Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
-    EthernetPacket::Ptr req_eth_pkt = EthernetPacket::New(buffer, 0);
+    PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
+    EthernetPacket::Ptr req_eth_pkt =
+        EthernetPacket::New(buffer, buffer->size() - pkt_len);
 
     req_eth_pkt->srcIs(out_iface->mac());
     req_eth_pkt->dstIs(EthernetAddr::kBroadcast);
@@ -379,7 +381,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
                           IPPacket::kHeaderSize +
                           ICMPPacket::kHeaderLen +
                           data_len);
-  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+  PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
 
   // Look up routing table entry for packet source.
   IPv4Addr dest_ip = orig_pkt->src();
@@ -398,7 +400,8 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   Interface::Ptr out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
+  EthernetPacket::Ptr eth_pkt =
+      EthernetPacket::New(buffer, buffer->size() - pkt_len);
   eth_pkt->typeIs(EthernetPacket::kIP);
 
   // IP packet next.
@@ -464,7 +467,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
                           IPPacket::kHeaderSize +
                           ICMPPacket::kHeaderLen +
                           data_len);
-  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+  PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
 
   // Look up routing table entry for packet source.
   IPv4Addr dest_ip = orig_pkt->src();
@@ -483,7 +486,8 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   Interface::Ptr out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
+  EthernetPacket::Ptr eth_pkt =
+      EthernetPacket::New(buffer, buffer->size() - pkt_len);
   eth_pkt->typeIs(EthernetPacket::kIP);
 
   // IP packet next.

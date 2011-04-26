@@ -7,9 +7,9 @@
 
 #include "arp_packet.h"
 #include "ethernet_packet.h"
-#include "fwk/buffer.h"
 #include "fwk/exception.h"
 #include "ip_packet.h"
+#include "packet_buffer.h"
 
 using std::string;
 
@@ -45,16 +45,16 @@ class ARPPacketTest : public ::testing::Test {
                              0x08, 0x08, 0x04, 0x04 };
 
     // Put a packet in a buffer.
-    buf_ = Fwk::Buffer::BufferNew(arp_packet, sizeof(arp_packet));
+    buf_ = PacketBuffer::New(arp_packet, sizeof(arp_packet));
 
     // Update header pointer.
     header_ = (struct ARPHeader*)buf_->data();
 
     // Construct ARPPacket from buffer.
-    pkt_ = ARPPacket::ARPPacketNew(buf_, 0);
+    pkt_ = ARPPacket::ARPPacketNew(buf_, buf_->size() - sizeof(arp_packet));
   }
 
-  Fwk::Buffer::Ptr buf_;
+  PacketBuffer::Ptr buf_;
   struct ARPHeader* header_;
   ARPPacket::Ptr pkt_;
 };

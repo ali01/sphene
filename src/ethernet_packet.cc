@@ -7,11 +7,11 @@
 #include <string>
 
 #include "arp_packet.h"
-#include "fwk/buffer.h"
 #include "fwk/exception.h"
 #include "interface.h"
 #include "ip_packet.h"
 #include "packet.h"
+#include "packet_buffer.h"
 #include "unknown_packet.h"
 
 // Minimum size of string buffers for formatting addresses.
@@ -86,7 +86,7 @@ EthernetAddr::operator std::string() const {
 }
 
 
-EthernetPacket::EthernetPacket(const Fwk::Buffer::Ptr buffer,
+EthernetPacket::EthernetPacket(const PacketBuffer::Ptr buffer,
                                const unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       eth_hdr((struct ether_header*)offsetAddress(0)) { }

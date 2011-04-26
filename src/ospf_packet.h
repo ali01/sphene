@@ -1,10 +1,10 @@
 #ifndef OSPF_PACKET_H_7R33RO3C
 #define OSPF_PACKET_H_7R33RO3C
 
-#include "fwk/buffer.h"
 #include "fwk/log.h"
 
 #include "packet.h"
+#include "packet_buffer.h"
 #include "ip_packet.h"
 
 // TODO(ali): need tests
@@ -27,7 +27,7 @@ class OSPFPacket : public Packet {
     kLSU   = 0x4
   };
 
-  static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFPacket(buffer, buffer_offset);
   }
 
@@ -65,7 +65,7 @@ class OSPFPacket : public Packet {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  protected:
-  OSPFPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  OSPFPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
   /* Data members. */
   mutable Fwk::Log::Ptr log_;
@@ -87,7 +87,7 @@ class OSPFHelloPacket : public OSPFPacket {
 
   static const IPv4Addr kBroadcastAddr;
 
-  static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFHelloPacket(buffer, buffer_offset);
   }
 
@@ -109,7 +109,7 @@ class OSPFHelloPacket : public OSPFPacket {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  private:
-  OSPFHelloPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  OSPFHelloPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
   /* Data members. */
   struct ospf_hello_pkt* ospf_hello_pkt_;
@@ -126,7 +126,7 @@ class OSPFLSUPacket : public OSPFPacket {
   typedef Fwk::Ptr<OSPFLSUPacket> Ptr;
 
   /* OSPFLSUPacket factory constructor. */
-  static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFLSUPacket(buffer, buffer_offset);
   }
 
@@ -152,7 +152,7 @@ class OSPFLSUPacket : public OSPFPacket {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  private:
-  OSPFLSUPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  OSPFLSUPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
   /* Data members. */
   struct ospf_lsu_hdr* ospf_lsu_hdr_;
@@ -168,7 +168,7 @@ class OSPFLSUAdvertisement : public Packet {
   typedef Fwk::Ptr<const OSPFLSUAdvertisement> PtrConst;
   typedef Fwk::Ptr<OSPFLSUAdvertisement> Ptr;
 
-  static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFLSUAdvertisement(buffer, buffer_offset);
   }
 
@@ -188,7 +188,7 @@ class OSPFLSUAdvertisement : public Packet {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  private:
-  OSPFLSUAdvertisement(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  OSPFLSUAdvertisement(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
   struct ospf_lsu_adv* ospf_lsu_adv_;
 

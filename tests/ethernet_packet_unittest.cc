@@ -7,9 +7,9 @@
 #include <string>
 
 #include "arp_packet.h"
-#include "fwk/buffer.h"
 #include "ethernet_packet.h"
 #include "ip_packet.h"
+#include "packet_buffer.h"
 #include "unknown_packet.h"
 
 using std::string;
@@ -61,10 +61,13 @@ class EthernetPacketTest : public ::testing::Test {
     // Put a packet in a buffer.
     const char* payload = "This is an ethernet packet payload.";
     uint8_t pkt[ETHER_ADDR_LEN * 2 + ETHER_TYPE_LEN + strlen(payload)];
-    buf_ = Fwk::Buffer::BufferNew(pkt, sizeof(pkt));
+    buf_ = PacketBuffer::New(pkt, sizeof(pkt));
+
+    // Construct packet.
+    pkt_ = EthernetPacket::New(buf_, buf_->size() - sizeof(pkt));
 
     // Update header pointer.
-    header_ = (struct ether_header*)buf_->data();
+    header_ = (struct ether_header*)pkt_->data();
 
     // Set fields in the header.
     memcpy(header_->ether_shost, src, sizeof(src));
@@ -76,12 +79,9 @@ class EthernetPacketTest : public ::testing::Test {
 
     // Copy in payload.
     memcpy(payload_, payload, strlen(payload));
-
-    // Construct packet.
-    pkt_ = EthernetPacket::New(buf_, 0);
   }
 
-  Fwk::Buffer::Ptr buf_;
+  PacketBuffer::Ptr buf_;
   struct ether_header* header_;
   char* payload_;
   EthernetPacket::Ptr pkt_;

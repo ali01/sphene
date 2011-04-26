@@ -23,7 +23,6 @@
 #include <unistd.h>
 #include <utility>
 
-#include "fwk/buffer.h"
 #include "fwk/concurrent_deque.h"
 #include "fwk/exception.h"
 #include "fwk/log.h"
@@ -39,6 +38,7 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "lwtcp/lwip/sys.h"
+#include "packet_buffer.h"
 #include "router.h"
 #include "routing_table.h"
 #include "sr_vns.h"
@@ -250,8 +250,9 @@ void sr_integ_input(struct sr_instance* sr,
     return;
   }
 
-  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(packet, len);
-  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
+  PacketBuffer::Ptr buffer = PacketBuffer::New(packet, len);
+  EthernetPacket::Ptr eth_pkt =
+      EthernetPacket::New(buffer, buffer->size() - len);
 
   // Insert packet into packet queue.
   sr->input_queue->pushBack(std::make_pair(eth_pkt, iface));
@@ -388,10 +389,11 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
   const size_t pkt_len = (EthernetPacket::kHeaderSize +
                           IPPacket::kHeaderSize +
                           len);
-  Fwk::Buffer::Ptr buffer = Fwk::Buffer::BufferNew(pkt_len);
+  PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt = EthernetPacket::New(buffer, 0);
+  EthernetPacket::Ptr eth_pkt =
+      EthernetPacket::New(buffer, buffer->size() - pkt_len);
   eth_pkt->typeIs(EthernetPacket::kIP);
 
   // IP packet next.

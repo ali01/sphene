@@ -3,9 +3,9 @@
 
 #include <inttypes.h>
 
-#include "fwk/buffer.h"
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
+#include "packet_buffer.h"
 
 /* Forward declarations. */
 class ARPPacket;
@@ -45,7 +45,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
   uint8_t* data() const { return buffer_->data() + buffer_offset_; }
   size_t len() const { return buffer_->size() - buffer_offset_; }
 
-  Fwk::Buffer::Ptr buffer() const { return buffer_; }
+  PacketBuffer::Ptr buffer() const { return buffer_; }
   unsigned int bufferOffset() const { return buffer_offset_; }
 
   /* Packet validation. */
@@ -61,7 +61,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
   void enclosingPacketIs(Ptr pkt) { encl_pkt_ = pkt; }
 
  protected:
-  Packet(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
+  Packet(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
       : buffer_(buffer), buffer_offset_(buffer_offset), encl_pkt_(NULL) { }
 
   // Returns the pointer into the packet buffer at an offset relative to the
@@ -71,7 +71,7 @@ class Packet : public Fwk::PtrInterface<Packet> {
   uint8_t* offsetAddress(unsigned int offset) const;
 
   /* Data members. */
-  Fwk::Buffer::Ptr buffer_;
+  PacketBuffer::Ptr buffer_;
   const unsigned int buffer_offset_;
   Ptr encl_pkt_;
 };

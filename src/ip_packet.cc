@@ -5,6 +5,7 @@
 
 #include "icmp_packet.h"
 #include "interface.h"
+#include "packet_buffer.h"
 #include "unknown_packet.h"
 
 /* IP Header packet struct. */
@@ -28,7 +29,7 @@ IPPacket::kHeaderSize = sizeof(struct ip_hdr);
 
 /* IPPacket */
 
-IPPacket::IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
+IPPacket::IPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       log_(Fwk::Log::LogNew("IPPacket")),
       ip_hdr_((struct ip_hdr *)offsetAddress(0)) {}

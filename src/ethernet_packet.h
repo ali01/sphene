@@ -5,10 +5,10 @@
 #include <net/ethernet.h>
 #include <string>
 
-#include "fwk/buffer.h"
 #include "fwk/ptr.h"
 
 #include "packet.h"
+#include "packet_buffer.h"
 
 class Interface;
 
@@ -64,7 +64,7 @@ class EthernetPacket : public Packet {
 
   // Construct a new EthernetPacket in 'buffer' starting at 'buffer_offset'
   // within the buffer.
-  static Ptr New(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new EthernetPacket(buffer, buffer_offset);
   }
 
@@ -107,7 +107,7 @@ class EthernetPacket : public Packet {
  protected:
   // Constructs an EthernetPacket from 'buffer' starting at 'buffer_offset'
   // within the buffer.
-  EthernetPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  EthernetPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
   struct ether_header* eth_hdr;
 };

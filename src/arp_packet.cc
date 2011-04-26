@@ -5,16 +5,16 @@
 #include <inttypes.h>
 #include <string>
 #include "ethernet_packet.h"
-#include "fwk/buffer.h"
 #include "fwk/exception.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "packet_buffer.h"
 
 
 const size_t
 ARPPacket::kHeaderSize = sizeof(struct ARPHeader);
 
-ARPPacket::ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
+ARPPacket::ARPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       arp_hdr_((struct ARPHeader *)offsetAddress(0)) {
   arp_hdr_->htype = htons(1); // Ethernet

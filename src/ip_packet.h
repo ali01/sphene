@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "fwk/buffer.h"
 #include "fwk/log.h"
 #include "fwk/ordinal.h"
 
 #include "ipv4_addr.h"
 #include "packet.h"
+#include "packet_buffer.h"
 
 /* Typedefs. */
 typedef uint8_t IPVersion;
@@ -44,7 +44,7 @@ class IPPacket : public Packet {
 
   static const size_t kHeaderSize;
 
-  static Ptr IPPacketNew(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset) {
+  static Ptr IPPacketNew(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }
 
@@ -104,7 +104,7 @@ class IPPacket : public Packet {
   static uint16_t compute_cksum(const PacketBuffer* buffer, unsigned int len);
 
  protected:
-  IPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  IPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
   mutable Fwk::Log::Ptr log_;

@@ -5,8 +5,8 @@
 #include <string>
 #include <inttypes.h>
 
-#include "fwk/buffer.h"
 #include "ip_packet.h"
+#include "packet_buffer.h"
 
 
 class IPPacketTest : public ::testing::Test {
@@ -21,10 +21,11 @@ class IPPacketTest : public ::testing::Test {
                                 0xab, 0x42, 0x03, 0xe7, /* fifth word */
                                 0xDD, 0xEE, 0xFF /* irrelevant bytes after */ };
 
-    Fwk::Buffer::Ptr buf_ =
-      Fwk::Buffer::BufferNew(packet_buffer, sizeof(packet_buffer));
-    pkt_ = IPPacket::IPPacketNew(buf_, 3);
-    ip_hdr_ = pkt_->buffer()->data() + 3; /* ptr to beginning of IP header */
+    PacketBuffer::Ptr buf_ =
+      PacketBuffer::New(packet_buffer, sizeof(packet_buffer));
+    pkt_ = IPPacket::IPPacketNew(buf_,
+                                 buf_->size() - sizeof(packet_buffer) + 3);
+    ip_hdr_ = pkt_->data(); /* ptr to beginning of IP header */
   }
 
   const uint8_t *ip_hdr_;

@@ -3,6 +3,8 @@
 #include <netinet/in.h>
 
 #include "interface.h"
+#include "packet_buffer.h"
+
 
 struct ospf_pkt {
   uint8_t version;          /* protocol version */
@@ -41,7 +43,7 @@ struct ospf_lsu_adv {
 
 /* OSPFPacket */
 
-OSPFPacket::OSPFPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
+OSPFPacket::OSPFPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       log_(Fwk::Log::LogNew("OSPFPacket")),
       ospf_pkt_((struct ospf_pkt*)offsetAddress(0)) {}
@@ -187,7 +189,7 @@ OSPFPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 const IPv4Addr OSPFHelloPacket::kBroadcastAddr(0xe0000005);
 
-OSPFHelloPacket::OSPFHelloPacket(Fwk::Buffer::Ptr buffer,
+OSPFHelloPacket::OSPFHelloPacket(PacketBuffer::Ptr buffer,
                                  unsigned int buffer_offset)
     : OSPFPacket(buffer, buffer_offset),
       ospf_hello_pkt_((struct ospf_hello_pkt*)offsetAddress(0)) {}
@@ -245,7 +247,7 @@ OSPFHelloPacket::operator()(Functor* const f,
 
 /* OSPFLSUPacket */
 
-OSPFLSUPacket::OSPFLSUPacket(Fwk::Buffer::Ptr buffer,
+OSPFLSUPacket::OSPFLSUPacket(PacketBuffer::Ptr buffer,
                              unsigned int buffer_offset)
     : OSPFPacket(buffer, buffer_offset),
       ospf_lsu_hdr_((struct ospf_lsu_hdr*)offsetAddress(0)) {}
@@ -310,7 +312,7 @@ OSPFLSUPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 /* OSPFLSUAdvertisement */
 
-OSPFLSUAdvertisement::OSPFLSUAdvertisement(Fwk::Buffer::Ptr buffer,
+OSPFLSUAdvertisement::OSPFLSUAdvertisement(PacketBuffer::Ptr buffer,
                                            unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ospf_lsu_adv_((struct ospf_lsu_adv*)offsetAddress(0)) {}

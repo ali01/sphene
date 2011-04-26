@@ -4,14 +4,14 @@
 #include <cstring>
 #include <inttypes.h>
 #include <string>
-#include "fwk/buffer.h"
 #include "fwk/exception.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "packet_buffer.h"
 #include "unknown_packet.h"
 
 
-ICMPPacket::ICMPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
+ICMPPacket::ICMPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       icmp_hdr_((struct ICMPHeader *)offsetAddress(0)) { }
 
@@ -115,7 +115,7 @@ uint16_t ICMPPacket::computeChecksum() const {
 }
 
 
-ICMPTimeExceededPacket::ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer,
+ICMPTimeExceededPacket::ICMPTimeExceededPacket(PacketBuffer::Ptr buffer,
                                                unsigned int buffer_offset)
     : ICMPPacket(buffer, buffer_offset) {
   typeIs(kTimeExceeded);
@@ -151,7 +151,7 @@ void ICMPTimeExceededPacket::originalPacketIs(IPPacket::PtrConst pkt) {
 }
 
 
-ICMPDestUnreachablePacket::ICMPDestUnreachablePacket(Fwk::Buffer::Ptr buffer,
+ICMPDestUnreachablePacket::ICMPDestUnreachablePacket(PacketBuffer::Ptr buffer,
                                                      unsigned int buffer_offset)
     : ICMPPacket(buffer, buffer_offset) {
   typeIs(kDestUnreachable);

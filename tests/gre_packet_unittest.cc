@@ -8,8 +8,8 @@
 #include "arp_packet.h"
 #include "ethernet_packet.h"
 #include "gre_packet.h"
-#include "fwk/buffer.h"
 #include "fwk/exception.h"
+#include "packet_buffer.h"
 
 using std::string;
 
@@ -45,16 +45,16 @@ class GREPacketTest : public ::testing::Test {
                              0x08, 0x08, 0x04, 0x04 };            // Targer P
 
     // Put a packet in a buffer.
-    buf_ = Fwk::Buffer::BufferNew(gre_packet, sizeof(gre_packet));
-
-    // Update header pointer.
-    header_ = (struct GREHeader*)buf_->data();
+    buf_ = PacketBuffer::New(gre_packet, sizeof(gre_packet));
 
     // Construct GREPacket from buffer.
-    pkt_ = GREPacket::GREPacketNew(buf_, 0);
+    pkt_ = GREPacket::GREPacketNew(buf_, buf_->size() - sizeof(gre_packet));
+
+    // Update header pointer.
+    header_ = (struct GREHeader*)pkt_->data();
   }
 
-  Fwk::Buffer::Ptr buf_;
+  PacketBuffer::Ptr buf_;
   struct GREHeader* header_;
   GREPacket::Ptr pkt_;
 };

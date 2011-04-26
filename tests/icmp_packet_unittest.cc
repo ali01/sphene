@@ -6,8 +6,8 @@
 #include <string>
 
 #include "icmp_packet.h"
-#include "fwk/buffer.h"
 #include "fwk/exception.h"
+#include "packet_buffer.h"
 
 using std::string;
 
@@ -42,16 +42,16 @@ class ICMPPacketTest : public ::testing::Test {
                               0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37 };
 
     // Put a packet in a buffer.
-    buf_ = Fwk::Buffer::BufferNew(icmp_packet, sizeof(icmp_packet));
-
-    // Update header pointer.
-    header_ = (struct ICMPHeader*)buf_->data();
+    buf_ = PacketBuffer::New(icmp_packet, sizeof(icmp_packet));
 
     // Construct ICMPPacket from buffer.
-    pkt_ = ICMPPacket::ICMPPacketNew(buf_, 0);
+    pkt_ = ICMPPacket::ICMPPacketNew(buf_, buf_->size() - sizeof(icmp_packet));
+
+    // Update header pointer.
+    header_ = (struct ICMPHeader*)pkt_->data();
   }
 
-  Fwk::Buffer::Ptr buf_;
+  PacketBuffer::Ptr buf_;
   struct ICMPHeader* header_;
   ICMPPacket::Ptr pkt_;
 };

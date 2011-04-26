@@ -3,10 +3,9 @@
 
 #include <string>
 
-#include "fwk/buffer.h"
-
 #include "ip_packet.h"
 #include "packet.h"
+#include "packet_buffer.h"
 
 class Interface;
 
@@ -34,7 +33,7 @@ class ICMPPacket : public Packet {
     kTTLExceeded = 0
   };
 
-  static Ptr ICMPPacketNew(Fwk::Buffer::Ptr buffer,
+  static Ptr ICMPPacketNew(PacketBuffer::Ptr buffer,
                            unsigned int buffer_offset) {
     return new ICMPPacket(buffer, buffer_offset);
   }
@@ -81,7 +80,7 @@ class ICMPPacket : public Packet {
     uint32_t rest;
   } __attribute__((packed));
 
-  ICMPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  ICMPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
   uint16_t computeChecksum() const;
 
   struct ICMPHeader* icmp_hdr_;
@@ -93,7 +92,7 @@ class ICMPTimeExceededPacket : public ICMPPacket {
   typedef Fwk::Ptr<const ICMPTimeExceededPacket> PtrConst;
   typedef Fwk::Ptr<ICMPTimeExceededPacket> Ptr;
 
-  static Ptr New(Fwk::Buffer::Ptr buffer,
+  static Ptr New(PacketBuffer::Ptr buffer,
                  unsigned int buffer_offset) {
     return new ICMPTimeExceededPacket(buffer, buffer_offset);
   }
@@ -108,7 +107,7 @@ class ICMPTimeExceededPacket : public ICMPPacket {
   void originalPacketIs(IPPacket::PtrConst pkt);
 
  protected:
-  ICMPTimeExceededPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  ICMPTimeExceededPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
   ICMPTimeExceededPacket(ICMPPacket::Ptr icmp_pkt);
 };
 
@@ -118,7 +117,7 @@ class ICMPDestUnreachablePacket : public ICMPPacket {
   typedef Fwk::Ptr<const ICMPDestUnreachablePacket> PtrConst;
   typedef Fwk::Ptr<ICMPDestUnreachablePacket> Ptr;
 
-  static Ptr New(Fwk::Buffer::Ptr buffer,
+  static Ptr New(PacketBuffer::Ptr buffer,
                  unsigned int buffer_offset) {
     return new ICMPDestUnreachablePacket(buffer, buffer_offset);
   }
@@ -133,7 +132,7 @@ class ICMPDestUnreachablePacket : public ICMPPacket {
   void originalPacketIs(IPPacket::PtrConst pkt);
 
  protected:
-  ICMPDestUnreachablePacket(Fwk::Buffer::Ptr buffer,
+  ICMPDestUnreachablePacket(PacketBuffer::Ptr buffer,
                             unsigned int buffer_offset);
   ICMPDestUnreachablePacket(ICMPPacket::Ptr icmp_pkt);
 };

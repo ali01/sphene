@@ -3,11 +3,10 @@
 
 #include <string>
 
-#include "fwk/buffer.h"
-
 #include "ethernet_packet.h"
 #include "ip_packet.h"
 #include "packet.h"
+#include "packet_buffer.h"
 
 class Interface;
 
@@ -25,7 +24,7 @@ class ARPPacket : public Packet {
   static const size_t kHeaderSize;
 
   // Only IPv4-on-Ethernet packets are supported.
-  static Ptr ARPPacketNew(Fwk::Buffer::Ptr buffer,
+  static Ptr ARPPacketNew(PacketBuffer::Ptr buffer,
                           unsigned int buffer_offset) {
     return new ARPPacket(buffer, buffer_offset);
   }
@@ -73,7 +72,7 @@ class ARPPacket : public Packet {
   static const int kPacketLen = 28;
 
  protected:
-  ARPPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  ARPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
   struct ARPHeader {

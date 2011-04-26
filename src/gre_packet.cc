@@ -4,13 +4,13 @@
 #include <inttypes.h>
 #include "arp_packet.h"
 #include "ethernet_packet.h"
-#include "fwk/buffer.h"
 #include "fwk/exception.h"
 #include "interface.h"
+#include "packet_buffer.h"
 #include "unknown_packet.h"
 
 
-GREPacket::GREPacket(const Fwk::Buffer::Ptr buffer,
+GREPacket::GREPacket(const PacketBuffer::Ptr buffer,
                      const unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       gre_hdr_((struct GREHeader *)offsetAddress(0)) { }

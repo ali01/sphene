@@ -3,10 +3,9 @@
 
 #include <string>
 
-#include "fwk/buffer.h"
-
 #include "ethernet_packet.h"
 #include "packet.h"
+#include "packet_buffer.h"
 
 class Interface;
 
@@ -16,7 +15,7 @@ class GREPacket : public Packet {
   typedef Fwk::Ptr<const GREPacket> PtrConst;
   typedef Fwk::Ptr<GREPacket> Ptr;
 
-  static Ptr GREPacketNew(Fwk::Buffer::Ptr buffer,
+  static Ptr GREPacketNew(PacketBuffer::Ptr buffer,
                           unsigned int buffer_offset) {
     return new GREPacket(buffer, buffer_offset);
   }
@@ -81,7 +80,7 @@ class GREPacket : public Packet {
   Packet::Ptr payload();
 
  protected:
-  GREPacket(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset);
+  GREPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
   struct GREHeader {
