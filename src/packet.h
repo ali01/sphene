@@ -64,6 +64,10 @@ class Packet : public Fwk::PtrInterface<Packet> {
   Packet(Fwk::Buffer::Ptr buffer, unsigned int buffer_offset)
       : buffer_(buffer), buffer_offset_(buffer_offset), encl_pkt_(NULL) { }
 
+  // Returns the pointer into the packet buffer at an offset relative to the
+  // start of the packet in the buffer. offsetAddress(0) returns the pointer to
+  // the beginning of the packet in the buffer. Throws Fwk::RangeException if
+  // the offset is beyond the end of the internal buffer.
   uint8_t* offsetAddress(unsigned int offset) const;
 
   /* Data members. */

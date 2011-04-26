@@ -135,6 +135,7 @@ libsr_base_a_SOURCES = \
                        src/ospf_router.cc \
                        src/packet.cc \
                        src/packet.h \
+                       src/packet_buffer.h \
                        src/real_socket_helper.cc \
                        src/real_socket_helper.h \
                        src/reg_defines.h \
@@ -256,6 +257,7 @@ TESTS = \
         interface_map_unittest \
         ip_packet_unittest \
         packet_unittest \
+        packet_buffer_unittest \
         routing_table_unittest \
         sw_data_plane_unittest \
         task_unittest
@@ -305,6 +307,10 @@ ip_packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 packet_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+packet_buffer_unittest_SOURCES = tests/packet_buffer_unittest.cc $(FWK_SRCS)
+packet_buffer_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+packet_buffer_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 routing_table_unittest_SOURCES = tests/routing_table_unittest.cc
 routing_table_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
