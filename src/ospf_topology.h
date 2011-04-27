@@ -1,8 +1,6 @@
 #ifndef OSPF_TOPOLOGY_H_I3MK5NYZ
 #define OSPF_TOPOLOGY_H_I3MK5NYZ
 
-
-
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
