@@ -301,6 +301,15 @@ OSPFLSUPacket::valid() const {
   if (!OSPFPacket::valid())
     return false;
 
+  size_t mem_size = buffer()->len() - bufferOffset();
+  size_t required_mem = sizeof(struct ospf_lsu_hdr) +
+                        advCount() * sizeof(struct ospf_lsu_adv);
+  if (mem_size < required_mem) {
+    DLOG << "Packet buffer too small to accommodate "
+         << "stated number of LSU advertisements.";
+    return false;
+  }
+
   return true;
 }
 
