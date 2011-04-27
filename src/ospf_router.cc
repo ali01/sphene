@@ -156,6 +156,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     adv = pkt->advertisement(adv_index);
     // TODO(ali): process OSPF LSU advertisement.
+    //   Add to topology.
   }
 
   // TODO(ali): flood LSU packet.
