@@ -29,6 +29,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   uint32_t routerID() const { return router_id_; }
   uint32_t areaID() const { return area_id_; }
 
+  OSPFInterfaceMap::Ptr interfaceMap() { return interfaces_; }
+  OSPFInterfaceMap::PtrConst interfaceMap() const { return interfaces_; }
+
  protected:
   OSPFRouter(uint32_t router_id, uint32_t area_id);
 
@@ -54,7 +57,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   uint32_t router_id_;
   uint32_t area_id_;
-  OSPFInterfaceMap interfaces_;
+  OSPFInterfaceMap::Ptr interfaces_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);

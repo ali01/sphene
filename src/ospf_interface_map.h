@@ -20,10 +20,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   typedef Fwk::Map<IPv4Addr,OSPFInterfaceDesc>::const_iterator
     const_iterator;
 
-  /* Public constructor allows compile-time allocation. */
-  OSPFInterfaceMap() {}
-
-  static Ptr OSPFInterfaceMapNew() {
+  static Ptr New() {
     return new OSPFInterfaceMap();
   }
 
@@ -38,6 +35,9 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   iterator end() { return interfaces_.end(); }
   const_iterator begin() const { return interfaces_.begin(); }
   const_iterator end() const { return interfaces_.end(); }
+
+ protected:
+  OSPFInterfaceMap() {}
 
  private:
   /* Data members. */

@@ -6,7 +6,8 @@ OSPFRouter::OSPFRouter(uint32_t router_id, uint32_t area_id) :
   log_(Fwk::Log::LogNew("OSPFRouter")),
   functor_(this),
   router_id_(router_id),
-  area_id_(area_id) {}
+  area_id_(area_id),
+  interfaces_(OSPFInterfaceMap::New()) {}
 
 void
 OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
@@ -19,7 +20,7 @@ OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
 
 OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
     : ospf_router_(ospf_router),
-      interfaces_(&ospf_router->interfaces_),
+      interfaces_(ospf_router->interfaces_.ptr()),
       log_(ospf_router->log_) {}
 
 void
