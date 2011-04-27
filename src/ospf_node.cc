@@ -17,17 +17,21 @@ OSPFNode::neighborIs(OSPFNode::Ptr node) {
     return;
 
   neighbors_[node->routerID()] = node;
+  node->neighborIs(this);
 }
 
 void
 OSPFNode::neighborDel(uint32_t id) {
+  OSPFNode::Ptr node = neighbor(id);
+  node->neighborDel(this);
   neighbors_.elemDel(id);
 }
 
 void
-OSPFNode::neighborDel(OSPFNode::PtrConst node) {
+OSPFNode::neighborDel(OSPFNode::Ptr node) {
   if (node == NULL)
     return;
 
-  this->neighborDel(node->routerID());
+  node->neighborDel(this);
+  neighbors_.elemDel(node->routerID());
 }

@@ -38,7 +38,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   void neighborIs(OSPFNode::Ptr node);
   void neighborDel(uint32_t id);
-  void neighborDel(OSPFNode::PtrConst node);
+  void neighborDel(OSPFNode::Ptr node);
 
   void nextHopIs(OSPFNode::Ptr node) { next_hop_ = node; }
 
