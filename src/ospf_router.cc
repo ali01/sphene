@@ -1,6 +1,7 @@
 #include "ospf_router.h"
 
 #include "interface.h"
+#include "ospf_interface_map.h"
 
 OSPFRouter::OSPFRouter(uint32_t router_id, uint32_t area_id) :
   log_(Fwk::Log::LogNew("OSPFRouter")),
@@ -13,6 +14,16 @@ void
 OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
   /* double dispatch */
   (*pkt)(&functor_, iface);
+}
+
+OSPFInterfaceMap::Ptr
+OSPFRouter::interfaceMap() {
+  return interfaces_;
+}
+
+OSPFInterfaceMap::PtrConst
+OSPFRouter::interfaceMap() const {
+  return interfaces_;
 }
 
 
@@ -91,14 +102,14 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
 }
 
 void
+OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
+                                      Interface::PtrConst iface) {
+
+}
+
+void
 OSPFRouter::PacketFunctor::operator()(OSPFLSUAdvertisement* pkt,
                                       Interface::PtrConst iface) {
 
 }
 
-
-void
-OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
-                                      Interface::PtrConst iface) {
-
-}

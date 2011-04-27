@@ -6,11 +6,11 @@
 
 #include "interface.h"
 #include "ospf_packet.h"
-#include "ospf_interface_map.h"
 
 
 /* Forward declarations. */
 class Interface;
+class OSPFInterfaceMap;
 
 
 class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
@@ -29,8 +29,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   uint32_t routerID() const { return router_id_; }
   uint32_t areaID() const { return area_id_; }
 
-  OSPFInterfaceMap::Ptr interfaceMap() { return interfaces_; }
-  OSPFInterfaceMap::PtrConst interfaceMap() const { return interfaces_; }
+  Fwk::Ptr<OSPFInterfaceMap> interfaceMap();
+  Fwk::Ptr<const OSPFInterfaceMap> interfaceMap() const;
 
  protected:
   OSPFRouter(uint32_t router_id, uint32_t area_id);
@@ -57,7 +57,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   uint32_t router_id_;
   uint32_t area_id_;
-  OSPFInterfaceMap::Ptr interfaces_;
+  Fwk::Ptr<OSPFInterfaceMap> interfaces_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);
