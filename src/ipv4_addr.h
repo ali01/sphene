@@ -10,6 +10,8 @@
 
 class IPv4Addr : public Fwk::Ordinal<IPv4Addr,uint32_t> {
  public:
+  static const IPv4Addr kMax;
+
   IPv4Addr();
 
   /* Expects an IP address in host byte order */

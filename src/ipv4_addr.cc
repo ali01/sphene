@@ -2,6 +2,8 @@
 
 /* IPv4Addr */
 
+const IPv4Addr IPv4Addr::kMax(0xffffffff);
+
 IPv4Addr::IPv4Addr() : Fwk::Ordinal<IPv4Addr,uint32_t>(0) {}
 
 IPv4Addr::IPv4Addr(uint32_t addr) : Fwk::Ordinal<IPv4Addr,uint32_t>(addr) {}
