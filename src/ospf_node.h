@@ -29,6 +29,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr neighbor(uint32_t id);
   OSPFNode::PtrConst neighbor(uint32_t id) const;
 
+  /* Next hop node in shortest path from this router. */
   OSPFNode::Ptr nextHop() { return next_hop_; }
   OSPFNode::PtrConst nextHop() const { return next_hop_; }
 
