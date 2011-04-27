@@ -151,19 +151,13 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   node->latestSeqnoIs(pkt->seqno());
   node->ageIs(0);
 
-  /* Dispatching on each LSU advertisement enclosed in the LSU packet. */
+  /* Processing each LSU advertisement enclosed in the LSU packet. */
   OSPFLSUAdvertisement::Ptr adv;
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     adv = pkt->advertisement(adv_index);
-    (*adv)(this, iface);
+    // TODO(ali): process OSPF LSU advertisement.
   }
 
   // TODO(ali): flood LSU packet.
   // TODO(ali): update the routing table.
-}
-
-void
-OSPFRouter::PacketFunctor::operator()(OSPFLSUAdvertisement* pkt,
-                                      Interface::PtrConst iface) {
-
 }

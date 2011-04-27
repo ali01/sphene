@@ -46,7 +46,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
     void operator()(OSPFPacket*, Fwk::Ptr<const Interface>);
     void operator()(OSPFHelloPacket*, Fwk::Ptr<const Interface>);
-    void operator()(OSPFLSUAdvertisement*, Fwk::Ptr<const Interface>);
     void operator()(OSPFLSUPacket*, Fwk::Ptr<const Interface>);
 
    private:
