@@ -1,6 +1,8 @@
 #ifndef OSPF_NODE_H_VKYMXJVI
 #define OSPF_NODE_H_VKYMXJVI
 
+#include <ctime>
+
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -18,6 +20,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
     return new OSPFNode();
   }
 
+  /* Accessors. */ 
+
   uint32_t routerID() const { return router_id_; }
   IPv4Addr subnet() const { return subnet_; }
   IPv4Addr subnetMask() const { return subnet_mask_; }
@@ -28,11 +32,19 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr nextHop() { return next_hop_; }
   OSPFNode::PtrConst nextHop() const { return next_hop_; }
 
+  time_t age() const { return time(NULL) - t_; }
+
+  /* Mutators. */
+
   void neighborIs(OSPFNode::Ptr node);
   void neighborDel(uint32_t id);
   void neighborDel(OSPFNode::PtrConst node);
 
   void nextHopIs(OSPFNode::Ptr node) { next_hop_ = node; }
+
+  void ageIs(time_t age)  { t_ = time(NULL) - age; }
+
+  /* Iterators. */
 
   iterator neighborsBegin() { return neighbors_.begin(); }
   iterator neighborsEnd() { return neighbors_.end(); }
@@ -46,6 +58,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   uint32_t router_id_;
   IPv4Addr subnet_;
   IPv4Addr subnet_mask_;
+  time_t t_;
 
   /* Next hop node in shortest path from this router. */
   OSPFNode::Ptr next_hop_;
