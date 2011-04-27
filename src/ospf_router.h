@@ -11,6 +11,7 @@
 /* Forward declarations. */
 class Interface;
 class OSPFInterfaceMap;
+class OSPFTopology;
 
 
 class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
@@ -32,6 +33,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFInterfaceMap> interfaceMap();
   Fwk::Ptr<const OSPFInterfaceMap> interfaceMap() const;
 
+  Fwk::Ptr<OSPFTopology> topology();
+  Fwk::Ptr<const OSPFTopology> topology() const;
+
  protected:
   OSPFRouter(uint32_t router_id, uint32_t area_id);
 
@@ -48,6 +52,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
    private:
     OSPFRouter* ospf_router_;
     OSPFInterfaceMap* interfaces_;
+    OSPFTopology* topology_;
     Fwk::Log::Ptr log_;
   };
 
@@ -58,6 +63,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   uint32_t router_id_;
   uint32_t area_id_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
+  Fwk::Ptr<OSPFTopology> topology_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);

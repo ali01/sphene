@@ -136,6 +136,7 @@ libsr_base_a_SOURCES = \
                        src/ospf_node.cc \
                        src/ospf_packet.cc \
                        src/ospf_router.cc \
+                       src/ospf_topology.cc \
                        src/packet.cc \
                        src/packet.h \
                        src/packet_buffer.h \

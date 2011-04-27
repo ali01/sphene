@@ -2,13 +2,15 @@
 
 #include "interface.h"
 #include "ospf_interface_map.h"
+#include "ospf_topology.h"
 
 OSPFRouter::OSPFRouter(uint32_t router_id, uint32_t area_id) :
   log_(Fwk::Log::LogNew("OSPFRouter")),
   functor_(this),
   router_id_(router_id),
   area_id_(area_id),
-  interfaces_(OSPFInterfaceMap::New()) {}
+  interfaces_(OSPFInterfaceMap::New()),
+  topology_(OSPFTopology::New()) {}
 
 void
 OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
@@ -26,12 +28,23 @@ OSPFRouter::interfaceMap() const {
   return interfaces_;
 }
 
+OSPFTopology::Ptr
+OSPFRouter::topology() {
+  return topology_;
+}
+
+OSPFTopology::PtrConst
+OSPFRouter::topology() const {
+  return topology_;
+}
+
 
 /* OSPFRouter::PacketFunctor */
 
 OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
     : ospf_router_(ospf_router),
       interfaces_(ospf_router->interfaces_.ptr()),
+      topology_(ospf_router->topology_.ptr()),
       log_(ospf_router->log_) {}
 
 void
