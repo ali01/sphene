@@ -33,7 +33,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::PtrConst nextHop() const { return next_hop_; }
 
   time_t age() const { return time(NULL) - last_refreshed_; }
-
+  uint16_t latestSeqno() const { return latest_seqno_; }
   /* Mutators. */
 
   void neighborIs(OSPFNode::Ptr node);
@@ -43,6 +43,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   void nextHopIs(OSPFNode::Ptr node) { next_hop_ = node; }
 
   void ageIs(time_t age)  { last_refreshed_ = time(NULL) - age; }
+  void latestSeqnoIs(uint16_t seqno) { latest_seqno_ = seqno; }
 
   /* Iterators. */
 
@@ -59,6 +60,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   IPv4Addr subnet_;
   IPv4Addr subnet_mask_;
   time_t last_refreshed_;
+  uint16_t latest_seqno_;
 
   /* Next hop node in shortest path from this router. */
   OSPFNode::Ptr next_hop_;
