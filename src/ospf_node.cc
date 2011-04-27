@@ -1,9 +1,9 @@
 #include "ospf_node.h"
 
-OSPFNode::OSPFNode(uint32_t router_id, IPv4Addr subnet, IPv4Addr subnet_mask)
+OSPFNode::OSPFNode(uint32_t router_id, IPv4Addr subnet)
     : router_id_(router_id),
       subnet_(subnet),
-      subnet_mask_(subnet_mask),
+      subnet_mask_(IPv4Addr::kMax),
       last_refreshed_(time(NULL)),
       latest_seqno_(0) {}
 
