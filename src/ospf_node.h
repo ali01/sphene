@@ -16,8 +16,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   typedef Fwk::Map<uint32_t,OSPFNode>::iterator iterator;
   typedef Fwk::Map<uint32_t,OSPFNode>::const_iterator const_iterator;
 
-  static Ptr New() {
-    return new OSPFNode();
+  static Ptr New(uint32_t router_id, IPv4Addr subnet, IPv4Addr subnet_mask) {
+    return new OSPFNode(router_id, subnet, subnet_mask);
   }
 
   /* Accessors. */ 
@@ -53,7 +53,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   const_iterator neighborsEnd() const { return neighbors_.end(); }
 
  private:
-  OSPFNode() {}
+  OSPFNode(uint32_t router_id, IPv4Addr subnet, IPv4Addr subnet_mask);
 
   /* Data members. */
   uint32_t router_id_;
