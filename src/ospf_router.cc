@@ -1,6 +1,7 @@
 #include "ospf_router.h"
 
 #include "interface.h"
+#include "ip_packet.h"
 #include "ospf_interface_map.h"
 #include "ospf_topology.h"
 
@@ -60,7 +61,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
                                       Interface::PtrConst iface) {
   /* Packet validation. */
   if (!pkt->valid()) {
-    DLOG << "Ignoring invalid packet.";
+    DLOG << "Ignoring invalid OSPF Hello packet.";
     return;
   }
 
@@ -117,7 +118,48 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
 void
 OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
                                       Interface::PtrConst iface) {
+  /* Packet validation. */
+  if (!pkt->valid()) {
+    DLOG << "Ignoring invalid OSPF LSU packet.";
+    return;
+  }
 
+  uint32_t node_id = pkt->routerID();
+  if (node_id == ospf_router_->routerID()) {
+    /* Drop link-state updates that were originally sent by this router.
+     * This will happen if the packet traverses a cycle that leads back to
+     * this router. This can be expected to happen relatively often;
+     * therefore, no logging is performed. */
+    return;
+  }
+
+  OSPFNode::Ptr node = topology_->node(node_id);
+  if (node) {
+    if (node->latestSeqno() >= pkt->seqno()) {
+      /* Drop packets with old sequence numbers. */
+      return;
+    }
+
+  } else {
+    /* Creating new node and inserting it into the topology database */
+    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+    node = OSPFNode::New(node_id, ip_pkt->src());
+    topology_->nodeIs(node);
+  }
+
+  /* Updating seqno and the node entry's age in topology database */
+  node->latestSeqnoIs(pkt->seqno());
+  node->ageIs(0);
+
+  /* Dispatching on each LSU advertisement enclosed in the LSU packet. */
+  OSPFLSUAdvertisement::Ptr adv;
+  for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
+    adv = pkt->advertisement(adv_index);
+    (*adv)(this, iface);
+  }
+
+  // TODO(ali): flood LSU packet.
+  // TODO(ali): update the routing table.
 }
 
 void
@@ -125,4 +167,3 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUAdvertisement* pkt,
                                       Interface::PtrConst iface) {
 
 }
-
