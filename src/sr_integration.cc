@@ -38,6 +38,7 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "lwtcp/lwip/sys.h"
+#include "ospf_daemon.h"
 #include "packet_buffer.h"
 #include "router.h"
 #include "routing_table.h"
@@ -165,6 +166,12 @@ void sr_integ_hw_setup(struct sr_instance* sr)
       ARPQueueDaemon::New(router->controlPlane());
   arp_queue_daemon->periodIs(1);
   router->taskManager()->taskIs(arp_queue_daemon);
+
+  // Create OSPF daemon and add it to the task manager.
+  // TODO(ms): Use real OSPFRouter instance here.
+  OSPFDaemon::Ptr ospf_daemon = OSPFDaemon::New(NULL, router->controlPlane());
+  ospf_daemon->periodIs(1);
+  router->taskManager()->taskIs(ospf_daemon);
 
   // Start processing thread.
   sr->quit = false;
