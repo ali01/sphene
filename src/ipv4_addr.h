@@ -11,6 +11,7 @@
 class IPv4Addr : public Fwk::Ordinal<IPv4Addr,uint32_t> {
  public:
   static const IPv4Addr kMax;
+  static const IPv4Addr kZero;
 
   IPv4Addr();
 
