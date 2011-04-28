@@ -252,33 +252,33 @@ RouteDelOrQ : HelpOrQ                             { HELP(HELP_MANIP_IP_ROUTE_DEL
             | TAV_IP TAV_IP TMIorQ                { HELP(HELP_MANIP_IP_ROUTE_DEL); }
             ;
 
-ManipTypeIPTunnel : WrongOrQ                      { HELP(HELP_MANIP_IP_ROUTE); }
+ManipTypeIPTunnel : WrongOrQ                      { HELP(HELP_MANIP_IP_TUNNEL); }
                   | T_ADD TunnelAddOrQ
                   | T_DEL TunnelDelOrQ
                   | T_CHANGE TunnelChangeOrQ
                   ;
 
-TunnelAddOrQ : HelpOrQ                               { HELP(HELP_MANIP_IP_ROUTE_ADD); }
-             | {ERR_IP} error                        { HELP(HELP_MANIP_IP_ROUTE_ADD); }
-             | TAV_IP {ERR_IP} error                 { HELP(HELP_MANIP_IP_ROUTE_ADD); }
-             | TAV_IP TAV_IP {ERR_IP} error          { HELP(HELP_MANIP_IP_ROUTE_ADD); }
-             | TAV_IP TAV_IP TAV_IP {ERR_INTF} error { HELP(HELP_MANIP_IP_ROUTE_ADD); }
+TunnelAddOrQ : HelpOrQ                               { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | {ERR_IP} error                        { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_IP {ERR_IP} error                 { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_IP TAV_IP {ERR_IP} error          { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_IP TAV_IP TAV_IP {ERR_INTF} error { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
              | TAV_IP TAV_IP TAV_IP TAV_STR          { SETC_RT_ADD(cli_manip_ip_route_add,$1,$2,$3,$4); }
-             | TAV_IP TAV_IP TAV_IP TAV_STR TMIorQ   { HELP(HELP_MANIP_IP_ROUTE_ADD); }
+             | TAV_IP TAV_IP TAV_IP TAV_STR TMIorQ   { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
              ;
 
-TunnelDelOrQ : HelpOrQ                             { HELP(HELP_MANIP_IP_ROUTE_DEL); }
-             | {ERR_IP} error                      { HELP(HELP_MANIP_IP_ROUTE_DEL); }
-             | TAV_IP {ERR_IP} error               { HELP(HELP_MANIP_IP_ROUTE_DEL); }
+TunnelDelOrQ : HelpOrQ                             { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
+             | {ERR_IP} error                      { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
+             | TAV_IP {ERR_IP} error               { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
              | TAV_IP TAV_IP                       { SETC_RT(cli_manip_ip_route_del,$1,$2); }
-             | TAV_IP TAV_IP TMIorQ                { HELP(HELP_MANIP_IP_ROUTE_DEL); }
+             | TAV_IP TAV_IP TMIorQ                { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
              ;
 
-TunnelChangeOrQ : HelpOrQ                             { HELP(HELP_MANIP_IP_ROUTE_DEL); }
-                | {ERR_IP} error                      { HELP(HELP_MANIP_IP_ROUTE_DEL); }
-                | TAV_IP {ERR_IP} error               { HELP(HELP_MANIP_IP_ROUTE_DEL); }
+TunnelChangeOrQ : HelpOrQ                             { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | {ERR_IP} error                      { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | TAV_IP {ERR_IP} error               { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
                 | TAV_IP TAV_IP                       { SETC_RT(cli_manip_ip_route_del,$1,$2); }
-                | TAV_IP TAV_IP TMIorQ                { HELP(HELP_MANIP_IP_ROUTE_DEL); }
+                | TAV_IP TAV_IP TMIorQ                { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
                 ;
 
 ActionCommand : T_PING ActionPing
