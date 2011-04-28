@@ -25,7 +25,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     return new OSPFRouter(router_id, area_id);
   }
 
-  // TODO(ali): perhaps should take OSPFPacket.
+  // TODO(ali): perhaps should take OSPFPacket instead of Packet.
   void packetNew(Packet::Ptr pkt, Fwk::Ptr<const Interface> iface);
 
   uint32_t routerID() const { return router_id_; }
