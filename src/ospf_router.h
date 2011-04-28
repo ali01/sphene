@@ -4,13 +4,13 @@
 #include "fwk/log.h"
 #include "fwk/ptr_interface.h"
 
-#include "interface.h"
-#include "ospf_packet.h"
-
+#include "packet.h"
 
 /* Forward declarations. */
 class Interface;
 class OSPFInterfaceMap;
+class OSPFLSUPacket;
+class OSPFNode;
 class OSPFTopology;
 
 
@@ -25,7 +25,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     return new OSPFRouter(router_id, area_id);
   }
 
-  void packetNew(Packet::Ptr pkt, Interface::PtrConst iface);
+  // TODO(ali): perhaps should take OSPFPacket.
+  void packetNew(Packet::Ptr pkt, Fwk::Ptr<const Interface> iface);
 
   uint32_t routerID() const { return router_id_; }
   uint32_t areaID() const { return area_id_; }
@@ -54,6 +55,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     OSPFTopology* topology_;
     Fwk::Log::Ptr log_;
   };
+
+  void process_lsu_advertisements(Fwk::Ptr<OSPFNode> node,
+                                  Fwk::Ptr<const OSPFLSUPacket> pkt);
 
   /* data members */
   Fwk::Log::Ptr log_;

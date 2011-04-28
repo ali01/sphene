@@ -3,7 +3,11 @@
 #include "interface.h"
 #include "ip_packet.h"
 #include "ospf_interface_map.h"
+#include "ospf_node.h"
+#include "ospf_packet.h"
 #include "ospf_topology.h"
+
+/* OSPFRouter */
 
 OSPFRouter::OSPFRouter(uint32_t router_id, uint32_t area_id) :
   log_(Fwk::Log::LogNew("OSPFRouter")),
@@ -38,7 +42,6 @@ OSPFTopology::PtrConst
 OSPFRouter::topology() const {
   return topology_;
 }
-
 
 /* OSPFRouter::PacketFunctor */
 
@@ -151,14 +154,33 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   node->latestSeqnoIs(pkt->seqno());
   node->ageIs(0);
 
-  /* Processing each LSU advertisement enclosed in the LSU packet. */
-  OSPFLSUAdvertisement::Ptr adv;
-  for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
-    adv = pkt->advertisement(adv_index);
-    // TODO(ali): process OSPF LSU advertisement.
-    //   Add to topology.
-  }
+  ospf_router_->process_lsu_advertisements(node, pkt);
 
   // TODO(ali): flood LSU packet.
   // TODO(ali): update the routing table.
+  // TODO(ali): deal with contradicting advertisements.
+}
+
+/* OSPFRouter private member functions */
+
+void
+OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr node,
+                                       OSPFLSUPacket::PtrConst pkt) {
+  /* Processing each LSU advertisement enclosed in the LSU packet. */
+  OSPFLSUAdvertisement::PtrConst adv;
+  OSPFNode::Ptr neighbor;
+  for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
+    adv = pkt->advertisement(adv_index);
+    neighbor = topology_->node(adv->routerID());
+    if (neighbor == NULL) {
+      neighbor = OSPFNode::New(adv->routerID());
+      topology_->nodeIs(neighbor);
+    }
+
+    neighbor->subnetIs(adv->subnet());
+    neighbor->subnetMaskIs(adv->subnetMask());
+
+    /* Establish bi-directional neighbor relationship. */
+    node->neighborIs(neighbor);
+  }
 }
