@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 
 #include <string>
-#include "ethernet_packet.h"
 #include "interface.h"
 #include "ipv4_addr.h"
 #include "tunnel.h"
