@@ -233,3 +233,24 @@ void rtable_purge(struct sr_instance* const sr, const int is_static) {
                          RoutingTable::Entry::kStatic :
                          RoutingTable::Entry::kDynamic));
 }
+
+
+int tunnel_add(struct sr_instance* const sr,
+               const char* const name,
+               const char* const mode,
+               const uint32_t dest) {
+  return 0;
+}
+
+
+int tunnel_del(struct sr_instance* const sr, const char* const name) {
+  return 0;
+}
+
+
+int tunnel_change(struct sr_instance* const sr,
+                  const char* const name,
+                  const char* const mode,
+                  const uint32_t dest) {
+  return 0;
+}
