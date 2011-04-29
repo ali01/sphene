@@ -167,6 +167,8 @@ libsr_base_a_SOURCES = \
                        src/task.h \
                        src/tunnel.cc \
                        src/tunnel.h \
+                       src/tunnel_map.cc \
+                       src/tunnel_map.h \
                        src/unknown_packet.cc \
                        src/unknown_packet.h \
                        src/vnscommand.h \
