@@ -268,7 +268,8 @@ TESTS = \
         packet_buffer_unittest \
         routing_table_unittest \
         sw_data_plane_unittest \
-        task_unittest
+        task_unittest \
+        tunnel_unittest
 
 bin_PROGRAMS += $(TESTS)
 
@@ -333,6 +334,10 @@ sw_data_plane_unittest_LDADD = libgtest.a $(USER_LIBS)
 task_unittest_SOURCES = tests/task_unittest.cc
 task_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 task_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+tunnel_unittest_SOURCES = tests/tunnel_unittest.cc $(FWK_SRCS)
+tunnel_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+tunnel_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 .PHONY: all deep-clean
 deep-clean: distclean
