@@ -63,3 +63,25 @@ TEST_F(TunnelMapTest, Retrieve) {
   Tunnel::Ptr null(NULL);
   EXPECT_EQ(null, map_->tunnel("bogusiface"));
 }
+
+
+TEST_F(TunnelMapTest, Delete) {
+  Tunnel::Ptr null(NULL);
+
+  // Insert tunnels.
+  map_->tunnelIs(tun0_);
+  map_->tunnelIs(tun1_);
+  ASSERT_EQ((size_t)2, map_->tunnels());
+
+  // Delete one tunnel.
+  map_->tunnelDel(tun0_);
+  EXPECT_EQ((size_t)1, map_->tunnels());
+  EXPECT_EQ(null, map_->tunnel(tun0_->name()));
+  EXPECT_EQ(null, map_->tunnelRemoteAddr(tun0_->remote()));
+
+  // Delete the second tunnel, by name.
+  map_->tunnelDel(tun1_->name());
+  EXPECT_EQ((size_t)0, map_->tunnels());
+  EXPECT_EQ(null, map_->tunnel(tun1_->name()));
+  EXPECT_EQ(null, map_->tunnelRemoteAddr(tun1_->remote()));
+}

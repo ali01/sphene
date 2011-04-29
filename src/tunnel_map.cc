@@ -20,6 +20,22 @@ void TunnelMap::tunnelIs(const Tunnel::Ptr tunnel) {
 }
 
 
+void TunnelMap::tunnelDel(const std::string& name) {
+  Tunnel::Ptr t = tunnel(name);
+  tunnelDel(t);
+}
+
+
+void TunnelMap::tunnelDel(Tunnel::Ptr tunnel) {
+  // TODO(ms): Throw an exception here instead?
+  if (!tunnel)
+    return;
+
+  name_t_map_.erase(tunnel->name());
+  ip_t_map_.erase(tunnel->remote());
+}
+
+
 Tunnel::Ptr TunnelMap::tunnel(const string& name) {
   NameTunnelMap::iterator it = name_t_map_.find(name);
   return (it != name_t_map_.end()) ? it->second : NULL;

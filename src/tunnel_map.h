@@ -27,6 +27,10 @@ class TunnelMap : public Fwk::PtrInterface<TunnelMap> {
   // exists, it is replaced with 'iface'.
   void tunnelIs(Tunnel::Ptr tunnel);
 
+  // Delete a tunnel.
+  void tunnelDel(const std::string& name);
+  void tunnelDel(Tunnel::Ptr tunnel);
+
   // Returns a tunnel by name 'name'. Returns NULL if no tunnel exists by that
   // name.
   Tunnel::Ptr tunnel(const std::string& name);
