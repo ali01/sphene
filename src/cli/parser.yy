@@ -38,6 +38,8 @@ char token_err[128];
 #define ERR_IP    ERR("expected IP address")
 #define ERR_MAC   ERR("expected MAC address")
 #define ERR_INTF  ERR("expected interface name")
+#define ERR_MODE  ERR("expected tunnel mode")
+#define ERR_REMOTE ERR("expected tunnel remote IP")
 #define ERR_NO_USAGE(desc) parse_error(desc); meh_force = 1; meh_has_usage = 0; meh_ignore = 0;
 #define ERR_IGNORE meh_ignore = 1;
 
@@ -49,6 +51,7 @@ gross_object_t gobj;
 gross_arp_t garp;
 gross_intf_t gintf;
 gross_route_t grt;
+gross_tunnel_t gtt;
 gross_ip_t gip;
 gross_ip_int_t giip;
 gross_option_t gopt;
@@ -60,6 +63,8 @@ gross_option_t gopt;
 #define SETC_INTF_SET(func,name,xip,sm) SETC_INTF(func,name); gintf.ip=xip; gintf.subnet_mask=sm
 #define SETC_RT(func,xdest,xmask) SETC_FUNC1(func); gobj.data=&grt; grt.dest=xdest; grt.mask=xmask
 #define SETC_RT_ADD(func,dest,xgw,mask,intf) SETC_RT(func,dest,mask); grt.gw=xgw; grt.intf_name=intf
+#define SETC_TUN(func, xname) SETC_FUNC1(func); gobj.data=&gtt; gtt.name=xname
+#define SETC_TUN_ADDCH(func, xname, xmode, xip) SETC_TUN(func, xname); gtt.mode=xmode; gtt.remote=xip
 #define SETC_IP(func,xip) SETC_FUNC1(func); gobj.data=&gip; gip.ip=xip
 #define SETC_IP_INT(func,xip,xn) SETC_FUNC1(func); gobj.data=&giip; giip.ip=xip; giip.count=xn
 #define SETC_OPT(func) SETC_FUNC1(func); gobj.data=&gopt
@@ -88,7 +93,8 @@ static void run_command();
 /* Terminals with no attribute value */
 %token  T_SHOW T_QUESTION T_NEWLINE T_ALL
 %token  T_VNS T_USER T_VHOST T_LHOST T_TOPOLOGY
-%token  T_IP T_ROUTE T_INTF T_ARP T_OSPF T_HW T_NEIGHBORS T_TUNNEL
+%token  T_IP T_ROUTE T_INTF T_ARP T_OSPF T_HW T_NEIGHBORS
+%token  T_TUNNEL T_MODE T_REMOTE
 %token  T_ADD T_DEL T_CHANGE T_UP T_DOWN T_PURGE T_STATIC T_DYNAMIC T_ABOUT
 %token  T_PING T_TRACE T_HELP T_EXIT T_SHUTDOWN T_FLOOD
 %token  T_SET T_UNSET T_OPTION T_VERBOSE T_DATE
@@ -259,26 +265,29 @@ ManipTypeIPTunnel : WrongOrQ                      { HELP(HELP_MANIP_IP_TUNNEL); 
                   ;
 
 TunnelAddOrQ : HelpOrQ                               { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
-             | {ERR_IP} error                        { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
-             | TAV_IP {ERR_IP} error                 { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
-             | TAV_IP TAV_IP {ERR_IP} error          { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
-             | TAV_IP TAV_IP TAV_IP {ERR_INTF} error { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
-             | TAV_IP TAV_IP TAV_IP TAV_STR          { SETC_RT_ADD(cli_manip_ip_route_add,$1,$2,$3,$4); }
-             | TAV_IP TAV_IP TAV_IP TAV_STR TMIorQ   { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | {ERR_INTF} error                      { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_STR {ERR_MODE} error              { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_STR T_MODE {ERR_MODE} error       { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_STR T_MODE TAV_STR {ERR_REMOTE} error { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_STR T_MODE TAV_STR T_REMOTE {ERR_IP} error { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+             | TAV_STR T_MODE TAV_STR T_REMOTE TAV_IP { SETC_TUN_ADDCH(cli_manip_ip_tunnel_add, $1, $3, $5); }
+             | TAV_STR T_MODE TAV_STR T_REMOTE TAV_IP TMIorQ { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
              ;
 
 TunnelDelOrQ : HelpOrQ                             { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
-             | {ERR_IP} error                      { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
-             | TAV_IP {ERR_IP} error               { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
-             | TAV_IP TAV_IP                       { SETC_RT(cli_manip_ip_route_del,$1,$2); }
-             | TAV_IP TAV_IP TMIorQ                { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
+             | {ERR_INTF} error                    { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
+             | TAV_STR                             { SETC_TUN(cli_manip_ip_tunnel_del, $1); }
+             | TAV_STR TMIorQ                      { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
              ;
 
-TunnelChangeOrQ : HelpOrQ                             { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
-                | {ERR_IP} error                      { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
-                | TAV_IP {ERR_IP} error               { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
-                | TAV_IP TAV_IP                       { SETC_RT(cli_manip_ip_route_del,$1,$2); }
-                | TAV_IP TAV_IP TMIorQ                { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+TunnelChangeOrQ : HelpOrQ                               { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | {ERR_INTF} error                      { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | TAV_STR {ERR_MODE} error              { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | TAV_STR T_MODE {ERR_MODE} error       { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | TAV_STR T_MODE TAV_STR {ERR_REMOTE} error { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | TAV_STR T_MODE TAV_STR T_REMOTE {ERR_IP} error { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
+                | TAV_STR T_MODE TAV_STR T_REMOTE TAV_IP { SETC_TUN_ADDCH(cli_manip_ip_tunnel_change, $1, $3, $5); }
+                | TAV_STR T_MODE TAV_STR T_REMOTE TAV_IP TMIorQ { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
                 ;
 
 ActionCommand : T_PING ActionPing
@@ -356,6 +365,10 @@ ActionHelp : HelpOrQ                              { HELP(HELP_ACTION_HELP); }
            | HelpOrQ T_IP T_ROUTE T_PURGE         { HELP(HELP_MANIP_IP_ROUTE_PURGE_ALL); }
            | HelpOrQ T_IP T_ROUTE T_DYNAMIC       { HELP(HELP_MANIP_IP_ROUTE_PURGE_DYN); }
            | HelpOrQ T_IP T_ROUTE T_STATIC        { HELP(HELP_MANIP_IP_ROUTE_PURGE_STA); }
+           | HelpOrQ T_IP T_TUNNEL                 { HELP(HELP_MANIP_IP_TUNNEL); }
+           | HelpOrQ T_IP T_TUNNEL T_ADD          { HELP(HELP_MANIP_IP_TUNNEL_ADD); }
+           | HelpOrQ T_IP T_TUNNEL T_DEL          { HELP(HELP_MANIP_IP_TUNNEL_DEL); }
+           | HelpOrQ T_IP T_TUNNEL T_CHANGE       { HELP(HELP_MANIP_IP_TUNNEL_CHANGE); }
            | HelpOrQ T_DATE                       { HELP(HELP_ACTION_DATE); }
            | HelpOrQ T_EXIT                       { HELP(HELP_ACTION_EXIT); }
            | HelpOrQ T_PING                       { HELP(HELP_ACTION_PING); }

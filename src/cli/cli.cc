@@ -544,6 +544,26 @@ void cli_manip_ip_route_purge_sta() {
     cli_send_str( "All static routes have been removed from the routing table.\n" );
 }
 
+void cli_manip_ip_tunnel_add(gross_tunnel_t* data) {
+  char buf[1024];
+  snprintf(buf, sizeof(buf), "add tunnel (%s): mode %s, remote %d\n",
+           data->name, data->mode, data->remote);
+  cli_send_str(buf);
+}
+
+void cli_manip_ip_tunnel_del(gross_tunnel_t* data) {
+  char buf[1024];
+  snprintf(buf, sizeof(buf), "delete tunnel %s", data->name);
+  cli_send_str(buf);
+}
+
+void cli_manip_ip_tunnel_change(gross_tunnel_t* data) {
+  char buf[1024];
+  snprintf(buf, sizeof(buf), "change tunnel (%s): mode %s, remote %d\n",
+           data->name, data->mode, data->remote);
+  cli_send_str(buf);
+}
+
 void cli_date() {
     char str_time[STRLEN_TIME];
     struct timeval now;

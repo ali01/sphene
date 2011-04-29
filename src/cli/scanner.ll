@@ -86,6 +86,9 @@ STRING            ({BEG_STRING}\")
 "ip"         { return T_IP;        }
 "rt"         { return T_ROUTE;     }
 "route"      { return T_ROUTE;     }
+"tunnel"     { return T_TUNNEL;    }
+"mode"       { return T_MODE;      }
+"remote"     { return T_REMOTE;    }
 "intf"       { return T_INTF;      }
 "interface"  { return T_INTF;      }
 "arp"        { return T_ARP;       }
@@ -100,6 +103,7 @@ STRING            ({BEG_STRING}\")
  /* ********* Manipulation Operations ********** */
 "add"        { return T_ADD;       }
 "del"        { return T_DEL;       }
+"change"     { return T_CHANGE;    }
 "delete"     { return T_DEL;       }
 "up"         { return T_UP;        }
 "enable"     { return T_UP;        }
@@ -157,7 +161,7 @@ STRING            ({BEG_STRING}\")
 static int copy_yytext( int is_quoted ) {
     unsigned len, start;
 
-    len = strlen( yytext ) - (is_quoted ? 2 : 0);
+    len = strlen( yytext ) - (is_quoted ? 2 : 0) + 1;
     if( len > MAX_STR_LEN ) {
         parse_error( "String too long (max is %u chars)" );
         return 0;

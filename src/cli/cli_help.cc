@@ -270,17 +270,17 @@ HELP_MANIP_IP_TUNNEL_ADD,
 HELP_MANIP_IP_TUNNEL_DEL,
 HELP_MANIP_IP_TUNNEL_CHANGE);
 
-      case HELP_MANIP_IP_TUNNEL_ADD:
-        return 0 == writenstr(fd, "\
-ip tunnel add <name> [mode { gre }] remote <addr>: add a tunnel to <addr>\n");
+             case HELP_MANIP_IP_TUNNEL_ADD:
+               return 0 == writenstr(fd, "\
+ip tunnel add <name> mode { gre } remote <addr>: add a tunnel to <addr>\n");
 
-      case HELP_MANIP_IP_TUNNEL_DEL:
-        return 0 == writenstr(fd, "\
+             case HELP_MANIP_IP_TUNNEL_DEL:
+               return 0 == writenstr(fd, "\
 ip tunnel del <name>: delete a tunnel\n");
 
-      case HELP_MANIP_IP_TUNNEL_CHANGE:
-        return 0 == writenstr(fd, "\
-ip tunnel change <name> [mode { gre }] [remote <addr>]: change attributes of an existing tunnel\n");
+             case HELP_MANIP_IP_TUNNEL_CHANGE:
+               return 0 == writenstr(fd, "\
+ip tunnel change <name> mode { gre } remote <addr>: change attributes of an existing tunnel\n");
 
         case HELP_ACTION:
             return cli_send_multi_help( fd, "",
