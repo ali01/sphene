@@ -16,6 +16,11 @@ class Interface : public Fwk::NamedInterface {
   typedef Fwk::Ptr<const Interface> PtrConst;
   typedef Fwk::Ptr<Interface> Ptr;
 
+  enum Type {
+    kHardware,
+    kVirtual
+  };
+
   static Ptr InterfaceNew(const std::string& name) {
     return new Interface(name);
   }
@@ -51,6 +56,12 @@ class Interface : public Fwk::NamedInterface {
   // Sets the enabled flag.
   void enabledIs(bool enabled) { enabled_ = enabled; }
 
+  // Returns the type of interface.
+  Type type() const { return type_; }
+
+  // Sets the interface type.
+  void typeIs(Type type) { type_ = type; }
+
  protected:
   Interface(const std::string& name);
 
@@ -59,6 +70,7 @@ class Interface : public Fwk::NamedInterface {
   IPv4Addr ip_;
   IPv4Addr mask_;
   uint32_t speed_;
+  Type type_;
 
  private:
   Interface(const Interface&);

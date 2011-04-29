@@ -283,6 +283,7 @@ void sr_integ_add_interface(struct sr_instance* sr,
   iface->ipIs(ntohl(vns_if->ip));  // vns_if->ip and friends are nbo
   iface->subnetMaskIs(ntohl(vns_if->mask));
   iface->speedIs(vns_if->speed);
+  iface->typeIs(Interface::kHardware);
 
   // Add the interface to the data plane.
   sr->router->dataPlane()->interfaceMap()->interfaceIs(iface);
