@@ -165,6 +165,8 @@ libsr_base_a_SOURCES = \
                        src/sw_data_plane.h \
                        src/task.cc \
                        src/task.h \
+                       src/tunnel.cc \
+                       src/tunnel.h \
                        src/unknown_packet.cc \
                        src/unknown_packet.h \
                        src/vnscommand.h \
