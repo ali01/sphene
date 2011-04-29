@@ -544,6 +544,41 @@ void cli_manip_ip_route_purge_sta() {
     cli_send_str( "All static routes have been removed from the routing table.\n" );
 }
 
+void cli_manip_ip_tunnel_add(gross_tunnel_t* data) {
+  if (strcmp(data->mode, "gre")) {
+    cli_send_str("Unknown mode: ");
+    cli_send_str(data->mode);
+    cli_send_str("\n");
+    return;
+  }
+
+  if (tunnel_add(SR, data->name, data->mode, data->remote))
+    cli_send_str("The tunnel has been added\n");
+  else
+    cli_send_str("A tunnel already exists with that name.\n");
+}
+
+void cli_manip_ip_tunnel_del(gross_tunnel_t* data) {
+  if (tunnel_del(SR, data->name))
+    cli_send_str("The tunnel has been removed.\n");
+  else
+    cli_send_str("That tunnel does not exist.\n");
+}
+
+void cli_manip_ip_tunnel_change(gross_tunnel_t* data) {
+  if (strcmp(data->mode, "gre")) {
+    cli_send_str("Unknown mode: ");
+    cli_send_str(data->mode);
+    cli_send_str("\n");
+    return;
+  }
+
+  if (tunnel_change(SR, data->name, data->mode, data->remote))
+    cli_send_str("The tunnel has been changed.\n");
+  else
+    cli_send_str("No tunnel exists with that name.\n");
+}
+
 void cli_date() {
     char str_time[STRLEN_TIME];
     struct timeval now;

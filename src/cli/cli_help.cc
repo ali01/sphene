@@ -153,11 +153,12 @@ show vns vhost: displays the VNS virtual host address\n" );
           case HELP_MANIP_IP:
             return cli_send_multi_help( fd, "\
 ip [arp | interface (intf) | ospf | route (rt)] <command>: update the router's state\n",
-4,
+5,
 HELP_MANIP_IP_ARP,
 HELP_MANIP_IP_INTF,
 HELP_MANIP_IP_OSPF,
-HELP_MANIP_IP_ROUTE );
+HELP_MANIP_IP_ROUTE,
+HELP_MANIP_IP_TUNNEL );
 
            case HELP_MANIP_IP_ARP:
                return cli_send_multi_help( fd, "\
@@ -260,6 +261,26 @@ ip route purge <dyn|dynamic>: remove all dynamic routes in the routing table\n" 
                  return 0==writenstr( fd, "\
 ip route purge <sta|static>: remove all static routes in the routing table\n" );
 
+
+           case HELP_MANIP_IP_TUNNEL:
+              return cli_send_multi_help(fd, "\
+ip tunnel {add | del | change} <name> [mode { gre }] [remote ADDR]: modify tunnels\n",
+3,
+HELP_MANIP_IP_TUNNEL_ADD,
+HELP_MANIP_IP_TUNNEL_DEL,
+HELP_MANIP_IP_TUNNEL_CHANGE);
+
+             case HELP_MANIP_IP_TUNNEL_ADD:
+               return 0 == writenstr(fd, "\
+ip tunnel add <name> mode { gre } remote <addr>: add a tunnel to <addr>\n");
+
+             case HELP_MANIP_IP_TUNNEL_DEL:
+               return 0 == writenstr(fd, "\
+ip tunnel del <name>: delete a tunnel\n");
+
+             case HELP_MANIP_IP_TUNNEL_CHANGE:
+               return 0 == writenstr(fd, "\
+ip tunnel change <name> mode { gre } remote <addr>: change attributes of an existing tunnel\n");
 
         case HELP_ACTION:
             return cli_send_multi_help( fd, "",

@@ -102,4 +102,26 @@ void rtable_purge_all(struct sr_instance* sr);
 /** Remove all routes of a specific type from the router. */
 void rtable_purge(struct sr_instance* sr, int is_static);
 
+
+/**
+ * Adds a new tunnel.
+ */
+int tunnel_add(struct sr_instance* sr,
+               const char* name,
+               const char* mode,
+               uint32_t dest);
+
+/**
+ * Deletes an existing tunnel.
+ */
+int tunnel_del(struct sr_instance* sr, const char* name);
+
+/**
+ * Changes an existing tunnel.
+ */
+int tunnel_change(struct sr_instance* sr,
+                  const char* name,
+                  const char* mode,
+                  uint32_t dest);
+
 #endif /* CLI_STUBS_H */

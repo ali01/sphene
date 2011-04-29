@@ -44,6 +44,12 @@ typedef struct {
 } gross_route_t;
 
 typedef struct {
+    const char* name;
+    const char* mode;
+    uint32_t remote;
+} gross_tunnel_t;
+
+typedef struct {
     uint32_t ip;
 } gross_ip_t;
 
@@ -152,6 +158,10 @@ void cli_manip_ip_route_del( gross_route_t* data );
 void cli_manip_ip_route_purge_all();
 void cli_manip_ip_route_purge_dyn();
 void cli_manip_ip_route_purge_sta();
+
+void cli_manip_ip_tunnel_add(gross_tunnel_t* data);
+void cli_manip_ip_tunnel_del(gross_tunnel_t* data);
+void cli_manip_ip_tunnel_change(gross_tunnel_t* data);
 
 /* Display the current date and time. */
 void cli_date();
