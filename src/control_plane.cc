@@ -161,7 +161,6 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
 
       Fwk::ScopedLock<ARPCache> lock(cp_->arpCache());
       cp_->arpCache()->entryIs(cache_entry);
-      cp_->arpCache()->lockedIs(false);
     }
 
     // Look at the opcode.
