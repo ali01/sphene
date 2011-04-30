@@ -4,13 +4,15 @@
 #include <map>
 #include <string>
 
+#include "fwk/locked_interface.h"
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
 #include "interface.h"
 #include "ip_packet.h"
 
 
-class InterfaceMap : public Fwk::PtrInterface<InterfaceMap> {
+class InterfaceMap : public Fwk::PtrInterface<InterfaceMap>,
+                     public Fwk::LockedInterface {
  public:
   typedef Fwk::Ptr<const InterfaceMap> PtrConst;
   typedef Fwk::Ptr<InterfaceMap> Ptr;
