@@ -279,9 +279,9 @@ int tunnel_del(struct sr_instance* const sr, const char* const name) {
   Fwk::ScopedLock<InterfaceMap> if_map_lock(if_map);
   Fwk::ScopedLock<TunnelMap> tun_map_lock(tun_map);
 
-  // Make sure we have a tunnel by this name.
+  // Make sure we have a tunnel with this name.
   if (!tun_map->tunnel(name))
-    return 0;  // no tunnel exists by that name.
+    return 0;  // no tunnel exists with that name
 
   // Remove virtual interface and tunnel.
   if_map->interfaceDel(name);
@@ -295,5 +295,19 @@ int tunnel_change(struct sr_instance* const sr,
                   const char* const name,
                   const char* const mode,
                   const uint32_t dest) {
-  return 0;
+  InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
+  TunnelMap::Ptr tun_map = sr->router->controlPlane()->tunnelMap();
+  Fwk::ScopedLock<InterfaceMap> if_map_lock(if_map);
+  Fwk::ScopedLock<TunnelMap> tun_map_lock(tun_map);
+
+  // Make sure we have a tunnel with this name.
+  if (!tun_map->tunnel(name))
+    return 0;  // no tunnel exists with that name
+
+  // Update the attributes of the tunnel.
+  Tunnel::Ptr tunnel = tun_map->tunnel(name);
+  tunnel->modeIs(Tunnel::kGRE);  // we only support GRE right now
+  tunnel->remoteIs(ntohl(dest));
+
+  return 1;
 }
