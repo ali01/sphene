@@ -274,7 +274,20 @@ int tunnel_add(struct sr_instance* const sr,
 
 
 int tunnel_del(struct sr_instance* const sr, const char* const name) {
-  return 0;
+  InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
+  TunnelMap::Ptr tun_map = sr->router->controlPlane()->tunnelMap();
+  Fwk::ScopedLock<InterfaceMap> if_map_lock(if_map);
+  Fwk::ScopedLock<TunnelMap> tun_map_lock(tun_map);
+
+  // Make sure we have a tunnel by this name.
+  if (!tun_map->tunnel(name))
+    return 0;  // no tunnel exists by that name.
+
+  // Remove virtual interface and tunnel.
+  if_map->interfaceDel(name);
+  tun_map->tunnelDel(name);
+
+  return 1;
 }
 
 
