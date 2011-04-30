@@ -9,6 +9,10 @@ namespace Fwk {
 // should use Fwk::ScopedLock when possible.
 class LockedInterface {
  public:
+  LockedInterface() {
+    pthread_mutex_init(&li_lock_, NULL);
+  }
+
   void lockedIs(bool locked) {
     if (locked)
       pthread_mutex_lock(&li_lock_);

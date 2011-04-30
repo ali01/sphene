@@ -3,8 +3,8 @@
 
 #include <ctime>
 #include <map>
-#include <pthread.h>
 
+#include "fwk/locked_interface.h"
 #include "fwk/ptr_interface.h"
 
 #include "ethernet_packet.h"
@@ -13,7 +13,8 @@
 
 /* Thread safety: in a threaded environment, methods of this class must be
    accessed with lockedIs(true) or by using the ScopedLock. */
-class ARPCache : public Fwk::PtrInterface<ARPCache> {
+class ARPCache : public Fwk::PtrInterface<ARPCache>,
+                 public Fwk::LockedInterface {
  public:
   typedef Fwk::Ptr<const ARPCache> PtrConst;
   typedef Fwk::Ptr<ARPCache> Ptr;
@@ -75,9 +76,6 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
   void entryDel(const IPv4Addr& ip);
   void entryDel(Entry::Ptr entry);
 
-  /* Locking for thread safety. */
-  void lockedIs(bool locked);
-
   iterator begin() { return addr_map_.begin(); }
   iterator end() { return addr_map_.end(); }
   const_iterator begin() const { return addr_map_.begin(); }
@@ -89,7 +87,6 @@ class ARPCache : public Fwk::PtrInterface<ARPCache> {
  private:
   /* Data members */
   std::map<IPv4Addr,Entry::Ptr> addr_map_;
-  pthread_mutex_t lock_;
 
   /* Disallowed operations. */
   ARPCache(const ARPCache&);
