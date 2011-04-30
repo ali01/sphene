@@ -253,7 +253,7 @@ int tunnel_add(struct sr_instance* const sr,
   // Tunnels share the same namespace as interfaces because they are based on
   // interfaces.
   if (if_map->interface(name))
-    return 1;   // interface already exists with name
+    return 0;   // interface already exists with name
 
   // Create a new virtual interface for the tunnel.
   Interface::Ptr iface = Interface::InterfaceNew(name);
@@ -269,7 +269,7 @@ int tunnel_add(struct sr_instance* const sr,
   if_map->interfaceIs(iface);
   tun_map->tunnelIs(tunnel);
 
-  return 0;
+  return 1;
 }
 
 
