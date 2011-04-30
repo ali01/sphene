@@ -151,50 +151,51 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
   }
 
   // Are we the target of the ARP packet?
-  if (cp_->dataPlane()->interfaceMap()->interfaceAddr(target_ip)) {
-    DLOG << "We are the target of this ARP packet.";
+  InterfaceMap::Ptr if_map = cp_->dataPlane()->interfaceMap();
+  if (!if_map->interfaceAddr(target_ip))
+    return;
 
-    // Add <sender IP, sender MAC> to ARP cache.
-    if (!merge_flag) {
-      cache_entry = ARPCache::Entry::New(sender_ip, sender_eth);
-      cache_entry->typeIs(ARPCache::Entry::kDynamic);
+  DLOG << "We are the target of this ARP packet.";
 
-      Fwk::ScopedLock<ARPCache> lock(cp_->arpCache());
-      cp_->arpCache()->entryIs(cache_entry);
-    }
+  // Add <sender IP, sender MAC> to ARP cache.
+  if (!merge_flag) {
+    cache_entry = ARPCache::Entry::New(sender_ip, sender_eth);
+    cache_entry->typeIs(ARPCache::Entry::kDynamic);
 
-    // Look at the opcode.
-    if (pkt->operation() == ARPPacket::kRequest) {
-      DLOG << "sending ARP reply";
+    Fwk::ScopedLock<ARPCache> lock(cp_->arpCache());
+    cp_->arpCache()->entryIs(cache_entry);
+  }
 
-      // Swap the hardware and protocol fields.
-      pkt->targetHWAddrIs(sender_eth);
-      pkt->targetPAddrIs(sender_ip);
-      pkt->senderHWAddrIs(target_eth);
-      pkt->senderPAddrIs(target_ip);
+  // Look at the opcode.
+  if (pkt->operation() == ARPPacket::kRequest) {
+    DLOG << "sending ARP reply";
 
-      // Flip the operation.
-      pkt->operationIs(ARPPacket::kReply);
+    // Swap the hardware and protocol fields.
+    pkt->targetHWAddrIs(sender_eth);
+    pkt->targetPAddrIs(sender_ip);
+    pkt->senderHWAddrIs(target_eth);
+    pkt->senderPAddrIs(target_ip);
 
-      // Get the enclosing EthernetPacket.
-      EthernetPacket::Ptr eth_pkt =
-          (EthernetPacket*)(pkt->enclosingPacket().ptr());
+    // Flip the operation.
+    pkt->operationIs(ARPPacket::kReply);
 
-      // Update the source address to our MAC.
-      eth_pkt->srcIs(iface->mac());
+    // Get the enclosing EthernetPacket.
+    EthernetPacket::Ptr eth_pkt =
+        (EthernetPacket*)(pkt->enclosingPacket().ptr());
 
-      // Send ARP reply on same interface.
-      cp_->dataPlane()->outputPacketNew(eth_pkt, iface);
+    // Update the source address to our MAC.
+    eth_pkt->srcIs(iface->mac());
 
-    } else if (pkt->operation() == ARPPacket::kReply) {
-      IPv4Addr ip_addr = pkt->senderPAddr();
-      EthernetAddr eth_addr = pkt->senderHWAddr();
+    // Send ARP reply on same interface.
+    cp_->dataPlane()->outputPacketNew(eth_pkt, iface);
+  } else if (pkt->operation() == ARPPacket::kReply) {
+    IPv4Addr ip_addr = pkt->senderPAddr();
+    EthernetAddr eth_addr = pkt->senderHWAddr();
 
-      DLOG << "ARP reply for " << ip_addr << " received";
+    DLOG << "ARP reply for " << ip_addr << " received";
 
-      cp_->updateARPCacheMapping(ip_addr, eth_addr);
-      cp_->sendEnqueued(ip_addr, eth_addr);
-    }
+    cp_->updateARPCacheMapping(ip_addr, eth_addr);
+    cp_->sendEnqueued(ip_addr, eth_addr);
   }
 }
 
