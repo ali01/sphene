@@ -555,7 +555,7 @@ void cli_manip_ip_tunnel_add(gross_tunnel_t* data) {
   if (tunnel_add(SR, data->name, data->mode, data->remote))
     cli_send_str("The tunnel has been added\n");
   else
-    cli_send_str("A tunnel already exists with that name.\n");
+    cli_send_str("An interface or tunnel already exists with that name.\n");
 }
 
 void cli_manip_ip_tunnel_del(gross_tunnel_t* data) {

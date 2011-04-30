@@ -15,7 +15,10 @@
 #include "router.h"
 #include "sr_base_internal.h"
 #include "routing_table.h"
+#include "tunnel.h"
+#include "tunnel_map.h"
 
+using std::string;
 using std::vector;
 
 
@@ -239,6 +242,31 @@ int tunnel_add(struct sr_instance* const sr,
                const char* const name,
                const char* const mode,
                const uint32_t dest) {
+  InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
+  TunnelMap::Ptr tun_map = sr->router->controlPlane()->tunnelMap();
+
+  // TODO(ms): need interface lock here too.
+  Fwk::ScopedLock<TunnelMap> tun_lock(tun_map);
+
+  // Tunnels share the same namespace as interfaces because they are based on
+  // interfaces.
+  if (if_map->interface(name))
+    return 1;   // interface already exists with name
+
+  // Create a new virtual interface for the tunnel.
+  Interface::Ptr iface = Interface::InterfaceNew(name);
+  iface->typeIs(Interface::kVirtual);
+  iface->enabledIs(true);
+
+  // Create a new tunnel on the interface.
+  Tunnel::Ptr tunnel = Tunnel::New(iface);
+  tunnel->modeIs(Tunnel::kGRE);  // we only support GRE for now
+  tunnel->remoteIs(ntohl(dest));
+
+  // Add the tunnel and virtual interface to their respective maps.
+  if_map->interfaceIs(iface);
+  tun_map->tunnelIs(tunnel);
+
   return 0;
 }
 
