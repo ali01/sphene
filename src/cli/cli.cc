@@ -23,6 +23,8 @@
 #include "interface_map.h"
 #include "router.h"
 #include "routing_table.h"
+#include "tunnel.h"
+#include "tunnel_map.h"
 
 #include "cli_stubs.h"
 
@@ -229,6 +231,7 @@ void cli_show_ip() {
     cli_show_ip_arp();
     cli_show_ip_intf();
     cli_show_ip_route();
+    cli_show_ip_tunnel();
 }
 
 void cli_show_ip_arp() {
@@ -312,6 +315,36 @@ void cli_show_ip_route() {
     snprintf(line_buf, sizeof(line_buf), format,
              subnet.c_str(), gateway.c_str(), mask.c_str(), if_name.c_str(),
              ((type == RoutingTable::Entry::kStatic) ? "static" : "dynamic"));
+
+    cli_send_str(line_buf);
+  }
+}
+
+void cli_show_ip_tunnel() {
+  struct sr_instance* sr = get_sr();
+  TunnelMap::Ptr tun_map = sr->router->controlPlane()->tunnelMap();
+
+  // Buffer for proper formatting.
+  char line_buf[256];
+
+  // Line format.
+  const char* const format = "  %-16s %-9s\n";
+
+  // Output header.
+  cli_send_str("Tunnels:\n");
+  snprintf(line_buf, sizeof(line_buf), format, "Endpoint IP", "Interface");
+  cli_send_str(line_buf);
+
+  // Output each tunnel.
+  Fwk::ScopedLock<TunnelMap> lock(tun_map);
+  for (TunnelMap::const_iterator it = tun_map->begin();
+       it != tun_map->end(); ++it) {
+    Tunnel::Ptr tunnel = it->second;
+    const string& remote = tunnel->remote();
+    const string& if_name = tunnel->interface()->name();
+
+    snprintf(line_buf, sizeof(line_buf), format,
+             remote.c_str(), if_name.c_str());
 
     cli_send_str(line_buf);
   }

@@ -21,6 +21,7 @@ typedef enum cli_help_t {
        HELP_SHOW_IP_ARP,
        HELP_SHOW_IP_INTF,
        HELP_SHOW_IP_ROUTE,
+       HELP_SHOW_IP_TUNNEL,
       HELP_SHOW_OPT,
        HELP_SHOW_OPT_VERBOSE,
       HELP_SHOW_OSPF,

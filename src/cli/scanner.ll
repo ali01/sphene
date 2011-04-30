@@ -86,6 +86,7 @@ STRING            ({BEG_STRING}\")
 "ip"         { return T_IP;        }
 "rt"         { return T_ROUTE;     }
 "route"      { return T_ROUTE;     }
+"tun"        { return T_TUNNEL;    }
 "tunnel"     { return T_TUNNEL;    }
 "mode"       { return T_MODE;      }
 "remote"     { return T_REMOTE;    }

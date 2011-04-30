@@ -149,6 +149,8 @@ ShowTypeIP : /* empty: show all */                { SETC_FUNC0(cli_show_ip); }
            | T_INTF TMIorQ                        { HELP(HELP_SHOW_IP_INTF); }
            | T_ROUTE                              { SETC_FUNC0(cli_show_ip_route); }
            | T_ROUTE TMIorQ                       { HELP(HELP_SHOW_IP_ROUTE); }
+           | T_TUNNEL                             { SETC_FUNC0(cli_show_ip_tunnel); }
+           | T_TUNNEL TMIorQ                      { HELP(HELP_SHOW_IP_TUNNEL); }
            | WrongOrQ                             { HELP(HELP_SHOW_IP); }
            ;
 
@@ -339,6 +341,7 @@ ActionHelp : HelpOrQ                              { HELP(HELP_ACTION_HELP); }
            | HelpOrQ T_SHOW T_IP T_ARP            { HELP(HELP_SHOW_IP_ARP); }
            | HelpOrQ T_SHOW T_IP T_INTF           { HELP(HELP_SHOW_IP_INTF); }
            | HelpOrQ T_SHOW T_IP T_ROUTE          { HELP(HELP_SHOW_IP_ROUTE); }
+           | HelpOrQ T_SHOW T_IP T_TUNNEL         { HELP(HELP_SHOW_IP_TUNNEL); }
            | HelpOrQ T_SHOW T_OPTION              { HELP(HELP_SHOW_OPT); }
            | HelpOrQ T_SHOW T_OPTION T_VERBOSE    { HELP(HELP_SHOW_OPT_VERBOSE); }
            | HelpOrQ T_SHOW T_OSPF                { HELP(HELP_SHOW_OSPF); }

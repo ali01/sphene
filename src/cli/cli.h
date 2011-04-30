@@ -117,6 +117,7 @@ void cli_show_ip();
 void cli_show_ip_arp();
 void cli_show_ip_intf();
 void cli_show_ip_route();
+void cli_show_ip_tunnel();
 
 void cli_show_opt();
 void cli_show_opt_verbose();

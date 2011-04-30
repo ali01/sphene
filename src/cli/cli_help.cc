@@ -76,12 +76,13 @@ show hw route: displays the HW routing table\n" );
 
           case HELP_SHOW_IP:
               return cli_send_multi_help( fd, "\
-show ip [arp, interface (intf), route (rt),]: display information about the\n\
+show ip [arp, interface (intf), route (rt), tunnel (tun)]: display information about the\n\
   router's IP state\n",
-3,
+4,
 HELP_SHOW_IP_ARP,
 HELP_SHOW_IP_INTF,
-HELP_SHOW_IP_ROUTE );
+HELP_SHOW_IP_ROUTE,
+HELP_SHOW_IP_TUNNEL );
 
            case HELP_SHOW_IP_ARP:
                 return 0==writenstr( fd, "\
@@ -94,6 +95,10 @@ show ip interface: displays the router's interfaces\n" );
            case HELP_SHOW_IP_ROUTE:
                 return 0==writenstr( fd, "\
 show ip route: displays the routing table sorted by longest prefixes first\n" );
+
+           case HELP_SHOW_IP_TUNNEL:
+                return 0 == writenstr(fd, "\
+show ip tunnel: displays the configured IP tunnels\n");
 
           case HELP_SHOW_OPT:
               return cli_send_multi_help( fd, "\
