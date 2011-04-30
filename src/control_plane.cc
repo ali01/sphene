@@ -151,9 +151,12 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
   }
 
   // Are we the target of the ARP packet?
-  InterfaceMap::Ptr if_map = cp_->dataPlane()->interfaceMap();
-  if (!if_map->interfaceAddr(target_ip))
-    return;
+  {
+    InterfaceMap::Ptr if_map = cp_->dataPlane()->interfaceMap();
+    Fwk::ScopedLock<InterfaceMap> if_map_lock(if_map);
+    if (!if_map->interfaceAddr(target_ip))
+      return;
+  }
 
   DLOG << "We are the target of this ARP packet.";
 
