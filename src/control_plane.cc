@@ -24,7 +24,8 @@ ControlPlane::ControlPlane(const std::string& name)
       functor_(this),
       arp_cache_(ARPCache::New()),
       arp_queue_(ARPQueue::New()),
-      routing_table_(RoutingTable::New()) { }
+      routing_table_(RoutingTable::New()),
+      tunnel_map_(TunnelMap::New()) { }
 
 
 void ControlPlane::packetNew(Packet::Ptr pkt,

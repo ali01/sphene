@@ -14,6 +14,8 @@
 #include "interface_map.h"
 #include "packet.h"
 #include "routing_table.h"
+#include "tunnel.h"
+#include "tunnel_map.h"
 
 // Forward declarations.
 class ARPPacket;
@@ -48,6 +50,9 @@ class ControlPlane : public Fwk::NamedInterface {
   ARPQueue::Ptr arpQueue() const { return arp_queue_; }
 
   RoutingTable::Ptr routingTable() const { return routing_table_; }
+
+  // Returns the associated TunnelMap.
+  TunnelMap::Ptr tunnelMap() const { return tunnel_map_; }
 
  protected:
   ControlPlane(const std::string& name);
@@ -88,6 +93,7 @@ class ControlPlane : public Fwk::NamedInterface {
   ARPCache::Ptr arp_cache_;
   ARPQueue::Ptr arp_queue_;
   RoutingTable::Ptr routing_table_;
+  TunnelMap::Ptr tunnel_map_;
   DataPlane::Ptr dp_;
 
   // Operations disallowed.
