@@ -93,6 +93,7 @@ int router_interface_set_enabled(struct sr_instance* const sr,
                                  const char* const name,
                                  const int enabled) {
   InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
+  Fwk::ScopedLock<InterfaceMap> lock(if_map);
   Interface::Ptr iface = if_map->interface(name);
 
   if (!iface)
@@ -108,6 +109,7 @@ int router_interface_set_enabled(struct sr_instance* const sr,
 Interface::Ptr router_lookup_interface_via_ip(struct sr_instance* const sr,
                                               const uint32_t ip) {
   InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
+  Fwk::ScopedLock<InterfaceMap> lock(if_map);
   return if_map->interfaceAddr(ntohl(ip));
 }
 
@@ -115,6 +117,7 @@ Interface::Ptr router_lookup_interface_via_ip(struct sr_instance* const sr,
 Interface::Ptr router_lookup_interface_via_name(struct sr_instance* const sr,
                                                 const char* name) {
   InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
+  Fwk::ScopedLock<InterfaceMap> lock(if_map);
   return if_map->interface(name);
 }
 
@@ -244,9 +247,8 @@ int tunnel_add(struct sr_instance* const sr,
                const uint32_t dest) {
   InterfaceMap::Ptr if_map = sr->router->dataPlane()->interfaceMap();
   TunnelMap::Ptr tun_map = sr->router->controlPlane()->tunnelMap();
-
-  // TODO(ms): need interface lock here too.
-  Fwk::ScopedLock<TunnelMap> tun_lock(tun_map);
+  Fwk::ScopedLock<InterfaceMap> if_map_lock(if_map);
+  Fwk::ScopedLock<TunnelMap> tun_map_lock(tun_map);
 
   // Tunnels share the same namespace as interfaces because they are based on
   // interfaces.
