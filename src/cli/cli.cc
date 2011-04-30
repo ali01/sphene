@@ -270,6 +270,7 @@ void cli_show_ip_intf() {
   cli_send_str(line_buf);
 
   // Output each interface.
+  Fwk::ScopedLock<InterfaceMap> lock(ifaces);
   for (InterfaceMap::const_iterator it = ifaces->begin();
        it != ifaces->end(); ++it) {
     Interface::Ptr iface = it->second;
