@@ -20,6 +20,22 @@ void InterfaceMap::interfaceIs(const Interface::Ptr iface) {
 }
 
 
+void InterfaceMap::interfaceDel(const std::string& name) {
+  Interface::Ptr iface = interface(name);
+  interfaceDel(iface);
+}
+
+
+void InterfaceMap::interfaceDel(const Interface::Ptr iface) {
+  // TODO(ms): Throw an exception here instead?
+  if (!iface)
+    return;
+
+  name_if_map_.erase(iface->name());
+  ip_if_map_.erase(iface->ip());
+}
+
+
 Interface::Ptr InterfaceMap::interface(const string& name) {
   NameInterfaceMap::iterator it = name_if_map_.find(name);
   return (it != name_if_map_.end()) ? it->second : NULL;

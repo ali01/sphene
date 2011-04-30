@@ -29,6 +29,10 @@ class InterfaceMap : public Fwk::PtrInterface<InterfaceMap>,
   // already exists, it is replaced with 'iface'.
   void interfaceIs(Interface::Ptr iface);
 
+  // Remove an interface from the map.
+  void interfaceDel(const std::string& name);
+  void interfaceDel(Interface::Ptr iface);
+
   // Returns an interface by name 'name'. Returns NULL if no interface exists
   // by that name.
   Interface::Ptr interface(const std::string& name);

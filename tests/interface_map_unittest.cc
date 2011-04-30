@@ -60,3 +60,25 @@ TEST_F(InterfaceMapTest, Retrieve) {
   Interface::PtrConst null(NULL);
   EXPECT_EQ(null, map_->interface("bogusiface"));
 }
+
+
+TEST_F(InterfaceMapTest, Delete) {
+  Interface::PtrConst null(NULL);
+
+  // Insert interfaces.
+  map_->interfaceIs(eth0_);
+  map_->interfaceIs(eth1_);
+  ASSERT_EQ((size_t)2, map_->interfaces());
+
+  // Delete one interface from the map.
+  map_->interfaceDel(eth0_);
+  EXPECT_EQ((size_t)1, map_->interfaces());
+  EXPECT_EQ(null, map_->interface(eth0_->name()));
+  EXPECT_EQ(null, map_->interfaceAddr(eth0_->ip()));
+
+  // Delete the second tunnel, by name.
+  map_->interfaceDel(eth1_->name());
+  EXPECT_EQ((size_t)0, map_->interfaces());
+  EXPECT_EQ(null, map_->interface(eth1_->name()));
+  EXPECT_EQ(null, map_->interfaceAddr(eth1_->ip()));
+}
