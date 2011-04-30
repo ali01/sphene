@@ -5,12 +5,14 @@
 #include <string>
 
 #include "ipv4_addr.h"
+#include "fwk/locked_interface.h"
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
 #include "tunnel.h"
 
 
-class TunnelMap : public Fwk::PtrInterface<TunnelMap> {
+class TunnelMap : public Fwk::PtrInterface<TunnelMap>,
+                  public Fwk::LockedInterface {
  public:
   typedef Fwk::Ptr<const TunnelMap> PtrConst;
   typedef Fwk::Ptr<TunnelMap> Ptr;
