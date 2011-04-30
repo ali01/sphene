@@ -1,11 +1,11 @@
 #ifndef ROUTING_TABLE_H_HE9H7VS9
 #define ROUTING_TABLE_H_HE9H7VS9
 
-#include <pthread.h>
 #include <set>
 
-#include "fwk/ptr_interface.h"
 #include "fwk/linked_list.h"
+#include "fwk/locked_interface.h"
+#include "fwk/ptr_interface.h"
 #include "fwk/scoped_lock.h"
 
 #include "ip_packet.h"
@@ -14,7 +14,8 @@
 
 /* Thread safety: in a threaded environment, methods of this class must be
    accessed with lockedIs(true) or by using the ScopedLock. */
-class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
+class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
+                     public Fwk::LockedInterface {
  public:
   typedef Fwk::Ptr<const RoutingTable> PtrConst;
   typedef Fwk::Ptr<RoutingTable> Ptr;
@@ -78,18 +79,12 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable> {
   /* Returns number of entries in routing table. */
   size_t entries() const { return rtable_.size(); }
 
-  /* Locking for thread safety. */
-  void lockedIs(bool locked);
-
  protected:
   RoutingTable();
 
  private:
   /* Routing table is a linked list. */
   Fwk::LinkedList<Entry> rtable_;
-
-  /* Lock for modifications. */
-  pthread_mutex_t lock_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);

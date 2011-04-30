@@ -1,8 +1,5 @@
 #include "routing_table.h"
 
-#include <pthread.h>
-
-
 /* RoutingTable::Entry */
 
 RoutingTable::Entry::Entry()
@@ -28,10 +25,7 @@ RoutingTable::Entry::operator=(const Entry& other) {
 
 /* RoutingTable */
 
-RoutingTable::RoutingTable() {
-  // TODO(ms): Check return value.
-  pthread_mutex_init(&lock_, NULL);
-}
+RoutingTable::RoutingTable() { }
 
 
 RoutingTable::Entry::Ptr
@@ -56,15 +50,6 @@ RoutingTable::Entry::PtrConst
 RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   RoutingTable* self = const_cast<RoutingTable*>(this);
   return self->lpm(dest_ip);
-}
-
-
-void
-RoutingTable::lockedIs(const bool locked) {
-  if (locked)
-    pthread_mutex_lock(&lock_);
-  else
-    pthread_mutex_unlock(&lock_);
 }
 
 
