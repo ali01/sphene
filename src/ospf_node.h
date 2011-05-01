@@ -16,6 +16,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   typedef Fwk::Map<uint32_t,OSPFNode>::iterator iterator;
   typedef Fwk::Map<uint32_t,OSPFNode>::const_iterator const_iterator;
 
+  static const uint16_t kMaxDistance = 0xffff;
+
   static Ptr New(uint32_t router_id) {
     return new OSPFNode(router_id, IPv4Addr::kZero);
   }
