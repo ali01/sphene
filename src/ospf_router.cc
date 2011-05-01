@@ -86,9 +86,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   ifd = interfaces_->interfaceDesc(iface->ip());
 
   if (ifd == NULL) {
-    // TODO(ali): Could just drop packet here.
-    //   OSPFRouter could just assume that interfaces
-    //   are always configured externally.
     /* Packet was received on an interface that the dynamic router
      * was unaware about -- possibly a newly created virtual interface.
      * Creating a new interface description object and
