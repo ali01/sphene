@@ -4,14 +4,14 @@
 #include "fwk/log.h"
 #include "fwk/ptr_interface.h"
 
+#include "ospf_interface_map.h"
+#include "ospf_topology.h"
 #include "packet.h"
 
 /* Forward declarations. */
 class Interface;
-class OSPFInterfaceMap;
 class OSPFLSUPacket;
 class OSPFNode;
-class OSPFTopology;
 
 
 class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
@@ -31,11 +31,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   uint32_t routerID() const { return router_id_; }
   uint32_t areaID() const { return area_id_; }
 
-  Fwk::Ptr<OSPFInterfaceMap> interfaceMap();
-  Fwk::Ptr<const OSPFInterfaceMap> interfaceMap() const;
+  OSPFInterfaceMap::Ptr interfaceMap();
+  OSPFInterfaceMap::PtrConst interfaceMap() const;
 
-  Fwk::Ptr<OSPFTopology> topology();
-  Fwk::Ptr<const OSPFTopology> topology() const;
+  OSPFTopology::Ptr topology();
+  OSPFTopology::PtrConst topology() const;
 
  protected:
   OSPFRouter(uint32_t router_id, uint32_t area_id);
@@ -65,8 +65,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   uint32_t router_id_;
   uint32_t area_id_;
-  Fwk::Ptr<OSPFInterfaceMap> interfaces_;
-  Fwk::Ptr<OSPFTopology> topology_;
+  OSPFInterfaceMap::Ptr interfaces_;
+  OSPFTopology::Ptr topology_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);
