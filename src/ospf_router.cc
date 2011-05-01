@@ -24,19 +24,9 @@ OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
   (*pkt)(&functor_, iface);
 }
 
-OSPFInterfaceMap::Ptr
-OSPFRouter::interfaceMap() {
-  return interfaces_;
-}
-
 OSPFInterfaceMap::PtrConst
 OSPFRouter::interfaceMap() const {
   return interfaces_;
-}
-
-OSPFTopology::Ptr
-OSPFRouter::topology() {
-  return topology_;
 }
 
 OSPFTopology::PtrConst

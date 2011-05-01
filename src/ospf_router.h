@@ -31,10 +31,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   uint32_t routerID() const { return router_id_; }
   uint32_t areaID() const { return area_id_; }
 
-  Fwk::Ptr<OSPFInterfaceMap> interfaceMap();
   Fwk::Ptr<const OSPFInterfaceMap> interfaceMap() const;
-
-  Fwk::Ptr<OSPFTopology> topology();
   Fwk::Ptr<const OSPFTopology> topology() const;
 
  protected:
