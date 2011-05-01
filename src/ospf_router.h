@@ -62,9 +62,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   uint32_t router_id_;
   uint32_t area_id_;
+  Fwk::Ptr<OSPFNode> router_node_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
-  Fwk::Ptr<OSPFNode> router_node_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);

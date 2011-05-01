@@ -1,6 +1,8 @@
 #include "ospf_topology.h"
 
-OSPFTopology::OSPFTopology() {}
+OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node) : root_node_(root_node) {
+  this->nodeIs(root_node_);
+}
 
 OSPFNode::Ptr
 OSPFTopology::node(uint32_t router_id) {

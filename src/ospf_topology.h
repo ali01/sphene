@@ -15,8 +15,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   typedef Fwk::Map<uint32_t,OSPFNode>::iterator iterator;
   typedef Fwk::Map<uint32_t,OSPFNode>::const_iterator const_iterator;
 
-  static Ptr New() {
-    return new OSPFTopology();
+  static Ptr New(OSPFNode::Ptr root_node) {
+    return new OSPFTopology(root_node);
   }
 
   OSPFNode::Ptr node(uint32_t router_id);
@@ -32,10 +32,11 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   const_iterator nodesEnd() const { return nodes_.end(); }
 
  private:
-  OSPFTopology();
+  OSPFTopology(OSPFNode::Ptr root_node);
 
   /* Data members. */
   Fwk::Map<uint32_t,OSPFNode> nodes_;
+  OSPFNode::Ptr root_node_;
 
   /* Operations disallowed. */
   OSPFTopology(const OSPFTopology&);
