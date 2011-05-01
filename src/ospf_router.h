@@ -1,9 +1,11 @@
 #ifndef OSPF_ROUTER_H_LFORNADU
 #define OSPF_ROUTER_H_LFORNADU
 
+#include "fwk/linked_list.h"
 #include "fwk/log.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
+using Fwk::LinkedList;
 
 #include "ospf_types.h"
 #include "packet.h"
@@ -46,6 +48,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   OSPFRouter(const RouterID& router_id, const AreaID& area_id);
 
  private:
+  /* Nested double-dispatch Packet::Functor. */
   class PacketFunctor : public Packet::Functor {
    public:
     PacketFunctor(OSPFRouter* ospf_router);
@@ -62,10 +65,34 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     Fwk::Log::Ptr log_;
   };
 
+  /* Allows the insertion of Node objects into Fwk::LinkedList. */
+  class NodeWrapper : public LinkedList<NodeWrapper>::Node {
+   public:
+    typedef Fwk::Ptr<const NodeWrapper> PtrConst;
+    typedef Fwk::Ptr<NodeWrapper> Ptr;
+
+    static Ptr New(Fwk::Ptr<OSPFNode> node);
+
+    Fwk::Ptr<const OSPFNode> node() const;
+    Fwk::Ptr<OSPFNode> node();
+
+   private:
+    NodeWrapper(Fwk::Ptr<OSPFNode> node);
+
+    /* Data members. */
+    Fwk::Ptr<OSPFNode> node_;
+
+    /* Operations disallowed. */
+    NodeWrapper(const NodeWrapper&);
+    void operator=(const NodeWrapper&);
+  };
+
+
+  /* OSPFRouter private member functions. */
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> node,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
-  /* data members */
+  /* OSPfRouter data members. */
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
 
@@ -75,6 +102,13 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
   Fwk::Ptr<RoutingTable> routing_table_;
+
+  /* Logical Multimap<RouterID,AdvertisedNeighbors>: Keeps track of neighbor
+     relationships that have not yet been commited to the topology. This is
+     necessary to avoid corrupting the topology in response to contradicting
+     link-state advertisements. Refer to the PWOSPF specification for more
+     details. */
+  Fwk::Map<RouterID,LinkedList<NodeWrapper> > links_staged_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);

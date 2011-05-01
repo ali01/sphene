@@ -170,6 +170,28 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   // TODO(ali): deal with contradicting advertisements.
 }
 
+
+/* OSPFRouter::NodeWrapper */
+
+OSPFRouter::NodeWrapper::NodeWrapper(Fwk::Ptr<OSPFNode> node)
+    : node_(node) {}
+
+OSPFRouter::NodeWrapper::Ptr
+OSPFRouter::NodeWrapper::New(Fwk::Ptr<OSPFNode> node) {
+  return new NodeWrapper(node);
+}
+
+OSPFNode::PtrConst
+OSPFRouter::NodeWrapper::node() const {
+  return node_;
+}
+
+OSPFNode::Ptr
+OSPFRouter::NodeWrapper::node() {
+  return node_;
+}
+
+
 /* OSPFRouter private member functions */
 
 void
