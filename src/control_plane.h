@@ -87,6 +87,8 @@ class ControlPlane : public Fwk::NamedInterface {
   void sendICMPDestHostUnreach(IPPacket::PtrConst orig_pkt);
   void sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt);
   void sendICMPDestUnreach(ICMPPacket::Code code, IPPacket::PtrConst orig_pkt);
+  void encapsulateAndOutputPacket(IPPacket::Ptr pkt,
+                                  Interface::PtrConst out_iface);
 
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;

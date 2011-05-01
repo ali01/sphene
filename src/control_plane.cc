@@ -13,6 +13,8 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "packet_buffer.h"
+#include "tunnel.h"
+#include "tunnel_map.h"
 
 
 // Input to TCP stack.
@@ -73,9 +75,29 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
     return;
   }
 
+  // Decrement TTL. We do this last to avoid having to increase the TTL and
+  // recompute the checksum again if an error occurs.
+  pkt->ttlDec(1);
+  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
+  if (pkt->ttl() < 1) {
+    // Send ICMP Time Exceeded Message to source.
+    pkt->ttlIs(pkt->ttl() + 1);
+    sendICMPTTLExceeded(pkt);
+    return;
+  }
+
+  // Recompute the checksum since we changed the TTL.
+  pkt->checksumReset();
+
   // Outgoing interface.
   Interface::Ptr out_iface = r_entry->interface();
   DLOG << "  outgoing interface: " << out_iface->name();
+
+  if (out_iface->type() == Interface::kVirtual) {
+    // Interface is virtual. We need to do an encapsulation here.
+    encapsulateAndOutputPacket(pkt, out_iface);
+    return;
+  }
 
   // Next hop IP address.
   IPv4Addr next_hop_ip = r_entry->gateway();
@@ -96,25 +118,14 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
     return;
   }
 
-  // Decrement TTL. We do this last to avoid having to increase the TTL and
-  // recompute the checksum again if an error occurs.
-  pkt->ttlDec(1);
-  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
-  if (pkt->ttl() < 1) {
-    // Send ICMP Time Exceeded Message to source.
-    pkt->ttlIs(pkt->ttl() + 1);
-    sendICMPTTLExceeded(pkt);
-    return;
-  }
-
-  // Recompute the checksum since we changed the TTL.
-  pkt->checksumReset();
-
   // Update Ethernet header using ARP entry.
+  pkt->buffer()->minimumSizeIs(pkt->len() + EthernetPacket::kHeaderSize);
   EthernetPacket::Ptr eth_pkt =
-      Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+      EthernetPacket::New(pkt->buffer(),
+                          pkt->bufferOffset() - EthernetPacket::kHeaderSize);
   eth_pkt->srcIs(out_iface->mac());
   eth_pkt->dstIs(arp_entry->ethernetAddr());
+  eth_pkt->typeIs(EthernetPacket::kIP);
 
   // Send packet.
   DLOG << "Forwarding IP packet to " << string(next_hop_ip);
@@ -232,12 +243,15 @@ void ControlPlane::PacketFunctor::operator()(GREPacket* const pkt,
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
 
   // Do we have a tunnel with this remote?
-  TunnelMap::Ptr tun_map = cp_->tunnelMap();
-  Fwk::ScopedLock<TunnelMap> tun_map_lock(tun_map);
-  Tunnel::Ptr tunnel = tun_map->tunnelRemoteAddr(ip_pkt->src());
-  if (!tunnel) {
-    DLOG << "  no GRE tunnel to " << ip_pkt->src() << ", ignoring";
-    return;
+  Tunnel::Ptr tunnel;
+  {
+    TunnelMap::Ptr tun_map = cp_->tunnelMap();
+    Fwk::ScopedLock<TunnelMap> tun_map_lock(tun_map);
+    tunnel = tun_map->tunnelRemoteAddr(ip_pkt->src());
+    if (!tunnel) {
+      DLOG << "  no GRE tunnel to " << ip_pkt->src() << ", ignoring";
+      return;
+    }
   }
 
   // Simulate the packet coming from the tunnel's virtual interface.
@@ -547,5 +561,75 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   ip_pkt->checksumReset();
 
   // Send packet.
+  outputPacketNew(ip_pkt);
+}
+
+
+void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
+                                              Interface::PtrConst out_iface) {
+  DLOG << "Encapsulating packet for virtual interface";
+
+  // Look up the associated tunnel.
+  Tunnel::Ptr tunnel;
+  {
+    Fwk::ScopedLock<TunnelMap> tunnel_map_lock(tunnel_map_);
+    tunnel = tunnel_map_->tunnel(out_iface->name());
+    if (!tunnel) {
+      ELOG << "output interface is virtual but no associated tunnel found";
+      return;
+    }
+  }
+
+  DLOG << "  tunnel remote: " << tunnel->remote();
+
+  if (tunnel->mode() != Tunnel::kGRE) {
+    ELOG << "unknown tunnel mode; cannot encapsulate";
+    return;
+  }
+
+  // Do an LPM on remote.
+  RoutingTable::Entry::Ptr tunnel_r_entry;
+  {
+    RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
+    Fwk::ScopedLock<RoutingTable> lock(rtable);
+    tunnel_r_entry = rtable->lpm(tunnel->remote());
+  }
+  if (!tunnel_r_entry) {
+    // TODO(ms): is there something we can do besides give up here?
+    DLOG << "No route to " << tunnel->remote() << ", giving up";
+    return;
+  }
+
+  // Add GRE header.
+  // TODO(ms): kHeaderSize assumes we will have a checksum!
+  pkt->buffer()->minimumSizeIs(pkt->len() + GREPacket::kHeaderSize);
+  GREPacket::Ptr gre_pkt =
+      GREPacket::GREPacketNew(pkt->buffer(),
+                              pkt->bufferOffset() - GREPacket::kHeaderSize);
+  gre_pkt->reserved0Is(0);
+  gre_pkt->reserved1Is(0);
+  gre_pkt->versionIs(0);
+  gre_pkt->protocolIs(EthernetPacket::kIP);
+  gre_pkt->checksumPresentIs(true);
+  gre_pkt->checksumReset();
+
+  // Add IP header.
+  gre_pkt->buffer()->minimumSizeIs(gre_pkt->len() + IPPacket::kHeaderSize);
+  IPPacket::Ptr ip_pkt =
+      IPPacket::IPPacketNew(gre_pkt->buffer(),
+                            gre_pkt->bufferOffset() - IPPacket::kHeaderSize);
+  ip_pkt->versionIs(4);
+  ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
+  ip_pkt->packetLengthIs(ip_pkt->len());
+  ip_pkt->diffServicesAre(0);
+  ip_pkt->protocolIs(IPPacket::kGRE);
+  ip_pkt->flagsAre(IPPacket::IP_DF);
+  ip_pkt->fragmentOffsetIs(0);
+  ip_pkt->srcIs(tunnel_r_entry->interface()->ip());
+  ip_pkt->dstIs(tunnel->remote());
+  ip_pkt->ttlIs(64);
+  ip_pkt->checksumReset();
+
+  // Output new packet.
   outputPacketNew(ip_pkt);
 }
