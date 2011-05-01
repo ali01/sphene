@@ -5,7 +5,8 @@ OSPFNode::OSPFNode(uint32_t router_id, IPv4Addr subnet)
       subnet_(subnet),
       subnet_mask_(IPv4Addr::kMax),
       last_refreshed_(time(NULL)),
-      latest_seqno_(0) {}
+      latest_seqno_(0),
+      distance_(0) {}
 
 OSPFNode::Ptr
 OSPFNode::neighbor(uint32_t id) {
