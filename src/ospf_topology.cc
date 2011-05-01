@@ -7,12 +7,12 @@ OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node) : root_node_(root_node) {
 }
 
 OSPFNode::Ptr
-OSPFTopology::node(uint32_t router_id) {
+OSPFTopology::node(const RouterID& router_id) {
   return nodes_.elem(router_id);
 }
 
 OSPFNode::PtrConst
-OSPFTopology::node(uint32_t router_id) const {
+OSPFTopology::node(const RouterID& router_id) const {
   OSPFTopology* self = const_cast<OSPFTopology*>(this);
   return self->node(router_id);
 }
@@ -42,7 +42,7 @@ OSPFTopology::nodeDel(OSPFNode::Ptr node) {
 }
 
 void
-OSPFTopology::nodeDel(uint32_t router_id) {
+OSPFTopology::nodeDel(const RouterID& router_id) {
   OSPFNode::Ptr node = this->node(router_id);
   this->nodeDel(node);
 }
@@ -56,7 +56,7 @@ OSPFTopology::onUpdate() {
 void
 OSPFTopology::compute_optimal_spanning_tree() {
   /* Set of all nodes: shallow copy of nodes_. */
-  Fwk::Map<uint32_t,OSPFNode> node_set(nodes_);
+  Fwk::Map<RouterID,OSPFNode> node_set(nodes_);
 
   /* Initializing distance to all nodes to kMaxDistance. */
   for (iterator it = node_set.begin(); it != node_set.end(); ++it) {
@@ -96,7 +96,7 @@ OSPFTopology::compute_optimal_spanning_tree() {
 
 // TODO(ali): make use of a heap instead.
 OSPFNode::Ptr
-OSPFTopology::min_dist_node(const Fwk::Map<uint32_t,OSPFNode>& map) {
+OSPFTopology::min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map) {
   OSPFNode::Ptr min_nd = NULL;
   for (const_iterator it = map.begin(); it != map.end(); ++it) {
     OSPFNode::Ptr cur_nd = it->second;

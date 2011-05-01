@@ -78,23 +78,23 @@ OSPFPacket::lenIs(uint16_t len) {
   ospf_pkt_->len = htons(len);
 }
 
-uint32_t
+RouterID
 OSPFPacket::routerID() const {
   return ntohl(ospf_pkt_->router_id);
 }
 
 void
-OSPFPacket::routerIDIs(uint32_t id) {
+OSPFPacket::routerIDIs(const RouterID& id) {
   ospf_pkt_->router_id = htonl(id);
 }
 
-uint32_t
+AreaID
 OSPFPacket::areaID() const {
   return ntohl(ospf_pkt_->area_id);
 }
 
 void
-OSPFPacket::areaIDIs(uint32_t id) {
+OSPFPacket::areaIDIs(const AreaID& id) {
   ospf_pkt_->area_id = htonl(id);
 }
 
@@ -346,13 +346,13 @@ OSPFLSUAdvertisement::subnetMaskIs(const IPv4Addr& mask) {
   ospf_lsu_adv_->mask = mask.nbo();
 }
 
-uint32_t
+RouterID
 OSPFLSUAdvertisement::routerID() const {
   return ntohl(ospf_lsu_adv_->router_id);
 }
 
 void
-OSPFLSUAdvertisement::routerIDIs(uint32_t id) {
+OSPFLSUAdvertisement::routerIDIs(const RouterID& id) {
   ospf_lsu_adv_->mask = htonl(id);
 }
 

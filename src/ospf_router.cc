@@ -10,7 +10,7 @@
 
 /* OSPFRouter */
 
-OSPFRouter::OSPFRouter(uint32_t router_id, uint32_t area_id) :
+OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id) :
   log_(Fwk::Log::LogNew("OSPFRouter")),
   functor_(this),
   router_id_(router_id),
@@ -108,7 +108,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     return;
   }
 
-  uint32_t neighbor_id = pkt->routerID();
+  RouterID neighbor_id = pkt->routerID();
   OSPFNode::Ptr neighbor = ifd->neighbor(neighbor_id);
 
   if (neighbor == NULL) {
@@ -136,7 +136,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
     return;
   }
 
-  uint32_t node_id = pkt->routerID();
+  RouterID node_id = pkt->routerID();
   if (node_id == ospf_router_->routerID()) {
     /* Drop link-state updates that were originally sent by this router.
      * This will happen if the packet traverses a cycle that leads back to

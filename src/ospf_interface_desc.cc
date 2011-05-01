@@ -5,12 +5,12 @@ OSPFInterfaceDesc::OSPFInterfaceDesc(Interface::PtrConst iface,
     : iface_(iface), helloint_(helloint) {}
 
 OSPFNode::Ptr
-OSPFInterfaceDesc::neighbor(uint32_t router_id) {
+OSPFInterfaceDesc::neighbor(const RouterID& router_id) {
   return neighbors_.elem(router_id);
 }
 
 OSPFNode::PtrConst
-OSPFInterfaceDesc::neighbor(uint32_t router_id) const {
+OSPFInterfaceDesc::neighbor(const RouterID& router_id) const {
   OSPFInterfaceDesc* self = const_cast<OSPFInterfaceDesc*>(this);
   return self->neighbor(router_id);
 }
@@ -32,6 +32,6 @@ OSPFInterfaceDesc::neighborDel(OSPFNode::Ptr nb) {
 }
 
 void
-OSPFInterfaceDesc::neighborDel(uint32_t router_id) {
+OSPFInterfaceDesc::neighborDel(const RouterID& router_id) {
   neighbors_.elemDel(router_id);
 }

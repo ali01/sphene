@@ -7,33 +7,34 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
+#include "ospf_types.h"
 
 class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
  public:
   typedef Fwk::Ptr<const OSPFNode> PtrConst;
   typedef Fwk::Ptr<OSPFNode> Ptr;
 
-  typedef Fwk::Map<uint32_t,OSPFNode>::iterator iterator;
-  typedef Fwk::Map<uint32_t,OSPFNode>::const_iterator const_iterator;
+  typedef Fwk::Map<RouterID,OSPFNode>::iterator iterator;
+  typedef Fwk::Map<RouterID,OSPFNode>::const_iterator const_iterator;
 
   static const uint16_t kMaxDistance = 0xffff;
 
-  static Ptr New(uint32_t router_id) {
+  static Ptr New(const RouterID& router_id) {
     return new OSPFNode(router_id, IPv4Addr::kZero);
   }
 
-  static Ptr New(uint32_t router_id, IPv4Addr subnet) {
+  static Ptr New(const RouterID& router_id, IPv4Addr subnet) {
     return new OSPFNode(router_id, subnet);
   }
 
   /* Accessors. */ 
 
-  uint32_t routerID() const { return router_id_; }
-  IPv4Addr subnet() const { return subnet_; }
-  IPv4Addr subnetMask() const { return subnet_mask_; }
+  const RouterID& routerID() const { return router_id_; }
+  const IPv4Addr& subnet() const { return subnet_; }
+  const IPv4Addr& subnetMask() const { return subnet_mask_; }
 
-  OSPFNode::Ptr neighbor(uint32_t id);
-  OSPFNode::PtrConst neighbor(uint32_t id) const;
+  OSPFNode::Ptr neighbor(const RouterID& id);
+  OSPFNode::PtrConst neighbor(const RouterID& id) const;
 
   /* Previous node in the shortest path from the root node to this node. */
   OSPFNode::Ptr prev() { return prev_; }
@@ -49,7 +50,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   void subnetMaskIs(IPv4Addr mask) { subnet_mask_ = mask; }
 
   void neighborIs(OSPFNode::Ptr node);
-  void neighborDel(uint32_t id);
+  void neighborDel(const RouterID& id);
   void neighborDel(OSPFNode::Ptr node);
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
@@ -66,10 +67,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   const_iterator neighborsEnd() const { return neighbors_.end(); }
 
  private:
-  OSPFNode(uint32_t router_id, IPv4Addr subnet);
+  OSPFNode(const RouterID& router_id, IPv4Addr subnet);
 
   /* Data members. */
-  uint32_t router_id_;
+  RouterID router_id_;
   IPv4Addr subnet_;
   IPv4Addr subnet_mask_;
   time_t last_refreshed_;
@@ -80,7 +81,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr prev_;
 
   /* Map of all neighbors directly attached to this node. */
-  Fwk::Map<uint32_t,OSPFNode> neighbors_;
+  Fwk::Map<RouterID,OSPFNode> neighbors_;
 
   /* Operations disallowed. */
   OSPFNode(const OSPFNode&);

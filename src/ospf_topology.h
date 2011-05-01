@@ -5,6 +5,7 @@
 #include "fwk/ptr_interface.h"
 
 #include "ospf_node.h"
+#include "ospf_types.h"
 
 
 class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
@@ -12,19 +13,19 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   typedef Fwk::Ptr<const OSPFTopology> PtrConst;
   typedef Fwk::Ptr<OSPFTopology> Ptr;
 
-  typedef Fwk::Map<uint32_t,OSPFNode>::iterator iterator;
-  typedef Fwk::Map<uint32_t,OSPFNode>::const_iterator const_iterator;
+  typedef Fwk::Map<RouterID,OSPFNode>::iterator iterator;
+  typedef Fwk::Map<RouterID,OSPFNode>::const_iterator const_iterator;
 
   static Ptr New(OSPFNode::Ptr root_node) {
     return new OSPFTopology(root_node);
   }
 
-  OSPFNode::Ptr node(uint32_t router_id);
-  OSPFNode::PtrConst node(uint32_t router_id) const;
+  OSPFNode::Ptr node(const RouterID& router_id);
+  OSPFNode::PtrConst node(const RouterID& router_id) const;
 
   void nodeIs(OSPFNode::Ptr node);
   void nodeDel(OSPFNode::Ptr node);
-  void nodeDel(uint32_t router_id);
+  void nodeDel(const RouterID& router_id);
 
   iterator nodesBegin() { return nodes_.begin(); }
   iterator nodesEnd() { return nodes_.end(); }
@@ -38,10 +39,10 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   OSPFTopology(OSPFNode::Ptr root_node);
 
   void compute_optimal_spanning_tree();
-  static OSPFNode::Ptr min_dist_node(const Fwk::Map<uint32_t,OSPFNode>& map);
+  static OSPFNode::Ptr min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map);
 
   /* Data members. */
-  Fwk::Map<uint32_t,OSPFNode> nodes_;
+  Fwk::Map<RouterID,OSPFNode> nodes_;
   OSPFNode::Ptr root_node_;
 
   /* Operations disallowed. */

@@ -6,6 +6,7 @@
 #include "packet.h"
 #include "packet_buffer.h"
 #include "ip_packet.h"
+#include "ospf_types.h"
 
 // TODO(ali): need tests
 
@@ -41,11 +42,11 @@ class OSPFPacket : public Packet {
   void lenIs(uint16_t len);
 
   /* Router ID of the sender of this OSPF Packet. */
-  uint32_t routerID() const;
-  void routerIDIs(uint32_t id);
+  RouterID routerID() const;
+  void routerIDIs(const RouterID& id);
 
-  uint32_t areaID() const;
-  void areaIDIs(uint32_t id);
+  AreaID areaID() const;
+  void areaIDIs(const AreaID& id);
 
   uint16_t checksum() const;
   uint16_t checksumReset();
@@ -180,8 +181,8 @@ class OSPFLSUAdvertisement : public Packet {
   IPv4Addr subnetMask() const;
   void subnetMaskIs(const IPv4Addr& mask);
 
-  uint32_t routerID() const;
-  void routerIDIs(uint32_t id);
+  RouterID routerID() const;
+  void routerIDIs(const RouterID& id);
 
   /* Packet validation. */
   virtual bool valid() const { return true; }
