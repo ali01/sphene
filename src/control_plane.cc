@@ -75,9 +75,13 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
 
   // Outgoing interface.
   Interface::Ptr out_iface = r_entry->interface();
+  DLOG << "  outgoing interface: " << out_iface->name();
 
   // Next hop IP address.
   IPv4Addr next_hop_ip = r_entry->gateway();
+  if (next_hop_ip == 0)
+    next_hop_ip = pkt->dst();
+  DLOG << "  next hop: " << next_hop_ip;
 
   // Look up ARP entry for next hop.
   ARPCache::Entry::Ptr arp_entry;
