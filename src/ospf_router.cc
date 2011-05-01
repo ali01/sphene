@@ -91,14 +91,14 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   }
 
   uint32_t neighbor_id = pkt->routerID();
-  OSPFNeighbor::Ptr neighbor = ifd->neighbor(neighbor_id);
+  OSPFNode::Ptr neighbor = ifd->neighbor(neighbor_id);
 
   if (neighbor == NULL) {
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
     IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
     IPv4Addr neighbor_addr = ip_pkt->src();
-    neighbor = OSPFNeighbor::New(neighbor_id, neighbor_addr);
+    neighbor = OSPFNode::New(neighbor_id, neighbor_addr);
     ifd->neighborIs(neighbor);
   }
 

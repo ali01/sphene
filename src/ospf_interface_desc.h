@@ -5,7 +5,7 @@
 #include "fwk/ptr_interface.h"
 
 #include "interface.h"
-#include "ospf_neighbor.h"
+#include "ospf_node.h"
 #include "time_types.h"
 
 
@@ -14,8 +14,8 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   typedef Fwk::Ptr<const OSPFInterfaceDesc> PtrConst;
   typedef Fwk::Ptr<OSPFInterfaceDesc> Ptr;
 
-  typedef Fwk::Map<uint32_t,OSPFNeighbor>::iterator iterator;
-  typedef Fwk::Map<uint32_t,OSPFNeighbor>::const_iterator
+  typedef Fwk::Map<uint32_t,OSPFNode>::iterator iterator;
+  typedef Fwk::Map<uint32_t,OSPFNode>::const_iterator
     const_iterator;
 
   static Ptr New(Interface::PtrConst iface, uint16_t helloint) {
@@ -25,11 +25,11 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   Interface::PtrConst interface() const { return iface_; }
   Seconds helloint() const { return helloint_; }
 
-  OSPFNeighbor::Ptr neighbor(uint32_t router_id);
-  OSPFNeighbor::PtrConst neighbor(uint32_t router_id) const;
+  OSPFNode::Ptr neighbor(uint32_t router_id);
+  OSPFNode::PtrConst neighbor(uint32_t router_id) const;
 
-  void neighborIs(OSPFNeighbor::Ptr nb);
-  void neighborDel(OSPFNeighbor::Ptr nb);
+  void neighborIs(OSPFNode::Ptr nb);
+  void neighborDel(OSPFNode::Ptr nb);
   void neighborDel(uint32_t router_id);
 
   iterator neighborsBegin() { return neighbors_.begin(); }
@@ -43,7 +43,7 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   /* Data members. */
   Interface::PtrConst iface_;
   uint16_t helloint_;
-  Fwk::Map<uint32_t,OSPFNeighbor> neighbors_;
+  Fwk::Map<uint32_t,OSPFNode> neighbors_;
 
   /* Operations disallowed. */
   OSPFInterfaceDesc(const OSPFInterfaceDesc&);
