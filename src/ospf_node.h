@@ -35,6 +35,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr neighbor(uint32_t id);
   OSPFNode::PtrConst neighbor(uint32_t id) const;
 
+  /* Previous node in the shortest path from the root node to this node. */
+  OSPFNode::Ptr prev() { return prev_; }
+  OSPFNode::PtrConst prev() const { return prev_; }
+
   time_t age() const { return time(NULL) - last_refreshed_; }
   uint16_t latestSeqno() const { return latest_seqno_; }
   uint16_t distance() const { return distance_; }
@@ -47,6 +51,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   void neighborIs(OSPFNode::Ptr node);
   void neighborDel(uint32_t id);
   void neighborDel(OSPFNode::Ptr node);
+
+  void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
   void ageIs(time_t age)  { last_refreshed_ = time(NULL) - age; }
   void latestSeqnoIs(uint16_t seqno) { latest_seqno_ = seqno; }
@@ -69,6 +75,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   time_t last_refreshed_;
   uint16_t latest_seqno_;
   uint16_t distance_;
+
+  /* Previous node in the shortest path from the root node to this node. */
+  OSPFNode::Ptr prev_;
 
   /* Map of all neighbors directly attached to this node. */
   Fwk::Map<uint32_t,OSPFNode> neighbors_;
