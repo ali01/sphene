@@ -304,10 +304,19 @@ int tunnel_change(struct sr_instance* const sr,
   if (!tun_map->tunnel(name))
     return 0;  // no tunnel exists with that name
 
-  // Update the attributes of the tunnel.
   Tunnel::Ptr tunnel = tun_map->tunnel(name);
+
+  // Remove tunnel from map first. The tunnel map keys on the remote address,
+  // so to ensure consistency, we clear all pointers to the tunnel in the map
+  // before updating the tunnel.
+  tun_map->tunnelDel(tunnel);
+
+  // Update the attributes of the tunnel.
   tunnel->modeIs(Tunnel::kGRE);  // we only support GRE right now
   tunnel->remoteIs(ntohl(dest));
+
+  // Re-add tunnel to map.
+  tun_map->tunnelIs(tunnel);
 
   return 1;
 }
