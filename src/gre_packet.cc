@@ -192,18 +192,18 @@ void GREPacket::reserved1Is(const uint16_t value) {
 
 Packet::Ptr GREPacket::payload() {
   const uint16_t header_len = checksumPresent() ? 8 : 4;
-  const uint16_t payload_offset = buffer_offset_ + header_len;
+  const uint16_t payload_offset = bufferOffset() + header_len;
   Packet::Ptr pkt;
 
   switch (protocol()) {
     case EthernetPacket::kARP:
-      pkt = ARPPacket::ARPPacketNew(buffer_, payload_offset);
+      pkt = ARPPacket::ARPPacketNew(buffer(), payload_offset);
       break;
     case EthernetPacket::kIP:
-      pkt = IPPacket::IPPacketNew(buffer_, payload_offset);
+      pkt = IPPacket::IPPacketNew(buffer(), payload_offset);
       break;
     default:
-      pkt = UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
+      pkt = UnknownPacket::UnknownPacketNew(buffer(), payload_offset);
       break;
   }
 

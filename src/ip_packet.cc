@@ -245,18 +245,18 @@ IPPacket::compute_cksum(const PacketBuffer* pkt, unsigned int len) {
 // TODO(ms): Need tests for this.
 Packet::Ptr
 IPPacket::payload() {
-  uint16_t payload_offset = buffer_offset_ + headerLen();
+  uint16_t payload_offset = bufferOffset() + headerLen();
   Packet::Ptr pkt;
 
   switch (protocol()) {
     case kICMP:
-      pkt = ICMPPacket::ICMPPacketNew(buffer_, payload_offset);
+      pkt = ICMPPacket::ICMPPacketNew(buffer(), payload_offset);
       break;
     case kGRE:
-      pkt = GREPacket::GREPacketNew(buffer_, payload_offset);
+      pkt = GREPacket::GREPacketNew(buffer(), payload_offset);
       break;
     default:
-      pkt = UnknownPacket::UnknownPacketNew(buffer_, payload_offset);
+      pkt = UnknownPacket::UnknownPacketNew(buffer(), payload_offset);
       break;
   }
 

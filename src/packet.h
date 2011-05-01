@@ -42,11 +42,13 @@ class Packet : public Fwk::PtrInterface<Packet> {
     virtual ~Functor() { }
   };
 
-  uint8_t* data() const { return buffer_->data() + buffer_offset_; }
-  size_t len() const { return buffer_->size() - buffer_offset_; }
+  uint8_t* data() const { return buffer_->data() + bufferOffset(); }
+  size_t len() const { return buffer_->size() - bufferOffset(); }
 
   PacketBuffer::Ptr buffer() const { return buffer_; }
-  unsigned int bufferOffset() const { return buffer_offset_; }
+  unsigned int bufferOffset() const {
+    return buffer_->size() - reverse_offset_;
+  }
 
   /* Packet validation. */
   virtual bool valid() const = 0;
@@ -62,7 +64,9 @@ class Packet : public Fwk::PtrInterface<Packet> {
 
  protected:
   Packet(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
-      : buffer_(buffer), buffer_offset_(buffer_offset), encl_pkt_(NULL) { }
+      : buffer_(buffer),
+        reverse_offset_(buffer->size() - buffer_offset),
+        encl_pkt_(NULL) { }
 
   // Returns the pointer into the packet buffer at an offset relative to the
   // start of the packet in the buffer. offsetAddress(0) returns the pointer to
@@ -70,9 +74,10 @@ class Packet : public Fwk::PtrInterface<Packet> {
   // the offset is beyond the end of the internal buffer.
   uint8_t* offsetAddress(unsigned int offset) const;
 
+ private:
   /* Data members. */
   PacketBuffer::Ptr buffer_;
-  const unsigned int buffer_offset_;
+  const unsigned int reverse_offset_;  // offset from end of buffer
   Ptr encl_pkt_;
 };
 
