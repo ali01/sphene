@@ -6,6 +6,7 @@
 #include "fwk/scoped_lock.h"
 
 #include "arp_packet.h"
+#include "gre_packet.h"
 #include "ethernet_packet.h"
 #include "icmp_packet.h"
 #include "interface.h"
@@ -216,6 +217,28 @@ void ControlPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
 void ControlPlane::PacketFunctor::operator()(GREPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "GREPacket dispatch in ControlPlane";
+
+  // Check validity.
+  // TODO(ms): Can probably just use pkt->valid() here when it is implemented.
+  if (!pkt->checksumValid()) {
+    DLOG << "  bad checksum";
+    return;
+  }
+
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+
+  // Do we have a tunnel with this remote?
+  TunnelMap::Ptr tun_map = cp_->tunnelMap();
+  Fwk::ScopedLock<TunnelMap> tun_map_lock(tun_map);
+  Tunnel::Ptr tunnel = tun_map->tunnelRemoteAddr(ip_pkt->src());
+  if (!tunnel) {
+    DLOG << "  no GRE tunnel to " << ip_pkt->src() << ", ignoring";
+    return;
+  }
+
+  // Simulate the packet coming from the tunnel's virtual interface.
+  Packet::Ptr payload_pkt = pkt->payload();
+  cp_->dataPlane()->packetNew(payload_pkt, tunnel->interface());
 }
 
 
