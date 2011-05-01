@@ -32,10 +32,10 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   void neighborDel(OSPFNeighbor::Ptr nb);
   void neighborDel(uint32_t router_id);
 
-  iterator begin() { return neighbors_.begin(); }
-  iterator end() { return neighbors_.end(); }
-  const_iterator begin() const { return neighbors_.begin(); }
-  const_iterator end() const { return neighbors_.end(); }
+  iterator neighborsBegin() { return neighbors_.begin(); }
+  iterator neighborsEnd() { return neighbors_.end(); }
+  const_iterator neighborsBegin() const { return neighbors_.begin(); }
+  const_iterator neighborsEnd() const { return neighbors_.end(); }
 
  private:
   OSPFInterfaceDesc(Interface::PtrConst iface, uint16_t helloint);
