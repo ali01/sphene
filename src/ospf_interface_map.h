@@ -5,10 +5,8 @@
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
-#include "interface.h"
 #include "ipv4_addr.h"
 #include "ospf_interface_desc.h"
-#include "ospf_neighbor.h"
 
 
 class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
