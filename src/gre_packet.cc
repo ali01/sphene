@@ -10,6 +10,9 @@
 #include "unknown_packet.h"
 
 
+const size_t GREPacket::kHeaderSize = sizeof(struct GREHeader);
+
+
 GREPacket::GREPacket(const PacketBuffer::Ptr buffer,
                      const unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
