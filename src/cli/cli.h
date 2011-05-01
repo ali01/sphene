@@ -12,8 +12,8 @@
 #endif
 #include "cli_help.h"
 
-#define PROMPT "~> "
-#define STRLEN_PROMPT 3
+#define PROMPT "sphene% "
+#define STRLEN_PROMPT 8
 
 /* This nasty struct stores values until we know it is time to execute the
    command (very gross).  Better perhaps to have a class hierarchy with children
