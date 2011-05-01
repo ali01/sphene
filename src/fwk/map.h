@@ -35,9 +35,16 @@ public:
   typedef typename map<KeyT,typename ValueT::Ptr,Cmp>::const_reverse_iterator
     const_reverse_iterator;
 
-  static Ptr MapNew() { return new Map(); }
+  static Ptr New() { return new Map(); }
+  static Ptr New(const Map& other) { return new Map(other); }
 
   Map() {}
+
+  /* Shallow copy constructor. */
+  Map(const Map& other) {
+    for (const_iterator it = other.begin(); it != other.end(); ++it)
+      elemIs(it->first, it->second);
+  }
 
   virtual ~Map() {}
 
@@ -124,7 +131,6 @@ private:
   map<KeyT, typename ValueT::Ptr, Cmp> map_;
 
   /* operations disallowed */
-  Map(const Map&);
   void operator=(const Map&);
 };
 
