@@ -15,7 +15,8 @@ OSPFRouter::OSPFRouter(uint32_t router_id, uint32_t area_id) :
   router_id_(router_id),
   area_id_(area_id),
   interfaces_(OSPFInterfaceMap::New()),
-  topology_(OSPFTopology::New()) {}
+  topology_(OSPFTopology::New()),
+  router_node_(OSPFNode::New(router_id)) {}
 
 void
 OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
