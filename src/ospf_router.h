@@ -12,6 +12,7 @@ class OSPFInterfaceMap;
 class OSPFLSUPacket;
 class OSPFNode;
 class OSPFTopology;
+class RoutingTable;
 
 
 class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
@@ -33,6 +34,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   Fwk::Ptr<const OSPFInterfaceMap> interfaceMap() const;
   Fwk::Ptr<const OSPFTopology> topology() const;
+
+  Fwk::Ptr<const RoutingTable> routingTable() const;
+  Fwk::Ptr<RoutingTable> routingTable();
+
+  void routingTableIs(Fwk::Ptr<RoutingTable> rtable);
 
  protected:
   OSPFRouter(uint32_t router_id, uint32_t area_id);
@@ -66,6 +72,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFNode> router_node_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
+  Fwk::Ptr<RoutingTable> routing_table_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);

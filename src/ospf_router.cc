@@ -6,6 +6,7 @@
 #include "ospf_node.h"
 #include "ospf_packet.h"
 #include "ospf_topology.h"
+#include "routing_table.h"
 
 /* OSPFRouter */
 
@@ -16,7 +17,8 @@ OSPFRouter::OSPFRouter(uint32_t router_id, uint32_t area_id) :
   area_id_(area_id),
   router_node_(OSPFNode::New(router_id)),
   interfaces_(OSPFInterfaceMap::New()),
-  topology_(OSPFTopology::New(router_node_)) {}
+  topology_(OSPFTopology::New(router_node_)),
+  routing_table_(NULL) {}
 
 void
 OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
@@ -32,6 +34,21 @@ OSPFRouter::interfaceMap() const {
 OSPFTopology::PtrConst
 OSPFRouter::topology() const {
   return topology_;
+}
+
+RoutingTable::PtrConst
+OSPFRouter::routingTable() const {
+  return routing_table_;
+}
+
+RoutingTable::Ptr
+OSPFRouter::routingTable() {
+  return routing_table_;
+}
+
+void
+OSPFRouter::routingTableIs(RoutingTable::Ptr rtable) {
+  routing_table_ = rtable;
 }
 
 /* OSPFRouter::PacketFunctor */
