@@ -31,8 +31,14 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   const_iterator nodesBegin() const { return nodes_.begin(); }
   const_iterator nodesEnd() const { return nodes_.end(); }
 
+  /* Recomputes shortest-path spanning tree. */
+  void onUpdate();
+
  private:
   OSPFTopology(OSPFNode::Ptr root_node);
+
+  void compute_optimal_spanning_tree();
+  static OSPFNode::Ptr min_dist_node(const Fwk::Map<uint32_t,OSPFNode>& map);
 
   /* Data members. */
   Fwk::Map<uint32_t,OSPFNode> nodes_;
