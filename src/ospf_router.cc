@@ -38,6 +38,7 @@ OSPFRouter::topology() const {
 
 OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
     : ospf_router_(ospf_router),
+      router_node_(ospf_router->router_node_.ptr()),
       interfaces_(ospf_router->interfaces_.ptr()),
       topology_(ospf_router->topology_.ptr()),
       log_(ospf_router->log_) {}
@@ -100,6 +101,9 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     IPv4Addr neighbor_addr = ip_pkt->src();
     neighbor = OSPFNode::New(neighbor_id, neighbor_addr);
     ifd->neighborIs(neighbor);
+
+    // TODO(ali): this may need to be a deep copy of neighbor.
+    router_node_->neighborIs(neighbor);
   }
 
   /* Refresh neighbor's age. */

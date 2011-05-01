@@ -48,6 +48,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
    private:
     OSPFRouter* ospf_router_;
+    OSPFNode* router_node_;
     OSPFInterfaceMap* interfaces_;
     OSPFTopology* topology_;
     Fwk::Log::Ptr log_;
