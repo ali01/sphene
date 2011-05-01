@@ -169,11 +169,15 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   // Recompute the checksum since we changed the TTL.
   pkt->checksumReset();
 
-  // Update Ethernet header using ARP entry.
+  // Add Ethernet header using ARP entry data.
+  pkt->buffer()->minimumSizeIs(pkt->len() + EthernetPacket::kHeaderSize);
   EthernetPacket::Ptr eth_pkt =
-      Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+      EthernetPacket::New(pkt->buffer(),
+                          pkt->bufferOffset() - EthernetPacket::kHeaderSize);
   eth_pkt->srcIs(out_iface->mac());
   eth_pkt->dstIs(arp_entry->ethernetAddr());
+  eth_pkt->typeIs(EthernetPacket::kIP);
+
 
   // Send packet.
   DLOG << "Forwarding IP packet to " << string(next_hop_ip);

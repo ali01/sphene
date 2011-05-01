@@ -118,7 +118,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
     return;
   }
 
-  // Update Ethernet header using ARP entry.
+  // Add Ethernet header using ARP entry data.
   pkt->buffer()->minimumSizeIs(pkt->len() + EthernetPacket::kHeaderSize);
   EthernetPacket::Ptr eth_pkt =
       EthernetPacket::New(pkt->buffer(),
@@ -347,8 +347,13 @@ ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
 
   // Add packet that generated this ARP request to the ARP queue.
   DLOG << "queueing packet for " << pkt->dst() << " pending ARP reply";
+
+  // Update Ethernet header using ARP entry.
+  pkt->buffer()->minimumSizeIs(pkt->len() + EthernetPacket::kHeaderSize);
   EthernetPacket::Ptr eth_pkt =
-      Ptr::st_cast<EthernetPacket>(pkt->enclosingPacket());
+      EthernetPacket::New(pkt->buffer(),
+                          pkt->bufferOffset() - EthernetPacket::kHeaderSize);
+  eth_pkt->typeIs(EthernetPacket::kIP);
   entry->packetIs(eth_pkt);
 }
 
