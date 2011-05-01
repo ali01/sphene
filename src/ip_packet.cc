@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include "gre_packet.h"
 #include "icmp_packet.h"
 #include "interface.h"
 #include "packet_buffer.h"
@@ -250,6 +251,9 @@ IPPacket::payload() {
   switch (protocol()) {
     case kICMP:
       pkt = ICMPPacket::ICMPPacketNew(buffer_, payload_offset);
+      break;
+    case kGRE:
+      pkt = GREPacket::GREPacketNew(buffer_, payload_offset);
       break;
     default:
       pkt = UnknownPacket::UnknownPacketNew(buffer_, payload_offset);

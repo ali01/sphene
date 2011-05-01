@@ -39,6 +39,7 @@ class IPPacket : public Packet {
     kICMP    = 0x01,
     kTCP     = 0x06,
     kUDP     = 0x11,
+    kGRE     = 0x2F,
     kOSPF    = 0x59
   };
 
