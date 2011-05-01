@@ -484,17 +484,29 @@ void cli_manip_ip_arp_purge_sta() {
     cli_send_strs( 5, "Removed ", str_count, " static", what, " from the ARP cache\n" );
 }
 
+// TODO(ms): This should probably be implemented in cli_stubs.{cc,h}.
 void cli_manip_ip_intf_set( gross_intf_t* data ) {
     Interface::Ptr intf =
         router_lookup_interface_via_name( SR, data->intf_name );
-    if( intf ) {
-        /* not yet implmented: set intf's IP as data->ip and subnet mask as
-           data->subnet_mask */
+    if (intf) {
+      InterfaceMap::Ptr ifaces = SR->router->dataPlane()->interfaceMap();
+      Fwk::ScopedLock<InterfaceMap> lock(ifaces);
 
-        /* not yet implemented: let everyone else know the routes we offer have changed */
+      // Remove the interface from the map before we update it.
+      ifaces->interfaceDel(intf);
+
+      // Update interface attributes.
+      intf->ipIs(ntohl(data->ip));
+      intf->subnetMaskIs(ntohl(data->subnet_mask));
+
+      // Re-add the interface to the map.
+      ifaces->interfaceIs(intf);
+
+      // TODO(ms): This.
+      /* not yet implemented: let everyone else know the routes we offer have changed */
+    } else {
+      cli_send_strs( 2, data->intf_name, " is not a valid interface\n" );
     }
-    else
-        cli_send_strs( 2, data->intf_name, " is not a valid interface\n" );
 }
 
 void cli_manip_ip_intf_set_enabled( const char* intf_name, int enabled ) {
