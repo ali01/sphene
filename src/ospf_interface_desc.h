@@ -28,6 +28,10 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   OSPFNeighbor::Ptr neighbor(uint32_t router_id);
   OSPFNeighbor::PtrConst neighbor(uint32_t router_id) const;
 
+  void neighborIs(OSPFNeighbor::Ptr nb);
+  void neighborDel(OSPFNeighbor::Ptr nb);
+  void neighborDel(uint32_t router_id);
+
   iterator neighborsBegin() { return neighbors_.begin(); }
   iterator neighborsEnd() { return neighbors_.end(); }
   const_iterator neighborsBegin() const { return neighbors_.begin(); }
@@ -35,13 +39,6 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
 
  private:
   OSPFInterfaceDesc(Interface::PtrConst iface, uint16_t helloint);
-
-  void neighborIs(OSPFNeighbor::Ptr nb);
-  void neighborDel(OSPFNeighbor::Ptr nb);
-  void neighborDel(uint32_t router_id);
-
-  /* Only OSPFRouter can call the above three functions. */
-  friend class OSPFRouter;
 
   /* Data members. */
   Interface::PtrConst iface_;
