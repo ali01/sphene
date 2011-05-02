@@ -229,8 +229,8 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
 }
 
 OSPFRouter::NeighborRelationship::PtrConst
-OSPFRouter::staged_neighbor_relationship(const RouterID& lsu_sender_id,
-                                         const RouterID& adv_nb_id) const {
+OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
+                       const RouterID& adv_nb_id) const {
   LinkedList<NeighborRelationship>::PtrConst nb_list =
     links_staged_.elem(lsu_sender_id);
 

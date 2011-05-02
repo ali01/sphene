@@ -105,9 +105,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      connected to the node with ID ADVERTISED_NEIGHBOR_ID. If no such
      NeighborRelationship object exists in the multimap, this function returns
      NULL. */
-  NeighborRelationship::PtrConst
-    staged_neighbor_relationship(const RouterID& lsu_sender_id,
-                                 const RouterID& adv_nb_id) const;
+  NeighborRelationship::PtrConst staged_nbr(const RouterID& lsu_sender_id,
+                                            const RouterID& adv_nb_id) const;
 
   /* OSPfRouter data members. */
   Fwk::Log::Ptr log_;
