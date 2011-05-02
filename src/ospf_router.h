@@ -115,7 +115,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      the multimap, true otherwise. */
   bool stage_nbr(NeighborRelationship::Ptr nbr);
 
-  /* Commits the specified NeighborRelationship object to the router's 
+  /* Commits the specified NeighborRelationship object to the router's
      network topology and removes it from the LINKS_STAGED multimap.
      This function makes use of unstage_nbr(). */
   void commit_nbr(NeighborRelationship::Ptr nbr);
