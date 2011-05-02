@@ -227,3 +227,21 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     sender->neighborIs(neighbor);
   }
 }
+
+OSPFRouter::NeighborRelationship::PtrConst
+OSPFRouter::staged_neighbor_relationship(const RouterID& lsu_sender_id,
+                                         const RouterID& adv_nb_id) const {
+  LinkedList<NeighborRelationship>::PtrConst nb_list =
+    links_staged_.elem(lsu_sender_id);
+
+  if (nb_list) {
+    NeighborRelationship::PtrConst nbr;
+    for (nbr = nb_list->front(); nbr != NULL; nbr = nbr->next()) {
+      OSPFNode::PtrConst adv_nb = nbr->advertisedNeighbor();
+      if (adv_nb->routerID() == adv_nb_id)
+        return nbr;
+    }
+  }
+
+  return NULL;
+}

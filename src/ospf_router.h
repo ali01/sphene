@@ -94,8 +94,20 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
 
   /* OSPFRouter private member functions. */
+
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
+
+  /* Obtains the staged NeighborRelationship object with the specified
+     LSU_SENDER_ID and ADVERTISED_NEIGHBOR_ID from the LINKS_STAGED
+     multimap if it exists. A NeighborRelationship object will exist if the
+     node with ID of LSU_SENDER_ID has previously advertised that it is
+     connected to the node with ID ADVERTISED_NEIGHBOR_ID. If no such
+     NeighborRelationship object exists in the multimap, this function returns
+     NULL. */
+  NeighborRelationship::PtrConst
+    staged_neighbor_relationship(const RouterID& lsu_sender_id,
+                                 const RouterID& adv_nb_id) const;
 
   /* OSPfRouter data members. */
   Fwk::Log::Ptr log_;
