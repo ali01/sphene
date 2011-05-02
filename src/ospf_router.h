@@ -65,26 +65,31 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     Fwk::Log::Ptr log_;
   };
 
-  /* Allows the insertion of Node objects into Fwk::LinkedList. */
-  class NodeWrapper : public LinkedList<NodeWrapper>::Node {
+  class NeighborRelationship : public LinkedList<NeighborRelationship>::Node {
    public:
-    typedef Fwk::Ptr<const NodeWrapper> PtrConst;
-    typedef Fwk::Ptr<NodeWrapper> Ptr;
+    typedef Fwk::Ptr<const NeighborRelationship> PtrConst;
+    typedef Fwk::Ptr<NeighborRelationship> Ptr;
 
-    static Ptr New(Fwk::Ptr<OSPFNode> node);
+    static Ptr New(Fwk::Ptr<OSPFNode> lsu_sender,
+                   Fwk::Ptr<OSPFNode> advertised_neighbor);
 
-    Fwk::Ptr<const OSPFNode> node() const;
-    Fwk::Ptr<OSPFNode> node();
+    Fwk::Ptr<const OSPFNode> LSUSender() const;
+    Fwk::Ptr<OSPFNode> LSUSender();
+
+    Fwk::Ptr<const OSPFNode> advertisedNeighbor() const;
+    Fwk::Ptr<OSPFNode> advertisedNeighbor();
 
    private:
-    NodeWrapper(Fwk::Ptr<OSPFNode> node);
+    NeighborRelationship (Fwk::Ptr<OSPFNode> lsu_sender,
+                          Fwk::Ptr<OSPFNode> advertised_neighbor);
 
     /* Data members. */
-    Fwk::Ptr<OSPFNode> node_;
+    Fwk::Ptr<OSPFNode> lsu_sender_;
+    Fwk::Ptr<OSPFNode> advertised_neighbor_;
 
     /* Operations disallowed. */
-    NodeWrapper(const NodeWrapper&);
-    void operator=(const NodeWrapper&);
+    NeighborRelationship(const NeighborRelationship&);
+    void operator=(const NeighborRelationship&);
   };
 
 
@@ -103,12 +108,12 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFTopology> topology_;
   Fwk::Ptr<RoutingTable> routing_table_;
 
-  /* Logical Multimap<RouterID,AdvertisedNeighbors>: Keeps track of neighbor
-     relationships that have not yet been commited to the topology. This is
-     necessary to avoid corrupting the topology in response to contradicting
-     link-state advertisements. Refer to the PWOSPF specification for more
-     details. */
-  Fwk::Map<RouterID,LinkedList<NodeWrapper> > links_staged_;
+  /* Logical Multimap<LSUSenderRouterID,NeighborRelationshipList>: Keeps track
+     of neighbor relationships that have not yet been commited to the topology.
+     This is necessary to avoid corrupting the topology in response to
+     contradicting link-state advertisements. Refer to the PWOSPF specification
+     for more details. */
+  Fwk::Map<RouterID,LinkedList<NeighborRelationship> > links_staged_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);

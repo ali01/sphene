@@ -171,26 +171,37 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 }
 
 
-/* OSPFRouter::NodeWrapper */
+/* OSPFRouter::NeighborRelationship */
 
-OSPFRouter::NodeWrapper::NodeWrapper(Fwk::Ptr<OSPFNode> node)
-    : node_(node) {}
+OSPFRouter::NeighborRelationship::NeighborRelationship(OSPFNode::Ptr lsu_sender,
+                                                       OSPFNode::Ptr adv_nb)
+    : lsu_sender_(lsu_sender), advertised_neighbor_(adv_nb) {}
 
-OSPFRouter::NodeWrapper::Ptr
-OSPFRouter::NodeWrapper::New(Fwk::Ptr<OSPFNode> node) {
-  return new NodeWrapper(node);
+OSPFRouter::NeighborRelationship::Ptr
+OSPFRouter::NeighborRelationship::New(OSPFNode::Ptr lsu_sender,
+                                      OSPFNode::Ptr adv_nb) {
+  return new NeighborRelationship(lsu_sender, adv_nb);
 }
 
 OSPFNode::PtrConst
-OSPFRouter::NodeWrapper::node() const {
-  return node_;
+OSPFRouter::NeighborRelationship::LSUSender() const {
+  return lsu_sender_;
 }
 
 OSPFNode::Ptr
-OSPFRouter::NodeWrapper::node() {
-  return node_;
+OSPFRouter::NeighborRelationship::LSUSender() {
+  return lsu_sender_;
 }
 
+OSPFNode::PtrConst
+OSPFRouter::NeighborRelationship::advertisedNeighbor() const {
+  return advertised_neighbor_;
+}
+
+OSPFNode::Ptr
+OSPFRouter::NeighborRelationship::advertisedNeighbor() {
+  return advertised_neighbor_;
+}
 
 /* OSPFRouter private member functions */
 
@@ -202,6 +213,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   OSPFNode::Ptr neighbor;
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     adv = pkt->advertisement(adv_index);
+
     neighbor = topology_->node(adv->routerID());
     if (neighbor == NULL) {
       neighbor = OSPFNode::New(adv->routerID());
