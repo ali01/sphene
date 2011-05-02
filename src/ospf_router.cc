@@ -195,7 +195,7 @@ OSPFRouter::NodeWrapper::node() {
 /* OSPFRouter private member functions */
 
 void
-OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr node,
+OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                        OSPFLSUPacket::PtrConst pkt) {
   /* Processing each LSU advertisement enclosed in the LSU packet. */
   OSPFLSUAdvertisement::PtrConst adv;
@@ -212,6 +212,6 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr node,
     neighbor->subnetMaskIs(adv->subnetMask());
 
     /* Establish bi-directional neighbor relationship. */
-    node->neighborIs(neighbor);
+    sender->neighborIs(neighbor);
   }
 }

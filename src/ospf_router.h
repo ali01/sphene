@@ -89,7 +89,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
 
   /* OSPFRouter private member functions. */
-  void process_lsu_advertisements(Fwk::Ptr<OSPFNode> node,
+  void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
   /* OSPfRouter data members. */
