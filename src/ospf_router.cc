@@ -252,3 +252,39 @@ OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
   OSPFRouter* self = const_cast<OSPFRouter*>(this);
   return self->staged_nbr(lsu_sender_id, adv_nb_id);
 }
+
+void
+OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
+  if (nbr == NULL)
+    return;
+
+  OSPFNode::Ptr lsu_sender = nbr->lsuSender();
+  OSPFNode::Ptr adv_nb = nbr->advertisedNeighbor();
+
+  /* Establish bi-directional neighbor relationship. */
+  lsu_sender->neighborIs(adv_nb);
+
+  /* Add both nodes to the topology if they weren't already there. */
+  topology_->nodeIs(lsu_sender);
+  topology_->nodeIs(adv_nb);
+
+  /* Unstage neighbor relationship. */
+  unstage_nbr(nbr);
+}
+
+bool
+OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
+  if (nbr == NULL)
+    return false;
+
+  RouterID lsu_sender_id = nbr->lsuSender()->routerID();
+  LinkedList<NeighborRelationship>::Ptr nb_list =
+    links_staged_.elem(lsu_sender_id);
+
+  if (nb_list) {
+    if (nb_list->del(nbr))
+      return true;
+  }
+
+  return false;
+}
