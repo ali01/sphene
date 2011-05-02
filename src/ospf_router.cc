@@ -228,14 +228,14 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   }
 }
 
-OSPFRouter::NeighborRelationship::PtrConst
+OSPFRouter::NeighborRelationship::Ptr
 OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
-                       const RouterID& adv_nb_id) const {
-  LinkedList<NeighborRelationship>::PtrConst nb_list =
+                       const RouterID& adv_nb_id) {
+  LinkedList<NeighborRelationship>::Ptr nb_list =
     links_staged_.elem(lsu_sender_id);
 
   if (nb_list) {
-    NeighborRelationship::PtrConst nbr;
+    NeighborRelationship::Ptr nbr;
     for (nbr = nb_list->front(); nbr != NULL; nbr = nbr->next()) {
       OSPFNode::PtrConst adv_nb = nbr->advertisedNeighbor();
       if (adv_nb->routerID() == adv_nb_id)
@@ -244,4 +244,11 @@ OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
   }
 
   return NULL;
+}
+
+OSPFRouter::NeighborRelationship::PtrConst
+OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
+                       const RouterID& adv_nb_id) const {
+  OSPFRouter* self = const_cast<OSPFRouter*>(this);
+  return self->staged_nbr(lsu_sender_id, adv_nb_id);
 }

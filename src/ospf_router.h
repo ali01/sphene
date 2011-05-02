@@ -107,6 +107,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      NULL. */
   NeighborRelationship::PtrConst staged_nbr(const RouterID& lsu_sender_id,
                                             const RouterID& adv_nb_id) const;
+  NeighborRelationship::Ptr staged_nbr(const RouterID& lsu_sender_id,
+                                       const RouterID& adv_nb_id);
 
   /* OSPfRouter data members. */
   Fwk::Log::Ptr log_;
