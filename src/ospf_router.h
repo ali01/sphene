@@ -110,6 +110,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   NeighborRelationship::Ptr staged_nbr(const RouterID& lsu_sender_id,
                                        const RouterID& adv_nb_id);
 
+  /* Adds the specified NeighborRelationship object to the LINKS_STAGED
+     multimap. Returns false if NBR is NULL or if it already exists in
+     the multimap, true otherwise. */
+  bool stage_nbr(NeighborRelationship::Ptr nbr);
+
   /* Commits the specified NeighborRelationship object to the router's 
      network topology and removes it from the LINKS_STAGED multimap.
      This function makes use of unstage_nbr(). */

@@ -253,6 +253,30 @@ OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
   return self->staged_nbr(lsu_sender_id, adv_nb_id);
 }
 
+bool
+OSPFRouter::stage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
+  if (nbr == NULL)
+    return false;
+
+  RouterID lsu_sender_id = nbr->lsuSender()->routerID();
+  RouterID adv_nb_id = nbr->advertisedNeighbor()->routerID();
+  if (staged_nbr(lsu_sender_id, adv_nb_id) != NULL) {
+    /* NeighborRelationship is already staged. */
+    return false;
+  }
+
+  LinkedList<NeighborRelationship>::Ptr nb_list =
+    links_staged_.elem(lsu_sender_id);
+  if (nb_list == NULL) {
+    nb_list = LinkedList<NeighborRelationship>::New();
+    links_staged_[lsu_sender_id] = nb_list;
+  }
+
+  nb_list->pushBack(nbr);
+
+  return true;
+}
+
 void
 OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   if (nbr == NULL)
