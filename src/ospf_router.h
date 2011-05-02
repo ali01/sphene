@@ -93,7 +93,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   };
 
 
-  /* OSPFRouter private member functions. */
+  /* -- OSPFRouter private member functions. -- */
 
   /* Processes the LSU advertisements enclosed in PKT, an OSPFLSUPacket
      received from SENDER. This function establishes a bi-directional link in
@@ -136,7 +136,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      multimap, true otherwise. */
   bool unstage_nbr(NeighborRelationship::Ptr nbr);
 
-  /* OSPfRouter data members. */
+
+  /* -- OSPFRouter data members. -- */
+
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
 
