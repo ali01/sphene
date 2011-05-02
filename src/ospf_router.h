@@ -73,8 +73,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     static Ptr New(Fwk::Ptr<OSPFNode> lsu_sender,
                    Fwk::Ptr<OSPFNode> advertised_neighbor);
 
-    Fwk::Ptr<const OSPFNode> LSUSender() const;
-    Fwk::Ptr<OSPFNode> LSUSender();
+    Fwk::Ptr<const OSPFNode> lsuSender() const;
+    Fwk::Ptr<OSPFNode> lsuSender();
 
     Fwk::Ptr<const OSPFNode> advertisedNeighbor() const;
     Fwk::Ptr<OSPFNode> advertisedNeighbor();

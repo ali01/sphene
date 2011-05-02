@@ -184,12 +184,12 @@ OSPFRouter::NeighborRelationship::New(OSPFNode::Ptr lsu_sender,
 }
 
 OSPFNode::PtrConst
-OSPFRouter::NeighborRelationship::LSUSender() const {
+OSPFRouter::NeighborRelationship::lsuSender() const {
   return lsu_sender_;
 }
 
 OSPFNode::Ptr
-OSPFRouter::NeighborRelationship::LSUSender() {
+OSPFRouter::NeighborRelationship::lsuSender() {
   return lsu_sender_;
 }
 
