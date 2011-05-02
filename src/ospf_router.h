@@ -95,6 +95,17 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* OSPFRouter private member functions. */
 
+  /* Processes the LSU advertisements enclosed in PKT, an OSPFLSUPacket
+     received from SENDER. This function establishes a bi-directional link in
+     the router's network topology to each advertised neighbor, N_i, only if N_i
+     has also advertised connectivity to SENDER. In the case that N_i has not
+     previously advertised connectivity to SENDER, this function stages a
+     NeighborRelationship object to the LINKS_STAGED multimap to be committed
+     whenever said advertisement is received.
+
+     This function assumes that SENDER is already in the router's network
+     topology.
+  */
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 

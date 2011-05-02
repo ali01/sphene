@@ -214,17 +214,37 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     adv = pkt->advertisement(adv_index);
 
-    neighbor = topology_->node(adv->routerID());
-    if (neighbor == NULL) {
-      neighbor = OSPFNode::New(adv->routerID());
-      topology_->nodeIs(neighbor);
+    /* Check if the advertised neighbor has also advertised connectivity to
+       SENDER. If it has, then there will exist a NeighborRelationship object
+       in the LINKS_STAGED multimap. */
+    NeighborRelationship::Ptr nbr =
+      staged_nbr(adv->routerID(), sender->routerID());
+    if (nbr) {
+      // TODO(ali): verify matching subnet before commiting.
+
+      /* Staged NeighborRelationship object exists.
+         It can be committed to the router's network topology. */
+      commit_nbr(nbr);
+
+    } else {
+
+      /* The advertised neighbor is added to the network topology. The
+         neighbor relationship between NEIGHBOR and SENDER, however, is
+         staged for now. It is committed when NEIGHBOR confirms connectivity
+         to SENDER with an LSU of its own. */
+
+      neighbor = topology_->node(adv->routerID());
+      if (neighbor == NULL) {
+        neighbor = OSPFNode::New(adv->routerID());
+        topology_->nodeIs(neighbor);
+      }
+
+      neighbor->subnetIs(adv->subnet());
+      neighbor->subnetMaskIs(adv->subnetMask());
+
+      nbr = NeighborRelationship::New(sender, neighbor);
+      stage_nbr(nbr);
     }
-
-    neighbor->subnetIs(adv->subnet());
-    neighbor->subnetMaskIs(adv->subnetMask());
-
-    /* Establish bi-directional neighbor relationship. */
-    sender->neighborIs(neighbor);
   }
 }
 
