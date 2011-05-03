@@ -53,13 +53,18 @@ OSPFInterfaceDesc::neighborIs(OSPFNode::Ptr nb,
     return;
 
   RouterID nd_id = nb->routerID();
+  OSPFNeighbor::Ptr nbr_prev = neighbors_.elem(nd_id);
+  if (nbr_prev->node() != nb
+      || nbr_prev->subnet() != subnet
+      || nbr_prev->subnetMask() != subnet_mask) {
 
-  /* Adding to direct OSPFNode pointer map. */
-  neighbor_nodes_[nd_id] = nb;
+    /* Adding to direct OSPFNode pointer map. */
+    neighbor_nodes_[nd_id] = nb;
 
-  /* Adding to OSPFNeighbor pointer map. */
-  OSPFNeighbor::Ptr ospf_nbr = OSPFNeighbor::New(nb, subnet, subnet_mask);
-  neighbors_[nd_id] = ospf_nbr;
+    /* Adding to OSPFNeighbor pointer map. */
+    OSPFNeighbor::Ptr ospf_nbr = OSPFNeighbor::New(nb, subnet, subnet_mask);
+    neighbors_[nd_id] = ospf_nbr;
+  }
 }
 
 void
