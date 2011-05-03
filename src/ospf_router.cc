@@ -114,10 +114,12 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   if (neighbor == NULL) {
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
-    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-    IPv4Addr neighbor_addr = ip_pkt->src();
-    neighbor = OSPFNode::New(neighbor_id, neighbor_addr);
-    ifd->neighborIs(neighbor);
+    // TODO(ali): use soon to come new interface
+    // IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+    // IPv4Addr neighbor_addr = ip_pkt->src();
+
+    neighbor = OSPFNode::New(neighbor_id);
+    ifd->neighborIs(neighbor); // TODO(ali): use soon to come new interface
 
     // TODO(ali): this may need to be a deep copy of neighbor.
     router_node_->neighborIs(neighbor);
@@ -154,8 +156,9 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   } else {
     /* Creating new node and inserting it into the topology database */
-    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-    node = OSPFNode::New(node_id, ip_pkt->src());
+    // TODO(ali): make use of new interface
+    // IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+    node = OSPFNode::New(node_id);
     topology_->nodeIs(node);
   }
 
@@ -238,9 +241,6 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
         neighbor = OSPFNode::New(adv->routerID());
         topology_->nodeIs(neighbor);
       }
-
-      neighbor->subnetIs(adv->subnet());
-      neighbor->subnetMaskIs(adv->subnetMask());
 
       nbr = NeighborRelationship::New(sender, neighbor);
       stage_nbr(nbr);
