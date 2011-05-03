@@ -63,6 +63,12 @@ void DataPlane::PacketFunctor::operator()(ARPPacket* const pkt,
 void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "EthernetPacket dispatch in DataPlane";
+
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
+    return;
+  }
+
   DLOG << "  iface: " << iface->name();
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
@@ -83,6 +89,12 @@ void DataPlane::PacketFunctor::operator()(GREPacket* const pkt,
 void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "ICMPPacket dispatch in DataPlane";
+
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
+    return;
+  }
+
   DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
   DLOG << "  code: " << (uint32_t)pkt->code();
 }
@@ -91,13 +103,15 @@ void DataPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
 void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                           const Interface::PtrConst iface) {
   DLOG << "IPPacket dispatch in DataPlane";
+
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
+    return;
+  }
+
   DLOG << "  iface: " << iface->name();
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
-
-  /* IPPacket validation. */
-  if (!pkt->valid())
-    return;
 
   // Look up IP Packet's destination.
   IPv4Addr dest_ip = pkt->dst();

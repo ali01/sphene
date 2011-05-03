@@ -223,6 +223,11 @@ void ControlPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "EthernetPacket dispatch in ControlPlane";
 
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
+    return;
+  }
+
   // Dispatch encapsulated packet.
   Packet::Ptr payload_pkt = pkt->payload();
   (*payload_pkt)(this, iface);
@@ -233,10 +238,8 @@ void ControlPlane::PacketFunctor::operator()(GREPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "GREPacket dispatch in ControlPlane";
 
-  // Check validity.
-  // TODO(ms): Can probably just use pkt->valid() here when it is implemented.
-  if (!pkt->checksumValid()) {
-    DLOG << "  bad checksum";
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
     return;
   }
 
@@ -264,6 +267,12 @@ void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
                                              const Interface::PtrConst iface) {
   // TODO(ms): Further dispatch of ICMPPacket types should probably be here.
   DLOG << "ICMPPacket dispatch in ControlPlane";
+
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
+    return;
+  }
+
   DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
   DLOG << "  code: " << (uint32_t)pkt->code();
 
@@ -279,6 +288,11 @@ void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
 void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
                                              const Interface::PtrConst iface) {
   DLOG << "IPPacket dispatch in ControlPlane";
+
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
+    return;
+  }
 
   // We don't handle UDP packets at all.
   if (pkt->protocol() == IPPacket::kUDP) {
