@@ -27,11 +27,6 @@ class OSPFNeighbor : public Fwk::PtrInterface<OSPFNeighbor> {
   const IPv4Addr& subnet() const { return subnet_; }
   const IPv4Addr& subnetMask() const { return subnet_mask_; }
 
-  /* Mutators. */
-
-  void subnetIs(const IPv4Addr& subnet) { subnet_ = subnet; }
-  void subnetMaskIs(const IPv4Addr& mask) { subnet_mask_ = mask; }
-
  private:
   OSPFNeighbor(Fwk::Ptr<OSPFNode> neighbor,
                const IPv4Addr& subnet,
