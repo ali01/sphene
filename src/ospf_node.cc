@@ -10,7 +10,7 @@ OSPFNode::OSPFNode(const RouterID& router_id, IPv4Addr subnet)
 
 OSPFNode::Ptr
 OSPFNode::neighbor(const RouterID& id) {
-  return neighbors_.elem(id);
+  return neighbor_nodes_.elem(id);
 }
 
 OSPFNode::PtrConst
@@ -24,15 +24,29 @@ OSPFNode::neighborIs(OSPFNode::Ptr node) {
   if (node == NULL)
     return;
 
-  neighbors_[node->routerID()] = node;
+  RouterID nd_id = node->routerID();
+
+  /* Adding to direct OSPFNode pointer map. */
+  neighbor_nodes_[nd_id] = node;
+
+  /* Adding to OSPFNeighbor pointer map. */
+  OSPFNeighbor::Ptr ospf_neighbor = OSPFNeighbor::New(node);
+  neighbors_[nd_id] = ospf_neighbor;
+
+  /* Relationship is bi-directional. */
   node->neighborIs(this);
 }
 
 void
 OSPFNode::neighborDel(const RouterID& id) {
+  /* Deletion is bi-directional. */
   OSPFNode::Ptr node = neighbor(id);
-  node->neighborDel(this);
+  if (node)
+    node->neighborDel(this);
+
+  /* Deleting from both maps. */
   neighbors_.elemDel(id);
+  neighbor_nodes_.elemDel(id);
 }
 
 void
@@ -40,6 +54,5 @@ OSPFNode::neighborDel(OSPFNode::Ptr node) {
   if (node == NULL)
     return;
 
-  node->neighborDel(this);
-  neighbors_.elemDel(node->routerID());
+  neighborDel(node->routerID());
 }

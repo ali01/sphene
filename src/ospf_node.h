@@ -7,7 +7,9 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
+#include "ospf_neighbor.h"
 #include "ospf_types.h"
+
 
 class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
  public:
@@ -61,10 +63,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Iterators. */
 
-  iterator neighborsBegin() { return neighbors_.begin(); }
-  iterator neighborsEnd() { return neighbors_.end(); }
-  const_iterator neighborsBegin() const { return neighbors_.begin(); }
-  const_iterator neighborsEnd() const { return neighbors_.end(); }
+  iterator neighborsBegin() { return neighbor_nodes_.begin(); }
+  iterator neighborsEnd() { return neighbor_nodes_.end(); }
+  const_iterator neighborsBegin() const { return neighbor_nodes_.begin(); }
+  const_iterator neighborsEnd() const { return neighbor_nodes_.end(); }
 
  private:
   OSPFNode(const RouterID& router_id, IPv4Addr subnet);
@@ -81,7 +83,13 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr prev_;
 
   /* Map of all neighbors directly attached to this node. */
-  Fwk::Map<RouterID,OSPFNode> neighbors_;
+  Fwk::Map<RouterID,OSPFNeighbor> neighbors_;
+
+  /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
+     OSPFNeighbor objects). Used to provide iterators. If space constraints
+     become a problem, this can be optimized away by defining custom
+     iterators. */
+  Fwk::Map<RouterID,OSPFNode> neighbor_nodes_;
 
   /* Operations disallowed. */
   OSPFNode(const OSPFNode&);
