@@ -18,10 +18,6 @@ ARPPacket::kHeaderSize = sizeof(struct ARPHeader);
 ARPPacket::ARPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       arp_hdr_((struct ARPHeader *)offsetAddress(0)) {
-  arp_hdr_->htype = htons(1); // Ethernet
-  arp_hdr_->ptype = htons(0x800); // IP
-  arp_hdr_->hlen = 6;
-  arp_hdr_->plen = 4;
   // NOTE(ms): No validation of the fields is done here for performance
   //   reasons. We want to be able to create ARP packets inside of
   //   pre-allocated buffers, so to avoid the chicken-egg problem, we require

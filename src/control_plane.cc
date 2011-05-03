@@ -326,6 +326,8 @@ ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
 
     ARPPacket::Ptr arp_pkt = Ptr::st_cast<ARPPacket>(req_eth_pkt->payload());
     arp_pkt->operationIs(ARPPacket::kRequest);
+    arp_pkt->hwTypeIs(ARPPacket::kEthernet);
+    arp_pkt->pTypeIs(ARPPacket::kIP);
     arp_pkt->senderHWAddrIs(out_iface->mac());
     arp_pkt->senderPAddrIs(out_iface->ip());
     arp_pkt->targetHWAddrIs(EthernetAddr::kZero);
