@@ -37,11 +37,10 @@ class ARPPacket : public Packet {
     return new ARPPacket(buffer, buffer_offset);
   }
 
-  // Packet validation.
-  // TODO(ali): implement. Currently throws NotImplementedException.
-  virtual bool valid() const;
-
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+  // Packet validation.
+  virtual bool valid() const;
 
   // Returns the hardware type.
   HWType hwType() const;
@@ -95,7 +94,7 @@ class ARPPacket : public Packet {
   void targetPAddrIs(const IPv4Addr& addr);
 
   // Packet length in bytes.
-  static const int kPacketLen = 28;
+  static const unsigned int kPacketLen = 28;
 
  protected:
   ARPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
