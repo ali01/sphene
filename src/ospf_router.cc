@@ -331,10 +331,8 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   LinkedList<NeighborRelationship>::Ptr nb_list =
     links_staged_.elem(lsu_sender_id);
 
-  if (nb_list) {
-    if (nb_list->del(nbr))
-      return true;
-  }
+  if (nb_list && nb_list->del(nbr))
+    return true;
 
   return false;
 }
