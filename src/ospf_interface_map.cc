@@ -1,5 +1,7 @@
 #include "ospf_interface_map.h"
 
+#include "interface.h"
+
 /* OSPFInterfaceMap */
 
 OSPFInterfaceDesc::PtrConst

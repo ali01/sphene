@@ -4,10 +4,12 @@
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
-#include "interface.h"
 #include "ospf_node.h"
 #include "ospf_types.h"
 #include "time_types.h"
+
+/* Forward declarations. */
+class Interface;
 
 
 class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
@@ -19,11 +21,9 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   typedef Fwk::Map<RouterID,OSPFNode>::const_iterator
     const_iterator;
 
-  static Ptr New(Interface::PtrConst iface, uint16_t helloint) {
-    return new OSPFInterfaceDesc(iface, helloint);
-  }
+  static Ptr New(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
-  Interface::PtrConst interface() const { return iface_; }
+  Fwk::Ptr<const Interface> interface() const;
   Seconds helloint() const { return helloint_; }
 
   OSPFNode::Ptr neighbor(const RouterID& router_id);
@@ -39,10 +39,10 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   const_iterator neighborsEnd() const { return neighbors_.end(); }
 
  private:
-  OSPFInterfaceDesc(Interface::PtrConst iface, uint16_t helloint);
+  OSPFInterfaceDesc(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
   /* Data members. */
-  Interface::PtrConst iface_;
+  Fwk::Ptr<const Interface> iface_;
   uint16_t helloint_;
   Fwk::Map<RouterID,OSPFNode> neighbors_;
 
