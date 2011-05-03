@@ -225,11 +225,15 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     NeighborRelationship::Ptr nb_rel =
       staged_nbr(adv->routerID(), sender->routerID());
     if (nb_rel) {
-      // TODO(ali): verify matching subnet before commiting.
+      /* Staged NeighborRelationship object exists. If the subnets advertised
+         for both endpoints of the link, then the neighbor relationship can be
+         committed to the router's network topology. */
 
-      /* Staged NeighborRelationship object exists.
-         It can be committed to the router's network topology. */
-      commit_nbr(nb_rel);
+      OSPFNeighbor::Ptr sender_staged = nb_rel->advertisedNeighbor();
+      if (adv->subnet() == sender_staged->subnet()) {
+        /* Subnets match. The advertised neighbor relationship is valid. */
+        commit_nbr(nb_rel);
+      }
 
     } else {
 
