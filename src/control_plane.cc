@@ -478,6 +478,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
+  ip_pkt->identificationIs(0);
   ip_pkt->flagsAre(IPPacket::IP_DF);
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
@@ -564,6 +565,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
+  ip_pkt->identificationIs(0);
   ip_pkt->flagsAre(IPPacket::IP_DF);
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
@@ -644,6 +646,7 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   ip_pkt->packetLengthIs(ip_pkt->len());
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kGRE);
+  ip_pkt->identificationIs(0);
   ip_pkt->flagsAre(IPPacket::IP_DF);
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(tunnel_r_entry->interface()->ip());
