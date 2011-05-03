@@ -90,6 +90,9 @@ class ControlPlane : public Fwk::NamedInterface {
   void encapsulateAndOutputPacket(IPPacket::Ptr pkt,
                                   Interface::PtrConst out_iface);
 
+  // Fragments an IP packet and sends the fragments individually.
+  void fragmentAndSend(IPPacket::Ptr pkt);
+
   Fwk::Log::Ptr log_;
   PacketFunctor functor_;
   ARPCache::Ptr arp_cache_;

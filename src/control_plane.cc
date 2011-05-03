@@ -99,6 +99,13 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
     return;
   }
 
+  // Fragment large datagrams.
+  if (pkt->len() > EthernetPacket::kMTU) {
+    DLOG << "  len: " << pkt->len() << "; fragmenting";
+    fragmentAndSend(pkt);
+    return;
+  }
+
   // Next hop IP address.
   IPv4Addr next_hop_ip = r_entry->gateway();
   if (next_hop_ip == 0)
@@ -647,7 +654,7 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kGRE);
   ip_pkt->identificationIs(0);
-  ip_pkt->flagsAre(IPPacket::IP_DF);
+  ip_pkt->flagsAre(0);
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(tunnel_r_entry->interface()->ip());
   ip_pkt->dstIs(tunnel->remote());
@@ -656,4 +663,68 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
 
   // Output new packet.
   outputPacketNew(ip_pkt);
+}
+
+
+void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
+  if (pkt->flags() & IPPacket::IP_DF) {
+    WLOG << "Tried to fragment a packet with Don't Fragment bit set; ignoring";
+    return;
+  }
+
+  // Must be a multiple of 64.
+  const size_t max_payload_size = 1472;
+  const uint16_t cksum = pkt->checksum();
+
+  size_t bytes_left = pkt->len() - IPPacket::kHeaderSize;
+  size_t fragment_offset = 0;  // in 64-byte blocks
+  while (bytes_left > 0) {
+    // Calculate size of this fragment's payload.
+    size_t fragment_payload_size;
+    bool last_fragment;
+    if (bytes_left > max_payload_size) {
+      fragment_payload_size = max_payload_size;
+      last_fragment = false;
+    } else {
+      fragment_payload_size = bytes_left;
+      last_fragment = true;
+    }
+
+    // Total size of fragment.
+    const size_t fragment_size = IPPacket::kHeaderSize + fragment_payload_size;
+
+    // Create a new buffer and IP packet for new fragment.
+    PacketBuffer::Ptr buffer = PacketBuffer::New(fragment_size);
+    IPPacket::Ptr fragment =
+        IPPacket::IPPacketNew(buffer, buffer->size() - fragment_size);
+
+    // Copy fields into fragment.
+    fragment->versionIs(4);
+    fragment->headerLengthIs(IPPacket::kHeaderSize / 4);  // words
+    fragment->packetLengthIs(fragment->len());
+    fragment->diffServicesAre(pkt->diffServices());
+    fragment->protocolIs(pkt->protocol());
+    fragment->srcIs(pkt->src());
+    fragment->dstIs(pkt->dst());
+    fragment->ttlIs(pkt->ttl());
+
+    // Set fragmentation fields.
+    fragment->identificationIs(cksum);  // use cksum as identifier
+    fragment->flagsAre(last_fragment ? 0 : IPPacket::IP_MF);
+    fragment->fragmentOffsetIs(fragment_offset);
+
+    // Copy portion of data.
+    memcpy(fragment->data() + IPPacket::kHeaderSize,
+           pkt->data() + IPPacket::kHeaderSize + (fragment_offset * 64),
+           fragment_payload_size);
+
+    // Update checksum.
+    fragment->checksumReset();
+
+    // Send fragment.
+    outputPacketNew(fragment);
+
+    bytes_left -= fragment_payload_size;
+    fragment_offset += fragment_payload_size / 64;
+  }
 }
