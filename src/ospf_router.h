@@ -7,15 +7,15 @@
 #include "fwk/ptr_interface.h"
 using Fwk::LinkedList;
 
-#include "ospf_interface_map.h"
-#include "ospf_node.h"
-#include "ospf_topology.h"
 #include "ospf_types.h"
 #include "packet.h"
 
 /* Forward declarations. */
 class Interface;
+class OSPFInterfaceMap;
 class OSPFLSUPacket;
+class OSPFNode;
+class OSPFTopology;
 class RoutingTable;
 
 
@@ -36,8 +36,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   const RouterID& routerID() const { return router_id_; }
   const AreaID& areaID() const { return area_id_; }
 
-  OSPFInterfaceMap::PtrConst interfaceMap() const;
-  OSPFTopology::PtrConst topology() const;
+  Fwk::Ptr<const OSPFInterfaceMap> interfaceMap() const;
+  Fwk::Ptr<const OSPFTopology> topology() const;
 
   Fwk::Ptr<const RoutingTable> routingTable() const;
   Fwk::Ptr<RoutingTable> routingTable();
@@ -70,22 +70,22 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     typedef Fwk::Ptr<const NeighborRelationship> PtrConst;
     typedef Fwk::Ptr<NeighborRelationship> Ptr;
 
-    static Ptr New(OSPFNode::Ptr lsu_sender,
-                   OSPFNode::Ptr advertised_neighbor);
+    static Ptr New(Fwk::Ptr<OSPFNode> lsu_sender,
+                   Fwk::Ptr<OSPFNode> advertised_neighbor);
 
-    OSPFNode::PtrConst lsuSender() const;
-    OSPFNode::Ptr lsuSender();
+    Fwk::Ptr<const OSPFNode> lsuSender() const;
+    Fwk::Ptr<OSPFNode> lsuSender();
 
-    OSPFNode::PtrConst advertisedNeighbor() const;
-    OSPFNode::Ptr advertisedNeighbor();
+    Fwk::Ptr<const OSPFNode> advertisedNeighbor() const;
+    Fwk::Ptr<OSPFNode> advertisedNeighbor();
 
    private:
-    NeighborRelationship(OSPFNode::Ptr lsu_sender,
-                         OSPFNode::Ptr advertised_neighbor);
+    NeighborRelationship (Fwk::Ptr<OSPFNode> lsu_sender,
+                          Fwk::Ptr<OSPFNode> advertised_neighbor);
 
     /* Data members. */
-    OSPFNode::Ptr lsu_sender_;
-    OSPFNode::Ptr advertised_neighbor_;
+    Fwk::Ptr<OSPFNode> lsu_sender_;
+    Fwk::Ptr<OSPFNode> advertised_neighbor_;
 
     /* Operations disallowed. */
     NeighborRelationship(const NeighborRelationship&);
@@ -106,7 +106,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      This function assumes that SENDER is already in the router's network
      topology.
   */
-  void process_lsu_advertisements(OSPFNode::Ptr sender,
+  void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
   /* Obtains the staged NeighborRelationship object with the specified
@@ -144,9 +144,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   RouterID router_id_;
   AreaID area_id_;
-  OSPFNode::Ptr router_node_;
-  OSPFInterfaceMap::Ptr interfaces_;
-  OSPFTopology::Ptr topology_;
+  Fwk::Ptr<OSPFNode> router_node_;
+  Fwk::Ptr<OSPFInterfaceMap> interfaces_;
+  Fwk::Ptr<OSPFTopology> topology_;
   Fwk::Ptr<RoutingTable> routing_table_;
 
   /* Logical Multimap<LSUSenderRouterID,NeighborRelationshipList>: Keeps track
