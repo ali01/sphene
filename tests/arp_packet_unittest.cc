@@ -9,6 +9,7 @@
 #include "ethernet_packet.h"
 #include "fwk/exception.h"
 #include "ip_packet.h"
+#include "ipv4_addr.h"
 #include "packet_buffer.h"
 
 using std::string;
@@ -58,6 +59,34 @@ class ARPPacketTest : public ::testing::Test {
   struct ARPHeader* header_;
   ARPPacket::Ptr pkt_;
 };
+
+
+TEST_F(ARPPacketTest, htype) {
+  // Change the hardware type and ensure it changes.
+  ARPPacket::HWType new_type = (ARPPacket::HWType)42;
+  pkt_->hwTypeIs(new_type);
+  EXPECT_EQ(new_type, pkt_->hwType());
+  EXPECT_EQ(0, pkt_->hwAddrLen());  // unknown type length is 0
+
+  // Change type back to Ethernet.
+  pkt_->hwTypeIs(ARPPacket::kEthernet);
+  EXPECT_EQ(ARPPacket::kEthernet, pkt_->hwType());
+  EXPECT_EQ(EthernetAddr::kAddrLen, pkt_->hwAddrLen());
+}
+
+
+TEST_F(ARPPacketTest, ptype) {
+  // Change the protocol type and ensure it changes.
+  ARPPacket::PType new_type = (ARPPacket::PType)84;
+  pkt_->pTypeIs(new_type);
+  EXPECT_EQ(new_type, pkt_->pType());
+  EXPECT_EQ(0, pkt_->pAddrLen());  // unknown type length is 0
+
+  // Change type back to IP.
+  pkt_->pTypeIs(ARPPacket::kIP);
+  EXPECT_EQ(ARPPacket::kIP, pkt_->pType());
+  EXPECT_EQ(IPv4Addr::kAddrLen, pkt_->pAddrLen());
+}
 
 
 TEST_F(ARPPacketTest, operation) {

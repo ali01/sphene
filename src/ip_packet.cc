@@ -32,8 +32,7 @@ IPPacket::kHeaderSize = sizeof(struct ip_hdr);
 
 IPPacket::IPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
-      log_(Fwk::Log::LogNew("IPPacket")),
-      ip_hdr_((struct ip_hdr *)offsetAddress(0)) {}
+      ip_hdr_((struct ip_hdr *)offsetAddress(0)) { }
 
 
 void IPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
@@ -42,26 +41,17 @@ void IPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 bool
 IPPacket::valid() const {
-  size_t mem_size = buffer()->len() - bufferOffset();
-  if (mem_size < sizeof(struct ip_hdr) || mem_size < packetLength()) {
-    DLOG << "Packet buffer too small.";
+  if (len() < sizeof(struct ip_hdr) || len() < packetLength())
     return false;
-  }
 
-  if (headerLength() < 5) {  // in words, not bytes
-    DLOG << "Header length too small: " << (uint32_t)headerLength();
+  if (headerLength() < 5)  // in words, not bytes
     return false;
-  }
 
-  if (version() != 4) {
-    DLOG << "Invalid IP version: " << (uint32_t)version();
+  if (version() != 4)
     return false;
-  }
 
-  if (!checksumValid()) {
-    DLOG << "Invalid checksum";
+  if (!checksumValid())
     return false;
-  }
 
   return true;
 }

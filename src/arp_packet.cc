@@ -8,6 +8,7 @@
 #include "fwk/exception.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "ipv4_addr.h"
 #include "packet_buffer.h"
 
 
@@ -17,27 +18,74 @@ ARPPacket::kHeaderSize = sizeof(struct ARPHeader);
 ARPPacket::ARPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       arp_hdr_((struct ARPHeader *)offsetAddress(0)) {
-  arp_hdr_->htype = htons(1); // Ethernet
-  arp_hdr_->ptype = htons(0x800); // IP
-  arp_hdr_->hlen = 6;
-  arp_hdr_->plen = 4;
   // NOTE(ms): No validation of the fields is done here for performance
   //   reasons. We want to be able to create ARP packets inside of
   //   pre-allocated buffers, so to avoid the chicken-egg problem, we require
   //   validation to be done by the users of this interface.
 }
 
-// Packet validation.
-// TODO(ali): implement.
-bool
-ARPPacket::valid() const {
-  throw Fwk::NotImplementedException("ARPPacket::valid()", "not implemented");
-  return false;
-}
-
 
 void ARPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);
+}
+
+
+bool
+ARPPacket::valid() const {
+  // Verify length.
+  if (len() != kPacketLen)
+    return false;
+
+  // Verify hardware and protocol types and lengths.
+  if (hwType() != kEthernet || hwAddrLen() != EthernetAddr::kAddrLen ||
+      pType() != kIP || pAddrLen() != IPv4Addr::kAddrLen)
+    return false;
+
+  // Verify operation.
+  if (operation() != kRequest && operation() != kReply)
+    return false;
+
+  return true;
+}
+
+
+ARPPacket::HWType ARPPacket::hwType() const {
+  return (HWType)(ntohs(arp_hdr_->htype));
+}
+
+
+void ARPPacket::hwTypeIs(HWType hwtype) {
+  arp_hdr_->htype = htons(hwtype);
+
+  if (hwtype == kEthernet)
+    arp_hdr_->hlen = EthernetAddr::kAddrLen;
+  else
+    arp_hdr_->hlen = 0;
+}
+
+
+ARPPacket::PType ARPPacket::pType() const {
+  return (PType)(ntohs(arp_hdr_->ptype));
+}
+
+
+void ARPPacket::pTypeIs(PType ptype) {
+  arp_hdr_->ptype = htons(ptype);
+
+  if (ptype == kIP)
+    arp_hdr_->plen = IPv4Addr::kAddrLen;
+  else
+    arp_hdr_->plen = 0;
+}
+
+
+uint8_t ARPPacket::hwAddrLen() const {
+  return arp_hdr_->hlen;
+}
+
+
+uint8_t ARPPacket::pAddrLen() const {
+  return arp_hdr_->plen;
 }
 
 

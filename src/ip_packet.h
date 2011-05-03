@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "fwk/log.h"
 #include "fwk/ordinal.h"
 
 #include "ipv4_addr.h"
@@ -108,7 +107,6 @@ class IPPacket : public Packet {
   IPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
  private:
-  mutable Fwk::Log::Ptr log_;
   struct ip_hdr* ip_hdr_;
 };
 

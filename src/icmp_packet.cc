@@ -10,6 +10,8 @@
 #include "packet_buffer.h"
 #include "unknown_packet.h"
 
+const size_t ICMPPacket::kHeaderLen;
+
 
 ICMPPacket::ICMPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
@@ -20,11 +22,19 @@ void ICMPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);
 }
 
-// TODO: implement.
+
 bool ICMPPacket::valid() const {
-  throw Fwk::NotImplementedException("ICMPPacket::valid()", "not implemented");
-  return false;
+  // Verify length.
+  if (len() < kHeaderLen)
+    return false;
+
+  // Verify checksum.
+  if (!checksumValid())
+    return false;
+
+  return true;
 }
+
 
 ICMPPacket::Type ICMPPacket::type() const {
   return (Type)(icmp_hdr_->type);
@@ -79,9 +89,22 @@ void ICMPPacket::checksumIs(const uint16_t ck) {
 }
 
 
-void ICMPPacket::checksumReset() {
+bool ICMPPacket::checksumValid() const {
+  // Checksum field is present.
+  uint16_t pkt_cksum = checksum();
+
+  ICMPPacket* pkt = const_cast<ICMPPacket*>(this);
+  uint16_t calculated_cksum = pkt->checksumReset();
+  pkt->checksumIs(pkt_cksum);
+  return (pkt_cksum == calculated_cksum);
+}
+
+
+uint16_t ICMPPacket::checksumReset() {
   checksumIs(0);
-  checksumIs(computeChecksum());
+  const uint16_t ck = computeChecksum();
+  checksumIs(ck);
+  return ck;
 }
 
 

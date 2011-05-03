@@ -42,7 +42,6 @@ class ICMPPacket : public Packet {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
   // Packet validation.
-  // TODO(ali): implement, currently throws NotImplementedException
   virtual bool valid() const;
 
   // Returns the ICMP Type.
@@ -66,11 +65,14 @@ class ICMPPacket : public Packet {
   // Sets the ICMP header+data checksum.
   void checksumIs(uint16_t ck);
 
+  // Returns true if the checksum is valid.
+  bool checksumValid() const;
+
   // Recomputes the checksum of the ICMP header+data.
-  void checksumReset();
+  uint16_t checksumReset();
 
   // Header length in bytes.
-  static const int kHeaderLen = 8;
+  static const size_t kHeaderLen = 8;
 
  protected:
   struct ICMPHeader {
