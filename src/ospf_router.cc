@@ -3,6 +3,7 @@
 #include "interface.h"
 #include "ip_packet.h"
 #include "ospf_interface_map.h"
+#include "ospf_neighbor.h"
 #include "ospf_node.h"
 #include "ospf_packet.h"
 #include "ospf_topology.h"
@@ -114,15 +115,16 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   if (neighbor == NULL) {
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
-    // TODO(ali): use soon to come new interface
-    // IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-    // IPv4Addr neighbor_addr = ip_pkt->src();
-
     neighbor = OSPFNode::New(neighbor_id);
     ifd->neighborIs(neighbor); // TODO(ali): use soon to come new interface
 
+    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+    IPv4Addr neighbor_addr = ip_pkt->src();
+    IPv4Addr subnet_mask = pkt->subnetMask();
+    IPv4Addr subnet = neighbor_addr & subnet_mask;
+
     // TODO(ali): this may need to be a deep copy of neighbor.
-    router_node_->neighborIs(neighbor);
+    router_node_->neighborIs(neighbor, subnet, subnet_mask);
   }
 
   /* Refresh neighbor's age. */
@@ -177,12 +179,12 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 /* OSPFRouter::NeighborRelationship */
 
 OSPFRouter::NeighborRelationship::NeighborRelationship(OSPFNode::Ptr lsu_sender,
-                                                       OSPFNode::Ptr adv_nb)
+                                                       OSPFNeighbor::Ptr adv_nb)
     : lsu_sender_(lsu_sender), advertised_neighbor_(adv_nb) {}
 
 OSPFRouter::NeighborRelationship::Ptr
 OSPFRouter::NeighborRelationship::New(OSPFNode::Ptr lsu_sender,
-                                      OSPFNode::Ptr adv_nb) {
+                                      OSPFNeighbor::Ptr adv_nb) {
   return new NeighborRelationship(lsu_sender, adv_nb);
 }
 
@@ -196,12 +198,12 @@ OSPFRouter::NeighborRelationship::lsuSender() {
   return lsu_sender_;
 }
 
-OSPFNode::PtrConst
+OSPFNeighbor::PtrConst
 OSPFRouter::NeighborRelationship::advertisedNeighbor() const {
   return advertised_neighbor_;
 }
 
-OSPFNode::Ptr
+OSPFNeighbor::Ptr
 OSPFRouter::NeighborRelationship::advertisedNeighbor() {
   return advertised_neighbor_;
 }
@@ -213,21 +215,21 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                        OSPFLSUPacket::PtrConst pkt) {
   /* Processing each LSU advertisement enclosed in the LSU packet. */
   OSPFLSUAdvertisement::PtrConst adv;
-  OSPFNode::Ptr neighbor;
+  OSPFNode::Ptr neighbor_nd;
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     adv = pkt->advertisement(adv_index);
 
     /* Check if the advertised neighbor has also advertised connectivity to
        SENDER. If it has, then there will exist a NeighborRelationship object
        in the LINKS_STAGED multimap. */
-    NeighborRelationship::Ptr nbr =
+    NeighborRelationship::Ptr nb_rel =
       staged_nbr(adv->routerID(), sender->routerID());
-    if (nbr) {
+    if (nb_rel) {
       // TODO(ali): verify matching subnet before commiting.
 
       /* Staged NeighborRelationship object exists.
          It can be committed to the router's network topology. */
-      commit_nbr(nbr);
+      commit_nbr(nb_rel);
 
     } else {
 
@@ -236,14 +238,16 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
          staged for now. It is committed when NEIGHBOR confirms connectivity
          to SENDER with an LSU of its own. */
 
-      neighbor = topology_->node(adv->routerID());
-      if (neighbor == NULL) {
-        neighbor = OSPFNode::New(adv->routerID());
-        topology_->nodeIs(neighbor);
+      neighbor_nd = topology_->node(adv->routerID());
+      if (neighbor_nd == NULL) {
+        neighbor_nd = OSPFNode::New(adv->routerID());
+        topology_->nodeIs(neighbor_nd);
       }
 
-      nbr = NeighborRelationship::New(sender, neighbor);
-      stage_nbr(nbr);
+      OSPFNeighbor::Ptr neighbor =
+        OSPFNeighbor::New(neighbor_nd, adv->subnet(), adv->subnetMask());
+      nb_rel = NeighborRelationship::New(sender, neighbor);
+      stage_nbr(nb_rel);
     }
   }
 }
@@ -257,7 +261,7 @@ OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
   if (nb_list) {
     NeighborRelationship::Ptr nbr;
     for (nbr = nb_list->front(); nbr != NULL; nbr = nbr->next()) {
-      OSPFNode::PtrConst adv_nb = nbr->advertisedNeighbor();
+      OSPFNode::PtrConst adv_nb = nbr->advertisedNeighbor()->node();
       if (adv_nb->routerID() == adv_nb_id)
         return nbr;
     }
@@ -279,7 +283,7 @@ OSPFRouter::stage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
     return false;
 
   RouterID lsu_sender_id = nbr->lsuSender()->routerID();
-  RouterID adv_nb_id = nbr->advertisedNeighbor()->routerID();
+  RouterID adv_nb_id = nbr->advertisedNeighbor()->node()->routerID();
   if (staged_nbr(lsu_sender_id, adv_nb_id) != NULL) {
     /* NeighborRelationship is already staged. */
     return false;
@@ -303,14 +307,16 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
     return;
 
   OSPFNode::Ptr lsu_sender = nbr->lsuSender();
-  OSPFNode::Ptr adv_nb = nbr->advertisedNeighbor();
+  OSPFNeighbor::Ptr adv_nb = nbr->advertisedNeighbor();
 
   /* Establish bi-directional neighbor relationship. */
-  lsu_sender->neighborIs(adv_nb);
+  lsu_sender->neighborIs(adv_nb->node(),
+                         adv_nb->subnet(),
+                         adv_nb->subnetMask());
 
   /* Add both nodes to the topology if they weren't already there. */
   topology_->nodeIs(lsu_sender);
-  topology_->nodeIs(adv_nb);
+  topology_->nodeIs(adv_nb->node());
 
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);

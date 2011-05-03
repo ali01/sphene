@@ -14,6 +14,7 @@ using Fwk::LinkedList;
 class Interface;
 class OSPFInterfaceMap;
 class OSPFLSUPacket;
+class OSPFNeighbor;
 class OSPFNode;
 class OSPFTopology;
 class RoutingTable;
@@ -71,21 +72,21 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     typedef Fwk::Ptr<NeighborRelationship> Ptr;
 
     static Ptr New(Fwk::Ptr<OSPFNode> lsu_sender,
-                   Fwk::Ptr<OSPFNode> advertised_neighbor);
+                   Fwk::Ptr<OSPFNeighbor> advertised_neighbor);
 
     Fwk::Ptr<const OSPFNode> lsuSender() const;
     Fwk::Ptr<OSPFNode> lsuSender();
 
-    Fwk::Ptr<const OSPFNode> advertisedNeighbor() const;
-    Fwk::Ptr<OSPFNode> advertisedNeighbor();
+    Fwk::Ptr<const OSPFNeighbor> advertisedNeighbor() const;
+    Fwk::Ptr<OSPFNeighbor> advertisedNeighbor();
 
    private:
-    NeighborRelationship (Fwk::Ptr<OSPFNode> lsu_sender,
-                          Fwk::Ptr<OSPFNode> advertised_neighbor);
+    NeighborRelationship(Fwk::Ptr<OSPFNode> lsu_sender,
+                         Fwk::Ptr<OSPFNeighbor> advertised_neighbor);
 
     /* Data members. */
     Fwk::Ptr<OSPFNode> lsu_sender_;
-    Fwk::Ptr<OSPFNode> advertised_neighbor_;
+    Fwk::Ptr<OSPFNeighbor> advertised_neighbor_;
 
     /* Operations disallowed. */
     NeighborRelationship(const NeighborRelationship&);

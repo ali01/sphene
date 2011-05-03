@@ -45,7 +45,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Mutators. */
 
-  void neighborIs(OSPFNode::Ptr node);
+  void neighborIs(OSPFNode::Ptr node,
+                  const IPv4Addr& subnet,
+                  const IPv4Addr& subnet_mask);
   void neighborDel(const RouterID& id);
   void neighborDel(OSPFNode::Ptr node);
 
