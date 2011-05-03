@@ -52,7 +52,6 @@ OSPFNode::neighborIs(OSPFNode::Ptr node,
   neighbors_[nd_id] = ospf_nbr;
 
   /* Relationship is bi-directional. */
-  // TODO(ali): device confirmation mechanism.
   node->neighborIs(this, subnet, subnet_mask);
 }
 
