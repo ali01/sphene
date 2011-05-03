@@ -19,8 +19,6 @@ class OSPFNeighbor : public Fwk::PtrInterface<OSPFNeighbor> {
                  const IPv4Addr& subnet,
                  const IPv4Addr& subnet_mask);
 
-  static Ptr New(Fwk::Ptr<OSPFNode> neighbor);
-
   /* Accessors. */
 
   Fwk::Ptr<const OSPFNode> node() const;

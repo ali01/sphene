@@ -1,9 +1,7 @@
 #include "ospf_node.h"
 
-OSPFNode::OSPFNode(const RouterID& router_id, IPv4Addr subnet)
+OSPFNode::OSPFNode(const RouterID& router_id)
     : router_id_(router_id),
-      subnet_(subnet),
-      subnet_mask_(IPv4Addr::kMax),
       last_refreshed_(time(NULL)),
       latest_seqno_(0),
       distance_(0) {}
@@ -19,8 +17,28 @@ OSPFNode::neighbor(const RouterID& id) const {
   return self->neighbor(id);
 }
 
+IPv4Addr
+OSPFNode::neighborSubnet(const RouterID& neighbor_id) const {
+  OSPFNeighbor::PtrConst nbr = neighbors_.elem(neighbor_id);
+  if (nbr)
+    return nbr->subnet();
+
+  return IPv4Addr::kZero;
+}
+
+IPv4Addr
+OSPFNode::neighborSubnetMask(const RouterID& neighbor_id) const {
+  OSPFNeighbor::PtrConst nbr = neighbors_.elem(neighbor_id);
+  if (nbr)
+    return nbr->subnetMask();
+
+  return IPv4Addr::kMax;
+}
+
 void
-OSPFNode::neighborIs(OSPFNode::Ptr node) {
+OSPFNode::neighborIs(OSPFNode::Ptr node,
+                     const IPv4Addr& subnet,
+                     const IPv4Addr& subnet_mask) {
   if (node == NULL)
     return;
 
@@ -30,11 +48,12 @@ OSPFNode::neighborIs(OSPFNode::Ptr node) {
   neighbor_nodes_[nd_id] = node;
 
   /* Adding to OSPFNeighbor pointer map. */
-  OSPFNeighbor::Ptr ospf_neighbor = OSPFNeighbor::New(node);
-  neighbors_[nd_id] = ospf_neighbor;
+  OSPFNeighbor::Ptr ospf_nbr = OSPFNeighbor::New(node, subnet, subnet_mask);
+  neighbors_[nd_id] = ospf_nbr;
 
   /* Relationship is bi-directional. */
-  node->neighborIs(this);
+  // TODO(ali): device confirmation mechanism.
+  node->neighborIs(this, subnet, subnet_mask);
 }
 
 void
