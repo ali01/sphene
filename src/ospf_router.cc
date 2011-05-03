@@ -158,8 +158,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   } else {
     /* Creating new node and inserting it into the topology database */
-    // TODO(ali): make use of new interface
-    // IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
     node = OSPFNode::New(node_id);
     topology_->nodeIs(node);
   }
@@ -172,7 +170,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   // TODO(ali): flood LSU packet.
   // TODO(ali): update the routing table.
-  // TODO(ali): deal with contradicting advertisements.
 }
 
 
