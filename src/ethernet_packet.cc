@@ -22,6 +22,7 @@ const EthernetAddr EthernetAddr::kZero;
 const int EthernetAddr::kAddrLen;
 
 const size_t EthernetPacket::kHeaderSize;
+const size_t EthernetPacket::kMTU = 1500;
 
 
 EthernetAddr::EthernetAddr() {
