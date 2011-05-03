@@ -3,6 +3,7 @@
 
 #include <ctime>
 
+#include "fwk/base_notifiee.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -25,6 +26,25 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
     return new OSPFNode(router_id);
   }
 
+  /* Notification support. */
+  class Notifiee : public Fwk::BaseNotifiee<OSPFNode> {
+   public:
+    typedef Fwk::Ptr<const Notifiee> PtrConst;
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    /* Notifications supported. */
+    virtual void onNeighbor(const RouterID& id) {}
+    virtual void onNeighborDel(const RouterID& id) {}
+
+   protected:
+    Notifiee(OSPFNode::Ptr notifier) : Fwk::BaseNotifiee<OSPFNode>(notifier) {}
+
+   private:
+    /* Operations disallowed. */
+    Notifiee(const Notifiee&);
+    void operator=(const Notifiee&);
+  };
+
   /* Accessors. */ 
 
   const RouterID& routerID() const { return router_id_; }
@@ -43,6 +63,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   uint16_t latestSeqno() const { return latest_seqno_; }
   uint16_t distance() const { return distance_; }
 
+  Notifiee::PtrConst notifiee() const { return notifiee_; }
+  Notifiee::Ptr notifiee() { return notifiee_; }
+
   /* Mutators. */
 
   void neighborIs(OSPFNode::Ptr node,
@@ -56,6 +79,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   void ageIs(time_t age)  { last_refreshed_ = time(NULL) - age; }
   void latestSeqnoIs(uint16_t seqno) { latest_seqno_ = seqno; }
   void distanceIs(uint16_t dist) { distance_ = dist; }
+  void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
   /* Iterators. */
 
@@ -84,6 +108,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
      become a problem, this can be optimized away by defining custom
      iterators. */
   Fwk::Map<RouterID,OSPFNode> neighbor_nodes_;
+
+  /* Singleton notifiee. */
+  Notifiee::Ptr notifiee_;
 
   /* Operations disallowed. */
   OSPFNode(const OSPFNode&);

@@ -43,13 +43,22 @@ OSPFNode::neighborIs(OSPFNode::Ptr node,
     return;
 
   RouterID nd_id = node->routerID();
+  OSPFNeighbor::Ptr nbr_prev = neighbors_.elem(nd_id);
+  if (nbr_prev->node() != node
+      || nbr_prev->subnet() != subnet
+      || nbr_prev->subnetMask() != subnet_mask) {
 
-  /* Adding to direct OSPFNode pointer map. */
-  neighbor_nodes_[nd_id] = node;
+    /* Adding to OSPFNeighbor pointer map. */
+    OSPFNeighbor::Ptr nbr_new = OSPFNeighbor::New(node, subnet, subnet_mask);
+    neighbors_[nd_id] = nbr_new;
 
-  /* Adding to OSPFNeighbor pointer map. */
-  OSPFNeighbor::Ptr ospf_nbr = OSPFNeighbor::New(node, subnet, subnet_mask);
-  neighbors_[nd_id] = ospf_nbr;
+    /* Adding to direct OSPFNode pointer map. */
+    neighbor_nodes_[nd_id] = node;
+
+    /* Signal notifiee. */
+    if (notifiee_)
+      notifiee_->onNeighbor(nd_id);
+  }
 
   /* Relationship is bi-directional. */
   node->neighborIs(this, subnet, subnet_mask);
@@ -57,14 +66,19 @@ OSPFNode::neighborIs(OSPFNode::Ptr node,
 
 void
 OSPFNode::neighborDel(const RouterID& id) {
-  /* Deletion is bi-directional. */
   OSPFNode::Ptr node = neighbor(id);
-  if (node)
+  if (node) {
+    /* Deletion is bi-directional. */
     node->neighborDel(this);
 
-  /* Deleting from both maps. */
-  neighbors_.elemDel(id);
-  neighbor_nodes_.elemDel(id);
+    /* Deleting from both maps. */
+    neighbors_.elemDel(id);
+    neighbor_nodes_.elemDel(id);
+
+    /* Signal notifiee. */
+    if (notifiee_)
+      notifiee_->onNeighborDel(id);
+  }
 }
 
 void
