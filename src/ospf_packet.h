@@ -1,8 +1,6 @@
 #ifndef OSPF_PACKET_H_7R33RO3C
 #define OSPF_PACKET_H_7R33RO3C
 
-#include "fwk/log.h"
-
 #include "packet.h"
 #include "packet_buffer.h"
 #include "ip_packet.h"
@@ -68,9 +66,6 @@ class OSPFPacket : public Packet {
 
  protected:
   OSPFPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
-
-  /* Data members. */
-  mutable Fwk::Log::Ptr log_;
 
  private:
   /* Data members. */

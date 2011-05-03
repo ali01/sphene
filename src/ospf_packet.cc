@@ -2,8 +2,13 @@
 
 #include <netinet/in.h>
 
+#include "fwk/log.h"
+
 #include "interface.h"
 #include "packet_buffer.h"
+
+/* Global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFPacket");
 
 
 struct ospf_pkt {
@@ -45,7 +50,6 @@ struct ospf_lsu_adv {
 
 OSPFPacket::OSPFPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
-      log_(Fwk::Log::LogNew("OSPFPacket")),
       ospf_pkt_((struct ospf_pkt*)offsetAddress(0)) {}
 
 uint8_t
