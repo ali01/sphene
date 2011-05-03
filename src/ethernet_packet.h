@@ -62,6 +62,9 @@ class EthernetPacket : public Packet {
 
   static const size_t kHeaderSize = sizeof(struct ether_header);
 
+  // Maximum Transmission Unit, in bytes.
+  static const size_t kMTU;
+
   // Construct a new EthernetPacket in 'buffer' starting at 'buffer_offset'
   // within the buffer.
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
