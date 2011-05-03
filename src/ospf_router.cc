@@ -115,13 +115,13 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   if (neighbor == NULL) {
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
-    neighbor = OSPFNode::New(neighbor_id);
-    ifd->neighborIs(neighbor); // TODO(ali): use soon to come new interface
-
     IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
     IPv4Addr neighbor_addr = ip_pkt->src();
     IPv4Addr subnet_mask = pkt->subnetMask();
     IPv4Addr subnet = neighbor_addr & subnet_mask;
+
+    neighbor = OSPFNode::New(neighbor_id);
+    ifd->neighborIs(neighbor, subnet, subnet_mask);
 
     // TODO(ali): this may need to be a deep copy of neighbor.
     router_node_->neighborIs(neighbor, subnet, subnet_mask);
@@ -225,11 +225,15 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     NeighborRelationship::Ptr nb_rel =
       staged_nbr(adv->routerID(), sender->routerID());
     if (nb_rel) {
-      // TODO(ali): verify matching subnet before commiting.
+      /* Staged NeighborRelationship object exists. If the subnets advertised
+         for both endpoints of the link, then the neighbor relationship can be
+         committed to the router's network topology. */
 
-      /* Staged NeighborRelationship object exists.
-         It can be committed to the router's network topology. */
-      commit_nbr(nb_rel);
+      OSPFNeighbor::Ptr sender_staged = nb_rel->advertisedNeighbor();
+      if (adv->subnet() == sender_staged->subnet()) {
+        /* Subnets match. The advertised neighbor relationship is valid. */
+        commit_nbr(nb_rel);
+      }
 
     } else {
 
@@ -331,10 +335,8 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   LinkedList<NeighborRelationship>::Ptr nb_list =
     links_staged_.elem(lsu_sender_id);
 
-  if (nb_list) {
-    if (nb_list->del(nbr))
-      return true;
-  }
+  if (nb_list && nb_list->del(nbr))
+    return true;
 
   return false;
 }
