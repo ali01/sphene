@@ -1,9 +1,7 @@
 #include "ospf_node.h"
 
-OSPFNode::OSPFNode(const RouterID& router_id, IPv4Addr subnet)
+OSPFNode::OSPFNode(const RouterID& router_id)
     : router_id_(router_id),
-      subnet_(subnet),
-      subnet_mask_(IPv4Addr::kMax),
       last_refreshed_(time(NULL)),
       latest_seqno_(0),
       distance_(0) {}
@@ -17,6 +15,24 @@ OSPFNode::PtrConst
 OSPFNode::neighbor(const RouterID& id) const {
   OSPFNode* self = const_cast<OSPFNode*>(this);
   return self->neighbor(id);
+}
+
+IPv4Addr
+OSPFNode::neighborSubnet(const RouterID& neighbor_id) const {
+  OSPFNeighbor::Ptr nbr = neighbors_.elem(neighbor_id);
+  if (nbr)
+    return nbr->subnet();
+
+  return IPv4Addr::kZero;
+}
+
+IPv4Addr
+OSPFNode::neighborSubnetMask(const RouterID& neighbor_id) const {
+  OSPFNeighbor::Ptr nbr = neighbors_.elem(neighbor_id);
+  if (nbr)
+    return nbr->subnetMask();
+
+  return IPv4Addr::kMax;
 }
 
 void

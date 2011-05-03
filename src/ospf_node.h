@@ -22,21 +22,18 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   static const uint16_t kMaxDistance = 0xffff;
 
   static Ptr New(const RouterID& router_id) {
-    return new OSPFNode(router_id, IPv4Addr::kZero);
-  }
-
-  static Ptr New(const RouterID& router_id, IPv4Addr subnet) {
-    return new OSPFNode(router_id, subnet);
+    return new OSPFNode(router_id);
   }
 
   /* Accessors. */ 
 
   const RouterID& routerID() const { return router_id_; }
-  const IPv4Addr& subnet() const { return subnet_; }
-  const IPv4Addr& subnetMask() const { return subnet_mask_; }
 
   OSPFNode::Ptr neighbor(const RouterID& id);
   OSPFNode::PtrConst neighbor(const RouterID& id) const;
+
+  IPv4Addr neighborSubnet(const RouterID& neighbor_id) const;
+  IPv4Addr neighborSubnetMask(const RouterID& neighbor_id) const;
 
   /* Previous node in the shortest path from the root node to this node. */
   OSPFNode::Ptr prev() { return prev_; }
@@ -47,9 +44,6 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   uint16_t distance() const { return distance_; }
 
   /* Mutators. */
-
-  void subnetIs(IPv4Addr subnet) { subnet_ = subnet; }
-  void subnetMaskIs(IPv4Addr mask) { subnet_mask_ = mask; }
 
   void neighborIs(OSPFNode::Ptr node);
   void neighborDel(const RouterID& id);
@@ -69,12 +63,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   const_iterator neighborsEnd() const { return neighbor_nodes_.end(); }
 
  private:
-  OSPFNode(const RouterID& router_id, IPv4Addr subnet);
+  OSPFNode(const RouterID& router_id);
 
   /* Data members. */
   RouterID router_id_;
-  IPv4Addr subnet_;
-  IPv4Addr subnet_mask_;
   time_t last_refreshed_;
   uint16_t latest_seqno_;
   uint16_t distance_;
