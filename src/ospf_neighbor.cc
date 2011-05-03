@@ -12,7 +12,9 @@ OSPFNeighbor::New(OSPFNode::Ptr neighbor,
 OSPFNeighbor::OSPFNeighbor(OSPFNode::Ptr neighbor,
          const IPv4Addr& subnet,
          const IPv4Addr& subnet_mask)
-    : node_(neighbor), subnet_(subnet), subnet_mask_(subnet_mask) {}
+    : node_(neighbor),
+      subnet_(subnet & subnet_mask),
+      subnet_mask_(subnet_mask) {}
 
 OSPFNode::PtrConst
 OSPFNeighbor::node() const {
