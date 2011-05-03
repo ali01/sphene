@@ -8,6 +8,7 @@
 #include "fwk/exception.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "ipv4_addr.h"
 #include "packet_buffer.h"
 
 
@@ -38,6 +39,46 @@ ARPPacket::valid() const {
 
 void ARPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);
+}
+
+
+ARPPacket::HWType ARPPacket::hwType() const {
+  return (HWType)(ntohs(arp_hdr_->htype));
+}
+
+
+void ARPPacket::hwTypeIs(HWType hwtype) {
+  arp_hdr_->htype = htons(hwtype);
+
+  if (hwtype == kEthernet)
+    arp_hdr_->hlen = EthernetAddr::kAddrLen;
+  else
+    arp_hdr_->hlen = 0;
+}
+
+
+ARPPacket::PType ARPPacket::pType() const {
+  return (PType)(ntohs(arp_hdr_->ptype));
+}
+
+
+void ARPPacket::pTypeIs(PType ptype) {
+  arp_hdr_->ptype = htons(ptype);
+
+  if (ptype == kIP)
+    arp_hdr_->plen = IPv4Addr::kAddrLen;
+  else
+    arp_hdr_->plen = 0;
+}
+
+
+uint8_t ARPPacket::hwAddrLen() const {
+  return arp_hdr_->hlen;
+}
+
+
+uint8_t ARPPacket::pAddrLen() const {
+  return arp_hdr_->plen;
 }
 
 

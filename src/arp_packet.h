@@ -16,6 +16,14 @@ class ARPPacket : public Packet {
   typedef Fwk::Ptr<const ARPPacket> PtrConst;
   typedef Fwk::Ptr<ARPPacket> Ptr;
 
+  enum HWType {
+    kEthernet = 1
+  };
+
+  enum PType {
+    kIP = 0x0800
+  };
+
   enum Operation {
     kRequest = 1,
     kReply   = 2
@@ -34,6 +42,24 @@ class ARPPacket : public Packet {
   virtual bool valid() const;
 
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+  // Returns the hardware type.
+  HWType hwType() const;
+
+  // Sets the link layer type.
+  void hwTypeIs(HWType hwtype);
+
+  // Returns the protocol type.
+  PType pType() const;
+
+  // Sets the protocol type.
+  void pTypeIs(PType ptype);
+
+  // Returns the hardware address length.
+  uint8_t hwAddrLen() const;
+
+  // Returns the protocol address length.
+  uint8_t pAddrLen() const;
 
   // Returns the operation of the ARP packet.
   Operation operation() const;
