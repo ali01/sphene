@@ -167,6 +167,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   node->ageIs(0);
 
   ospf_router_->process_lsu_advertisements(node, pkt);
+  topology_->onUpdate();
 
   // TODO(ali): flood LSU packet.
   // TODO(ali): update the routing table.
