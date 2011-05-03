@@ -21,6 +21,8 @@ const EthernetAddr EthernetAddr::kBroadcast("FF:FF:FF:FF:FF:FF");
 const EthernetAddr EthernetAddr::kZero;
 const int EthernetAddr::kAddrLen;
 
+const size_t EthernetPacket::kHeaderSize;
+
 
 EthernetAddr::EthernetAddr() {
   memset(addr_, 0, kAddrLen);
@@ -94,17 +96,18 @@ EthernetPacket::EthernetPacket(const PacketBuffer::Ptr buffer,
       eth_hdr((struct ether_header*)offsetAddress(0)) { }
 
 
-// Packet validation.
-// TODO(ali): implement.
-bool EthernetPacket::valid() const {
-  throw Fwk::NotImplementedException("EthernetPacket::valid()",
-                                     "not implemented");
-  return false;
-}
-
 void EthernetPacket::operator()(Functor* const f,
                                 const Interface::PtrConst iface) {
   (*f)(this, iface);
+}
+
+
+bool EthernetPacket::valid() const {
+  // Verify length.
+  if (len() < kHeaderSize)
+    return false;
+
+  return true;
 }
 
 
