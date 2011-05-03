@@ -9,11 +9,6 @@ OSPFNeighbor::New(OSPFNode::Ptr neighbor,
   return new OSPFNeighbor(neighbor, subnet, subnet_mask);
 }
 
-OSPFNeighbor::Ptr
-OSPFNeighbor::New(Fwk::Ptr<OSPFNode> neighbor) {
-  return new OSPFNeighbor(neighbor, IPv4Addr::kZero, IPv4Addr::kMax);
-}
-
 OSPFNeighbor::OSPFNeighbor(OSPFNode::Ptr neighbor,
          const IPv4Addr& subnet,
          const IPv4Addr& subnet_mask)
