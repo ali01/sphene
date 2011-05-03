@@ -22,11 +22,10 @@ class GREPacket : public Packet {
     return new GREPacket(buffer, buffer_offset);
   }
 
-  // Packet validation
-  // TODO(ali): implement. Currently throws NotImplementedException.
-  virtual bool valid() const;
-
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+  // Packet validation
+  virtual bool valid() const;
 
   // Returns true if the C (checksum) bit) is enabled. Per RFC2784, this bit
   // determines the presence of the Checksum and Reserved1 fields.

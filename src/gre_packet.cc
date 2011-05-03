@@ -18,15 +18,26 @@ GREPacket::GREPacket(const PacketBuffer::Ptr buffer,
     : Packet(buffer, buffer_offset),
       gre_hdr_((struct GREHeader *)offsetAddress(0)) { }
 
-// Packet validation.
-// TODO(ali): implement.
-bool GREPacket::valid() const {
-  throw Fwk::NotImplementedException("GREPacket::valid()", "not implemented");
-  return false;
-}
 
 void GREPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
   (*f)(this, iface);
+}
+
+
+// Packet validation.
+bool GREPacket::valid() const {
+  // Verify length.
+  const size_t header_len = checksumPresent() ? 8 : 4;
+  if (len() < header_len)
+    return false;
+
+  if (reserved0() != 0 || reserved1() != 0)
+    return false;
+
+  if (!checksumValid())
+    return false;
+
+  return true;
 }
 
 
@@ -69,8 +80,6 @@ void GREPacket::checksumIs(const uint16_t ck) {
 bool GREPacket::checksumValid() const {
   if (!checksumPresent())
     return true;
-
-  // TODO(ms): Check buffer length here.
 
   // Checksum field is present.
   uint16_t pkt_cksum = checksum();
