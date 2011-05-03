@@ -17,10 +17,10 @@ class UnknownPacket : public Packet {
     return new UnknownPacket(buffer, buffer_offset);
   }
 
-  virtual bool valid() const { return true; }
-
   /* Double-dispatch support. */
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
+
+  virtual bool valid() const { return true; }
 
  protected:
   UnknownPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
