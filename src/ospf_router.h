@@ -7,6 +7,7 @@
 #include "fwk/ptr_interface.h"
 using Fwk::LinkedList;
 
+#include "ospf_topology.h"
 #include "ospf_types.h"
 #include "packet.h"
 
@@ -16,7 +17,6 @@ class OSPFInterfaceMap;
 class OSPFLSUPacket;
 class OSPFNeighbor;
 class OSPFNode;
-class OSPFTopology;
 class RoutingTable;
 
 
@@ -93,6 +93,29 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     void operator=(const NeighborRelationship&);
   };
 
+  /* Reactor to Topology notifications. */
+  class TopologyReactor : public OSPFTopology::Notifiee {
+   public:
+    typedef Fwk::Ptr<const TopologyReactor> PtrConst;
+    typedef Fwk::Ptr<TopologyReactor> Ptr;
+
+    static Ptr New(OSPFRouter::Ptr _r) {
+      return new TopologyReactor(_r);
+    }
+
+    void onDirtyCleared() {}
+
+   private:
+    TopologyReactor(OSPFRouter::Ptr _r) : router_(_r.ptr()) {}
+
+    /* Data members. */
+    OSPFRouter* router_;
+
+    /* Operations disallowed. */
+    TopologyReactor(const TopologyReactor&);
+    void operator=(const TopologyReactor&);
+  };
+
 
   /* -- OSPFRouter private member functions. -- */
 
@@ -156,6 +179,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      contradicting link-state advertisements. Refer to the PWOSPF specification
      for more details. */
   Fwk::Map<RouterID,LinkedList<NeighborRelationship> > links_staged_;
+
+  TopologyReactor::Ptr topology_reactor_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);
