@@ -221,7 +221,7 @@ static void init_hw_intf(Interface::Ptr iface, const int index) {
   DLOG << "Initializing hardware interface " << iface->name()
        << " as " << iface_name;
 
-  int s = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+  int s = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
   struct ifreq ifr;
   bzero(&ifr, sizeof(struct ifreq));
