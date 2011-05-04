@@ -37,6 +37,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
    protected:
     Notifiee() {}
+    virtual ~Notifiee() {}
 
    private:
     /* Operations disallowed. */
