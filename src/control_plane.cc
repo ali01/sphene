@@ -199,8 +199,8 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
     // Swap the hardware and protocol fields.
     pkt->targetHWAddrIs(sender_eth);
     pkt->targetPAddrIs(sender_ip);
-    pkt->senderHWAddrIs(target_eth);
-    pkt->senderPAddrIs(target_ip);
+    pkt->senderHWAddrIs(iface->mac());
+    pkt->senderPAddrIs(iface->ip());
 
     // Flip the operation.
     pkt->operationIs(ARPPacket::kReply);

@@ -15,15 +15,29 @@
 
 #include "sr_vns.h"
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
+#include <string>
+#include <vector>
 
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+
+#include "data_plane.h"
+#include "fwk/scoped_lock.h"
+#include "interface.h"
+#include "interface_map.h"
+#include "router.h"
+
+using std::string;
+using std::vector;
 
 struct sr_ethernet_hdr
 {
@@ -135,63 +149,102 @@ int sr_cpu_init_hardware(struct sr_instance* sr, const char* hwfile)
 
 int sr_cpu_input(struct sr_instance* sr)
 {
-    /* REQUIRES */
-    assert(sr);
+  uint8_t buf[4096];
 
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    fprintf(stderr, "!!!  sr_cpu_input(..) (sr_cpu_extension_nf2.c) called while running in cpu mode     !!!\n");
-    fprintf(stderr, "!!!  you need to implement this function to read from the hardware                  !!!\n");
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+  /* REQUIRES */
+  assert(sr);
 
-    assert(0);
+  /* Set of file descriptors for watch for reading. */
+  fd_set rfds;
+  FD_ZERO(&rfds);
 
-    /*
-     * TODO: Read packet from the hardware and pass to sr_integ_input(..)
-     *       e.g.
-     *
-     *  sr_integ_input(sr,
-     *          packet,   * lent *
-     *          len,
-     *          "eth2" ); * lent *
-     */
+  Router::Ptr router = sr->router;
+  InterfaceMap::Ptr if_map = router->dataPlane()->interfaceMap();
+  vector<int> fds_vec;
+  vector<string> names;
+  {
+    Fwk::ScopedLock<InterfaceMap> lock(if_map);
+    InterfaceMap::iterator it;
+    for (it = if_map->begin(); it != if_map->end(); ++it) {
+      Interface::Ptr iface = it->second;
+      int fd = iface->socketDescriptor();
+      if (fd > 0) {
+        FD_SET(fd, &rfds);
+        fds_vec.push_back(fd);
+        names.push_back(iface->name());
+      }
+    }
+  }
 
-    /*
-     * Note: To log incoming packets, use sr_log_packet from sr_dumper.[c,h]
-     */
+  struct timeval tv;
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
 
-    /* RETURN 1 on success, 0 on failure.
-     * Note: With a 0 result, the router will shut-down
-     */
-    return 1;
+  int ret = select(fds_vec.size(), &rfds, NULL, NULL, &tv);
+  if (ret == -1) {
+    perror("select()");
+    return 0;
+  } else if (ret) {
+    vector<int>::iterator it;
+    for (uint i = 0; i < fds_vec.size(); ++i) {
+      int fd = fds_vec[i];
 
-} /* -- sr_cpu_input -- */
+      if (!FD_ISSET(fd, &rfds))
+        continue;
+
+      /* Read data from ready file descriptor. */
+      int bytes = read(fd, buf, sizeof(buf));
+      if (bytes <= 0) {
+        perror("read()");
+        return 0;
+      }
+
+      /* Send packet through processing pipeline. */
+      sr_integ_input(sr, buf, bytes, names[i].c_str());
+      break;
+    }
+  } else {
+    /*fprintf(stdout, "timeout reading data\n");*/
+  }
+
+  return 1;
+}
+
 
 /*-----------------------------------------------------------------------------
  * Method: sr_cpu_output(..)
  * Scope: Global
  *
+ * Returns the length of the packet on success, -1 on failure.
  *---------------------------------------------------------------------------*/
 
-int sr_cpu_output(struct sr_instance* sr /* borrowed */,
-                       uint8_t* buf /* borrowed */ ,
-                       unsigned int len,
-                       const char* iface /* borrowed */)
+int sr_cpu_output(struct sr_instance* const sr /* borrowed */,
+                  uint8_t* const buf /* borrowed */ ,
+                  const unsigned int len,
+                  const char* const iface_name /* borrowed */)
 {
-    /* REQUIRES */
-    assert(sr);
-    assert(buf);
-    assert(iface);
+  /* REQUIRES */
+  assert(sr);
+  assert(buf);
+  assert(iface_name);
 
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    fprintf(stderr, "!!! sr_cpu_output(..) (sr_cpu_extension_nf2.c) called while running in cpu mode !!!\n");
-    fprintf(stderr, "!!! you need to implement this function to write to the hardware                !!!\n");
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+  Router::Ptr router = sr->router;
+  InterfaceMap::Ptr if_map = router->dataPlane()->interfaceMap();
+  Interface::Ptr iface = if_map->interface(iface_name);
 
-    assert(0);
-
-    /* Return the length of the packet on success, -1 on failure */
+  // TODO(ms): Really need some real logging here.
+  if (!iface)
     return -1;
-} /* -- sr_cpu_output -- */
+
+  int fd = iface->socketDescriptor();
+  if (fd < 0)
+    return -1;
+
+  int written = write(fd, buf, len);
+  return written;
+
+  return -1;
+}
 
 
 /*-----------------------------------------------------------------------------
