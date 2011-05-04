@@ -22,7 +22,7 @@ ARPCache::entry(const IPv4Addr& ip) const {
 
 void
 ARPCache::entryIs(Entry::Ptr entry) {
-  if (entry == NULL)
+  if (entry == NULL || addr_map_.find(entry->ipAddr()) != end())
     return;
 
   if (entries() >= kMaxEntries) {
@@ -41,6 +41,10 @@ ARPCache::entryIs(Entry::Ptr entry) {
 
   IPv4Addr key = entry->ipAddr();
   addr_map_[key] = entry;
+
+  // Dispatch notification.
+  for (unsigned int i = 0; i < notifiees_.size(); ++i)
+    Ptr::st_cast<Notifiee>(notifiees_[i])->onEntry(entry);
 }
 
 
@@ -56,5 +60,13 @@ ARPCache::entryDel(Entry::Ptr entry) {
 
 void
 ARPCache::entryDel(const IPv4Addr& ip) {
+  if (addr_map_.find(ip) == end())
+    return;
+  Entry::Ptr entry = addr_map_[ip];
+
   addr_map_.erase(ip);
+
+  // Dispatch notification.
+  for (unsigned int i = 0; i < notifiees_.size(); ++i)
+    Ptr::st_cast<Notifiee>(notifiees_[i])->onEntryDel(entry);
 }
