@@ -73,6 +73,10 @@ OSPFTopology::onUpdate() {
 
     /* Resetting topology dirty bit. */
     dirtyIs(false);
+
+    /* Signal notifiee. */
+    if (notifiee_)
+      notifiee_->onDirtyCleared();
   }
 }
 
