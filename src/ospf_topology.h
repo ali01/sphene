@@ -20,7 +20,6 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     return new OSPFTopology(root_node);
   }
 
-  /* Notification support. */
   class NodeReactor : public OSPFNode::Notifiee {
    public:
     typedef Fwk::Ptr<const Notifiee> PtrConst;

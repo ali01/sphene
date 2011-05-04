@@ -28,7 +28,7 @@ OSPFTopology::nodeIs(OSPFNode::Ptr node) {
   if (node_prev != node) {
     nodes_[nd_id] = node;
 
-    /* Subscribing for notifications. */
+    /* Subscribing from notifications. */
     node->notifieeIs(node_reactor_);
 
     /* Setting topology dirty bit. */
@@ -50,7 +50,7 @@ OSPFTopology::nodeDel(const RouterID& router_id) {
   if (node) {
     nodes_.elemDel(router_id);
 
-    /* Unsubscribing for notifications. */
+    /* Unsubscribing from notifications. */
     node->notifieeIs(NULL);
 
     /* Setting topology dirty bit. */
@@ -70,6 +70,8 @@ void
 OSPFTopology::onUpdate() {
   if (dirty()) {
     compute_optimal_spanning_tree();
+
+    /* Resetting topology dirty bit. */
     dirtyIs(false);
   }
 }
