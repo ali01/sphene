@@ -94,6 +94,10 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
   void entryDel(Entry::Ptr entry);
   void entryDel(const IPv4Addr& subnet);
 
+  /* Calls entryDel on all entries of type
+     Entry::kDynamic in the routing table. */
+  void clearDynamic();
+
   /* Iterators. */
   iterator entriesBegin() { return rtable_.begin(); }
   iterator entriesEnd() { return rtable_.end(); }
@@ -106,6 +110,8 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
  private:
   /* Routing table is a linked list. */
   Fwk::Map<IPv4Addr,Entry> rtable_;
+  Fwk::Map<IPv4Addr,Entry> rtable_dynamic_;
+  Fwk::Map<IPv4Addr,Entry> rtable_static_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);
