@@ -32,8 +32,8 @@ class DataPlane : public Fwk::NamedInterface {
   void packetNew(Packet::Ptr pkt, Interface::PtrConst iface);
 
   // Sends outgoing packets.
-  virtual void outputPacketNew(Fwk::Ptr<EthernetPacket const> pkt,
-                               Interface::PtrConst iface) = 0;
+  void outputPacketNew(Fwk::Ptr<EthernetPacket const> pkt,
+                       Interface::PtrConst iface);
 
   InterfaceMap::Ptr interfaceMap() const;
 
