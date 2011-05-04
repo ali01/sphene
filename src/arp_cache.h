@@ -5,6 +5,7 @@
 #include <map>
 
 #include "fwk/locked_interface.h"
+#include "fwk/notifier.h"
 #include "fwk/ptr_interface.h"
 
 #include "ethernet_packet.h"
@@ -13,8 +14,8 @@
 
 /* Thread safety: in a threaded environment, methods of this class must be
    accessed with lockedIs(true) or by using the ScopedLock. */
-class ARPCache : public Fwk::PtrInterface<ARPCache>,
-                 public Fwk::LockedInterface {
+class ARPCache : public Fwk::LockedInterface,
+                 public Fwk::Notifier {
  public:
   typedef Fwk::Ptr<const ARPCache> PtrConst;
   typedef Fwk::Ptr<ARPCache> Ptr;
@@ -62,8 +63,19 @@ class ARPCache : public Fwk::PtrInterface<ARPCache>,
     void operator=(const Entry&);
   };
 
-  typedef std::map<IPv4Addr,Entry::Ptr>::iterator iterator;
-  typedef std::map<IPv4Addr,Entry::Ptr>::const_iterator const_iterator;
+  class Notifiee : public Fwk::Notifiee {
+   public:
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    virtual void onEntry(Entry::Ptr entry) { }
+    virtual void onEntryDel(Entry::Ptr entry) { }
+  };
+
+  typedef std::map<IPv4Addr, Entry::Ptr>::iterator iterator;
+  typedef std::map<IPv4Addr, Entry::Ptr>::const_iterator const_iterator;
+
+  /* Maximum number of entries the cache will hold. */
+  static const size_t kMaxEntries;
 
   static Ptr New() {
     return new ARPCache();
