@@ -62,6 +62,12 @@ class Interface : public Fwk::NamedInterface {
   // Sets the interface type.
   void typeIs(Type type) { type_ = type; }
 
+  // Returns the socket descriptor for this interface.
+  int socketDescriptor() const { return socket_; }
+
+  // Sets the socket descriptor.
+  void socketDescriptorIs(int s) { socket_ = s; }
+
  protected:
   Interface(const std::string& name);
 
@@ -71,6 +77,7 @@ class Interface : public Fwk::NamedInterface {
   IPv4Addr mask_;
   uint32_t speed_;
   Type type_;
+  int socket_;
 
  private:
   Interface(const Interface&);
