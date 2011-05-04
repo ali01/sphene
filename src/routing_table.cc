@@ -114,7 +114,7 @@ RoutingTable::entryDel(const IPv4Addr& subnet) {
 }
 
 void
-RoutingTable::clearDynamic() {
+RoutingTable::clearDynamicEntries() {
   const_iterator it = rtable_dynamic_.begin();
   for(; it != rtable_dynamic_.end(); ++it) {
     IPv4Addr key = it->first;
