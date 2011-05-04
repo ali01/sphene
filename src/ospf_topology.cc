@@ -68,7 +68,10 @@ OSPFTopology::nodeDel(const RouterID& router_id) {
 
 void
 OSPFTopology::onUpdate() {
-  compute_optimal_spanning_tree();
+  if (dirty()) {
+    compute_optimal_spanning_tree();
+    dirtyIs(false);
+  }
 }
 
 /* Implementation of Dijkstra's algorithm. */
