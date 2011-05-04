@@ -64,9 +64,12 @@ using std::string;
 static Fwk::Log::Ptr log_;
 
 static void processing_thread(void* _sr);
+static void read_rtable(struct sr_instance* sr);
+
+#ifdef _CPUMODE_
 static void init_hw_intf_sockets(struct sr_instance* sr);
 static void init_hw_intf(Interface::Ptr iface, int index);
-static void read_rtable(struct sr_instance* sr);
+#endif
 
 
 /*-----------------------------------------------------------------------------
@@ -193,6 +196,7 @@ void sr_integ_hw_setup(struct sr_instance* sr)
 }
 
 
+#ifdef _CPUMODE_
 static void init_hw_intf_sockets(struct sr_instance* const sr) {
   Router::Ptr router = sr->router;
   InterfaceMap::Ptr if_map = router->dataPlane()->interfaceMap();
@@ -240,6 +244,7 @@ static void init_hw_intf(Interface::Ptr iface, const int index) {
 
   iface->socketDescriptorIs(s);
 }
+#endif
 
 
 static void read_rtable(struct sr_instance* const sr) {
