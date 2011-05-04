@@ -27,11 +27,11 @@ class RoutingTableTest : public ::testing::Test {
  protected:
   void SetUp() {
     routing_table_ = RoutingTable::New();
-    eth0_ = RoutingTable::Entry::New();
-    eth1_ = RoutingTable::Entry::New();
-    eth2_ = RoutingTable::Entry::New();
-    eth3_ = RoutingTable::Entry::New();
-    eth4_ = RoutingTable::Entry::New();
+    eth0_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
+    eth1_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
+    eth2_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
+    eth3_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
+    eth4_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
     if_eth0_ = Interface::InterfaceNew("eth0");
     if_eth1_ = Interface::InterfaceNew("eth1");
     if_eth2_ = Interface::InterfaceNew("eth2");
@@ -172,7 +172,8 @@ TEST_F(RoutingTableTest, duplicate) {
   EXPECT_EQ((size_t)1, routing_table_->entries());
 
   // Duplicate the object with the same subnet and gateway.
-  RoutingTable::Entry::Ptr eth0_dup = RoutingTable::Entry::New();
+  RoutingTable::Entry::Ptr eth0_dup =
+    RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
   eth0_dup->subnetIs(eth0_->subnet(), eth0_->subnetMask());
   eth0_dup->gatewayIs(eth0_->gateway());
   eth0_dup->interfaceIs(eth0_->interface());
@@ -191,7 +192,8 @@ TEST_F(RoutingTableTest, updateRoute) {
   routing_table_->entryIs(eth0_);
 
   // Make a new object with an updated gateway.
-  RoutingTable::Entry::Ptr eth0_dup = RoutingTable::Entry::New();
+  RoutingTable::Entry::Ptr eth0_dup =
+    RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
   eth0_dup->subnetIs(eth0_->subnet(), eth0_->subnetMask());
   eth0_dup->gatewayIs("4.2.2.1");
   eth0_dup->interfaceIs(eth0_->interface());

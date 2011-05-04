@@ -147,12 +147,13 @@ void rtable_route_add(struct sr_instance* const sr,
                       const uint32_t mask,
                       Interface::Ptr iface,
                       const int is_static_route) {
-  RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
+  RoutingTable::Entry::Ptr entry =
+    RoutingTable::Entry::New(is_static_route ?
+                             RoutingTable::Entry::kStatic :
+                             RoutingTable::Entry::kDynamic);
   entry->subnetIs(ntohl(dest), ntohl(mask));
   entry->gatewayIs(ntohl(gw));
   entry->interfaceIs(iface);
-  entry->typeIs(is_static_route ?
-                RoutingTable::Entry::kStatic : RoutingTable::Entry::kDynamic);
 
   RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
   {

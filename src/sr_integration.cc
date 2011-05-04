@@ -204,11 +204,11 @@ static void read_rtable(struct sr_instance* sr) {
     }
 
     // Add new routing entry.
-    RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
+    RoutingTable::Entry::Ptr entry =
+      RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
     entry->subnetIs(subnet, mask);
     entry->gatewayIs(gateway);
     entry->interfaceIs(iface);
-    entry->typeIs(RoutingTable::Entry::kStatic);
 
     {
       Fwk::ScopedLock<RoutingTable>lock(rt);
