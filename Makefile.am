@@ -119,6 +119,8 @@ libsr_base_a_SOURCES = \
                        src/getarg.cc \
                        src/gre_packet.cc \
                        src/gre_packet.h \
+                       src/hw_data_plane.cc \
+                       src/hw_data_plane.h \
                        src/icmp_packet.cc \
                        src/icmp_packet.h \
                        src/interface.cc \
