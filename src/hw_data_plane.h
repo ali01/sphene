@@ -28,6 +28,17 @@ class HWDataPlane : public DataPlane {
   }
 
  protected:
+  class ARPCacheReactor : public ARPCache::Notifiee {
+   public:
+    ARPCacheReactor(HWDataPlane* dp);
+    virtual void onEntry(ARPCache::Entry::Ptr entry);
+    virtual void onEntryDel(ARPCache::Entry::Ptr entry);
+
+   protected:
+    HWDataPlane* dp_;
+    Fwk::Log::Ptr log_;
+  };
+
   HWDataPlane(struct sr_instance* sr,
               Fwk::Ptr<RoutingTable> routing_table,
               Fwk::Ptr<ARPCache> arp_cache);
@@ -36,6 +47,7 @@ class HWDataPlane : public DataPlane {
   void operator=(const HWDataPlane&);
 
  private:
+  ARPCacheReactor arp_cache_reactor_;
   Fwk::Log::Ptr log_;
 };
 
