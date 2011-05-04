@@ -20,6 +20,29 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     return new OSPFTopology(root_node);
   }
 
+  class NodeReactor : public OSPFNode::Notifiee {
+   public:
+    typedef Fwk::Ptr<const Notifiee> PtrConst;
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    static Ptr New(OSPFTopology::Ptr _t) {
+      return new NodeReactor(_t);
+    }
+
+    void onNeighbor(const RouterID& id) {}
+    void onNeighborDel(const RouterID& id) {}
+
+   private:
+    NodeReactor(OSPFTopology::Ptr _t) : topology_(_t.ptr()) {}
+
+    /* Data members. */
+    OSPFTopology* topology_; /* Weak ptr to prevent circular reference. */
+
+    /* Operations disallowed. */
+    NodeReactor(const NodeReactor&);
+    void operator=(const NodeReactor&);
+  };
+
   OSPFNode::Ptr node(const RouterID& router_id);
   OSPFNode::PtrConst node(const RouterID& router_id) const;
 
@@ -44,6 +67,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   /* Data members. */
   Fwk::Map<RouterID,OSPFNode> nodes_;
   OSPFNode::Ptr root_node_;
+  NodeReactor::Ptr node_reactor_;
 
   /* Operations disallowed. */
   OSPFTopology(const OSPFTopology&);

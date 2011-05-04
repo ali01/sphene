@@ -2,7 +2,8 @@
 
 #include <queue>
 
-OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node) : root_node_(root_node) {
+OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
+    : root_node_(root_node), node_reactor_(NodeReactor::New(this)) {
   this->nodeIs(root_node_);
 }
 
@@ -23,6 +24,9 @@ OSPFTopology::nodeIs(OSPFNode::Ptr node) {
     return;
 
   nodes_[node->routerID()] = node;
+
+  /* Registering for notifications. */
+  node->notifieeIs(node_reactor_);
 }
 
 void
@@ -39,12 +43,13 @@ OSPFTopology::nodeDel(OSPFNode::Ptr node) {
   }
 
   nodes_.elemDel(node->routerID());
+  node->notifieeIs(NULL);
 }
 
 void
 OSPFTopology::nodeDel(const RouterID& router_id) {
   OSPFNode::Ptr node = this->node(router_id);
-  this->nodeDel(node);
+  nodeDel(node);
 }
 
 void
