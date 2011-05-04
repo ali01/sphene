@@ -34,12 +34,24 @@ RoutingTable::Entry::interfaceIs(Interface::Ptr iface) {
 
 RoutingTable::RoutingTable() { }
 
+RoutingTable::Entry::Ptr
+RoutingTable::entry(const IPv4Addr& subnet) {
+  return rtable_.elem(subnet);
+}
+
+RoutingTable::Entry::PtrConst
+RoutingTable::entry(const IPv4Addr& subnet) const {
+  RoutingTable* self = const_cast<RoutingTable*>(this);
+  return self->entry(subnet);
+}
 
 RoutingTable::Entry::Ptr
 RoutingTable::lpm(const IPv4Addr& dest_ip) {
   Entry::Ptr lpm = NULL;
-  Entry::Ptr entry;
-  for (entry = rtable_.front(); entry; entry = entry->next()) {
+
+  for(const_iterator it = entriesBegin(); it != entriesEnd(); ++it) {
+    Entry::Ptr entry = it->second;
+
     // Routes on disabled interfaces are ignored; packets can't go out them.
     if (!entry->interface()->enabled())
       continue;
@@ -61,12 +73,21 @@ RoutingTable::lpm(const IPv4Addr& dest_ip) const {
 
 void
 RoutingTable::entryIs(Entry::Ptr entry) {
-  Entry::Ptr existing = lpm(entry->subnet());
-  if (existing && entry->subnetMask() == existing->subnetMask()) {
-    // We have an existing routing entry for this subnet; remove it.
-    entryDel(existing);
-  }
+  if (entry == NULL)
+    return;
 
-  // Add the new entry.
-  rtable_.pushFront(entry);
+  rtable_[entry->subnet()] = entry;
+}
+
+void
+RoutingTable::entryDel(Entry::Ptr entry) {
+  if (entry == NULL)
+    return;
+
+  entryDel(entry->subnet());
+}
+
+void
+RoutingTable::entryDel(const IPv4Addr& subnet) {
+  rtable_.elemDel(subnet);
 }

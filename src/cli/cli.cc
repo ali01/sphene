@@ -305,8 +305,10 @@ void cli_show_ip_route() {
 
   // Output each routing table entry.
   Fwk::ScopedLock<RoutingTable> lock(rtable);
-  for (RoutingTable::Entry::Ptr entry = rtable->front();
-       entry; entry = entry->next()) {
+
+  RoutingTable::const_iterator it;
+  for (it = rtable->entriesBegin(); it != rtable->entriesEnd(); ++it) {
+    RoutingTable::Entry::Ptr entry = it->second;
     const string& subnet = entry->subnet();
     const string& mask = entry->subnetMask();
     const string& gateway = entry->gateway();

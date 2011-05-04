@@ -178,8 +178,9 @@ int rtable_route_remove(struct sr_instance* const sr,
   // TODO(ms): I'm not sure if this matches on type (static/dynamic) correctly.
   //   Specifically, what happens when we learn about a route that exists as
   //   static in the routing table? And vice versa?
-  RoutingTable::Entry::Ptr entry;
-  for (entry = rtable->front(); entry; entry = entry->next()) {
+  RoutingTable::const_iterator it;
+  for (it = rtable->entriesBegin(); it != rtable->entriesEnd(); ++it) {
+    RoutingTable::Entry::Ptr entry = it->second;
     if (entry->subnet() == ntohl(dest) &&
         entry->subnetMask() == ntohl(mask) &&
         entry->type() == (is_static ?
@@ -188,9 +189,9 @@ int rtable_route_remove(struct sr_instance* const sr,
       rtable->entryDel(entry);
 
       fprintf(stdout, "Removed route: %s/%s gw %s\n",
-          string(entry->subnet()).c_str(),
-          string(entry->subnetMask()).c_str(),
-          string(entry->gateway()).c_str());
+              string(entry->subnet()).c_str(),
+              string(entry->subnetMask()).c_str(),
+              string(entry->gateway()).c_str());
 
       return 1;
     }
@@ -210,7 +211,9 @@ static void rtable_purge_type(struct sr_instance* const sr,
 
   // Find candidate entries to remove.
   RoutingTable::Entry::Ptr entry;
-  for (entry = rtable->front(); entry; entry = entry->next()) {
+  for (RoutingTable::const_iterator it = rtable->entriesBegin();
+       it != rtable->entriesEnd(); ++it) {
+    entry = it->second;
     if (entry->type() == type)
       remove.push_back(entry);
   }

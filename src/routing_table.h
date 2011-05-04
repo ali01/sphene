@@ -1,8 +1,8 @@
 #ifndef ROUTING_TABLE_H_HE9H7VS9
 #define ROUTING_TABLE_H_HE9H7VS9
 
-#include "fwk/linked_list.h"
 #include "fwk/locked_interface.h"
+#include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
@@ -21,7 +21,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
   typedef Fwk::Ptr<RoutingTable> Ptr;
 
   /* Nested routing table entry class */
-  class Entry : public Fwk::LinkedList<Entry>::Node {
+  class Entry : public Fwk::PtrInterface<Entry> {
    public:
     typedef Fwk::Ptr<const Entry> PtrConst;
     typedef Fwk::Ptr<Entry> Ptr;
@@ -34,6 +34,15 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
     static Ptr New(Type type) {
       return new Entry(type);
     }
+
+    /* RoutingTable supports entry lookup by subnet. To make this safe,
+       the interface of Entry enforces the following equality:
+
+         subnet == subnet & subnet_mask
+
+       For this reason, two entries with equivalent subnets also have
+       equivalent subnet_masks.
+     */
 
     IPv4Addr subnet() const { return subnet_; }
     IPv4Addr subnetMask() const { return subnet_mask_; }
@@ -61,28 +70,42 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
     void operator=(const Entry&);
   };
 
+  /* Iterator types. */
+  typedef Fwk::Map<IPv4Addr,Entry>::const_iterator const_iterator;
+  typedef Fwk::Map<IPv4Addr,Entry>::iterator iterator;
+
   static Ptr New() {
     return new RoutingTable();
   }
 
-  Entry::Ptr lpm(const IPv4Addr& dest_ip);
-  Entry::Ptr front() { return rtable_.front(); }
+  /* Accessors. */
 
+  Entry::Ptr entry(const IPv4Addr& subnet);
+  Entry::PtrConst entry(const IPv4Addr& subnet) const;
+
+  Entry::Ptr lpm(const IPv4Addr& dest_ip);
   Entry::PtrConst lpm(const IPv4Addr& dest_ip) const;
-  Entry::PtrConst front() const { return rtable_.front(); }
+
+  size_t entries() const { return rtable_.size(); }
+
+  /* Mutators. */
 
   void entryIs(Entry::Ptr entry);
-  Entry::Ptr entryDel(Entry::Ptr entry) { return rtable_.del(entry); }
+  void entryDel(Entry::Ptr entry);
+  void entryDel(const IPv4Addr& subnet);
 
-  /* Returns number of entries in routing table. */
-  size_t entries() const { return rtable_.size(); }
+  /* Iterators. */
+  iterator entriesBegin() { return rtable_.begin(); }
+  iterator entriesEnd() { return rtable_.end(); }
+  const_iterator entriesBegin() const { return rtable_.begin(); }
+  const_iterator entriesEnd() const { return rtable_.end(); }
 
  protected:
   RoutingTable();
 
  private:
   /* Routing table is a linked list. */
-  Fwk::LinkedList<Entry> rtable_;
+  Fwk::Map<IPv4Addr,Entry> rtable_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);
