@@ -65,6 +65,9 @@ class ARPCache : public Fwk::PtrInterface<ARPCache>,
   typedef std::map<IPv4Addr,Entry::Ptr>::iterator iterator;
   typedef std::map<IPv4Addr,Entry::Ptr>::const_iterator const_iterator;
 
+  /* Maximum number of entries the cache will hold. */
+  static const size_t kMaxEntries;
+
   static Ptr New() {
     return new ARPCache();
   }

@@ -35,7 +35,7 @@ int arp_cache_static_entry_add(struct sr_instance* const sr,
     cache->entryIs(cache_entry);
   }
 
-  // TODO(ms): Max number of entries.
+  // The oldest entry is evicted. Add always succeeds.
   return 1;
 }
 
