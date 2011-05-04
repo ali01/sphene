@@ -208,34 +208,43 @@ int sr_cpu_input(struct sr_instance* sr)
   }
 
   return 1;
-} /* -- sr_cpu_input -- */
+}
+
 
 /*-----------------------------------------------------------------------------
  * Method: sr_cpu_output(..)
  * Scope: Global
  *
+ * Returns the length of the packet on success, -1 on failure.
  *---------------------------------------------------------------------------*/
 
-int sr_cpu_output(struct sr_instance* sr /* borrowed */,
-                       uint8_t* buf /* borrowed */ ,
-                       unsigned int len,
-                       const char* iface /* borrowed */)
+int sr_cpu_output(struct sr_instance* const sr /* borrowed */,
+                  uint8_t* const buf /* borrowed */ ,
+                  const unsigned int len,
+                  const char* const iface_name /* borrowed */)
 {
-    /* REQUIRES */
-    assert(sr);
-    assert(buf);
-    assert(iface);
+  /* REQUIRES */
+  assert(sr);
+  assert(buf);
+  assert(iface_name);
 
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    fprintf(stderr, "!!! sr_cpu_output(..) (sr_cpu_extension_nf2.c) called while running in cpu mode !!!\n");
-    fprintf(stderr, "!!! you need to implement this function to write to the hardware                !!!\n");
-    fprintf(stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+  Router::Ptr router = sr->router;
+  InterfaceMap::Ptr if_map = router->dataPlane()->interfaceMap();
+  Interface::Ptr iface = if_map->interface(iface_name);
 
-    assert(0);
-
-    /* Return the length of the packet on success, -1 on failure */
+  // TODO(ms): Really need some real logging here.
+  if (!iface)
     return -1;
-} /* -- sr_cpu_output -- */
+
+  int fd = iface->socketDescriptor();
+  if (fd < 0)
+    return -1;
+
+  int written = write(fd, buf, len);
+  return written;
+
+  return -1;
+}
 
 
 /*-----------------------------------------------------------------------------
