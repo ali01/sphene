@@ -31,7 +31,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
       kStatic
     };
 
-    static Ptr New(Type type) {
+    static Ptr New(Type type=kDynamic) {
       return new Entry(type);
     }
 
