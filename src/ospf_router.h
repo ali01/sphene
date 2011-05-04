@@ -103,7 +103,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
       return new TopologyReactor(_r);
     }
 
-    void onDirtyCleared() {}
+    void onDirtyCleared() { router_->rtable_update(); }
 
    private:
     TopologyReactor(OSPFRouter::Ptr _r) : router_(_r.ptr()) {}
@@ -118,6 +118,14 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
 
   /* -- OSPFRouter private member functions. -- */
+
+  /* Uses the optimal spanning tree computed by OSPFTopology to update all
+     entries in the routing table. */
+  void rtable_update();
+
+  /* Adds the subnets connected to DEST to the routing table via NEXT_HOP.
+     Assumes that routing_table_ is already locked. */
+  void rtable_add_dest(OSPFNode::PtrConst next_hop, OSPFNode::PtrConst dest);
 
   /* Processes the LSU advertisements enclosed in PKT, an OSPFLSUPacket
      received from SENDER. This function establishes a bi-directional link in
