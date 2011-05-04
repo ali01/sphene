@@ -23,16 +23,39 @@ OSPFTopology::nodeIs(OSPFNode::Ptr node) {
   if (node == NULL)
     return;
 
-  nodes_[node->routerID()] = node;
+  RouterID nd_id = node->routerID();
+  OSPFNode::Ptr node_prev = nodes_.elem(nd_id);
+  if (node_prev != node) {
+    nodes_[nd_id] = node;
 
-  /* Registering for notifications. */
-  node->notifieeIs(node_reactor_);
+    /* Subscribing for notifications. */
+    node->notifieeIs(node_reactor_);
+
+    /* Setting topology dirty bit. */
+    dirtyIs(true);
+  }
 }
 
 void
 OSPFTopology::nodeDel(OSPFNode::Ptr node) {
   if (node == NULL)
     return;
+
+  nodeDel(node->routerID());
+}
+
+void
+OSPFTopology::nodeDel(const RouterID& router_id) {
+  OSPFNode::Ptr node = nodes_.elem(router_id);
+  if (node) {
+    nodes_.elemDel(router_id);
+
+    /* Unsubscribing for notifications. */
+    node->notifieeIs(NULL);
+
+    /* Setting topology dirty bit. */
+    dirtyIs(true);
+  }
 
   /* Removing the node from the neighbor lists of all neighbors. */
   OSPFNode::Ptr neighbor;
@@ -41,15 +64,6 @@ OSPFTopology::nodeDel(OSPFNode::Ptr node) {
     neighbor = it->second;
     neighbor->neighborDel(node);
   }
-
-  nodes_.elemDel(node->routerID());
-  node->notifieeIs(NULL);
-}
-
-void
-OSPFTopology::nodeDel(const RouterID& router_id) {
-  OSPFNode::Ptr node = this->node(router_id);
-  nodeDel(node);
 }
 
 void
