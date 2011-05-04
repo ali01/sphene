@@ -41,6 +41,7 @@
 #include "control_plane.h"
 #include "data_plane.h"
 #include "ethernet_packet.h"
+#include "hw_data_plane.h"
 #include "interface.h"
 #include "interface_map.h"
 #include "ip_packet.h"
@@ -94,9 +95,12 @@ void sr_integ_init(struct sr_instance* sr)
   ControlPlane::Ptr cp = ControlPlane::ControlPlaneNew();
 
   // Create DataPlane.
-  // TODO(ms): Differentiate based on _CPUMODE_.
+#ifdef _CPUMODE_
+  DataPlane::Ptr dp = HWDataPlane::New(sr, cp->routingTable(), cp->arpCache());
+#else
   DataPlane::Ptr dp =
       SWDataPlane::SWDataPlaneNew(sr, cp->routingTable(), cp->arpCache());
+#endif
 
   // Initialize task manager.
   TaskManager::Ptr tm = TaskManager::New();

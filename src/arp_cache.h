@@ -65,8 +65,6 @@ class ARPCache : public Fwk::LockedInterface,
 
   class Notifiee : public Fwk::Notifiee {
    public:
-    typedef Fwk::Ptr<Notifiee> Ptr;
-
     virtual void onEntry(Entry::Ptr entry) { }
     virtual void onEntryDel(Entry::Ptr entry) { }
   };
