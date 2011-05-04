@@ -1,5 +1,7 @@
 #include "routing_table.h"
 
+#include "interface.h"
+
 /* RoutingTable::Entry */
 
 RoutingTable::Entry::Entry(Type type)
@@ -13,6 +15,20 @@ RoutingTable::Entry::subnetIs(const IPv4Addr& dest_ip,
   subnet_mask_ = subnet_mask;
 }
 
+Interface::PtrConst
+RoutingTable::Entry::interface() const {
+  return interface_;
+}
+
+Interface::Ptr
+RoutingTable::Entry::interface() {
+  return interface_;
+}
+
+void
+RoutingTable::Entry::interfaceIs(Interface::Ptr iface) {
+  interface_ = iface;
+}
 
 /* RoutingTable */
 

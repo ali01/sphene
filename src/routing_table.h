@@ -1,15 +1,15 @@
 #ifndef ROUTING_TABLE_H_HE9H7VS9
 #define ROUTING_TABLE_H_HE9H7VS9
 
-#include <set>
-
 #include "fwk/linked_list.h"
 #include "fwk/locked_interface.h"
 #include "fwk/ptr_interface.h"
-#include "fwk/scoped_lock.h"
 
-#include "ip_packet.h"
-#include "interface.h"
+#include "ipv4_addr.h"
+
+
+/* Forward declarations. */
+class Interface;
 
 
 /* Thread safety: in a threaded environment, methods of this class must be
@@ -38,12 +38,13 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
     IPv4Addr subnet() const { return subnet_; }
     IPv4Addr subnetMask() const { return subnet_mask_; }
     IPv4Addr gateway() const { return gateway_; }
-    Interface::Ptr interface() const { return interface_; }
+    Fwk::Ptr<const Interface> interface() const;
+    Fwk::Ptr<Interface> interface();
     Type type() const { return type_; }
 
     void subnetIs(const IPv4Addr& dest, const IPv4Addr& subnet_mask);
     void gatewayIs(const IPv4Addr& gateway) { gateway_ = gateway; }
-    void interfaceIs(Interface::Ptr iface) { interface_ = iface; }
+    void interfaceIs(Fwk::Ptr<Interface> iface);
 
    protected:
     Entry(Type type);
@@ -52,7 +53,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
     IPv4Addr subnet_;
     IPv4Addr subnet_mask_;
     IPv4Addr gateway_;
-    Interface::Ptr interface_;
+    Fwk::Ptr<Interface> interface_;
     Type type_;
 
     /* Operations disallowed */
