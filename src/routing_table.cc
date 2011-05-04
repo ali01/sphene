@@ -57,7 +57,7 @@ RoutingTable::lpm(const IPv4Addr& dest_ip) {
       continue;
 
     if (entry->subnet() == (dest_ip & entry->subnetMask())) {
-      if (lpm == NULL || entry->subnetMask() > entry->subnetMask())
+      if (lpm == NULL || entry->subnetMask() > lpm->subnetMask())
         lpm = entry;
     }
   }
