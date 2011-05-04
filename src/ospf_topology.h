@@ -49,11 +49,15 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   OSPFNode::Ptr node(const RouterID& router_id);
   OSPFNode::PtrConst node(const RouterID& router_id) const;
 
+  bool dirty() const { return dirty_; }
+
   /* Mutators. */
 
   void nodeIs(OSPFNode::Ptr node);
   void nodeDel(OSPFNode::Ptr node);
   void nodeDel(const RouterID& router_id);
+
+  void dirtyIs(bool status) { dirty_ = status; }
 
   /* Iterators. */
 
@@ -76,6 +80,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   Fwk::Map<RouterID,OSPFNode> nodes_;
   OSPFNode::Ptr root_node_;
   NodeReactor::Ptr node_reactor_;
+  bool dirty_;
 
   /* Operations disallowed. */
   OSPFTopology(const OSPFTopology&);
