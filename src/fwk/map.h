@@ -118,11 +118,11 @@ public:
     map_.clear();
   }
 
-  typename ValueT::Ptr operator[](const KeyT& key) {
+  typename ValueT::Ptr& operator[](const KeyT& key) {
     return map_[key];
   }
 
-  typename ValueT::PtrConst operator[](const KeyT& key) const {
+  const typename ValueT::PtrConst& operator[](const KeyT& key) const {
     return map_[key];
   }
 
