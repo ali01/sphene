@@ -180,6 +180,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      for more details. */
   Fwk::Map<RouterID,LinkedList<NeighborRelationship> > links_staged_;
 
+  /* Instance of reactor to Topology notifications. */
   TopologyReactor::Ptr topology_reactor_;
 
   /* operations disallowed */
