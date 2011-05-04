@@ -3,7 +3,6 @@
 
 #include <ctime>
 
-#include "fwk/base_notifiee.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -27,7 +26,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   }
 
   /* Notification support. */
-  class Notifiee : public Fwk::BaseNotifiee<OSPFNode> {
+  class Notifiee : public Fwk::PtrInterface<Notifiee> {
    public:
     typedef Fwk::Ptr<const Notifiee> PtrConst;
     typedef Fwk::Ptr<Notifiee> Ptr;
@@ -37,7 +36,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
     virtual void onNeighborDel(const RouterID& id) {}
 
    protected:
-    Notifiee(OSPFNode::Ptr notifier) : Fwk::BaseNotifiee<OSPFNode>(notifier) {}
+    Notifiee() {}
 
    private:
     /* Operations disallowed. */
