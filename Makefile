@@ -40,8 +40,8 @@ configure: autoreconf
 ifdef CXX_OPTION
 	@echo "Using clang++: $(CLANGPP_PATH)"
 endif
-	@echo "Running configure..."
-	cd $(BUILD) && ./configure $(CXX_OPTION)
+	@echo "Running ./configure $(OPTS) ..."
+	cd $(BUILD) && ./configure $(OPTS) $(CXX_OPTION)
 
 # Build Concurrency Kit.
 .PHONY: ck

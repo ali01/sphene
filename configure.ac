@@ -24,6 +24,19 @@ AC_ARG_ENABLE(
   [standalone_cli=no])
 AM_CONDITIONAL([STANDALONE_CLI], [test x$standalone_cli = xyes])
 
+# Option to build in "cpu mode" (use NetFPGA).
+AC_ARG_ENABLE(
+  [cpumode],
+  [  --enable-cpumode     Build in CPU mode (use NetFPGA) ],
+  [case "${enableval}" in
+     yes) cpumode=yes ;;
+     no)  cpumode=no ;;
+     *) AC_MSG_ERROR([bad value ${enableval} for --enable-cpumode]) ;;
+   esac],
+  [cpumode=no])
+AM_CONDITIONAL([CPUMODE], [test x$cpumode = xyes])
+
+
 # Determine the operating system.
 AC_MSG_CHECKING([uname -s for detecting host operating system])
 OSNAME=`uname -s`
@@ -49,4 +62,5 @@ AC_OUTPUT
 
 echo
 echo "Building standalone cli: $standalone_cli"
+echo "CPU mode:                $cpumode"
 echo
