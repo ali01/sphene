@@ -11,15 +11,18 @@
 
 /* OSPFRouter */
 
-OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id) :
-  log_(Fwk::Log::LogNew("OSPFRouter")),
-  functor_(this),
-  router_id_(router_id),
-  area_id_(area_id),
-  router_node_(OSPFNode::New(router_id)),
-  interfaces_(OSPFInterfaceMap::New()),
-  topology_(OSPFTopology::New(router_node_)),
-  routing_table_(NULL) {}
+OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id)
+    : log_(Fwk::Log::LogNew("OSPFRouter")),
+      functor_(this),
+      router_id_(router_id),
+      area_id_(area_id),
+      router_node_(OSPFNode::New(router_id)),
+      interfaces_(OSPFInterfaceMap::New()),
+      topology_(OSPFTopology::New(router_node_)),
+      routing_table_(NULL),
+      topology_reactor_(TopologyReactor::New(this)) {
+  topology_->notifieeIs(topology_reactor_);
+}
 
 void
 OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
@@ -158,8 +161,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   } else {
     /* Creating new node and inserting it into the topology database */
-    // TODO(ali): make use of new interface
-    // IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
     node = OSPFNode::New(node_id);
     topology_->nodeIs(node);
   }
@@ -169,10 +170,10 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   node->ageIs(0);
 
   ospf_router_->process_lsu_advertisements(node, pkt);
+  topology_->onUpdate();
 
   // TODO(ali): flood LSU packet.
   // TODO(ali): update the routing table.
-  // TODO(ali): deal with contradicting advertisements.
 }
 
 

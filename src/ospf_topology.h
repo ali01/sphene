@@ -20,19 +20,57 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     return new OSPFTopology(root_node);
   }
 
+  /* Notification support. */
+  class Notifiee : public Fwk::PtrInterface<Notifiee> {
+   public:
+    typedef Fwk::Ptr<const Notifiee> PtrConst;
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    /* Notifications supported. */
+
+    /* Signaled whenever the dirty attribute
+       transitions from TRUE to FALSE. */
+    virtual void onDirtyCleared() {}
+
+   protected:
+    Notifiee() {}
+    virtual ~Notifiee() {}
+
+   private:
+    /* Operations disallowed. */
+    Notifiee(const Notifiee&);
+    void operator=(const Notifiee&);
+  };
+
+  /* Accessors. */
+
   OSPFNode::Ptr node(const RouterID& router_id);
   OSPFNode::PtrConst node(const RouterID& router_id) const;
+
+  Notifiee::PtrConst notifiee() const { return notifiee_; }
+  Notifiee::Ptr notifiee() { return notifiee_; }
+
+  bool dirty() const { return dirty_; }
+
+  /* Mutators. */
 
   void nodeIs(OSPFNode::Ptr node);
   void nodeDel(OSPFNode::Ptr node);
   void nodeDel(const RouterID& router_id);
+
+  void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
+
+  void dirtyIs(bool status) { dirty_ = status; }
+
+  /* Iterators. */
 
   iterator nodesBegin() { return nodes_.begin(); }
   iterator nodesEnd() { return nodes_.end(); }
   const_iterator nodesBegin() const { return nodes_.begin(); }
   const_iterator nodesEnd() const { return nodes_.end(); }
 
-  /* Recomputes shortest-path spanning tree. */
+  /* Signals. */
+  /* onUpdate signal: Recomputes shortest-path spanning tree. */
   void onUpdate();
 
  private:
@@ -41,9 +79,41 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   void compute_optimal_spanning_tree();
   static OSPFNode::Ptr min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map);
 
+  /* Reactor to OSPFNode notifications. */
+  class NodeReactor : public OSPFNode::Notifiee {
+   public:
+    typedef Fwk::Ptr<const Notifiee> PtrConst;
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    static Ptr New(OSPFTopology::Ptr _t) {
+      return new NodeReactor(_t);
+    }
+
+    void onNeighbor(const RouterID& id) { topology_->dirtyIs(true); }
+    void onNeighborDel(const RouterID& id) { topology_->dirtyIs(true); }
+
+   private:
+    NodeReactor(OSPFTopology::Ptr _t) : topology_(_t.ptr()) {}
+
+    /* Data members. */
+    OSPFTopology* topology_; /* Weak ptr to prevent circular reference. */
+
+    /* Operations disallowed. */
+    NodeReactor(const NodeReactor&);
+    void operator=(const NodeReactor&);
+  };
+
   /* Data members. */
+
   Fwk::Map<RouterID,OSPFNode> nodes_;
   OSPFNode::Ptr root_node_;
+  NodeReactor::Ptr node_reactor_;
+
+  /* Singleton notifiee. */
+  Notifiee::Ptr notifiee_;
+
+  /* Dirty bit. */
+  bool dirty_;
 
   /* Operations disallowed. */
   OSPFTopology(const OSPFTopology&);
