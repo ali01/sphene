@@ -20,6 +20,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     return new OSPFTopology(root_node);
   }
 
+  /* Notification support. */
   class NodeReactor : public OSPFNode::Notifiee {
    public:
     typedef Fwk::Ptr<const Notifiee> PtrConst;
@@ -43,19 +44,26 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     void operator=(const NodeReactor&);
   };
 
+  /* Accessors. */
+
   OSPFNode::Ptr node(const RouterID& router_id);
   OSPFNode::PtrConst node(const RouterID& router_id) const;
+
+  /* Mutators. */
 
   void nodeIs(OSPFNode::Ptr node);
   void nodeDel(OSPFNode::Ptr node);
   void nodeDel(const RouterID& router_id);
+
+  /* Iterators. */
 
   iterator nodesBegin() { return nodes_.begin(); }
   iterator nodesEnd() { return nodes_.end(); }
   const_iterator nodesBegin() const { return nodes_.begin(); }
   const_iterator nodesEnd() const { return nodes_.end(); }
 
-  /* Recomputes shortest-path spanning tree. */
+  /* Signals. */
+  /* onUpdate signal: Recomputes shortest-path spanning tree. */
   void onUpdate();
 
  private:
