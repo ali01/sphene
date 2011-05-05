@@ -22,12 +22,12 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     return new OSPFInterfaceMap();
   }
 
-  OSPFInterfaceDesc::PtrConst interfaceDesc(const IPv4Addr& addr) const;
-  OSPFInterfaceDesc::Ptr interfaceDesc(const IPv4Addr& addr);
+  OSPFInterfaceDesc::PtrConst interface(const IPv4Addr& addr) const;
+  OSPFInterfaceDesc::Ptr interface(const IPv4Addr& addr);
 
-  void interfaceDescIs(OSPFInterfaceDesc::Ptr iface_desc);
-  void interfaceDescDel(OSPFInterfaceDesc::Ptr iface_desc);
-  void interfaceDescDel(const IPv4Addr& addr);
+  void interfaceIs(OSPFInterfaceDesc::Ptr iface_desc);
+  void interfaceDel(OSPFInterfaceDesc::Ptr iface_desc);
+  void interfaceDel(const IPv4Addr& addr);
 
   iterator begin() { return interfaces_.begin(); }
   iterator end() { return interfaces_.end(); }
