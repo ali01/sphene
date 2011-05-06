@@ -23,9 +23,9 @@ OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
       router_node_(OSPFNode::New(router_id)),
       interfaces_(OSPFInterfaceMap::New()),
       topology_(OSPFTopology::New(router_node_)),
+      topology_reactor_(TopologyReactor::New(this)),
       routing_table_(rtable),
-      control_plane_(cp.ptr()),
-      topology_reactor_(TopologyReactor::New(this)) {
+      control_plane_(cp.ptr()) {
   topology_->notifieeIs(topology_reactor_);
 }
 

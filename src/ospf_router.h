@@ -183,6 +183,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFNode> router_node_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
+  TopologyReactor::Ptr topology_reactor_; /* Reactor: Topology notifications */
+
+  /* External references. */
   Fwk::Ptr<RoutingTable> routing_table_;
   ControlPlane* control_plane_; /* Weak pointer prevents circular references */
 
@@ -192,9 +195,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      contradicting link-state advertisements. Refer to the PWOSPF specification
      for more details. */
   Fwk::Map<RouterID,LinkedList<NeighborRelationship> > links_staged_;
-
-  /* Instance of reactor to Topology notifications. */
-  TopologyReactor::Ptr topology_reactor_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);
