@@ -419,7 +419,7 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(ntohl(src));
   ip_pkt->dstIs(ntohl(dest));
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
 
   // Copy in data.
   memcpy(ip_pkt->data() + IPPacket::kHeaderSize, payload, len);

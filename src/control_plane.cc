@@ -490,8 +490,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
-  // TODO(ms): Any reason to pick a better default?
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
 
   // ICMP subtype packet.
   // Cannot use a direct static cast here because we need to call the subtype
@@ -577,7 +576,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
 
   // ICMP subtype packet.
   ICMPPacket::Ptr icmp_pkt = Ptr::st_cast<ICMPPacket>(ip_pkt->payload());
@@ -658,7 +657,7 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(tunnel_r_entry->interface()->ip());
   ip_pkt->dstIs(tunnel->remote());
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
   ip_pkt->checksumReset();
 
   // Output new packet.
