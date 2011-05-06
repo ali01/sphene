@@ -239,6 +239,13 @@ OSPFRouter::rtable_update() {
 void
 OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
                             OSPFNode::PtrConst dest) {
+  RouterID next_hop_id = next_hop->routerID();
+  OSPFInterface::Ptr iface = interfaces_->interface(next_hop_id);
+  if (iface == NULL) {
+    DLOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
+    return;
+  }
+
   OSPFNode::const_iterator it;
   for (it = dest->neighborsBegin(); it != dest->neighborsEnd(); ++it) {
     OSPFNode::Ptr neighbor = it->second;
@@ -251,16 +258,10 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     IPv4Addr nbr_subnet = dest->neighborSubnet(nbr_id);
     IPv4Addr nbr_subnet_mask = dest->neighborSubnetMask(nbr_id);
 
-    /* Setting entry's subnet and subnet mask. */
+    /* Setting entry's subnet, subnet mask, outgoing interface, and gateway. */
     RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
     entry->subnetIs(nbr_subnet, nbr_subnet_mask);
-
-    /* Setting entry's outgoing interface and gateway. */
-    RouterID next_hop_id = next_hop->routerID();
-    OSPFInterface::Ptr iface = interfaces_->interface(next_hop_id);
     entry->interfaceIs(iface->interface());
-
-    /* Setting entry's gateway. */
     entry->gatewayIs(iface->neighborGateway(next_hop_id));
 
     routing_table_->entryIs(entry);
