@@ -83,6 +83,7 @@ class OSPFHelloPacket : public OSPFPacket {
   typedef Fwk::Ptr<OSPFHelloPacket> Ptr;
 
   static const IPv4Addr kBroadcastAddr;
+  static const size_t kPacketSize;
 
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFHelloPacket(buffer, buffer_offset);
@@ -122,6 +123,9 @@ class OSPFLSUPacket : public OSPFPacket {
  public:
   typedef Fwk::Ptr<const OSPFLSUPacket> PtrConst;
   typedef Fwk::Ptr<OSPFLSUPacket> Ptr;
+
+  static const size_t kHeaderSize;
+  static const size_t kAdvSize;
 
   /* OSPFLSUPacket factory constructor. */
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
