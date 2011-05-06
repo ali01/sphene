@@ -180,6 +180,10 @@ void HWDataPlane::initializeInterface(Interface::Ptr iface) {
        << " as " << iface->name();
 
   int s = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+  if (s < 0) {
+    perror("socket()");
+    exit(1);
+  }
 
   struct ifreq ifr;
   bzero(&ifr, sizeof(struct ifreq));
