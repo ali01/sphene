@@ -133,6 +133,7 @@ class OSPFLSUPacket : public OSPFPacket {
 
   uint16_t ttl() const;
   void ttlIs(uint16_t ttl);
+  void ttlDec(uint16_t delta);
 
   uint32_t advCount() const;
   void advCountIs(uint32_t count);

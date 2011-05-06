@@ -276,6 +276,11 @@ OSPFLSUPacket::ttlIs(uint16_t ttl) {
   ospf_lsu_hdr_->ttl = htons(ttl);
 }
 
+void
+OSPFLSUPacket::ttlDec(uint16_t delta) {
+  ttlIs(ttl() - delta);
+}
+
 uint32_t
 OSPFLSUPacket::advCount() const {
   return ntohl(ospf_lsu_hdr_->adv_count);
