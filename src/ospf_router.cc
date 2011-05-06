@@ -175,7 +175,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   topology_->onUpdate();
 
   // TODO(ali): flood LSU packet.
-  // TODO(ali): update the routing table.
 }
 
 
@@ -242,7 +241,7 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
   RouterID next_hop_id = next_hop->routerID();
   OSPFInterface::Ptr iface = interfaces_->interface(next_hop_id);
   if (iface == NULL) {
-    DLOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
+    ELOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
     return;
   }
 
