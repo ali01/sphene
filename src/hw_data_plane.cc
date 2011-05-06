@@ -172,14 +172,12 @@ void HWDataPlane::initializeInterface(Interface::Ptr iface) {
     return;
 
   // Translate "ethX" to "nf2cX".
-  char name_prefix[iface->name().size()];
-  unsigned int index;
-  sscanf(iface->name().c_str(), "%s%d", name_prefix, &index);
+  unsigned int index = iface_map_->interfaces() - 1;
   char iface_name[32] = "nf2c";
   sprintf(&(iface_name[4]), "%i", index);
 
-  DLOG << "Initializing hardware interface " << iface->name()
-       << " as " << iface_name;
+  DLOG << "Initializing hardware interface " << iface_name
+       << " as " << iface->name();
 
   int s = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
