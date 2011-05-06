@@ -251,12 +251,16 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     IPv4Addr nbr_subnet = dest->neighborSubnet(nbr_id);
     IPv4Addr nbr_subnet_mask = dest->neighborSubnetMask(nbr_id);
 
+    /* Setting entry's subnet and subnet mask. */
     RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
     entry->subnetIs(nbr_subnet, nbr_subnet_mask);
 
-    // TODO(ali): set entry's gateway and interface.
+    /* Setting entry's outgoing interface. */
+    OSPFInterface::Ptr iface = interfaces_->interface(next_hop->routerID());
+    entry->interfaceIs(iface->interface());
+
+    // TODO(ali): set entry's gateway
     // entry->gatewayIs()
-    // entry->interfaceIs()
 
     routing_table_->entryIs(entry);
   }
