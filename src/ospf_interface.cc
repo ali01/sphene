@@ -28,6 +28,15 @@ OSPFInterface::neighbor(const RouterID& router_id) const {
 }
 
 IPv4Addr
+OSPFInterface::neighborGateway(const RouterID& router_id) const {
+  OSPFGateway::PtrConst nbr = neighbors_.elem(router_id);
+  if (nbr)
+    return nbr->gateway();
+
+  return IPv4Addr::kZero;
+}
+
+IPv4Addr
 OSPFInterface::neighborSubnet(const RouterID& router_id) const {
   OSPFGateway::PtrConst nbr = neighbors_.elem(router_id);
   if (nbr)

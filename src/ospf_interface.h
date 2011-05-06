@@ -53,6 +53,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   OSPFNode::Ptr neighbor(const RouterID& router_id);
   OSPFNode::PtrConst neighbor(const RouterID& router_id) const;
 
+  IPv4Addr neighborGateway(const RouterID& router_id) const;
   IPv4Addr neighborSubnet(const RouterID& router_id) const;
   IPv4Addr neighborSubnetMask(const RouterID& router_id) const;
 
