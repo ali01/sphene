@@ -25,6 +25,26 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   static Ptr New(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
+  /* Notification support. */
+  class Notifiee : public Fwk::PtrInterface<Notifiee> {
+   public:
+    typedef Fwk::Ptr<const Notifiee> PtrConst;
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    /* Notifications supported. */
+    virtual void onNeighbor(OSPFInterface::Ptr iface, const RouterID& id) {}
+    virtual void onNeighborDel(OSPFInterface::Ptr iface, const RouterID& id) {}
+
+   protected:
+    Notifiee() {}
+    virtual ~Notifiee() {}
+
+   private:
+    /* Operations disallowed. */
+    Notifiee(const Notifiee&);
+    void operator=(const Notifiee&);
+  };
+
   /* Accessors. */
 
   Fwk::Ptr<const Interface> interface() const;
@@ -36,6 +56,9 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   IPv4Addr neighborSubnet(const RouterID& router_id) const;
   IPv4Addr neighborSubnetMask(const RouterID& router_id) const;
 
+  Notifiee::PtrConst notifiee() const { return notifiee_; }
+  Notifiee::Ptr notifiee() { return notifiee_; }
+
   /* Mutators. */
 
   void neighborIs(OSPFNode::Ptr nb,
@@ -43,6 +66,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
                   const IPv4Addr& subnet_mask);
   void neighborDel(OSPFNode::Ptr nb);
   void neighborDel(const RouterID& router_id);
+  void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
   /* Iterators. */
 
@@ -66,6 +90,9 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
      become a problem, this can be optimized away by defining custom
      iterators. */
   Fwk::Map<RouterID,OSPFNode> neighbor_nodes_;
+
+  /* Singleton notifiee. */
+  Notifiee::Ptr notifiee_;
 
   /* Operations disallowed. */
   OSPFInterface(const OSPFInterface&);

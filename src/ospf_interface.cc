@@ -64,6 +64,9 @@ OSPFInterface::neighborIs(OSPFNode::Ptr nb,
     /* Adding to OSPFNeighbor pointer map. */
     OSPFNeighbor::Ptr ospf_nbr = OSPFNeighbor::New(nb, subnet, subnet_mask);
     neighbors_[nd_id] = ospf_nbr;
+
+    /* Signaling notifiee. */
+    notifiee_->onNeighbor(this, nd_id);
   }
 }
 
@@ -80,4 +83,7 @@ OSPFInterface::neighborDel(const RouterID& router_id) {
   /* Deleting from both maps. */
   neighbors_.elemDel(router_id);
   neighbor_nodes_.elemDel(router_id);
+
+  /* Signaling notifiee. */
+  notifiee_->onNeighborDel(this, router_id);
 }
