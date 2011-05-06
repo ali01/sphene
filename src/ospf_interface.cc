@@ -3,12 +3,12 @@
 #include "interface.h"
 
 OSPFInterface::Ptr
-OSPFInterface::New(Fwk::Ptr<const Interface> iface, uint16_t helloint) {
+OSPFInterface::New(Fwk::Ptr<const Interface> iface, Seconds helloint) {
   return new OSPFInterface(iface, helloint);
 }
 
 OSPFInterface::OSPFInterface(Interface::PtrConst iface,
-                             uint16_t helloint)
+                             Seconds helloint)
     : iface_(iface), helloint_(helloint) {}
 
 Interface::PtrConst

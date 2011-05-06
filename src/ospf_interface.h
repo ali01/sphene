@@ -23,7 +23,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   typedef Fwk::Map<RouterID,OSPFNode>::const_iterator
     const_iterator;
 
-  static Ptr New(Fwk::Ptr<const Interface> iface, uint16_t helloint);
+  static Ptr New(Fwk::Ptr<const Interface> iface, Seconds helloint);
 
   /* Notification support. */
   class Notifiee : public Fwk::PtrInterface<Notifiee> {
@@ -78,11 +78,11 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   const_iterator neighborsEnd() const { return neighbor_nodes_.end(); }
 
  private:
-  OSPFInterface(Fwk::Ptr<const Interface> iface, uint16_t helloint);
+  OSPFInterface(Fwk::Ptr<const Interface> iface, Seconds helloint);
 
   /* Data members. */
   Fwk::Ptr<const Interface> iface_;
-  uint16_t helloint_;
+  Seconds helloint_;
 
   /* Map of all neighbors directly attached to this router. */
   Fwk::Map<RouterID,OSPFGateway> neighbors_;
