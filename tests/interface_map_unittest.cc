@@ -9,6 +9,23 @@
 using std::string;
 
 
+// Test reactor class that counts the number of entries in the map.
+class InterfaceMapReactor : public InterfaceMap::Notifiee {
+ public:
+  typedef Fwk::Ptr<InterfaceMapReactor> Ptr;
+  InterfaceMapReactor() : count_(0) { }
+
+  static Ptr New() { return new InterfaceMapReactor(); }
+
+  virtual void onInterface(Interface::Ptr iface) { ++count_; }
+  virtual void onInterfaceDel(Interface::Ptr iface) { --count_; }
+  size_t interfaces() { return count_; }
+
+ private:
+  size_t count_;
+};
+
+
 class InterfaceMapTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
@@ -81,4 +98,33 @@ TEST_F(InterfaceMapTest, Delete) {
   EXPECT_EQ((size_t)0, map_->interfaces());
   EXPECT_EQ(null, map_->interface(eth1_->name()));
   EXPECT_EQ(null, map_->interfaceAddr(eth1_->ip()));
+}
+
+
+TEST_F(InterfaceMapTest, reactor) {
+  // Create a reactor.
+  InterfaceMapReactor::Ptr reactor = InterfaceMapReactor::New();
+  reactor->notifierIs(map_);
+
+  // Map is initially empty.
+  EXPECT_EQ((size_t)0, reactor->interfaces());
+
+  // Insert interfaces.
+  map_->interfaceIs(eth0_);
+  EXPECT_EQ((size_t)1, reactor->interfaces());
+  map_->interfaceIs(eth1_);
+  EXPECT_EQ((size_t)2, reactor->interfaces());
+
+  // Check that the reactor is called only when a *new* interface is added.
+  map_->interfaceIs(eth0_);
+  map_->interfaceIs(eth1_);
+  EXPECT_EQ((size_t)2, reactor->interfaces());
+
+  // Remove interfaces.
+  map_->interfaceDel(eth0_);
+  EXPECT_EQ((size_t)1, reactor->interfaces());
+  map_->interfaceDel(eth1_);
+  EXPECT_EQ((size_t)0, reactor->interfaces());
+  map_->interfaceDel(eth1_);
+  EXPECT_EQ((size_t)0, reactor->interfaces());
 }

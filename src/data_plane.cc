@@ -21,12 +21,12 @@ DataPlane::DataPlane(const std::string& name,
                      ARPCache::Ptr arp_cache)
     : Fwk::NamedInterface(name),
       log_(Fwk::Log::LogNew(name)),
-      functor_(this),
       iface_map_(InterfaceMap::InterfaceMapNew()),
       routing_table_(routing_table),
       arp_cache_(arp_cache),
       cp_(NULL),
-      sr_(sr) { }
+      sr_(sr),
+      functor_(this) { }
 
 
 void DataPlane::packetNew(Packet::Ptr pkt,
