@@ -111,4 +111,27 @@ class IPPacket : public Packet {
   struct ip_hdr* ip_hdr_;
 };
 
+template <typename PacketBuffer>
+inline uint16_t
+IPPacket::compute_cksum(const PacketBuffer* pkt, unsigned int len) {
+  uint32_t sum;
+  const uint8_t* buffer = (const uint8_t*)pkt;
+
+  for (sum = 0; len >= 2; buffer += 2, len -= 2)
+    sum += buffer[0] << 8 | buffer[1];
+
+  if (len > 0)
+    sum += buffer[0] << 8;
+
+  while (sum > 0xFFFF)
+    sum = (sum >> 16) + (sum & 0xFFFF);
+
+  sum = ~sum;
+
+  if (sum == 0)
+    sum = 0xFFFF;
+
+  return sum;
+}
+
 #endif
