@@ -4,6 +4,9 @@
 
 /* OSPFInterfaceMap */
 
+OSPFInterfaceMap::OSPFInterfaceMap()
+    : iface_reactor_(InterfaceReactor::New(this)) {}
+
 OSPFInterface::PtrConst
 OSPFInterfaceMap::interface(const IPv4Addr& addr) const {
   OSPFInterfaceMap* self = const_cast<OSPFInterfaceMap*>(this);
