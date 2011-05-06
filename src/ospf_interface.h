@@ -49,6 +49,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   Fwk::Ptr<const Interface> interface() const;
   Seconds helloint() const { return helloint_; }
+  Seconds latestHelloAge() const { return time(NULL) - latest_hello_; }
 
   OSPFNode::Ptr neighbor(const RouterID& router_id);
   OSPFNode::PtrConst neighbor(const RouterID& router_id) const;
@@ -61,6 +62,8 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   Notifiee::Ptr notifiee() { return notifiee_; }
 
   /* Mutators. */
+
+  void latestHelloAgeIs(Seconds age);
 
   void neighborIs(OSPFNode::Ptr nb,
                   const IPv4Addr& gateway,
@@ -83,6 +86,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   /* Data members. */
   Fwk::Ptr<const Interface> iface_;
   Seconds helloint_;
+  time_t latest_hello_;
 
   /* Map of all neighbors directly attached to this router. */
   Fwk::Map<RouterID,OSPFGateway> neighbors_;

@@ -9,7 +9,7 @@ OSPFInterface::New(Fwk::Ptr<const Interface> iface, Seconds helloint) {
 
 OSPFInterface::OSPFInterface(Interface::PtrConst iface,
                              Seconds helloint)
-    : iface_(iface), helloint_(helloint) {}
+    : iface_(iface), helloint_(helloint), latest_hello_(0) {}
 
 Interface::PtrConst
 OSPFInterface::interface() const {
@@ -52,6 +52,11 @@ OSPFInterface::neighborSubnetMask(const RouterID& router_id) const {
     return nbr->subnetMask();
 
   return IPv4Addr::kMax;
+}
+
+void
+OSPFInterface::latestHelloAgeIs(Seconds age) {
+  latest_hello_ = time(NULL) - age.value();
 }
 
 void
