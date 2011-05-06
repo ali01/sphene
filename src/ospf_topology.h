@@ -47,6 +47,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   OSPFNode::Ptr node(const RouterID& router_id);
   OSPFNode::PtrConst node(const RouterID& router_id) const;
 
+  OSPFNode::Ptr nextHop(const RouterID& router_id);
+  OSPFNode::PtrConst nextHop(const RouterID& router_id) const;
+
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 

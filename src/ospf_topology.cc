@@ -18,6 +18,32 @@ OSPFTopology::node(const RouterID& router_id) const {
   return self->node(router_id);
 }
 
+OSPFNode::Ptr
+OSPFTopology::nextHop(const RouterID& router_id) {
+  OSPFNode::Ptr next_hop = NULL;
+
+  OSPFNode::Ptr nd = node(router_id);
+  for (;;) {
+    if (nd == NULL)
+      break;
+
+    if (nd->prev() == root_node_) {
+      next_hop = nd;
+      break;
+    }
+
+    nd = nd->prev();
+  }
+
+  return next_hop;
+}
+
+OSPFNode::PtrConst
+OSPFTopology::nextHop(const RouterID& router_id) const {
+  OSPFTopology* self = const_cast<OSPFTopology*>(this);
+  return self->nextHop(router_id);
+}
+
 void
 OSPFTopology::nodeIs(OSPFNode::Ptr node) {
   if (node == NULL)

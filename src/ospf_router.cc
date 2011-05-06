@@ -1,5 +1,7 @@
 #include "ospf_router.h"
 
+#include "fwk/scoped_lock.h"
+
 #include "interface.h"
 #include "ip_packet.h"
 #include "ospf_interface_map.h"
@@ -210,6 +212,55 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 }
 
 /* OSPFRouter private member functions */
+
+void
+OSPFRouter::rtable_update() {
+  Fwk::ScopedLock<RoutingTable> lock(routing_table_);
+
+  /* Clear all dynamic entries in the routing table
+     before inserting the new ones. */
+  routing_table_->clearDynamicEntries();
+
+  OSPFNode::PtrConst next_hop, dest;
+  OSPFTopology::const_iterator it;
+  for (it = topology_->nodesBegin(); it != topology_->nodesEnd(); ++it) {
+    RouterID node_id = it->first;
+
+    next_hop = topology_->nextHop(node_id);
+    if (next_hop == NULL)
+      continue;
+
+    dest = it->second;
+    rtable_add_dest(next_hop, dest);
+  }
+}
+
+/* Function assumes that routing_table_ is already locked. */
+void
+OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
+                            OSPFNode::PtrConst dest) {
+  OSPFNode::const_iterator it;
+  for (it = dest->neighborsBegin(); it != dest->neighborsEnd(); ++it) {
+    OSPFNode::Ptr neighbor = it->second;
+    if (dest->prev() == NULL || dest->prev() == neighbor) {
+      /* Don't add the subnet through which we are connected to DEST. */
+      continue;
+    }
+
+    RouterID nbr_id = neighbor->routerID();
+    IPv4Addr nbr_subnet = dest->neighborSubnet(nbr_id);
+    IPv4Addr nbr_subnet_mask = dest->neighborSubnetMask(nbr_id);
+
+    RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
+    entry->subnetIs(nbr_subnet, nbr_subnet_mask);
+
+    // TODO(ali): set entry's gateway and interface.
+    // entry->gatewayIs()
+    // entry->interfaceIs()
+
+    routing_table_->entryIs(entry);
+  }
+}
 
 void
 OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,

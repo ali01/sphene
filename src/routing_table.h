@@ -96,7 +96,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
 
   /* Calls entryDel on all entries of type
      Entry::kDynamic in the routing table. */
-  void clearDynamic();
+  void clearDynamicEntries();
 
   /* Iterators. */
   iterator entriesBegin() { return rtable_.begin(); }

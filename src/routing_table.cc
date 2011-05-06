@@ -71,6 +71,9 @@ RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   return self->lpm(dest_ip);
 }
 
+// TODO(ali): possible optimization - ignore ENTRY if it has the same
+//   gateway as an existing entry but has a more specific subnet (i.e. a
+//   greater subnet mask).
 void
 RoutingTable::entryIs(Entry::Ptr entry) {
   if (entry == NULL)
@@ -114,7 +117,7 @@ RoutingTable::entryDel(const IPv4Addr& subnet) {
 }
 
 void
-RoutingTable::clearDynamic() {
+RoutingTable::clearDynamicEntries() {
   const_iterator it = rtable_dynamic_.begin();
   for(; it != rtable_dynamic_.end(); ++it) {
     IPv4Addr key = it->first;
