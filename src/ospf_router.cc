@@ -311,6 +311,23 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   }
 }
 
+void
+OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
+  RouterID sender_id = pkt->routerID();
+
+  OSPFInterfaceMap::const_iterator if_it;
+  for (if_it = interfaces_->begin(); if_it != interfaces_->end(); ++if_it) {
+    OSPFInterface::PtrConst iface = if_it->second;
+    OSPFInterface::const_iterator nbr_it = iface->neighborsBegin();
+    for (; nbr_it != iface->neighborsEnd(); ++nbr_it) {
+      OSPFNode::Ptr nbr = nbr_it->second;
+      RouterID nbr_id = nbr->routerID();
+      if (nbr_id != sender_id)
+        send_pkt_to_neighbor(nbr_id, pkt);
+    }
+  }
+}
+
 OSPFRouter::NeighborRelationship::Ptr
 OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
                        const RouterID& adv_nb_id) {
