@@ -42,8 +42,9 @@ class IPPacket : public Packet {
     kOSPF    = 0x59
   };
 
-  static const size_t kHeaderSize;
   static const uint8_t kDefaultTTL = 64;
+  static const size_t kHeaderSize;
+  static const IPVersion kVersion = 4;
 
   static Ptr IPPacketNew(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);

@@ -25,8 +25,9 @@ struct ip_hdr {
 } __attribute__((packed));
 
 /* Static members. */
-const size_t IPPacket::kHeaderSize = sizeof(struct ip_hdr);
 const uint8_t IPPacket::kDefaultTTL;
+const size_t IPPacket::kHeaderSize = sizeof(struct ip_hdr);
+const IPVersion IPPacket::kVersion;
 
 /* IPPacket */
 
