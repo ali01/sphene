@@ -27,8 +27,10 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   static const uint16_t kDefaultHelloInterval = 10;
 
-  static Ptr New(const RouterID& router_id, const AreaID& area_id) {
-    return new OSPFRouter(router_id, area_id);
+  static Ptr New(const RouterID& router_id,
+                 const AreaID& area_id,
+                 Fwk::Ptr<RoutingTable> rtable) {
+    return new OSPFRouter(router_id, area_id, rtable);
   }
 
   // TODO(ali): perhaps should take OSPFPacket instead of Packet.
@@ -43,10 +45,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<const RoutingTable> routingTable() const;
   Fwk::Ptr<RoutingTable> routingTable();
 
-  void routingTableIs(Fwk::Ptr<RoutingTable> rtable);
-
  protected:
-  OSPFRouter(const RouterID& router_id, const AreaID& area_id);
+  OSPFRouter(const RouterID& router_id, const AreaID& area_id,
+             Fwk::Ptr<RoutingTable> rtable);
 
  private:
   /* Nested double-dispatch Packet::Functor. */

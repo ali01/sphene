@@ -13,7 +13,8 @@
 
 /* OSPFRouter */
 
-OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id)
+OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
+                       RoutingTable::Ptr rtable)
     : log_(Fwk::Log::LogNew("OSPFRouter")),
       functor_(this),
       router_id_(router_id),
@@ -21,7 +22,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id)
       router_node_(OSPFNode::New(router_id)),
       interfaces_(OSPFInterfaceMap::New()),
       topology_(OSPFTopology::New(router_node_)),
-      routing_table_(NULL),
+      routing_table_(rtable),
       topology_reactor_(TopologyReactor::New(this)) {
   topology_->notifieeIs(topology_reactor_);
 }
@@ -50,11 +51,6 @@ OSPFRouter::routingTable() const {
 RoutingTable::Ptr
 OSPFRouter::routingTable() {
   return routing_table_;
-}
-
-void
-OSPFRouter::routingTableIs(RoutingTable::Ptr rtable) {
-  routing_table_ = rtable;
 }
 
 /* OSPFRouter::PacketFunctor */
