@@ -28,6 +28,9 @@ class InterfaceMap : public Fwk::LockedInterface,
     virtual void onInterfaceDel(Interface::Ptr iface) { }
   };
 
+  // Maximum number of interfaces in map.
+  static const size_t kMaxInterfaces;
+
   static Ptr InterfaceMapNew() {
     return new InterfaceMap();
   }
