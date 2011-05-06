@@ -121,12 +121,12 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
     IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-    IPv4Addr neighbor_addr = ip_pkt->src();
+    IPv4Addr gateway = ip_pkt->src();
     IPv4Addr subnet_mask = pkt->subnetMask();
-    IPv4Addr subnet = neighbor_addr & subnet_mask;
+    IPv4Addr subnet = gateway & subnet_mask;
 
     neighbor = OSPFNode::New(neighbor_id);
-    ifd->neighborIs(neighbor, subnet, subnet_mask);
+    ifd->neighborIs(neighbor, gateway, subnet, subnet_mask);
 
     // TODO(ali): this may need to be a deep copy of neighbor.
     router_node_->neighborIs(neighbor, subnet, subnet_mask);

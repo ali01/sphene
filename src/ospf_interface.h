@@ -5,7 +5,7 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
-#include "ospf_neighbor.h"
+#include "ospf_gateway.h"
 #include "ospf_node.h"
 #include "ospf_types.h"
 #include "time_types.h"
@@ -62,6 +62,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   /* Mutators. */
 
   void neighborIs(OSPFNode::Ptr nb,
+                  const IPv4Addr& gateway,
                   const IPv4Addr& subnet,
                   const IPv4Addr& subnet_mask);
   void neighborDel(OSPFNode::Ptr nb);
@@ -83,7 +84,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   uint16_t helloint_;
 
   /* Map of all neighbors directly attached to this router. */
-  Fwk::Map<RouterID,OSPFNeighbor> neighbors_;
+  Fwk::Map<RouterID,OSPFGateway> neighbors_;
 
   /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
      OSPFNeighbor objects). Used to provide iterators. If space constraints
