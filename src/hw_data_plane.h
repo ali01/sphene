@@ -8,6 +8,7 @@
 #include "arp_cache.h"
 #include "packet.h"
 #include "data_plane.h"
+#include "interface_map.h"
 
 class ARPPacket;
 class EthernetPacket;
@@ -40,6 +41,17 @@ class HWDataPlane : public DataPlane {
     Fwk::Log::Ptr log_;
   };
 
+  class InterfaceMapReactor : public InterfaceMap::Notifiee {
+   public:
+    InterfaceMapReactor(HWDataPlane* dp);
+    virtual void onInterface(Fwk::Ptr<Interface> iface);
+    virtual void onInterfaceDel(Fwk::Ptr<Interface> iface);
+
+   protected:
+    HWDataPlane* dp_;
+    Fwk::Log::Ptr log_;
+  };
+
   HWDataPlane(struct sr_instance* sr,
               Fwk::Ptr<RoutingTable> routing_table,
               Fwk::Ptr<ARPCache> arp_cache);
@@ -53,9 +65,15 @@ class HWDataPlane : public DataPlane {
                             const EthernetAddr& mac,
                             const IPv4Addr& ip,
                             unsigned int index);
+  void writeHWIPFilterTable();
+  void writeHWIPFilterTableEntry(struct nf2device* nf2,
+                                 const IPv4Addr& ip,
+                                 unsigned int index);
+  void initializeInterface(Fwk::Ptr<Interface> iface);
 
  private:
   ARPCacheReactor arp_cache_reactor_;
+  InterfaceMapReactor interface_map_reactor_;
   Fwk::Log::Ptr log_;
 };
 
