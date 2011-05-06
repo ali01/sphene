@@ -172,7 +172,11 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   ospf_router_->process_lsu_advertisements(node, pkt);
   topology_->onUpdate();
 
-  // TODO(ali): flood LSU packet.
+  if (pkt->ttl() > 1) {
+    pkt->ttlDec(1);
+    pkt->checksumReset();
+    ospf_router_->flood_lsu_packet(pkt);
+  }
 }
 
 
