@@ -169,7 +169,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   }
 
   // Outgoing interface.
-  Interface::Ptr out_iface = r_entry->interface();
+  Interface::PtrConst out_iface = r_entry->interface();
   if (out_iface->type() == Interface::kVirtual) {
     // Let ControlPlane deal with sending out virtual interfaces.
     dp_->controlPlane()->outputPacketNew(pkt);

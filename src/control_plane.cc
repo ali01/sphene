@@ -90,7 +90,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   pkt->checksumReset();
 
   // Outgoing interface.
-  Interface::Ptr out_iface = r_entry->interface();
+  Interface::PtrConst out_iface = r_entry->interface();
   DLOG << "  outgoing interface: " << out_iface->name();
 
   if (out_iface->type() == Interface::kVirtual) {
@@ -329,7 +329,7 @@ void ControlPlane::PacketFunctor::operator()(UnknownPacket* const pkt,
 
 void
 ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
-                                             Interface::Ptr out_iface,
+                                             Interface::PtrConst out_iface,
                                              IPPacket::Ptr pkt) {
   // Do we already have a packet queue for this next hop in the arp queue?
   ARPQueue::Entry::Ptr entry = arp_queue_->entry(next_hop_ip);
@@ -470,7 +470,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   }
 
   // Outgoing interface.
-  Interface::Ptr out_iface = r_entry->interface();
+  Interface::PtrConst out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
   EthernetPacket::Ptr eth_pkt =
@@ -557,7 +557,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   }
 
   // Outgoing interface.
-  Interface::Ptr out_iface = r_entry->interface();
+  Interface::PtrConst out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
   EthernetPacket::Ptr eth_pkt =
