@@ -24,8 +24,7 @@ struct ip_hdr {
   uint32_t ip_dst;          /* destination address */
 } __attribute__((packed));
 
-const size_t
-IPPacket::kHeaderSize = sizeof(struct ip_hdr);
+const size_t IPPacket::kHeaderSize = sizeof(struct ip_hdr);
 
 
 /* IPPacket */
