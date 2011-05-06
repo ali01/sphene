@@ -12,6 +12,7 @@ using Fwk::LinkedList;
 #include "packet.h"
 
 /* Forward declarations. */
+class ControlPlane;
 class Interface;
 class OSPFInterfaceMap;
 class OSPFLSUPacket;
@@ -27,10 +28,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   static const uint16_t kDefaultHelloInterval = 10;
 
-  static Ptr New(const RouterID& router_id,
-                 const AreaID& area_id,
-                 Fwk::Ptr<RoutingTable> rtable) {
-    return new OSPFRouter(router_id, area_id, rtable);
+  static Ptr New(const RouterID& router_id, const AreaID& area_id,
+                 Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp) {
+    return new OSPFRouter(router_id, area_id, rtable, cp);
   }
 
   // TODO(ali): perhaps should take OSPFPacket instead of Packet.
@@ -47,7 +47,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
  protected:
   OSPFRouter(const RouterID& router_id, const AreaID& area_id,
-             Fwk::Ptr<RoutingTable> rtable);
+             Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp);
 
  private:
   /* Nested double-dispatch Packet::Functor. */
@@ -181,6 +181,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
   Fwk::Ptr<RoutingTable> routing_table_;
+  ControlPlane* control_plane_; /* Weak pointer prevents circular references */
 
   /* Logical Multimap<LSUSenderRouterID,NeighborRelationshipList>: Keeps track
      of neighbor relationships that have not yet been commited to the topology.

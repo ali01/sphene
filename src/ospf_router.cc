@@ -2,6 +2,7 @@
 
 #include "fwk/scoped_lock.h"
 
+#include "control_plane.h"
 #include "interface.h"
 #include "ip_packet.h"
 #include "ospf_interface_map.h"
@@ -14,7 +15,7 @@
 /* OSPFRouter */
 
 OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
-                       RoutingTable::Ptr rtable)
+                       RoutingTable::Ptr rtable, Fwk::Ptr<ControlPlane> cp)
     : log_(Fwk::Log::LogNew("OSPFRouter")),
       functor_(this),
       router_id_(router_id),
@@ -23,6 +24,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
       interfaces_(OSPFInterfaceMap::New()),
       topology_(OSPFTopology::New(router_node_)),
       routing_table_(rtable),
+      control_plane_(cp.ptr()),
       topology_reactor_(TopologyReactor::New(this)) {
   topology_->notifieeIs(topology_reactor_);
 }
