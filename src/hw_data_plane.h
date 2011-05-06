@@ -14,6 +14,7 @@ class EthernetPacket;
 class ICMPPacket;
 class Interface;
 class IPPacket;
+struct nf2device;
 
 
 class HWDataPlane : public DataPlane {
@@ -45,6 +46,13 @@ class HWDataPlane : public DataPlane {
 
   HWDataPlane(const HWDataPlane&);
   void operator=(const HWDataPlane&);
+
+  // Writes the ARP cache to the hardware.
+  void writeHWARPCache();
+  void writeHWARPCacheEntry(struct nf2device* nf2,
+                            const EthernetAddr& mac,
+                            const IPv4Addr& ip,
+                            unsigned int index);
 
  private:
   ARPCacheReactor arp_cache_reactor_;

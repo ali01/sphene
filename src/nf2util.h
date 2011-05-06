@@ -25,7 +25,7 @@
  * Structure to represent an nf2 device to a user mode programs
  */
 struct nf2device {
-	char *device_name;
+	const char *device_name;
 	int fd;
 	int net_iface;
         char server_ip_addr[MAX_IPADDR_LEN];

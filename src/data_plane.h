@@ -57,6 +57,13 @@ class DataPlane : public Fwk::NamedInterface {
   DataPlane(const DataPlane&);
   void operator=(const DataPlane&);
 
+  Fwk::Log::Ptr log_;
+  InterfaceMap::Ptr iface_map_;
+  RoutingTable::Ptr routing_table_;
+  ARPCache::Ptr arp_cache_;
+  ControlPlane* cp_;
+  struct sr_instance* sr_;
+
  private:
   class PacketFunctor : public Packet::Functor {
    public:
@@ -74,13 +81,7 @@ class DataPlane : public Fwk::NamedInterface {
     Fwk::Log::Ptr log_;
   };
 
-  Fwk::Log::Ptr log_;
   PacketFunctor functor_;
-  InterfaceMap::Ptr iface_map_;
-  RoutingTable::Ptr routing_table_;
-  ARPCache::Ptr arp_cache_;
-  ControlPlane* cp_;
-  struct sr_instance* sr_;
 };
 
 #endif
