@@ -5,14 +5,15 @@
 #include <string>
 
 #include "fwk/locked_interface.h"
+#include "fwk/notifier.h"
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
 #include "interface.h"
 #include "ip_packet.h"
 
 
-class InterfaceMap : public Fwk::PtrInterface<InterfaceMap>,
-                     public Fwk::LockedInterface {
+class InterfaceMap : public Fwk::LockedInterface,
+                     public Fwk::Notifier {
  public:
   typedef Fwk::Ptr<const InterfaceMap> PtrConst;
   typedef Fwk::Ptr<InterfaceMap> Ptr;
@@ -20,6 +21,12 @@ class InterfaceMap : public Fwk::PtrInterface<InterfaceMap>,
   typedef std::map<IPv4Addr, Interface::Ptr> IPInterfaceMap;
   typedef NameInterfaceMap::iterator iterator;
   typedef NameInterfaceMap::const_iterator const_iterator;
+
+  class Notifiee : public Fwk::Notifiee {
+   public:
+    virtual void onInterface(Interface::Ptr iface) { }
+    virtual void onInterfaceDel(Interface::Ptr iface) { }
+  };
 
   static Ptr InterfaceMapNew() {
     return new InterfaceMap();
