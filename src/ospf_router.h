@@ -2,7 +2,6 @@
 #define OSPF_ROUTER_H_LFORNADU
 
 #include "fwk/linked_list.h"
-#include "fwk/log.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 using Fwk::LinkedList;
@@ -64,7 +63,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     OSPFNode* router_node_;
     OSPFInterfaceMap* interfaces_;
     OSPFTopology* topology_;
-    Fwk::Log::Ptr log_;
   };
 
   class NeighborRelationship : public LinkedList<NeighborRelationship>::Node {
@@ -179,7 +177,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* -- OSPFRouter data members. -- */
 
-  mutable Fwk::Log::Ptr log_;
   PacketFunctor functor_;
 
   RouterID router_id_;

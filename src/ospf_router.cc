@@ -1,5 +1,6 @@
 #include "ospf_router.h"
 
+#include "fwk/log.h"
 #include "fwk/scoped_lock.h"
 
 #include "control_plane.h"
@@ -12,12 +13,15 @@
 #include "ospf_topology.h"
 #include "routing_table.h"
 
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFRouter");
+
+
 /* OSPFRouter */
 
 OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
                        RoutingTable::Ptr rtable, Fwk::Ptr<ControlPlane> cp)
-    : log_(Fwk::Log::LogNew("OSPFRouter")),
-      functor_(this),
+    : functor_(this),
       router_id_(router_id),
       area_id_(area_id),
       router_node_(OSPFNode::New(router_id)),
@@ -61,8 +65,7 @@ OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
     : ospf_router_(ospf_router),
       router_node_(ospf_router->router_node_.ptr()),
       interfaces_(ospf_router->interfaces_.ptr()),
-      topology_(ospf_router->topology_.ptr()),
-      log_(ospf_router->log_) {}
+      topology_(ospf_router->topology_.ptr()) {}
 
 void
 OSPFRouter::PacketFunctor::operator()(OSPFPacket* pkt,
