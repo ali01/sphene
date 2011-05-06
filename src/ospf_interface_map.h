@@ -26,14 +26,17 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   OSPFInterface::PtrConst interface(const IPv4Addr& addr) const;
   OSPFInterface::Ptr interface(const IPv4Addr& addr);
 
+  OSPFInterface::PtrConst interface(const RouterID& neighbor_id) const;
+  OSPFInterface::Ptr interface(const RouterID& neighbor_id);
+
   void interfaceIs(OSPFInterface::Ptr iface_desc);
   void interfaceDel(OSPFInterface::Ptr iface_desc);
   void interfaceDel(const IPv4Addr& addr);
 
-  iterator begin() { return interfaces_.begin(); }
-  iterator end() { return interfaces_.end(); }
-  const_iterator begin() const { return interfaces_.begin(); }
-  const_iterator end() const { return interfaces_.end(); }
+  iterator begin() { return ip_ifaces.begin(); }
+  iterator end() { return ip_ifaces.end(); }
+  const_iterator begin() const { return ip_ifaces.begin(); }
+  const_iterator end() const { return ip_ifaces.end(); }
 
  protected:
   OSPFInterfaceMap();
@@ -48,8 +51,8 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
       return new InterfaceReactor(_im);
     }
 
-    void onNeighbor(OSPFInterface::Ptr iface, const RouterID& id) {}
-    void onNeighborDel(OSPFInterface::Ptr iface, const RouterID& id) {}
+    void onNeighbor(OSPFInterface::Ptr iface, const RouterID& id);
+    void onNeighborDel(OSPFInterface::Ptr iface, const RouterID& id);
 
    private:
     InterfaceReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}
@@ -63,8 +66,18 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   };
 
   /* Data members. */
-  Fwk::Map<IPv4Addr,OSPFInterface> interfaces_;
+
+  /* Map: Interface IP address => interface object. */
+  Fwk::Map<IPv4Addr,OSPFInterface> ip_ifaces;
+
+  /* Map: RouterID => interface object. */
+  Fwk::Map<RouterID,OSPFInterface> nbr_id_ifaces_;
+
+  /* Reactor to Interface notifications. */
   InterfaceReactor::Ptr iface_reactor_;
+
+  /* Friends */
+  friend class InterfaceReactor;
 
   /* Operations disallowed. */
   OSPFInterfaceMap(const OSPFInterfaceMap&);
