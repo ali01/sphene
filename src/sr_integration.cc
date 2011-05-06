@@ -42,6 +42,7 @@
 #include "ip_packet.h"
 #include "lwtcp/lwip/sys.h"
 #include "ospf_daemon.h"
+#include "ospf_router.h"
 #include "packet_buffer.h"
 #include "router.h"
 #include "routing_table.h"

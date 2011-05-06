@@ -1,12 +1,13 @@
 #ifndef OSPF_DAEMON_H_
 #define OSPF_DAEMON_H_
 
-#include "fwk/log.h"
 #include "fwk/ptr.h"
 
-#include "control_plane.h"
-#include "ospf_router.h"
 #include "task.h"
+
+/* Forward declarations. */
+class OSPFRouter;
+class ControlPlane;
 
 
 class OSPFDaemon : public PeriodicTask {
@@ -14,19 +15,20 @@ class OSPFDaemon : public PeriodicTask {
   typedef Fwk::Ptr<const OSPFDaemon> PtrConst;
   typedef Fwk::Ptr<OSPFDaemon> Ptr;
 
-  static Ptr New(OSPFRouter::Ptr ospf_rtr, ControlPlane::Ptr cp) {
-    return new OSPFDaemon(ospf_rtr, cp);
-  }
+  static Ptr New(Fwk::Ptr<OSPFRouter> ospf_router, Fwk::Ptr<ControlPlane> cp);
 
  protected:
-  OSPFDaemon(OSPFRouter::Ptr ospf_rtr, ControlPlane::Ptr cp);
+  OSPFDaemon(Fwk::Ptr<OSPFRouter> ospf_router, Fwk::Ptr<ControlPlane> cp);
 
   void run();
 
-  ControlPlane::Ptr cp_;
-  OSPFRouter::Ptr ospf_rtr_;
-  Fwk::Log::Ptr log_;
-};
+  /* Data members. */
+  Fwk::Ptr<ControlPlane> cp_;
+  Fwk::Ptr<OSPFRouter> ospf_router_;
 
+  /* Operations disallowed. */
+  OSPFDaemon(const OSPFDaemon&);
+  void operator=(const OSPFDaemon&);
+};
 
 #endif
