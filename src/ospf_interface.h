@@ -14,10 +14,10 @@
 class Interface;
 
 
-class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
+class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
  public:
-  typedef Fwk::Ptr<const OSPFInterfaceDesc> PtrConst;
-  typedef Fwk::Ptr<OSPFInterfaceDesc> Ptr;
+  typedef Fwk::Ptr<const OSPFInterface> PtrConst;
+  typedef Fwk::Ptr<OSPFInterface> Ptr;
 
   typedef Fwk::Map<RouterID,OSPFNode>::iterator iterator;
   typedef Fwk::Map<RouterID,OSPFNode>::const_iterator
@@ -52,7 +52,7 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   const_iterator neighborsEnd() const { return neighbor_nodes_.end(); }
 
  private:
-  OSPFInterfaceDesc(Fwk::Ptr<const Interface> iface, uint16_t helloint);
+  OSPFInterface(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
   /* Data members. */
   Fwk::Ptr<const Interface> iface_;
@@ -68,8 +68,8 @@ class OSPFInterfaceDesc : public Fwk::PtrInterface<OSPFInterfaceDesc> {
   Fwk::Map<RouterID,OSPFNode> neighbor_nodes_;
 
   /* Operations disallowed. */
-  OSPFInterfaceDesc(const OSPFInterfaceDesc&);
-  void operator=(const OSPFInterfaceDesc&);
+  OSPFInterface(const OSPFInterface&);
+  void operator=(const OSPFInterface&);
 };
 
 #endif

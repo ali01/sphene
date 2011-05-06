@@ -1,34 +1,34 @@
-#include "ospf_interface_desc.h"
+#include "ospf_interface.h"
 
 #include "interface.h"
 
-OSPFInterfaceDesc::Ptr
-OSPFInterfaceDesc::New(Fwk::Ptr<const Interface> iface, uint16_t helloint) {
-  return new OSPFInterfaceDesc(iface, helloint);
+OSPFInterface::Ptr
+OSPFInterface::New(Fwk::Ptr<const Interface> iface, uint16_t helloint) {
+  return new OSPFInterface(iface, helloint);
 }
 
-OSPFInterfaceDesc::OSPFInterfaceDesc(Interface::PtrConst iface,
-                                     uint16_t helloint)
+OSPFInterface::OSPFInterface(Interface::PtrConst iface,
+                             uint16_t helloint)
     : iface_(iface), helloint_(helloint) {}
 
 Interface::PtrConst
-OSPFInterfaceDesc::interface() const {
+OSPFInterface::interface() const {
   return iface_;
 }
 
 OSPFNode::Ptr
-OSPFInterfaceDesc::neighbor(const RouterID& router_id) {
+OSPFInterface::neighbor(const RouterID& router_id) {
   return neighbor_nodes_.elem(router_id);
 }
 
 OSPFNode::PtrConst
-OSPFInterfaceDesc::neighbor(const RouterID& router_id) const {
-  OSPFInterfaceDesc* self = const_cast<OSPFInterfaceDesc*>(this);
+OSPFInterface::neighbor(const RouterID& router_id) const {
+  OSPFInterface* self = const_cast<OSPFInterface*>(this);
   return self->neighbor(router_id);
 }
 
 IPv4Addr
-OSPFInterfaceDesc::neighborSubnet(const RouterID& router_id) const {
+OSPFInterface::neighborSubnet(const RouterID& router_id) const {
   OSPFNeighbor::PtrConst nbr = neighbors_.elem(router_id);
   if (nbr)
     return nbr->subnet();
@@ -37,7 +37,7 @@ OSPFInterfaceDesc::neighborSubnet(const RouterID& router_id) const {
 }
 
 IPv4Addr
-OSPFInterfaceDesc::neighborSubnetMask(const RouterID& router_id) const {
+OSPFInterface::neighborSubnetMask(const RouterID& router_id) const {
   OSPFNeighbor::PtrConst nbr = neighbors_.elem(router_id);
   if (nbr)
     return nbr->subnetMask();
@@ -46,9 +46,9 @@ OSPFInterfaceDesc::neighborSubnetMask(const RouterID& router_id) const {
 }
 
 void
-OSPFInterfaceDesc::neighborIs(OSPFNode::Ptr nb,
-                              const IPv4Addr& subnet,
-                              const IPv4Addr& subnet_mask) {
+OSPFInterface::neighborIs(OSPFNode::Ptr nb,
+                          const IPv4Addr& subnet,
+                          const IPv4Addr& subnet_mask) {
   if (nb == NULL)
     return;
 
@@ -68,7 +68,7 @@ OSPFInterfaceDesc::neighborIs(OSPFNode::Ptr nb,
 }
 
 void
-OSPFInterfaceDesc::neighborDel(OSPFNode::Ptr nb) {
+OSPFInterface::neighborDel(OSPFNode::Ptr nb) {
   if (nb == NULL)
     return;
 
@@ -76,7 +76,7 @@ OSPFInterfaceDesc::neighborDel(OSPFNode::Ptr nb) {
 }
 
 void
-OSPFInterfaceDesc::neighborDel(const RouterID& router_id) {
+OSPFInterface::neighborDel(const RouterID& router_id) {
   /* Deleting from both maps. */
   neighbors_.elemDel(router_id);
   neighbor_nodes_.elemDel(router_id);

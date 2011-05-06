@@ -4,19 +4,19 @@
 
 /* OSPFInterfaceMap */
 
-OSPFInterfaceDesc::PtrConst
+OSPFInterface::PtrConst
 OSPFInterfaceMap::interface(const IPv4Addr& addr) const {
   OSPFInterfaceMap* self = const_cast<OSPFInterfaceMap*>(this);
   return self->interface(addr);
 }
 
-OSPFInterfaceDesc::Ptr
+OSPFInterface::Ptr
 OSPFInterfaceMap::interface(const IPv4Addr& addr) {
   return interfaces_.elem(addr);
 }
 
 void
-OSPFInterfaceMap::interfaceIs(OSPFInterfaceDesc::Ptr iface_desc) {
+OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface_desc) {
   if (iface_desc == NULL)
     return;
 
@@ -25,7 +25,7 @@ OSPFInterfaceMap::interfaceIs(OSPFInterfaceDesc::Ptr iface_desc) {
 }
 
 void
-OSPFInterfaceMap::interfaceDel(OSPFInterfaceDesc::Ptr iface_desc) {
+OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface_desc) {
   if (iface_desc == NULL)
     return;
 

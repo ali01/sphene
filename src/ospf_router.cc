@@ -96,7 +96,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
 
   // TODO(ali): Interfaces must be manually removed from OSPFRouter if they
   //   cease to exist. One approach could be to make use of notifications.
-  OSPFInterfaceDesc::Ptr ifd;
+  OSPFInterface::Ptr ifd;
   ifd = interfaces_->interface(iface->ip());
 
   if (ifd == NULL) {
@@ -104,7 +104,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
      * was unaware about -- possibly a newly created virtual interface.
      * Creating a new interface description object and
      * adding it to the neighbor map. */
-    ifd = OSPFInterfaceDesc::New(iface, kDefaultHelloInterval);
+    ifd = OSPFInterface::New(iface, kDefaultHelloInterval);
     interfaces_->interfaceIs(ifd);
   }
 

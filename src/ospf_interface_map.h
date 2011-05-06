@@ -6,7 +6,8 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
-#include "ospf_interface_desc.h"
+#include "ospf_interface.h"
+#include "ospf_types.h"
 
 
 class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
@@ -14,19 +15,19 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   typedef Fwk::Ptr<const OSPFInterfaceMap> PtrConst;
   typedef Fwk::Ptr<OSPFInterfaceMap> Ptr;
 
-  typedef Fwk::Map<IPv4Addr,OSPFInterfaceDesc>::iterator iterator;
-  typedef Fwk::Map<IPv4Addr,OSPFInterfaceDesc>::const_iterator
+  typedef Fwk::Map<IPv4Addr,OSPFInterface>::iterator iterator;
+  typedef Fwk::Map<IPv4Addr,OSPFInterface>::const_iterator
     const_iterator;
 
   static Ptr New() {
     return new OSPFInterfaceMap();
   }
 
-  OSPFInterfaceDesc::PtrConst interface(const IPv4Addr& addr) const;
-  OSPFInterfaceDesc::Ptr interface(const IPv4Addr& addr);
+  OSPFInterface::PtrConst interface(const IPv4Addr& addr) const;
+  OSPFInterface::Ptr interface(const IPv4Addr& addr);
 
-  void interfaceIs(OSPFInterfaceDesc::Ptr iface_desc);
-  void interfaceDel(OSPFInterfaceDesc::Ptr iface_desc);
+  void interfaceIs(OSPFInterface::Ptr iface_desc);
+  void interfaceDel(OSPFInterface::Ptr iface_desc);
   void interfaceDel(const IPv4Addr& addr);
 
   iterator begin() { return interfaces_.begin(); }
@@ -39,7 +40,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
  private:
   /* Data members. */
-  Fwk::Map<IPv4Addr,OSPFInterfaceDesc> interfaces_;
+  Fwk::Map<IPv4Addr,OSPFInterface> interfaces_;
 
   /* Operations disallowed. */
   OSPFInterfaceMap(const OSPFInterfaceMap&);
