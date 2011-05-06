@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include "arp_cache.h"
 #include "ethernet_packet.h"
@@ -36,6 +37,18 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
       log_(Fwk::Log::LogNew("HWDataPlane")) {
   arp_cache_reactor_.notifierIs(arp_cache);
   interface_map_reactor_.notifierIs(iface_map_);
+
+  // Reset the hardware.
+  struct nf2device nf2;
+  nf2.device_name = kDefaultIfaceName;
+  nf2.net_iface = 1;
+  if (openDescriptor(&nf2)) {
+    perror("openDescriptor()");
+    exit(1);
+  }
+  writeReg(&nf2, CPCI_REG_CTRL, 0x00010100);
+  closeDescriptor(&nf2);
+  usleep(2000);
 }
 
 
