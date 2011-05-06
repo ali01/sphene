@@ -172,7 +172,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* -- OSPFRouter data members. -- */
 
-  Fwk::Log::Ptr log_;
+  mutable Fwk::Log::Ptr log_;
   PacketFunctor functor_;
 
   RouterID router_id_;
