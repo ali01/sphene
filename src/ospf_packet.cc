@@ -7,7 +7,7 @@
 #include "interface.h"
 #include "packet_buffer.h"
 
-/* Global log instance */
+/* Static global log instance */
 static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFPacket");
 
 
