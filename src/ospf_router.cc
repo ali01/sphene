@@ -255,12 +255,13 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
     entry->subnetIs(nbr_subnet, nbr_subnet_mask);
 
-    /* Setting entry's outgoing interface. */
-    OSPFInterface::Ptr iface = interfaces_->interface(next_hop->routerID());
+    /* Setting entry's outgoing interface and gateway. */
+    RouterID next_hop_id = next_hop->routerID();
+    OSPFInterface::Ptr iface = interfaces_->interface(next_hop_id);
     entry->interfaceIs(iface->interface());
 
-    // TODO(ali): set entry's gateway
-    // entry->gatewayIs()
+    /* Setting entry's gateway. */
+    entry->gatewayIs(iface->neighborGateway(next_hop_id));
 
     routing_table_->entryIs(entry);
   }
