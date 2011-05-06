@@ -395,3 +395,25 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   return false;
 }
+
+void
+OSPFRouter::send_pkt_to_neighbor(const RouterID& neighbor_id,
+                                 OSPFPacket::Ptr pkt) const {
+  OSPFInterface::PtrConst iface = interfaces_->interface(neighbor_id);
+  if (iface == NULL) {
+    ELOG << "send_pkt_to_node: Node with NEIGHBOR_ID is not directly connected "
+         << "to this router";
+    return;
+  }
+
+  IPv4Addr src_addr = iface->interface()->ip();
+  IPv4Addr dst_addr = iface->neighborGateway(neighbor_id);
+
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+  ip_pkt->srcIs(src_addr);
+  ip_pkt->dstIs(dst_addr);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
+  ip_pkt->checksumReset();
+
+  control_plane_->outputPacketNew(ip_pkt);
+}

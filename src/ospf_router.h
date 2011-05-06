@@ -142,6 +142,10 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
+  /* Sends PKT to the node in the topology with DEST_ID. */
+  void send_pkt_to_neighbor(const RouterID& neighbor_id,
+                            Fwk::Ptr<OSPFPacket> pkt) const;
+
   /* Obtains the staged NeighborRelationship object with the specified
      LSU_SENDER_ID and ADVERTISED_NEIGHBOR_ID from the LINKS_STAGED
      multimap if it exists. A NeighborRelationship object will exist if the
@@ -168,7 +172,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      multimap. Returns false if NBR is NULL or if it doesn't exist in the
      multimap, true otherwise. */
   bool unstage_nbr(NeighborRelationship::Ptr nbr);
-
 
   /* -- OSPFRouter data members. -- */
 
