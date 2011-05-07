@@ -401,22 +401,14 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
   struct sr_instance* sr = sr_get_global_instance(NULL);
 
     // Create buffer for new packet.
-  const size_t pkt_len = (EthernetPacket::kHeaderSize +
-                          IPPacket::kHeaderSize +
-                          len);
+  const size_t pkt_len = IPPacket::kHeaderSize + len;
   PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
 
-  // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt =
-      EthernetPacket::New(buffer, buffer->size() - pkt_len);
-  eth_pkt->typeIs(EthernetPacket::kIP);
-
-  // IP packet next.
-  IPPacket::Ptr ip_pkt =
-      IPPacket::Ptr::st_cast<IPPacket>(eth_pkt->payload());
+  // Put packet in buffer.
+  IPPacket::Ptr ip_pkt = IPPacket::New(buffer, buffer->size() - pkt_len);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
-  ip_pkt->packetLengthIs(IPPacket::kHeaderSize + len);
+  ip_pkt->packetLengthIs(pkt_len);
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs((IPPacket::IPType)proto);
   ip_pkt->flagsAre(0);
