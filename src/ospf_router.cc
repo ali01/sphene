@@ -423,7 +423,7 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
 void
 OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
-                                 OSPFPacket::Ptr pkt) const {
+                                    OSPFPacket::Ptr pkt) const {
   OSPFInterface::PtrConst iface = interfaces_->interface(neighbor_id);
   if (iface == NULL) {
     ELOG << "send_pkt_to_node: Node with NEIGHBOR_ID is not directly connected "
@@ -438,7 +438,7 @@ OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
   ip_pkt->srcIs(src_addr);
   ip_pkt->dstIs(dst_addr);
-  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
+  ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
 
   control_plane_->outputPacketNew(ip_pkt);
