@@ -431,7 +431,7 @@ OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
     return;
   }
 
-  IPv4Addr src_addr = iface->interface()->ip();
+  IPv4Addr src_addr = iface->interfaceIP();
   OSPFGateway::PtrConst nbr_gw = iface->gateway(neighbor_id);
   IPv4Addr dst_addr = nbr_gw->gateway();
 

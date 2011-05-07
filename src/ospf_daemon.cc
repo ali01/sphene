@@ -70,12 +70,12 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
     OSPFHelloPacket::NewDefault(buffer,
                                 ospf_router_->routerID(),
                                 ospf_router_->areaID(),
-                                iface->interface()->subnetMask(),
+                                iface->interfaceSubnetMask(),
                                 iface->helloint());
 
   IPPacket::Ptr ip_pkt =
     IPPacket::NewDefault(buffer, ip_pkt_len,
-                         iface->interface()->ip(),
+                         iface->interfaceIP(),
                          OSPFHelloPacket::kBroadcastAddr);
 
   /* IPPacket fields: */
