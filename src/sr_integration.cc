@@ -176,7 +176,8 @@ void sr_integ_hw_setup(struct sr_instance* sr)
   OSPFDaemon::Ptr ospf_daemon =
     OSPFDaemon::New(NULL, router->controlPlane(), router->dataPlane());
   ospf_daemon->periodIs(1);
-  router->taskManager()->taskIs(ospf_daemon);
+  // TODO(ali): enable OSPFDaemon
+  //router->taskManager()->taskIs(ospf_daemon);
 
   // Start processing thread.
   sr->quit = false;
