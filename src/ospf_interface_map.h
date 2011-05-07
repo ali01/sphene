@@ -51,8 +51,8 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
       return new InterfaceReactor(_im);
     }
 
-    void onNeighbor(OSPFInterface::Ptr iface, const RouterID& id);
-    void onNeighborDel(OSPFInterface::Ptr iface, const RouterID& id);
+    void onGateway(OSPFInterface::Ptr iface, const RouterID& id);
+    void onGatewayDel(OSPFInterface::Ptr iface, const RouterID& id);
 
    private:
     InterfaceReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}

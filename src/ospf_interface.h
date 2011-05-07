@@ -21,9 +21,12 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   typedef Fwk::Ptr<const OSPFInterface> PtrConst;
   typedef Fwk::Ptr<OSPFInterface> Ptr;
 
-  typedef Fwk::Map<RouterID,OSPFNode>::iterator iterator;
+  typedef Fwk::Map<RouterID,OSPFNode>::iterator nb_iterator;
   typedef Fwk::Map<RouterID,OSPFNode>::const_iterator
-    const_iterator;
+    const_nb_iterator;
+
+  typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iterator;
+  typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iterator;
 
   static Ptr New(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
@@ -34,8 +37,8 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
     typedef Fwk::Ptr<Notifiee> Ptr;
 
     /* Notifications supported. */
-    virtual void onNeighbor(OSPFInterface::Ptr iface, const RouterID& id) {}
-    virtual void onNeighborDel(OSPFInterface::Ptr iface, const RouterID& id) {}
+    virtual void onGateway(OSPFInterface::Ptr iface, const RouterID& id) {}
+    virtual void onGatewayDel(OSPFInterface::Ptr iface, const RouterID& id) {}
 
    protected:
     Notifiee() {}
@@ -53,12 +56,11 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   uint16_t helloint() const { return helloint_; }
   Seconds timeSinceHello() const { return time(NULL) - latest_hello_; }
 
+  OSPFGateway::Ptr gateway(const RouterID& router_id);
+  OSPFGateway::PtrConst gateway(const RouterID& router_id) const;
+
   OSPFNode::Ptr neighbor(const RouterID& router_id);
   OSPFNode::PtrConst neighbor(const RouterID& router_id) const;
-
-  IPv4Addr neighborGateway(const RouterID& router_id) const;
-  IPv4Addr neighborSubnet(const RouterID& router_id) const;
-  IPv4Addr neighborSubnetMask(const RouterID& router_id) const;
 
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
@@ -67,20 +69,25 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   void timeSinceHelloIs(Seconds delta);
 
-  void neighborIs(OSPFNode::Ptr nb,
-                  const IPv4Addr& gateway,
-                  const IPv4Addr& subnet,
-                  const IPv4Addr& subnet_mask);
-  void neighborDel(OSPFNode::Ptr nb);
-  void neighborDel(const RouterID& router_id);
+  void gatewayIs(OSPFNode::Ptr nb,
+                 const IPv4Addr& gateway,
+                 const IPv4Addr& subnet,
+                 const IPv4Addr& subnet_mask);
+  void gatewayDel(OSPFNode::Ptr nb);
+  void gatewayDel(const RouterID& router_id);
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
   /* Iterators. */
 
-  iterator neighborsBegin() { return neighbor_nodes_.begin(); }
-  iterator neighborsEnd() { return neighbor_nodes_.end(); }
-  const_iterator neighborsBegin() const { return neighbor_nodes_.begin(); }
-  const_iterator neighborsEnd() const { return neighbor_nodes_.end(); }
+  nb_iterator neighborsBegin() { return neighbors_.begin(); }
+  nb_iterator neighborsEnd() { return neighbors_.end(); }
+  const_nb_iterator neighborsBegin() const { return neighbors_.begin(); }
+  const_nb_iterator neighborsEnd() const { return neighbors_.end(); }
+
+  gw_iterator gatewaysBegin() { return gateways_.begin(); }
+  gw_iterator gatewaysEnd() { return gateways_.end(); }
+  const_gw_iterator gatewaysBegin() const { return gateways_.begin(); }
+  const_gw_iterator gatewaysEnd() const { return gateways_.end(); }
 
  private:
   OSPFInterface(Fwk::Ptr<const Interface> iface, uint16_t helloint);
@@ -91,13 +98,13 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   time_t latest_hello_;
 
   /* Map of all neighbors directly attached to this router. */
-  Fwk::Map<RouterID,OSPFGateway> neighbors_;
+  Fwk::Map<RouterID,OSPFGateway> gateways_;
 
   /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
      OSPFNeighbor objects). Used to provide iterators. If space constraints
      become a problem, this can be optimized away by defining custom
      iterators. */
-  Fwk::Map<RouterID,OSPFNode> neighbor_nodes_;
+  Fwk::Map<RouterID,OSPFNode> neighbors_;
 
   /* Singleton notifiee. */
   Notifiee::Ptr notifiee_;

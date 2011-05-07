@@ -48,7 +48,7 @@ struct ospf_lsu_adv {
 
 const size_t OSPFHelloPacket::kPacketSize = sizeof(struct ospf_hello_pkt);
 const size_t OSPFLSUPacket::kHeaderSize = sizeof(struct ospf_lsu_hdr);
-const size_t OSPFLSUPacket::kAdvSize = sizeof(struct ospf_lsu_adv);
+const size_t OSPFLSUAdvertisement::kSize = sizeof(struct ospf_lsu_adv);
 
 
 /* OSPFPacket */
