@@ -2,13 +2,13 @@
 #define OSPF_GATEWAY_H_CTXOEZOH
 
 #include "ipv4_addr.h"
-#include "ospf_neighbor.h"
+#include "ospf_link.h"
 
 /* Forward declarations. */
 class OSPFNode;
 
 
-class OSPFGateway : public OSPFNeighbor {
+class OSPFGateway : public OSPFLink {
  public:
   typedef Fwk::Ptr<const OSPFGateway> PtrConst;
   typedef Fwk::Ptr<OSPFGateway> Ptr;

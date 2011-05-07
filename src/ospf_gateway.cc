@@ -14,5 +14,5 @@ OSPFGateway::OSPFGateway(Fwk::Ptr<OSPFNode> neighbor,
                          const IPv4Addr& gateway,
                          const IPv4Addr& subnet,
                          const IPv4Addr& subnet_mask)
-    : OSPFNeighbor::OSPFNeighbor(neighbor, subnet, subnet_mask),
+    : OSPFLink::OSPFLink(neighbor, subnet, subnet_mask),
       gateway_(gateway) {}

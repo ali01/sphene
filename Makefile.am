@@ -140,7 +140,7 @@ libsr_base_a_SOURCES = \
                        src/ospf_gateway.cc \
                        src/ospf_interface.cc \
                        src/ospf_interface_map.cc \
-                       src/ospf_neighbor.cc \
+                       src/ospf_link.cc \
                        src/ospf_node.cc \
                        src/ospf_packet.cc \
                        src/ospf_router.cc \

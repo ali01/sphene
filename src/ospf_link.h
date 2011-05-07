@@ -1,5 +1,5 @@
-#ifndef OSPF_NEIGHBOR_H_QJXYEZKS
-#define OSPF_NEIGHBOR_H_QJXYEZKS
+#ifndef OSPF_LINK_H_QJXYEZKS
+#define OSPF_LINK_H_QJXYEZKS
 
 #include "fwk/ptr_interface.h"
 
@@ -10,10 +10,10 @@ class OSPFNode;
 
 /* Class used to keep track of the subnet and subnet mask of the link on which
    a neighboring node is connected. */
-class OSPFNeighbor : public Fwk::PtrInterface<OSPFNeighbor> {
+class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
  public:
-  typedef Fwk::Ptr<const OSPFNeighbor> PtrConst;
-  typedef Fwk::Ptr<OSPFNeighbor> Ptr;
+  typedef Fwk::Ptr<const OSPFLink> PtrConst;
+  typedef Fwk::Ptr<OSPFLink> Ptr;
 
   static Ptr New(Fwk::Ptr<OSPFNode> neighbor,
                  const IPv4Addr& subnet,
@@ -28,7 +28,7 @@ class OSPFNeighbor : public Fwk::PtrInterface<OSPFNeighbor> {
   const IPv4Addr& subnetMask() const { return subnet_mask_; }
 
  protected:
-  OSPFNeighbor(Fwk::Ptr<OSPFNode> neighbor,
+  OSPFLink(Fwk::Ptr<OSPFNode> neighbor,
                const IPv4Addr& subnet,
                const IPv4Addr& subnet_mask);
  private:
@@ -38,8 +38,8 @@ class OSPFNeighbor : public Fwk::PtrInterface<OSPFNeighbor> {
   IPv4Addr subnet_mask_;
 
   /* Operations disallowed. */
-  OSPFNeighbor(const OSPFNeighbor&);
-  void operator=(const OSPFNeighbor&);
+  OSPFLink(const OSPFLink&);
+  void operator=(const OSPFLink&);
 };
 
 #endif

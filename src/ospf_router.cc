@@ -8,7 +8,7 @@
 #include "ip_packet.h"
 #include "ospf_gateway.h"
 #include "ospf_interface_map.h"
-#include "ospf_neighbor.h"
+#include "ospf_link.h"
 #include "ospf_node.h"
 #include "ospf_packet.h"
 #include "ospf_topology.h"
@@ -187,12 +187,12 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 /* OSPFRouter::NeighborRelationship */
 
 OSPFRouter::NeighborRelationship::NeighborRelationship(OSPFNode::Ptr lsu_sender,
-                                                       OSPFNeighbor::Ptr adv_nb)
+                                                       OSPFLink::Ptr adv_nb)
     : lsu_sender_(lsu_sender), advertised_neighbor_(adv_nb) {}
 
 OSPFRouter::NeighborRelationship::Ptr
 OSPFRouter::NeighborRelationship::New(OSPFNode::Ptr lsu_sender,
-                                      OSPFNeighbor::Ptr adv_nb) {
+                                      OSPFLink::Ptr adv_nb) {
   return new NeighborRelationship(lsu_sender, adv_nb);
 }
 
@@ -206,12 +206,12 @@ OSPFRouter::NeighborRelationship::lsuSender() {
   return lsu_sender_;
 }
 
-OSPFNeighbor::PtrConst
+OSPFLink::PtrConst
 OSPFRouter::NeighborRelationship::advertisedNeighbor() const {
   return advertised_neighbor_;
 }
 
-OSPFNeighbor::Ptr
+OSPFLink::Ptr
 OSPFRouter::NeighborRelationship::advertisedNeighbor() {
   return advertised_neighbor_;
 }
@@ -291,7 +291,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
          for both endpoints of the link, then the neighbor relationship can be
          committed to the router's network topology. */
 
-      OSPFNeighbor::Ptr sender_staged = nb_rel->advertisedNeighbor();
+      OSPFLink::Ptr sender_staged = nb_rel->advertisedNeighbor();
       if (adv->subnet() == sender_staged->subnet()) {
         /* Subnets match. The advertised neighbor relationship is valid. */
         commit_nbr(nb_rel);
@@ -310,8 +310,8 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
         topology_->nodeIs(neighbor_nd);
       }
 
-      OSPFNeighbor::Ptr neighbor =
-        OSPFNeighbor::New(neighbor_nd, adv->subnet(), adv->subnetMask());
+      OSPFLink::Ptr neighbor =
+        OSPFLink::New(neighbor_nd, adv->subnet(), adv->subnetMask());
       nb_rel = NeighborRelationship::New(sender, neighbor);
       stage_nbr(nb_rel);
     }
@@ -390,7 +390,7 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
     return;
 
   OSPFNode::Ptr lsu_sender = nbr->lsuSender();
-  OSPFNeighbor::Ptr adv_nb = nbr->advertisedNeighbor();
+  OSPFLink::Ptr adv_nb = nbr->advertisedNeighbor();
 
   /* Establish bi-directional neighbor relationship. */
   lsu_sender->neighborIs(adv_nb->node(),

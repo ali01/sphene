@@ -7,7 +7,7 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
-#include "ospf_neighbor.h"
+#include "ospf_link.h"
 #include "ospf_types.h"
 
 
@@ -101,10 +101,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr prev_;
 
   /* Map of all neighbors directly attached to this node. */
-  Fwk::Map<RouterID,OSPFNeighbor> neighbors_;
+  Fwk::Map<RouterID,OSPFLink> neighbors_;
 
   /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
-     OSPFNeighbor objects). Used to provide iterators. If space constraints
+     OSPFLink objects). Used to provide iterators. If space constraints
      become a problem, this can be optimized away by defining custom
      iterators. */
   Fwk::Map<RouterID,OSPFNode> neighbor_nodes_;

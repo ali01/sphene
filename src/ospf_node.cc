@@ -19,7 +19,7 @@ OSPFNode::neighbor(const RouterID& id) const {
 
 IPv4Addr
 OSPFNode::neighborSubnet(const RouterID& neighbor_id) const {
-  OSPFNeighbor::PtrConst nbr = neighbors_.elem(neighbor_id);
+  OSPFLink::PtrConst nbr = neighbors_.elem(neighbor_id);
   if (nbr)
     return nbr->subnet();
 
@@ -28,7 +28,7 @@ OSPFNode::neighborSubnet(const RouterID& neighbor_id) const {
 
 IPv4Addr
 OSPFNode::neighborSubnetMask(const RouterID& neighbor_id) const {
-  OSPFNeighbor::PtrConst nbr = neighbors_.elem(neighbor_id);
+  OSPFLink::PtrConst nbr = neighbors_.elem(neighbor_id);
   if (nbr)
     return nbr->subnetMask();
 
@@ -43,13 +43,13 @@ OSPFNode::neighborIs(OSPFNode::Ptr node,
     return;
 
   RouterID nd_id = node->routerID();
-  OSPFNeighbor::Ptr nbr_prev = neighbors_.elem(nd_id);
+  OSPFLink::Ptr nbr_prev = neighbors_.elem(nd_id);
   if (nbr_prev->node() != node
       || nbr_prev->subnet() != subnet
       || nbr_prev->subnetMask() != subnet_mask) {
 
-    /* Adding to OSPFNeighbor pointer map. */
-    OSPFNeighbor::Ptr nbr_new = OSPFNeighbor::New(node, subnet, subnet_mask);
+    /* Adding to OSPFLink pointer map. */
+    OSPFLink::Ptr nbr_new = OSPFLink::New(node, subnet, subnet_mask);
     neighbors_[nd_id] = nbr_new;
 
     /* Adding to direct OSPFNode pointer map. */

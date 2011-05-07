@@ -101,7 +101,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   Fwk::Map<RouterID,OSPFGateway> gateways_;
 
   /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
-     OSPFNeighbor objects). Used to provide iterators. If space constraints
+     OSPFLink objects). Used to provide iterators. If space constraints
      become a problem, this can be optimized away by defining custom
      iterators. */
   Fwk::Map<RouterID,OSPFNode> neighbors_;
