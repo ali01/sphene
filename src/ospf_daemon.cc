@@ -105,5 +105,9 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   eth_pkt->dstIs(EthernetAddr::kBroadcast);
   eth_pkt->typeIs(EthernetPacket::kIP);
 
+  /* Sending packet. */
   data_plane_->outputPacketNew(eth_pkt, iface->interface());
+
+  /* Resetting time since last HELLO. */
+  iface->timeSinceHelloIs(0);
 }
