@@ -125,7 +125,6 @@ class OSPFLSUPacket : public OSPFPacket {
   typedef Fwk::Ptr<OSPFLSUPacket> Ptr;
 
   static const size_t kHeaderSize;
-  static const size_t kAdvSize;
 
   /* OSPFLSUPacket factory constructor. */
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
@@ -170,6 +169,8 @@ class OSPFLSUAdvertisement : public Packet {
  public:
   typedef Fwk::Ptr<const OSPFLSUAdvertisement> PtrConst;
   typedef Fwk::Ptr<OSPFLSUAdvertisement> Ptr;
+
+  static const size_t kSize;
 
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFLSUAdvertisement(buffer, buffer_offset);
