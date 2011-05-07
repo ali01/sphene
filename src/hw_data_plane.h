@@ -30,11 +30,11 @@ class HWDataPlane : public DataPlane {
   }
 
  protected:
-  class ARPCacheReactor : public ARPCache::Notifiee {
+  class ARPCacheReactor : public ARPCacheNotifiee {
    public:
     ARPCacheReactor(HWDataPlane* dp);
-    virtual void onEntry(ARPCache::Entry::Ptr entry);
-    virtual void onEntryDel(ARPCache::Entry::Ptr entry);
+    virtual void onEntry(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry);
+    virtual void onEntryDel(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry);
 
    protected:
     HWDataPlane* dp_;

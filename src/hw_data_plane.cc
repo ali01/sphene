@@ -32,7 +32,7 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
                          RoutingTable::Ptr routing_table,
                          ARPCache::Ptr arp_cache)
     : DataPlane("HWDataPlane", sr, routing_table, arp_cache),
-      arp_cache_reactor_(ARPCacheReactor(this)),
+      arp_cache_reactor_(this),
       interface_map_reactor_(InterfaceMapReactor(this)),
       log_(Fwk::Log::LogNew("HWDataPlane")) {
   arp_cache_reactor_.notifierIs(arp_cache);
@@ -57,12 +57,14 @@ HWDataPlane::ARPCacheReactor::ARPCacheReactor(HWDataPlane* dp)
       log_(Fwk::Log::LogNew("HWDataPlane::ARPCacheReactor")) { }
 
 
-void HWDataPlane::ARPCacheReactor::onEntry(ARPCache::Entry::Ptr entry) {
+void HWDataPlane::ARPCacheReactor::onEntry(ARPCache::Ptr cache,
+                                           ARPCache::Entry::Ptr entry) {
   dp_->writeHWARPCache();
 }
 
 
-void HWDataPlane::ARPCacheReactor::onEntryDel(ARPCache::Entry::Ptr entry) {
+void HWDataPlane::ARPCacheReactor::onEntryDel(ARPCache::Ptr cache,
+                                              ARPCache::Entry::Ptr entry) {
   dp_->writeHWARPCache();
 }
 
