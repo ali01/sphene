@@ -8,7 +8,8 @@
 const size_t ARPCache::kMaxEntries = 32;
 
 
-ARPCache::ARPCache() : BaseNotifier("ARPCache") { }
+ARPCache::ARPCache()
+    : Fwk::BaseNotifier<ARPCache, ARPCacheNotifiee>("ARPCache") { }
 
 
 ARPCache::Entry::Ptr

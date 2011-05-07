@@ -13,7 +13,8 @@ using std::string;
 const size_t InterfaceMap::kMaxInterfaces = 32;
 
 
-InterfaceMap::InterfaceMap() : BaseNotifier("InterfaceMap") { }
+InterfaceMap::InterfaceMap()
+    : Fwk::BaseNotifier<InterfaceMap, InterfaceMapNotifiee>("InterfaceMap") { }
 
 
 void InterfaceMap::interfaceIs(const Interface::Ptr iface) {
