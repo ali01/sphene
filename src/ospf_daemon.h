@@ -1,10 +1,13 @@
 #ifndef OSPF_DAEMON_H_
 #define OSPF_DAEMON_H_
 
+#include <time.h>
+
 #include "fwk/ptr.h"
 
 #include "ospf_types.h"
 #include "task.h"
+#include "time_types.h"
 
 /* Forward declarations. */
 class OSPFInterface;
@@ -31,7 +34,12 @@ class OSPFDaemon : public PeriodicTask {
   /* Override. */
   void run();
 
-  /* -- OSPFDaemon private member functions. -- */
+  /* --  Private attributes -- */
+
+  Seconds timeSinceLSU() const { return ::time(NULL) - latest_lsu_; }
+  void timeSinceLSUIs(Seconds delta);
+
+  /* -- OSPFDaemon private helper functions. -- */
 
   /* For all neighbors N_i, sends a HELLO packet to N_i if the last HELLO sent
      through the interface, J_i, that N_i is connected to, occurred more than
@@ -45,6 +53,8 @@ class OSPFDaemon : public PeriodicTask {
   Fwk::Ptr<ControlPlane> control_plane_;
   Fwk::Ptr<DataPlane> data_plane_;
   Fwk::Ptr<OSPFRouter> ospf_router_;
+
+  time_t latest_lsu_;
 
   /* Operations disallowed. */
   OSPFDaemon(const OSPFDaemon&);

@@ -43,6 +43,11 @@ OSPFDaemon::run() {
 }
 
 void
+OSPFDaemon::timeSinceLSUIs(Seconds delta) {
+  latest_lsu_ = ::time(NULL) - delta.value();
+}
+
+void
 OSPFDaemon::broadcast_timed_hello() {
   OSPFInterfaceMap::PtrConst iface_map = ospf_router_->interfaceMap();
   OSPFInterfaceMap::const_iterator if_it;
