@@ -31,6 +31,28 @@ const IPVersion IPPacket::kVersion;
 
 /* IPPacket */
 
+IPPacket::Ptr
+IPPacket::NewDefault(PacketBuffer::Ptr buffer,
+                     uint16_t packet_len,
+                     const IPv4Addr& src,
+                     const IPv4Addr& dst) {
+  IPPacket::Ptr pkt = new IPPacket(buffer, buffer->size() - packet_len);
+
+  pkt->versionIs(IPPacket::kVersion);
+  pkt->headerLengthIs(IPPacket::kHeaderSize / 4); /* Words, not bytes. */
+  pkt->diffServicesAre(0);
+  pkt->packetLengthIs(packet_len);
+  pkt->identificationIs(0);
+  pkt->flagsAre(0);
+  pkt->fragmentOffsetIs(0);
+  pkt->ttlIs(kDefaultTTL);
+  pkt->srcIs(src);
+  pkt->dstIs(dst);
+  pkt->checksumReset();
+
+  return pkt;
+}
+
 IPPacket::IPPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ip_hdr_((struct ip_hdr *)offsetAddress(0)) { }
