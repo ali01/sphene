@@ -173,7 +173,8 @@ void sr_integ_hw_setup(struct sr_instance* sr)
 
   // Create OSPF daemon and add it to the task manager.
   // TODO(ms): Use real OSPFRouter instance here.
-  OSPFDaemon::Ptr ospf_daemon = OSPFDaemon::New(NULL, router->controlPlane());
+  OSPFDaemon::Ptr ospf_daemon =
+    OSPFDaemon::New(NULL, router->controlPlane(), router->dataPlane());
   ospf_daemon->periodIs(1);
   router->taskManager()->taskIs(ospf_daemon);
 
