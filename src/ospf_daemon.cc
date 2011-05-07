@@ -37,9 +37,9 @@ OSPFDaemon::OSPFDaemon(OSPFRouter::Ptr ospf_router,
 
 void
 OSPFDaemon::run() {
-  // TODO(ms): This runs every second. Send Hello packets and LSU packets here
-  //   as necessary. Also timeout any neighbors or routers in the topology that
-  //   have not sent Hello or LSU packets within the required time period.
+  /* Sending HELLO packets to all connected neighbors
+     every iface.HELLOINT seconds. */
+  broadcast_timed_hello();
 }
 
 void
