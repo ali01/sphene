@@ -33,6 +33,7 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
                          ARPCache::Ptr arp_cache)
     : DataPlane("HWDataPlane", sr, routing_table, arp_cache),
       arp_cache_reactor_(this),
+      interface_reactor_(this),
       interface_map_reactor_(this),
       log_(Fwk::Log::LogNew("HWDataPlane")) {
   arp_cache_reactor_.notifierIs(arp_cache);
@@ -69,6 +70,22 @@ void HWDataPlane::ARPCacheReactor::onEntryDel(ARPCache::Ptr cache,
 }
 
 
+HWDataPlane::InterfaceReactor::InterfaceReactor(HWDataPlane* dp)
+    : dp_(dp),
+      log_(Fwk::Log::LogNew("HWDataPlane::InterfaceReactor")) { }
+
+
+void HWDataPlane::InterfaceReactor::onIP(Interface::Ptr iface) {
+  DLOG << "IP address on " << iface->name() << " changed to " << iface->ip();
+  dp_->writeHWIPFilterTable();
+}
+
+
+void HWDataPlane::InterfaceReactor::onMAC(Interface::Ptr iface) {
+  // TODO(ms): Implement.
+}
+
+
 HWDataPlane::InterfaceMapReactor::InterfaceMapReactor(HWDataPlane* dp)
     : dp_(dp),
       log_(Fwk::Log::LogNew("HWDataPlane::InterfaceMapReactor")) { }
@@ -78,6 +95,9 @@ void HWDataPlane::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
                                                    Interface::Ptr iface) {
   dp_->initializeInterface(iface);
   dp_->writeHWIPFilterTable();
+
+  // Register to get notifications from the interface itself.
+  dp_->interface_reactor_.notifierIs(iface);
 }
 
 

@@ -8,12 +8,12 @@
 #include "arp_cache.h"
 #include "packet.h"
 #include "data_plane.h"
+#include "interface.h"
 #include "interface_map.h"
 
 class ARPPacket;
 class EthernetPacket;
 class ICMPPacket;
-class Interface;
 class IPPacket;
 struct nf2device;
 
@@ -35,6 +35,17 @@ class HWDataPlane : public DataPlane {
     ARPCacheReactor(HWDataPlane* dp);
     virtual void onEntry(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry);
     virtual void onEntryDel(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry);
+
+   protected:
+    HWDataPlane* dp_;
+    Fwk::Log::Ptr log_;
+  };
+
+  class InterfaceReactor : public Interface::Notifiee {
+   public:
+    InterfaceReactor(HWDataPlane* dp);
+    virtual void onIP(Interface::Ptr iface);
+    virtual void onMAC(Interface::Ptr iface);
 
    protected:
     HWDataPlane* dp_;
@@ -75,6 +86,7 @@ class HWDataPlane : public DataPlane {
 
  private:
   ARPCacheReactor arp_cache_reactor_;
+  InterfaceReactor interface_reactor_;
   InterfaceMapReactor interface_map_reactor_;
   Fwk::Log::Ptr log_;
 };
