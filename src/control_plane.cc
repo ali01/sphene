@@ -664,12 +664,12 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
     return;
   }
 
-  // Must be a multiple of 64.
-  const size_t max_payload_size = 1472;
+  // Must be a multiple of 8.
+  const size_t max_payload_size = 1480;
   const uint16_t cksum = pkt->checksum();
 
   size_t bytes_left = pkt->len() - IPPacket::kHeaderSize;
-  size_t fragment_offset = 0;  // in 64-byte blocks
+  size_t fragment_offset = 0;  // in 8-byte blocks
   while (bytes_left > 0) {
     // Calculate size of this fragment's payload.
     size_t fragment_payload_size;
@@ -707,7 +707,7 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
 
     // Copy portion of data.
     memcpy(fragment->data() + IPPacket::kHeaderSize,
-           pkt->data() + IPPacket::kHeaderSize + (fragment_offset * 64),
+           pkt->data() + IPPacket::kHeaderSize + (fragment_offset * 8),
            fragment_payload_size);
 
     // Update checksum.
@@ -717,6 +717,6 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
     outputPacketNew(fragment);
 
     bytes_left -= fragment_payload_size;
-    fragment_offset += fragment_payload_size / 64;
+    fragment_offset += fragment_payload_size / 8;
   }
 }
