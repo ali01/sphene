@@ -365,6 +365,7 @@ uint32_t sr_integ_findsrcip(uint32_t dest /* nbo */)
 {
   struct sr_instance* sr = sr_get_global_instance(NULL);
   RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
+  Fwk::ScopedLock<RoutingTable> lock(rtable);
 
   // Find routing table entry for destination.
   IPv4Addr dest_ip(ntohl(dest));
