@@ -28,7 +28,15 @@ class OSPFDaemon : public PeriodicTask {
              Fwk::Ptr<ControlPlane> cp,
              Fwk::Ptr<DataPlane> dp);
 
+  /* Override. */
   void run();
+
+  /* -- OSPFDaemon private member functions. -- */
+
+  /* For all neighbors N_i, sends a HELLO packet to N_i if the last HELLO sent
+     through the interface, J_i, that N_i is connected to, occurred more than
+     J_i.HELLOINT seconds ago. */
+  void broadcast_timed_hello();
 
   /* Sends a HELLO packet to all neighbors connected to interface IFACE. */
   void broadcast_hello_out_interface(Fwk::Ptr<OSPFInterface> iface);

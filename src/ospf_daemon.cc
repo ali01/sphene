@@ -8,6 +8,7 @@
 #include "ethernet_packet.h"
 #include "ip_packet.h"
 #include "ospf_interface.h"
+#include "ospf_interface_map.h"
 #include "ospf_packet.h"
 #include "ospf_router.h"
 #include "packet_buffer.h"
@@ -39,6 +40,18 @@ OSPFDaemon::run() {
   // TODO(ms): This runs every second. Send Hello packets and LSU packets here
   //   as necessary. Also timeout any neighbors or routers in the topology that
   //   have not sent Hello or LSU packets within the required time period.
+}
+
+void
+OSPFDaemon::broadcast_timed_hello() {
+  OSPFInterfaceMap::PtrConst iface_map = ospf_router_->interfaceMap();
+  OSPFInterfaceMap::const_iterator if_it;
+  for (if_it = iface_map->begin(); if_it != iface_map->end(); ++if_it) {
+    OSPFInterface::Ptr iface = if_it->second;
+    if (iface->latestHelloAge() > iface->helloint()) {
+      broadcast_hello_out_interface(iface);
+    }
+  }
 }
 
 void
