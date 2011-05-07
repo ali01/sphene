@@ -55,8 +55,8 @@ OSPFInterface::neighborSubnetMask(const RouterID& router_id) const {
 }
 
 void
-OSPFInterface::latestHelloAgeIs(uint16_t age) {
-  latest_hello_ = time(NULL) - age;
+OSPFInterface::timeSinceHelloIs(Seconds delta) {
+  latest_hello_ = time(NULL) - delta.value();
 }
 
 void

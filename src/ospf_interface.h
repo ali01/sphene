@@ -10,6 +10,7 @@
 #include "ospf_gateway.h"
 #include "ospf_node.h"
 #include "ospf_types.h"
+#include "time_types.h"
 
 /* Forward declarations. */
 class Interface;
@@ -50,7 +51,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   Fwk::Ptr<const Interface> interface() const;
   uint16_t helloint() const { return helloint_; }
-  time_t latestHelloAge() const { return time(NULL) - latest_hello_; }
+  Seconds timeSinceHello() const { return time(NULL) - latest_hello_; }
 
   OSPFNode::Ptr neighbor(const RouterID& router_id);
   OSPFNode::PtrConst neighbor(const RouterID& router_id) const;
@@ -64,7 +65,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   /* Mutators. */
 
-  void latestHelloAgeIs(uint16_t age);
+  void timeSinceHelloIs(Seconds delta);
 
   void neighborIs(OSPFNode::Ptr nb,
                   const IPv4Addr& gateway,
