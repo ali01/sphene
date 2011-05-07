@@ -322,8 +322,8 @@ void
 OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
   RouterID sender_id = pkt->routerID();
 
-  OSPFInterfaceMap::const_iterator if_it;
-  for (if_it = interfaces_->begin(); if_it != interfaces_->end(); ++if_it) {
+  OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
+  for (; if_it != interfaces_->ifacesEnd(); ++if_it) {
     OSPFInterface::PtrConst iface = if_it->second;
     OSPFInterface::const_nb_iter nbr_it = iface->neighborsBegin();
     for (; nbr_it != iface->neighborsEnd(); ++nbr_it) {

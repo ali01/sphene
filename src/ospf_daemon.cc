@@ -50,8 +50,8 @@ OSPFDaemon::timeSinceLSUIs(Seconds delta) {
 void
 OSPFDaemon::broadcast_timed_hello() {
   OSPFInterfaceMap::PtrConst iface_map = ospf_router_->interfaceMap();
-  OSPFInterfaceMap::const_iterator if_it;
-  for (if_it = iface_map->begin(); if_it != iface_map->end(); ++if_it) {
+  OSPFInterfaceMap::const_if_iter if_it = iface_map->ifacesBegin();
+  for (; if_it != iface_map->ifacesEnd(); ++if_it) {
     OSPFInterface::Ptr iface = if_it->second;
     if (iface->timeSinceHello() > iface->helloint()) {
       broadcast_hello_out_interface(iface);
