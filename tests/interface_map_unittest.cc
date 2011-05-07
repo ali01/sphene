@@ -17,8 +17,10 @@ class InterfaceMapReactor : public InterfaceMap::Notifiee {
 
   static Ptr New() { return new InterfaceMapReactor(); }
 
-  virtual void onInterface(Interface::Ptr iface) { ++count_; }
-  virtual void onInterfaceDel(Interface::Ptr iface) { --count_; }
+  virtual void onInterface(InterfaceMap::Ptr map,
+                           Interface::Ptr iface) { ++count_; }
+  virtual void onInterfaceDel(InterfaceMap::Ptr map,
+                              Interface::Ptr iface) { --count_; }
   size_t interfaces() { return count_; }
 
  private:

@@ -24,7 +24,7 @@ void InterfaceMap::interfaceIs(const Interface::Ptr iface) {
 
   // Dispatch notification.
   for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    Ptr::st_cast<Notifiee>(notifiees_[i])->onInterface(iface);
+    notifiees_[i]->onInterface(this, iface);
 }
 
 
@@ -46,7 +46,7 @@ void InterfaceMap::interfaceDel(const Interface::Ptr iface) {
 
   // Dispatch notification.
   for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    Ptr::st_cast<Notifiee>(notifiees_[i])->onInterfaceDel(iface);
+    notifiees_[i]->onInterfaceDel(this, iface);
 }
 
 
