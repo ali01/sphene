@@ -60,9 +60,9 @@ OSPFInterface::gatewayIs(OSPFNode::Ptr nb,
     neighbors_[nd_id] = nb;
 
     /* Adding to OSPFGateway pointer map. */
-    OSPFGateway::Ptr ospf_nbr =
+    OSPFGateway::Ptr gw_obj =
       OSPFGateway::New(nb, gateway, subnet, subnet_mask);
-    gateways_[nd_id] = ospf_nbr;
+    gateways_[nd_id] = gw_obj;
 
     /* Signaling notifiee. */
     notifiee_->onGateway(this, nd_id);
