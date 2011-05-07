@@ -147,7 +147,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* Sends the given LSU packet to all neighbors except the packet's original
      sender. */
-  void forward_flood_lsu_packet(Fwk::Ptr<OSPFLSUPacket> pkt) const;
+  void forward_lsu_flood(Fwk::Ptr<OSPFLSUPacket> pkt) const;
 
   /* Constructs a full link-state update packet destined to neighbor with id
      NBR_ID connected at interface IFACE. */

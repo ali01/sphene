@@ -180,7 +180,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   if (pkt->ttl() > 1) {
     pkt->ttlDec(1);
     pkt->checksumReset();
-    ospf_router_->forward_flood_lsu_packet(pkt);
+    ospf_router_->forward_lsu_flood(pkt);
   }
 }
 
@@ -363,7 +363,7 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
 }
 
 void
-OSPFRouter::forward_flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
+OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
   RouterID sender_id = pkt->routerID();
 
   OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
