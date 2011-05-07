@@ -2,23 +2,25 @@
 #define ROUTING_TABLE_H_HE9H7VS9
 
 #include "fwk/locked_interface.h"
+#include "fwk/notifier.h"
 #include "fwk/map.h"
-#include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
 
 
 /* Forward declarations. */
 class Interface;
-
+class RoutingTableNotifiee;
 
 /* Thread safety: in a threaded environment, methods of this class must be
    accessed with lockedIs(true) or by using the ScopedLock. */
-class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
-                     public Fwk::LockedInterface {
+class RoutingTable
+    : public Fwk::BaseNotifier<RoutingTable, RoutingTableNotifiee>,
+      public Fwk::LockedInterface {
  public:
   typedef Fwk::Ptr<const RoutingTable> PtrConst;
   typedef Fwk::Ptr<RoutingTable> Ptr;
+  typedef RoutingTableNotifiee Notifiee;
 
   /* Nested routing table entry class */
   class Entry : public Fwk::PtrInterface<Entry> {
@@ -115,6 +117,16 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);
   void operator=(const RoutingTable&);
+};
+
+
+class RoutingTableNotifiee
+    : public Fwk::BaseNotifiee<RoutingTable, RoutingTableNotifiee> {
+ public:
+  virtual void onEntry(RoutingTable::Ptr rtable,
+                       RoutingTable::Entry::Ptr entry) { }
+  virtual void onEntryDel(RoutingTable::Ptr rtable,
+                          RoutingTable::Entry::Ptr entry) { }
 };
 
 #endif

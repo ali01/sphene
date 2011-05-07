@@ -86,6 +86,9 @@ RoutingTable::entryIs(Entry::Ptr entry) {
       rtable_static_[subnet] = entry;
       break;
   }
+
+  for (unsigned int i = 0; i < notifiees_.size(); ++i)
+    notifiees_[i]->onEntry(this, entry);
 }
 
 void
@@ -104,6 +107,9 @@ RoutingTable::entryDel(Entry::Ptr entry) {
       rtable_static_.elemDel(subnet);
       break;
   }
+
+  for (unsigned int i = 0; i < notifiees_.size(); ++i)
+    notifiees_[i]->onEntry(this, entry);
 }
 
 void
@@ -114,9 +120,8 @@ RoutingTable::entryDel(const IPv4Addr& subnet) {
 void
 RoutingTable::clearDynamicEntries() {
   const_iterator it = rtable_dynamic_.begin();
-  for(; it != rtable_dynamic_.end(); ++it) {
+  for (; it != rtable_dynamic_.end(); ++it) {
     IPv4Addr key = it->first;
-    rtable_.elemDel(key);
-    rtable_dynamic_.elemDel(key);
+    entryDel(key);
   }
 }
