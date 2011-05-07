@@ -203,6 +203,32 @@ OSPFPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 const IPv4Addr OSPFHelloPacket::kBroadcastAddr(0xe0000005);
 
+OSPFHelloPacket::Ptr
+OSPFHelloPacket::NewDefault(PacketBuffer::Ptr buffer,
+                            const RouterID& router_id,
+                            const AreaID& area_id,
+                            const IPv4Addr& mask,
+                            uint16_t helloint) {
+  OSPFHelloPacket::Ptr pkt =
+    new OSPFHelloPacket(buffer, buffer->size() - OSPFHelloPacket::kPacketSize);
+
+  /* OSPFPacket fields. */
+  pkt->versionIs(OSPFPacket::kVersion);
+  pkt->typeIs(OSPFPacket::kHello);
+  pkt->lenIs(OSPFHelloPacket::kPacketSize);
+  pkt->routerIDIs(router_id);
+  pkt->areaIDIs(area_id);
+  pkt->autypeAndAuthAreZero();
+
+  /* OSPFHelloPacket fields. */
+  pkt->subnetMaskIs(mask);
+  pkt->hellointIs(helloint);
+  pkt->paddingIsZero();
+  pkt->checksumReset();
+
+  return pkt;
+}
+
 OSPFHelloPacket::OSPFHelloPacket(PacketBuffer::Ptr buffer,
                                  unsigned int buffer_offset)
     : OSPFPacket(buffer, buffer_offset),

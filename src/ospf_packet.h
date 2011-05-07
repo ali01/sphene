@@ -85,6 +85,12 @@ class OSPFHelloPacket : public OSPFPacket {
   static const IPv4Addr kBroadcastAddr;
   static const size_t kPacketSize;
 
+  static Ptr NewDefault(PacketBuffer::Ptr buffer,
+                        const RouterID& router_id,
+                        const AreaID& area_id,
+                        const IPv4Addr& mask,
+                        uint16_t helloint);
+
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFHelloPacket(buffer, buffer_offset);
   }

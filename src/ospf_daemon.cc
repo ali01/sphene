@@ -67,31 +67,23 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   PacketBuffer::Ptr buffer = PacketBuffer::New(eth_pkt_len);
 
   OSPFHelloPacket::Ptr ospf_pkt =
-    OSPFHelloPacket::New(buffer, buffer->size() - OSPFHelloPacket::kPacketSize);
+    OSPFHelloPacket::NewDefault(buffer,
+                                ospf_router_->routerID(),
+                                ospf_router_->areaID(),
+                                iface->interface()->subnetMask(),
+                                iface->helloint());
 
   IPPacket::Ptr ip_pkt =
     IPPacket::NewDefault(buffer, ip_pkt_len,
                          iface->interface()->ip(),
                          OSPFHelloPacket::kBroadcastAddr);
 
-  EthernetPacket::Ptr eth_pkt =
-    EthernetPacket::New(buffer, buffer->size() - eth_pkt_len);
-
-  /* OSPFHelloPacket fields: */
-  ospf_pkt->versionIs(OSPFPacket::kVersion);
-  ospf_pkt->typeIs(OSPFPacket::kHello);
-  ospf_pkt->lenIs(OSPFHelloPacket::kPacketSize);
-  ospf_pkt->routerIDIs(ospf_router_->routerID());
-  ospf_pkt->areaIDIs(ospf_router_->areaID());
-  ospf_pkt->autypeAndAuthAreZero();
-  ospf_pkt->subnetMaskIs(iface->interface()->subnetMask());
-  ospf_pkt->hellointIs(iface->helloint());
-  ospf_pkt->paddingIsZero();
-  ospf_pkt->checksumReset();
-
   /* IPPacket fields: */
   ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
+
+  EthernetPacket::Ptr eth_pkt =
+    EthernetPacket::New(buffer, buffer->size() - eth_pkt_len);
 
   /* EthernetPacket fields: */
   eth_pkt->srcIs(iface->interface()->mac());
