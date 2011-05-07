@@ -450,8 +450,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
       (orig_pkt->len() < max_data_len) ? orig_pkt->len() : max_data_len;
 
   // Create buffer for new packet.
-  const size_t pkt_len = (EthernetPacket::kHeaderSize +
-                          IPPacket::kHeaderSize +
+  const size_t pkt_len = (IPPacket::kHeaderSize +
                           ICMPPacket::kHeaderLen +
                           data_len);
   PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
@@ -472,17 +471,11 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   // Outgoing interface.
   Interface::PtrConst out_iface = r_entry->interface();
 
-  // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt =
-      EthernetPacket::New(buffer, buffer->size() - pkt_len);
-  eth_pkt->typeIs(EthernetPacket::kIP);
-
   // IP packet next.
-  IPPacket::Ptr ip_pkt =
-      Ptr::st_cast<IPPacket>(eth_pkt->payload());
+  IPPacket::Ptr ip_pkt = IPPacket::New(buffer, buffer->size() - pkt_len);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
-  ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
+  ip_pkt->packetLengthIs(pkt_len);
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->identificationIs(0);
@@ -536,8 +529,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
       (orig_pkt->len() < max_data_len) ? orig_pkt->len() : max_data_len;
 
   // Create buffer for new packet.
-  const size_t pkt_len = (EthernetPacket::kHeaderSize +
-                          IPPacket::kHeaderSize +
+  const size_t pkt_len = (IPPacket::kHeaderSize +
                           ICMPPacket::kHeaderLen +
                           data_len);
   PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
@@ -558,17 +550,11 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   // Outgoing interface.
   Interface::PtrConst out_iface = r_entry->interface();
 
-  // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt =
-      EthernetPacket::New(buffer, buffer->size() - pkt_len);
-  eth_pkt->typeIs(EthernetPacket::kIP);
-
   // IP packet next.
-  IPPacket::Ptr ip_pkt =
-      Ptr::st_cast<IPPacket>(eth_pkt->payload());
+  IPPacket::Ptr ip_pkt = IPPacket::New(buffer, buffer->size() - pkt_len);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
-  ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
+  ip_pkt->packetLengthIs(pkt_len);
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->identificationIs(0);
