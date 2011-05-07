@@ -2,7 +2,6 @@
 #define OSPF_ROUTER_H_LFORNADU
 
 #include "fwk/linked_list.h"
-#include "fwk/log.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 using Fwk::LinkedList;
@@ -12,6 +11,7 @@ using Fwk::LinkedList;
 #include "packet.h"
 
 /* Forward declarations. */
+class ControlPlane;
 class Interface;
 class OSPFInterfaceMap;
 class OSPFLSUPacket;
@@ -27,8 +27,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   static const uint16_t kDefaultHelloInterval = 10;
 
-  static Ptr New(const RouterID& router_id, const AreaID& area_id) {
-    return new OSPFRouter(router_id, area_id);
+  static Ptr New(const RouterID& router_id, const AreaID& area_id,
+                 Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp) {
+    return new OSPFRouter(router_id, area_id, rtable, cp);
   }
 
   // TODO(ali): perhaps should take OSPFPacket instead of Packet.
@@ -43,10 +44,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<const RoutingTable> routingTable() const;
   Fwk::Ptr<RoutingTable> routingTable();
 
-  void routingTableIs(Fwk::Ptr<RoutingTable> rtable);
-
  protected:
-  OSPFRouter(const RouterID& router_id, const AreaID& area_id);
+  OSPFRouter(const RouterID& router_id, const AreaID& area_id,
+             Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp);
 
  private:
   /* Nested double-dispatch Packet::Functor. */
@@ -63,7 +63,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     OSPFNode* router_node_;
     OSPFInterfaceMap* interfaces_;
     OSPFTopology* topology_;
-    Fwk::Log::Ptr log_;
   };
 
   class NeighborRelationship : public LinkedList<NeighborRelationship>::Node {
@@ -141,6 +140,14 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
+  /* Sends the given LSU packet to all neighbors except the packet's original
+     sender. */
+  void flood_lsu_packet(Fwk::Ptr<OSPFLSUPacket> pkt) const;
+
+  /* Sends PKT to the node in the topology with DEST_ID. */
+  void send_pkt_to_neighbor(const RouterID& neighbor_id,
+                            Fwk::Ptr<OSPFPacket> pkt) const;
+
   /* Obtains the staged NeighborRelationship object with the specified
      LSU_SENDER_ID and ADVERTISED_NEIGHBOR_ID from the LINKS_STAGED
      multimap if it exists. A NeighborRelationship object will exist if the
@@ -168,10 +175,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      multimap, true otherwise. */
   bool unstage_nbr(NeighborRelationship::Ptr nbr);
 
-
   /* -- OSPFRouter data members. -- */
 
-  Fwk::Log::Ptr log_;
   PacketFunctor functor_;
 
   RouterID router_id_;
@@ -179,7 +184,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFNode> router_node_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
+  TopologyReactor::Ptr topology_reactor_; /* Reactor: Topology notifications */
+
+  /* External references. */
   Fwk::Ptr<RoutingTable> routing_table_;
+  ControlPlane* control_plane_; /* Weak pointer prevents circular references */
 
   /* Logical Multimap<LSUSenderRouterID,NeighborRelationshipList>: Keeps track
      of neighbor relationships that have not yet been commited to the topology.
@@ -187,9 +196,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      contradicting link-state advertisements. Refer to the PWOSPF specification
      for more details. */
   Fwk::Map<RouterID,LinkedList<NeighborRelationship> > links_staged_;
-
-  /* Instance of reactor to Topology notifications. */
-  TopologyReactor::Ptr topology_reactor_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);

@@ -20,13 +20,8 @@ RoutingTable::Entry::interface() const {
   return interface_;
 }
 
-Interface::Ptr
-RoutingTable::Entry::interface() {
-  return interface_;
-}
-
 void
-RoutingTable::Entry::interfaceIs(Interface::Ptr iface) {
+RoutingTable::Entry::interfaceIs(Interface::PtrConst iface) {
   interface_ = iface;
 }
 

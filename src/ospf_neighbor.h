@@ -27,11 +27,11 @@ class OSPFNeighbor : public Fwk::PtrInterface<OSPFNeighbor> {
   const IPv4Addr& subnet() const { return subnet_; }
   const IPv4Addr& subnetMask() const { return subnet_mask_; }
 
- private:
+ protected:
   OSPFNeighbor(Fwk::Ptr<OSPFNode> neighbor,
                const IPv4Addr& subnet,
                const IPv4Addr& subnet_mask);
-
+ private:
   /* Data members. */
   Fwk::Ptr<OSPFNode> node_;
   IPv4Addr subnet_;

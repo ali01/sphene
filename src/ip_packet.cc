@@ -24,9 +24,10 @@ struct ip_hdr {
   uint32_t ip_dst;          /* destination address */
 } __attribute__((packed));
 
-const size_t
-IPPacket::kHeaderSize = sizeof(struct ip_hdr);
-
+/* Static members. */
+const uint8_t IPPacket::kDefaultTTL;
+const size_t IPPacket::kHeaderSize = sizeof(struct ip_hdr);
+const IPVersion IPPacket::kVersion;
 
 /* IPPacket */
 
@@ -207,30 +208,6 @@ IPPacket::checksumValid() const {
   self->checksumIs(pkt_cksum);
   return pkt_cksum == actual_cksum;
 }
-
-template <typename PacketBuffer>
-uint16_t
-IPPacket::compute_cksum(const PacketBuffer* pkt, unsigned int len) {
-  uint32_t sum;
-  const uint8_t* buffer = (const uint8_t*)pkt;
-
-  for (sum = 0; len >= 2; buffer += 2, len -= 2)
-    sum += buffer[0] << 8 | buffer[1];
-
-  if (len > 0)
-    sum += buffer[0] << 8;
-
-  while (sum > 0xFFFF)
-    sum = (sum >> 16) + (sum & 0xFFFF);
-
-  sum = ~sum;
-
-  if (sum == 0)
-    sum = 0xFFFF;
-
-  return sum;
-}
-
 
 // TODO(ms): Need tests for this.
 Packet::Ptr

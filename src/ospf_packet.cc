@@ -7,7 +7,7 @@
 #include "interface.h"
 #include "packet_buffer.h"
 
-/* Global log instance */
+/* Static global log instance */
 static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFPacket");
 
 
@@ -45,6 +45,11 @@ struct ospf_lsu_adv {
   uint32_t mask;            /* subnet mask of advertised route */
   uint32_t router_id;       /* ID of neighboring router on advertised link */
 } __attribute((packed));
+
+const size_t OSPFHelloPacket::kPacketSize = sizeof(struct ospf_hello_pkt);
+const size_t OSPFLSUPacket::kHeaderSize = sizeof(struct ospf_lsu_hdr);
+const size_t OSPFLSUPacket::kAdvSize = sizeof(struct ospf_lsu_adv);
+
 
 /* OSPFPacket */
 
@@ -274,6 +279,11 @@ OSPFLSUPacket::ttl() const {
 void
 OSPFLSUPacket::ttlIs(uint16_t ttl) {
   ospf_lsu_hdr_->ttl = htons(ttl);
+}
+
+void
+OSPFLSUPacket::ttlDec(uint16_t delta) {
+  ttlIs(ttl() - delta);
 }
 
 uint32_t

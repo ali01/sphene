@@ -90,7 +90,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   pkt->checksumReset();
 
   // Outgoing interface.
-  Interface::Ptr out_iface = r_entry->interface();
+  Interface::PtrConst out_iface = r_entry->interface();
   DLOG << "  outgoing interface: " << out_iface->name();
 
   if (out_iface->type() == Interface::kVirtual) {
@@ -329,7 +329,7 @@ void ControlPlane::PacketFunctor::operator()(UnknownPacket* const pkt,
 
 void
 ControlPlane::sendARPRequestAndEnqueuePacket(IPv4Addr next_hop_ip,
-                                             Interface::Ptr out_iface,
+                                             Interface::PtrConst out_iface,
                                              IPPacket::Ptr pkt) {
   // Do we already have a packet queue for this next hop in the arp queue?
   ARPQueue::Entry::Ptr entry = arp_queue_->entry(next_hop_ip);
@@ -470,7 +470,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   }
 
   // Outgoing interface.
-  Interface::Ptr out_iface = r_entry->interface();
+  Interface::PtrConst out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
   EthernetPacket::Ptr eth_pkt =
@@ -490,8 +490,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
-  // TODO(ms): Any reason to pick a better default?
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
 
   // ICMP subtype packet.
   // Cannot use a direct static cast here because we need to call the subtype
@@ -557,7 +556,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   }
 
   // Outgoing interface.
-  Interface::Ptr out_iface = r_entry->interface();
+  Interface::PtrConst out_iface = r_entry->interface();
 
   // Ethernet packet first. Src and Dst are set when the IP packet is sent.
   EthernetPacket::Ptr eth_pkt =
@@ -577,7 +576,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
 
   // ICMP subtype packet.
   ICMPPacket::Ptr icmp_pkt = Ptr::st_cast<ICMPPacket>(ip_pkt->payload());
@@ -646,7 +645,7 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   // Add IP header.
   gre_pkt->buffer()->minimumSizeIs(gre_pkt->len() + IPPacket::kHeaderSize);
   IPPacket::Ptr ip_pkt =
-      IPPacket::IPPacketNew(gre_pkt->buffer(),
+      IPPacket::New(gre_pkt->buffer(),
                             gre_pkt->bufferOffset() - IPPacket::kHeaderSize);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
@@ -658,7 +657,7 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(tunnel_r_entry->interface()->ip());
   ip_pkt->dstIs(tunnel->remote());
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
   ip_pkt->checksumReset();
 
   // Output new packet.
@@ -696,7 +695,7 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
     // Create a new buffer and IP packet for new fragment.
     PacketBuffer::Ptr buffer = PacketBuffer::New(fragment_size);
     IPPacket::Ptr fragment =
-        IPPacket::IPPacketNew(buffer, buffer->size() - fragment_size);
+        IPPacket::New(buffer, buffer->size() - fragment_size);
 
     // Copy fields into fragment.
     fragment->versionIs(4);
