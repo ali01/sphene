@@ -4,17 +4,21 @@
 #include <inttypes.h>
 #include <string>
 
-#include "fwk/named_interface.h"
+#include "fwk/notifier.h"
 #include "fwk/ptr.h"
 
 #include "ethernet_packet.h"
 #include "ip_packet.h"
 
 
-class Interface : public Fwk::NamedInterface {
+class InterfaceNotifiee;
+
+class Interface
+    : public Fwk::BaseNotifier<Interface, InterfaceNotifiee> {
  public:
   typedef Fwk::Ptr<const Interface> PtrConst;
   typedef Fwk::Ptr<Interface> Ptr;
+  typedef InterfaceNotifiee Notifiee;
 
   enum Type {
     kHardware,
@@ -29,13 +33,13 @@ class Interface : public Fwk::NamedInterface {
   EthernetAddr mac() const { return mac_; }
 
   // Sets the hardware (MAC) address.
-  void macIs(const EthernetAddr& addr) { mac_ = addr; }
+  void macIs(const EthernetAddr& addr);
 
   // Returns IPv4 address.
   IPv4Addr ip() const { return ip_; }
 
   // Sets the interface IP address.
-  void ipIs(const IPv4Addr& ip) { ip_ = ip; }
+  void ipIs(const IPv4Addr& ip);
 
   // Returns subnet mask.
   IPv4Addr subnetMask() const { return mask_; }
@@ -82,6 +86,14 @@ class Interface : public Fwk::NamedInterface {
  private:
   Interface(const Interface&);
   void operator=(const Interface&);
+};
+
+
+class InterfaceNotifiee
+    : public Fwk::BaseNotifiee<Interface, InterfaceNotifiee> {
+ public:
+  virtual void onIP(Interface::Ptr iface) { }
+  virtual void onMAC(Interface::Ptr iface) { }
 };
 
 #endif
