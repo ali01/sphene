@@ -72,6 +72,13 @@ class Interface
   // Sets the socket descriptor.
   void socketDescriptorIs(int s) { socket_ = s; }
 
+  // Returns the index.
+  unsigned int index() const { return index_; }
+
+  // Sets the index. This is usually called by a container (e.g.,
+  // InterfaceMap).
+  void indexIs(unsigned int index) { index_ = index; }
+
  protected:
   Interface(const std::string& name);
 
@@ -82,6 +89,7 @@ class Interface
   uint32_t speed_;
   Type type_;
   int socket_;
+  unsigned int index_;
 
  private:
   Interface(const Interface&);
