@@ -21,12 +21,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include <linux/netdevice.h>
-#include <linux/sockios.h>
-#include <netinet/in.h>
 #include <string>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <unistd.h>
 #include <utility>
 
@@ -51,17 +46,11 @@
 #include "packet_buffer.h"
 #include "router.h"
 #include "routing_table.h"
+#include "sr_cpu_extension_nf2.h"
 #include "sr_vns.h"
 #include "sr_base_internal.h"
 #include "sw_data_plane.h"
 #include "task.h"
-
-#ifdef _CPUMODE_
-#include "nf2.h"
-#include "nf2util.h"
-#include "reg_defines.h"
-#include "sr_cpu_extension_nf2.h"
-#endif
 
 using std::pair;
 using std::string;
@@ -70,11 +59,6 @@ static Fwk::Log::Ptr log_;
 
 static void processing_thread(void* _sr);
 static void read_rtable(struct sr_instance* sr);
-
-#ifdef _CPUMODE_
-static void init_hw_interfaces(struct sr_instance* sr);
-static void init_hw_interface(Interface::Ptr iface, int index);
-#endif
 
 
 /*-----------------------------------------------------------------------------
@@ -172,11 +156,6 @@ void sr_integ_hw_setup(struct sr_instance* sr)
 {
   Router::Ptr router = sr->router;
 
-#ifdef _CPUMODE_
-  // Initialize hardware interfaces if necessary.
-  init_hw_interfaces(sr);
-#endif
-
   // Read in rtable file, if any.
   read_rtable(sr);
 
@@ -203,61 +182,6 @@ void sr_integ_hw_setup(struct sr_instance* sr)
   sr->quit = false;
   sys_thread_new(processing_thread, sr);
 }
-
-
-#ifdef _CPUMODE_
-static void init_hw_interfaces(struct sr_instance* const sr) {
-  Router::Ptr router = sr->router;
-  InterfaceMap::Ptr if_map = router->dataPlane()->interfaceMap();
-
-  InterfaceMap::iterator it;
-  int index = 0;
-  for (it = if_map->begin(); it != if_map->end(); ++it, ++index) {
-    Interface::Ptr iface = it->second;
-    // Do nothing for non-hardware interfaces.
-    if (iface->type() != Interface::kHardware)
-      continue;
-
-    init_hw_interface(iface, index);
-  }
-}
-
-
-static void init_hw_interface(Interface::Ptr iface, const int index) {
-  char iface_name[32] = "nf2c";
-  sprintf(&(iface_name[4]), "%i", index);
-
-  DLOG << "Initializing hardware interface " << iface_name
-       << " as " << iface->name();
-
-  int s = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-  if (s < 0) {
-    perror("socket()");
-    exit(1);
-  }
-
-  struct ifreq ifr;
-  bzero(&ifr, sizeof(struct ifreq));
-  strncpy(ifr.ifr_ifrn.ifrn_name, iface_name, IFNAMSIZ);
-  if (ioctl(s, SIOCGIFINDEX, &ifr) < 0) {
-    perror("ioctl SIOCGIFINDEX");
-    exit(1);
-  }
-
-  struct sockaddr_ll saddr;
-  bzero(&saddr, sizeof(struct sockaddr_ll));
-  saddr.sll_family = AF_PACKET;
-  saddr.sll_protocol = htons(ETH_P_ALL);
-  saddr.sll_ifindex = ifr.ifr_ifru.ifru_ivalue;
-
-  if (bind(s, (struct sockaddr*)(&saddr), sizeof(saddr)) < 0) {
-    perror("bind error");
-    exit(1);
-  }
-
-  iface->socketDescriptorIs(s);
-}
-#endif
 
 
 static void read_rtable(struct sr_instance* const sr) {
