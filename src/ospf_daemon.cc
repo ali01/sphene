@@ -5,7 +5,12 @@
 
 #include "control_plane.h"
 #include "data_plane.h"
+#include "ethernet_packet.h"
+#include "ip_packet.h"
+#include "ospf_interface.h"
+#include "ospf_packet.h"
 #include "ospf_router.h"
+#include "packet_buffer.h"
 #include "task.h"
 #include "time_types.h"
 
@@ -34,4 +39,53 @@ OSPFDaemon::run() {
   // TODO(ms): This runs every second. Send Hello packets and LSU packets here
   //   as necessary. Also timeout any neighbors or routers in the topology that
   //   have not sent Hello or LSU packets within the required time period.
+}
+
+void
+OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
+  size_t ip_pkt_len = OSPFHelloPacket::kPacketSize + IPPacket::kHeaderSize;
+  size_t eth_pkt_len = ip_pkt_len + EthernetPacket::kHeaderSize;
+
+  PacketBuffer::Ptr buffer = PacketBuffer::New(eth_pkt_len);
+
+  OSPFHelloPacket::Ptr ospf_pkt =
+    OSPFHelloPacket::New(buffer, buffer->size() - OSPFHelloPacket::kPacketSize);
+
+  IPPacket::Ptr ip_pkt =
+    IPPacket::New(buffer, buffer->size() - ip_pkt_len);
+
+  EthernetPacket::Ptr eth_pkt =
+    EthernetPacket::New(buffer, buffer->size() - eth_pkt_len);
+
+  /* OSPFHelloPacket fields: */
+  ospf_pkt->versionIs(OSPFPacket::kVersion);
+  ospf_pkt->typeIs(OSPFPacket::kHello);
+  ospf_pkt->lenIs(OSPFHelloPacket::kPacketSize);
+  ospf_pkt->routerIDIs(ospf_router_->routerID());
+  ospf_pkt->areaIDIs(ospf_router_->areaID());
+  ospf_pkt->autypeAndAuthAreZero();
+  ospf_pkt->subnetMaskIs(iface->interface()->subnetMask());
+  ospf_pkt->hellointIs(iface->helloint());
+  ospf_pkt->paddingIsZero();
+  ospf_pkt->checksumReset();
+
+  /* IPPacket fields: */
+  ip_pkt->versionIs(IPPacket::kVersion);
+  ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4); /* Words, not bytes. */
+  ip_pkt->diffServicesAre(0);
+  ip_pkt->packetLengthIs(ip_pkt_len);
+  ip_pkt->identificationIs(0);
+  ip_pkt->flagsAre(0);
+  ip_pkt->fragmentOffsetIs(0);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
+  ip_pkt->srcIs(iface->interface()->ip());
+  ip_pkt->dstIs(OSPFHelloPacket::kBroadcastAddr);
+  ip_pkt->checksumReset();
+
+  /* EthernetPacket fields: */
+  eth_pkt->srcIs(iface->interface()->mac());
+  eth_pkt->dstIs(EthernetAddr::kBroadcast);
+  eth_pkt->typeIs(EthernetPacket::kIP);
+
+  data_plane_->outputPacketNew(eth_pkt, iface->interface());
 }

@@ -3,9 +3,12 @@
 
 #include "fwk/ptr.h"
 
+#include "ospf_types.h"
 #include "task.h"
 
 /* Forward declarations. */
+class OSPFInterface;
+class OSPFRouter;
 class ControlPlane;
 class DataPlane;
 class OSPFRouter;
@@ -26,6 +29,9 @@ class OSPFDaemon : public PeriodicTask {
              Fwk::Ptr<DataPlane> dp);
 
   void run();
+
+  /* Sends a HELLO packet to all neighbors connected to interface IFACE. */
+  void broadcast_hello_out_interface(Fwk::Ptr<OSPFInterface> iface);
 
   /* Data members. */
   Fwk::Ptr<ControlPlane> control_plane_;
