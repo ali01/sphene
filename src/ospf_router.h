@@ -13,6 +13,7 @@ using Fwk::LinkedList;
 /* Forward declarations. */
 class ControlPlane;
 class Interface;
+class OSPFInterface;
 class OSPFInterfaceMap;
 class OSPFLSUPacket;
 class OSPFLink;
@@ -140,13 +141,18 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
+  /* Sends PKT to the node in the topology with DEST_ID. */
+  void forward_pkt_to_neighbor(const RouterID& neighbor_id,
+                            Fwk::Ptr<OSPFPacket> pkt) const;
+
   /* Sends the given LSU packet to all neighbors except the packet's original
      sender. */
   void forward_flood_lsu_packet(Fwk::Ptr<OSPFLSUPacket> pkt) const;
 
-  /* Sends PKT to the node in the topology with DEST_ID. */
-  void forward_pkt_to_neighbor(const RouterID& neighbor_id,
-                            Fwk::Ptr<OSPFPacket> pkt) const;
+  /* Constructs a full link-state update packet destined to neighbor with id
+     NBR_ID connected at interface IFACE. */
+  Fwk::Ptr<OSPFLSUPacket> build_lsu_to_neighbor(Fwk::Ptr<OSPFInterface> iface,
+                                                const RouterID& nbr_id) const;
 
   /* Obtains the staged NeighborRelationship object with the specified
      LSU_SENDER_ID and ADVERTISED_NEIGHBOR_ID from the LINKS_STAGED

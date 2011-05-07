@@ -319,6 +319,49 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   }
 }
 
+OSPFLSUPacket::Ptr
+OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
+                                  const RouterID& nbr_id) const {
+  if (iface->neighbor(nbr_id) == NULL) {
+    ELOG << "send_new_lsu_to_neighbor: Node with specified NBR_ID is not "
+         << "directly connected to IFACE.";
+    return NULL;
+  }
+
+  size_t adv_count = interfaces_->gateways();
+
+  size_t ospf_pkt_len = OSPFLSUPacket::kHeaderSize +
+                        adv_count * OSPFLSUAdvertisement::kSize;
+  size_t ip_pkt_len = IPPacket::kHeaderSize + ospf_pkt_len;
+  size_t eth_pkt_len = EthernetPacket::kHeaderSize + ip_pkt_len;
+
+  PacketBuffer::Ptr buffer = PacketBuffer::New(eth_pkt_len);
+
+  /* OSPFPacket. */
+  OSPFLSUPacket::Ptr ospf_pkt =
+    OSPFLSUPacket::NewDefault(buffer, routerID(), areaID(),
+                              adv_count, lsu_seqno_);
+
+  OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
+  for (uint32_t ix = 0; gw_it != iface->gatewaysEnd(); ++gw_it, ++ix) {
+    OSPFGateway::Ptr gw = gw_it->second;
+    OSPFLSUAdvertisement::Ptr adv = ospf_pkt->advertisement(ix);
+    adv->routerIDIs(gw->node()->routerID());
+    adv->subnetIs(gw->subnet());
+    adv->subnetMaskIs(gw->subnetMask());
+  }
+
+  /* IPPacket. */
+  OSPFGateway::Ptr gw_obj = iface->gateway(nbr_id);
+  IPPacket::Ptr ip_pkt =
+    IPPacket::NewDefault(buffer, ip_pkt_len,
+                         iface->interfaceIP(), gw_obj->gateway());
+  ip_pkt->ttlIs(1);
+  ip_pkt->checksumReset();
+
+  return ospf_pkt;
+}
+
 void
 OSPFRouter::forward_flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
   RouterID sender_id = pkt->routerID();
