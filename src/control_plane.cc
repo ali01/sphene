@@ -609,17 +609,6 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
     return;
   }
 
-  // Check to see if fragmentation will be needed.
-  const size_t new_packet_length = (IPPacket::kHeaderSize +
-                                    GREPacket::kHeaderSize +
-                                    pkt->len());
-  if ((pkt->flags() & IPPacket::IP_DF) &&
-      new_packet_length > EthernetPacket::kMTU) {
-    // Fragmentation will be needed and Don't Fragment is set.
-    sendICMPDestUnreachFragRequired(pkt);
-    return;
-  }
-
   // Do an LPM on remote.
   RoutingTable::Entry::Ptr tunnel_r_entry;
   {
