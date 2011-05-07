@@ -130,8 +130,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     neighbor = OSPFNode::New(neighbor_id);
     ifd->gatewayIs(neighbor, gateway, subnet, subnet_mask);
 
-    // TODO(ali): this may need to be a deep copy of neighbor.
-    router_node_->neighborIs(neighbor, subnet, subnet_mask);
+    // TODO(ali): this may need to be a deep copy of link.
+    router_node_->linkIs(neighbor, subnet, subnet_mask);
   }
 
   /* Refresh neighbor's age. */
@@ -251,7 +251,7 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     return;
   }
 
-  OSPFNode::const_iterator it;
+  OSPFNode::const_nb_iter it;
   for (it = dest->neighborsBegin(); it != dest->neighborsEnd(); ++it) {
     OSPFNode::Ptr neighbor = it->second;
     if (dest->prev() == NULL || dest->prev() == neighbor) {
@@ -392,10 +392,10 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   OSPFNode::Ptr lsu_sender = nbr->lsuSender();
   OSPFLink::Ptr adv_nb = nbr->advertisedNeighbor();
 
-  /* Establish bi-directional neighbor relationship. */
-  lsu_sender->neighborIs(adv_nb->node(),
-                         adv_nb->subnet(),
-                         adv_nb->subnetMask());
+  /* Establish bi-directional link. */
+  lsu_sender->linkIs(adv_nb->node(),
+                     adv_nb->subnet(),
+                     adv_nb->subnetMask());
 
   /* Add both nodes to the topology if they weren't already there. */
   topology_->nodeIs(lsu_sender);

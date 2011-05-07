@@ -84,11 +84,10 @@ OSPFTopology::nodeDel(const RouterID& router_id) {
   }
 
   /* Removing the node from the neighbor lists of all neighbors. */
-  OSPFNode::Ptr neighbor;
-  OSPFNode::iterator it;
+  OSPFNode::nb_iter it;
   for (it = node->neighborsBegin(); it != node->neighborsEnd(); ++it) {
-    neighbor = it->second;
-    neighbor->neighborDel(node);
+    OSPFNode::Ptr neighbor = it->second;
+    neighbor->linkDel(node);
   }
 }
 
@@ -131,7 +130,7 @@ OSPFTopology::compute_optimal_spanning_tree() {
 
     node_set.elemDel(cur_nd->routerID());
 
-    OSPFNode::iterator it = cur_nd->neighborsBegin();
+    OSPFNode::nb_iter it = cur_nd->neighborsBegin();
     for (; it != cur_nd->neighborsEnd(); ++it) {
       OSPFNode::Ptr neighbor = it->second;
       neighbor = node_set.elem(neighbor->routerID());

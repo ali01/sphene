@@ -16,8 +16,11 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   typedef Fwk::Ptr<const OSPFNode> PtrConst;
   typedef Fwk::Ptr<OSPFNode> Ptr;
 
-  typedef Fwk::Map<RouterID,OSPFNode>::iterator iterator;
-  typedef Fwk::Map<RouterID,OSPFNode>::const_iterator const_iterator;
+  typedef Fwk::Map<RouterID,OSPFNode>::iterator nb_iter;
+  typedef Fwk::Map<RouterID,OSPFNode>::const_iterator const_nb_iter;
+
+  typedef Fwk::Map<RouterID,OSPFLink>::iterator link_iter;
+  typedef Fwk::Map<RouterID,OSPFLink>::const_iterator const_link_iter;
 
   static const uint16_t kMaxDistance = 0xffff;
 
@@ -32,8 +35,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
     typedef Fwk::Ptr<Notifiee> Ptr;
 
     /* Notifications supported. */
-    virtual void onNeighbor(const RouterID& id) {}
-    virtual void onNeighborDel(const RouterID& id) {}
+    virtual void onLink(const RouterID& id) {}
+    virtual void onLinkDel(const RouterID& id) {}
 
    protected:
     Notifiee() {}
@@ -49,11 +52,11 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   const RouterID& routerID() const { return router_id_; }
 
+  OSPFLink::Ptr link(const RouterID& id);
+  OSPFLink::PtrConst link(const RouterID& id) const;
+
   OSPFNode::Ptr neighbor(const RouterID& id);
   OSPFNode::PtrConst neighbor(const RouterID& id) const;
-
-  IPv4Addr neighborSubnet(const RouterID& neighbor_id) const;
-  IPv4Addr neighborSubnetMask(const RouterID& neighbor_id) const;
 
   /* Previous node in the shortest path from the root node to this node. */
   OSPFNode::Ptr prev() { return prev_; }
@@ -68,11 +71,11 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Mutators. */
 
-  void neighborIs(OSPFNode::Ptr node,
-                  const IPv4Addr& subnet,
-                  const IPv4Addr& subnet_mask);
-  void neighborDel(const RouterID& id);
-  void neighborDel(OSPFNode::Ptr node);
+  void linkIs(OSPFNode::Ptr node,
+              const IPv4Addr& subnet,
+              const IPv4Addr& subnet_mask);
+  void linkDel(const RouterID& id);
+  void linkDel(OSPFNode::Ptr node);
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
@@ -83,10 +86,15 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Iterators. */
 
-  iterator neighborsBegin() { return neighbor_nodes_.begin(); }
-  iterator neighborsEnd() { return neighbor_nodes_.end(); }
-  const_iterator neighborsBegin() const { return neighbor_nodes_.begin(); }
-  const_iterator neighborsEnd() const { return neighbor_nodes_.end(); }
+  nb_iter neighborsBegin() { return neighbors_.begin(); }
+  nb_iter neighborsEnd() { return neighbors_.end(); }
+  const_nb_iter neighborsBegin() const { return neighbors_.begin(); }
+  const_nb_iter neighborsEnd() const { return neighbors_.end(); }
+
+  link_iter linksBegin() { return links_.begin(); }
+  link_iter linksEnd() { return links_.end(); }
+  const_link_iter linksBegin() const { return links_.begin(); }
+  const_link_iter linksEnd() const { return links_.end(); }
 
  private:
   OSPFNode(const RouterID& router_id);
@@ -101,13 +109,13 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr prev_;
 
   /* Map of all neighbors directly attached to this node. */
-  Fwk::Map<RouterID,OSPFLink> neighbors_;
+  Fwk::Map<RouterID,OSPFLink> links_;
 
   /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
      OSPFLink objects). Used to provide iterators. If space constraints
      become a problem, this can be optimized away by defining custom
      iterators. */
-  Fwk::Map<RouterID,OSPFNode> neighbor_nodes_;
+  Fwk::Map<RouterID,OSPFNode> neighbors_;
 
   /* Singleton notifiee. */
   Notifiee::Ptr notifiee_;

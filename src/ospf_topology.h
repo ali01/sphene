@@ -92,8 +92,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
       return new NodeReactor(_t);
     }
 
-    void onNeighbor(const RouterID& id) { topology_->dirtyIs(true); }
-    void onNeighborDel(const RouterID& id) { topology_->dirtyIs(true); }
+    void onLink(const RouterID& id) { topology_->dirtyIs(true); }
+    void onLinkDel(const RouterID& id) { topology_->dirtyIs(true); }
 
    private:
     NodeReactor(OSPFTopology::Ptr _t) : topology_(_t.ptr()) {}
