@@ -3,12 +3,12 @@
 #include "interface.h"
 
 OSPFInterface::Ptr
-OSPFInterface::New(Fwk::Ptr<const Interface> iface, Seconds helloint) {
+OSPFInterface::New(Fwk::Ptr<const Interface> iface, uint16_t helloint) {
   return new OSPFInterface(iface, helloint);
 }
 
 OSPFInterface::OSPFInterface(Interface::PtrConst iface,
-                             Seconds helloint)
+                             uint16_t helloint)
     : iface_(iface), helloint_(helloint), latest_hello_(0) {}
 
 Interface::PtrConst
@@ -55,8 +55,8 @@ OSPFInterface::neighborSubnetMask(const RouterID& router_id) const {
 }
 
 void
-OSPFInterface::latestHelloAgeIs(Seconds age) {
-  latest_hello_ = time(NULL) - age.value();
+OSPFInterface::latestHelloAgeIs(uint16_t age) {
+  latest_hello_ = time(NULL) - age;
 }
 
 void

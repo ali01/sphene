@@ -1,6 +1,8 @@
 #ifndef OSPF_INTERFACE_DESC_H_6WPUE39N
 #define OSPF_INTERFACE_DESC_H_6WPUE39N
 
+#include <time.h>
+
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -8,7 +10,6 @@
 #include "ospf_gateway.h"
 #include "ospf_node.h"
 #include "ospf_types.h"
-#include "time_types.h"
 
 /* Forward declarations. */
 class Interface;
@@ -23,7 +24,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   typedef Fwk::Map<RouterID,OSPFNode>::const_iterator
     const_iterator;
 
-  static Ptr New(Fwk::Ptr<const Interface> iface, Seconds helloint);
+  static Ptr New(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
   /* Notification support. */
   class Notifiee : public Fwk::PtrInterface<Notifiee> {
@@ -48,8 +49,8 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   /* Accessors. */
 
   Fwk::Ptr<const Interface> interface() const;
-  Seconds helloint() const { return helloint_; }
-  Seconds latestHelloAge() const { return time(NULL) - latest_hello_; }
+  uint16_t helloint() const { return helloint_; }
+  time_t latestHelloAge() const { return time(NULL) - latest_hello_; }
 
   OSPFNode::Ptr neighbor(const RouterID& router_id);
   OSPFNode::PtrConst neighbor(const RouterID& router_id) const;
@@ -63,7 +64,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   /* Mutators. */
 
-  void latestHelloAgeIs(Seconds age);
+  void latestHelloAgeIs(uint16_t age);
 
   void neighborIs(OSPFNode::Ptr nb,
                   const IPv4Addr& gateway,
@@ -81,11 +82,11 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   const_iterator neighborsEnd() const { return neighbor_nodes_.end(); }
 
  private:
-  OSPFInterface(Fwk::Ptr<const Interface> iface, Seconds helloint);
+  OSPFInterface(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
   /* Data members. */
   Fwk::Ptr<const Interface> iface_;
-  Seconds helloint_;
+  uint16_t helloint_;
   time_t latest_hello_;
 
   /* Map of all neighbors directly attached to this router. */
