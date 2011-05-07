@@ -58,7 +58,7 @@ class InterfaceMap
   const_iterator end() const { return name_if_map_.end(); }
 
  protected:
-  InterfaceMap() { }
+  InterfaceMap();
 
  private:
   NameInterfaceMap name_if_map_;

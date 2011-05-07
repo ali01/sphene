@@ -4,12 +4,16 @@
 #include <map>
 
 #include "fwk/exception.h"
+#include "fwk/notifier.h"
 #include "interface.h"
 #include "ip_packet.h"
 
 using std::string;
 
 const size_t InterfaceMap::kMaxInterfaces = 32;
+
+
+InterfaceMap::InterfaceMap() : BaseNotifier("InterfaceMap") { }
 
 
 void InterfaceMap::interfaceIs(const Interface::Ptr iface) {
