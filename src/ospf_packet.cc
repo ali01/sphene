@@ -46,8 +46,13 @@ struct ospf_lsu_adv {
   uint32_t router_id;       /* ID of neighboring router on advertised link */
 } __attribute((packed));
 
+const uint8_t OSPFPacket::kVersion;
+
 const size_t OSPFHelloPacket::kPacketSize = sizeof(struct ospf_hello_pkt);
+
+const uint8_t OSPFLSUPacket::kDefaultTTL;
 const size_t OSPFLSUPacket::kHeaderSize = sizeof(struct ospf_lsu_hdr);
+
 const size_t OSPFLSUAdvertisement::kSize = sizeof(struct ospf_lsu_adv);
 
 

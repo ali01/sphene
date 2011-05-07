@@ -124,6 +124,7 @@ class OSPFLSUPacket : public OSPFPacket {
   typedef Fwk::Ptr<const OSPFLSUPacket> PtrConst;
   typedef Fwk::Ptr<OSPFLSUPacket> Ptr;
 
+  static const uint8_t kDefaultTTL = 255;
   static const size_t kHeaderSize;
 
   /* OSPFLSUPacket factory constructor. */
