@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <signal.h>
+#include <sstream>
 #include <stdio.h>               /* snprintf()                        */
 #include <stdlib.h>              /* malloc()                          */
 #include <string.h>              /* strncpy()                         */
@@ -227,30 +228,49 @@ void cli_show_hw_route() {
 #endif
 
 void cli_show_ip() {
-    cli_send_str( "IP State:\n" );
+    cli_send_str("IP State:\n");
     cli_show_ip_arp();
+    cli_send_str("\n");
     cli_show_ip_intf();
+    cli_send_str("\n");
     cli_show_ip_route();
+    cli_send_str("\n");
     cli_show_ip_tunnel();
 }
 
 void cli_show_ip_arp() {
   struct sr_instance* sr = get_sr();
   ARPCache::Ptr cache = sr->router->controlPlane()->arpCache();
-  Fwk::ScopedLock<ARPCache> lock(cache);
 
+  // Buffers for proper formatting.
+  char line_buf[256];
+  std::stringstream ss;
+
+  // Line format.
+  const char* const format = "  %-16s   %-19s\n";
+
+  // Output header.
   cli_send_str("ARP cache:\n");
-  for (ARPCache::iterator it = cache->begin(); it != cache->end(); ++it) {
-    ARPCache::Entry::Ptr entry = it->second;
-    const string& ip = entry->ipAddr();
-    const string& mac = entry->ethernetAddr();
+  snprintf(line_buf, sizeof(line_buf), format,
+           "IP address", "MAC address");
+  cli_send_str(line_buf);
 
-    cli_send_str("  ");
-    cli_send_str(ip.c_str());
-    cli_send_str("\t");
-    cli_send_str(mac.c_str());
-    cli_send_str("\n");
+  {
+    Fwk::ScopedLock<ARPCache> lock(cache);
+
+    for (ARPCache::iterator it = cache->begin(); it != cache->end(); ++it) {
+      ARPCache::Entry::Ptr entry = it->second;
+      const string& ip = entry->ipAddr();
+      const string& mac = entry->ethernetAddr();
+
+      snprintf(line_buf, sizeof(line_buf), format,
+               ip.c_str(), mac.c_str());
+      ss << line_buf;
+    }
   }
+
+  // Send to client.
+  cli_send_str(ss.str().c_str());
 }
 
 void cli_show_ip_intf() {
@@ -259,6 +279,7 @@ void cli_show_ip_intf() {
 
   // Buffer for proper formatting.
   char line_buf[256];
+  std::stringstream ss;
 
   // Line format.
   const char* const format = "  %-6s %-16s %-16s %-19s %-6s\n";
@@ -269,30 +290,35 @@ void cli_show_ip_intf() {
            "Name", "IP address", "Mask", "MAC address", "Status");
   cli_send_str(line_buf);
 
-  // Output each interface.
-  Fwk::ScopedLock<InterfaceMap> lock(ifaces);
-  for (InterfaceMap::const_iterator it = ifaces->begin();
-       it != ifaces->end(); ++it) {
-    Interface::Ptr iface = it->second;
-    const string& name = iface->name();
-    const string& ip = iface->ip();
-    const string& mask = iface->subnetMask();
-    const string& mac = iface->mac();
-    const bool enabled = iface->enabled();
+  {
+    Fwk::ScopedLock<InterfaceMap> lock(ifaces);
 
-    snprintf(line_buf, sizeof(line_buf), format,
-             name.c_str(), ip.c_str(), mask.c_str(), mac.c_str(),
-             (enabled ? "up" : "down"));
-    cli_send_str(line_buf);
+    for (InterfaceMap::const_iterator it = ifaces->begin();
+         it != ifaces->end(); ++it) {
+      Interface::Ptr iface = it->second;
+      const string& name = iface->name();
+      const string& ip = iface->ip();
+      const string& mask = iface->subnetMask();
+      const string& mac = iface->mac();
+      const bool enabled = iface->enabled();
+
+      snprintf(line_buf, sizeof(line_buf), format,
+               name.c_str(), ip.c_str(), mask.c_str(), mac.c_str(),
+               (enabled ? "up" : "down"));
+      ss << line_buf;
+    }
   }
+
+  cli_send_str(ss.str().c_str());
 }
 
 void cli_show_ip_route() {
   struct sr_instance* sr = get_sr();
   RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
 
-  // Buffer for proper formatting.
+  // Buffers for proper formatting.
   char line_buf[256];
+  std::stringstream ss;
 
   // Line format.
   const char* const format = "  %-16s %-16s %-16s %-11s %-9s\n";
@@ -303,24 +329,30 @@ void cli_show_ip_route() {
            "Destination", "Gateway", "Mask", "Interface", "Type");
   cli_send_str(line_buf);
 
-  // Output each routing table entry.
-  Fwk::ScopedLock<RoutingTable> lock(rtable);
+  // Build up stringstream of routing table entries. We cannot output to the
+  // client here because routing the outgoing packet would require the the
+  // routing table lock, which we hold.
+  {
+    Fwk::ScopedLock<RoutingTable> lock(rtable);
 
-  RoutingTable::const_iterator it;
-  for (it = rtable->entriesBegin(); it != rtable->entriesEnd(); ++it) {
-    RoutingTable::Entry::Ptr entry = it->second;
-    const string& subnet = entry->subnet();
-    const string& mask = entry->subnetMask();
-    const string& gateway = entry->gateway();
-    const string& if_name = entry->interface()->name();
-    const RoutingTable::Entry::Type type = entry->type();
+    RoutingTable::const_iterator it;
+    for (it = rtable->entriesBegin(); it != rtable->entriesEnd(); ++it) {
+      RoutingTable::Entry::Ptr entry = it->second;
+      const string& subnet = entry->subnet();
+      const string& mask = entry->subnetMask();
+      const string& gateway = entry->gateway();
+      const string& if_name = entry->interface()->name();
+      const RoutingTable::Entry::Type type = entry->type();
 
-    snprintf(line_buf, sizeof(line_buf), format,
-             subnet.c_str(), gateway.c_str(), mask.c_str(), if_name.c_str(),
-             ((type == RoutingTable::Entry::kStatic) ? "static" : "dynamic"));
-
-    cli_send_str(line_buf);
+      snprintf(line_buf, sizeof(line_buf), format,
+               subnet.c_str(), gateway.c_str(), mask.c_str(), if_name.c_str(),
+               ((type == RoutingTable::Entry::kStatic) ? "static" : "dynamic"));
+      ss << line_buf;
+    }
   }
+
+  // Output to client.
+  cli_send_str(ss.str().c_str());
 }
 
 void cli_show_ip_tunnel() {
@@ -329,6 +361,7 @@ void cli_show_ip_tunnel() {
 
   // Buffer for proper formatting.
   char line_buf[256];
+  std::stringstream ss;
 
   // Line format.
   const char* const format = "  %-16s %-9s\n";
@@ -338,19 +371,22 @@ void cli_show_ip_tunnel() {
   snprintf(line_buf, sizeof(line_buf), format, "Endpoint IP", "Interface");
   cli_send_str(line_buf);
 
-  // Output each tunnel.
-  Fwk::ScopedLock<TunnelMap> lock(tun_map);
-  for (TunnelMap::const_iterator it = tun_map->begin();
-       it != tun_map->end(); ++it) {
-    Tunnel::Ptr tunnel = it->second;
-    const string& remote = tunnel->remote();
-    const string& if_name = tunnel->interface()->name();
+  {
+    Fwk::ScopedLock<TunnelMap> lock(tun_map);
 
-    snprintf(line_buf, sizeof(line_buf), format,
-             remote.c_str(), if_name.c_str());
+    for (TunnelMap::const_iterator it = tun_map->begin();
+         it != tun_map->end(); ++it) {
+      Tunnel::Ptr tunnel = it->second;
+      const string& remote = tunnel->remote();
+      const string& if_name = tunnel->interface()->name();
 
-    cli_send_str(line_buf);
+      snprintf(line_buf, sizeof(line_buf), format,
+               remote.c_str(), if_name.c_str());
+      ss << line_buf;
+    }
   }
+
+  cli_send_str(ss.str().c_str());
 }
 
 void cli_show_opt() {
