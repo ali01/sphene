@@ -62,31 +62,6 @@ class BaseNotifier
   friend class BaseNotifiee<Notifier, Notifiee>;
 };
 
-
-class Notifier;
-
-class Notifiee : public PtrInterface<Notifiee> {
- public:
-  virtual void notifierIs(Ptr<Notifier> notifier);
-
- protected:
-  Notifiee();
-
-  Notifier* notifier_;
-};
-
-
-class Notifier : public PtrInterface<Notifier> {
- protected:
-  virtual void notifieeIs(Ptr<Notifiee> notifiee);
-  virtual void notifieeDel(Ptr<Notifiee> notifiee);
-
-  std::vector<Ptr<Notifiee> > notifiees_;
-
- private:
-  friend class Notifiee;
-};
-
 }  // Fwk
 
 #endif

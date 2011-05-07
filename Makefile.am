@@ -96,7 +96,6 @@ FWK_SRCS = \
            src/fwk/exception.h \
            src/fwk/log.cc \
            src/fwk/log.h \
-           src/fwk/notifier.cc \
            src/fwk/ptr.h \
            src/fwk/ptr_interface.h \
            src/fwk/utility.cc
