@@ -1,16 +1,16 @@
 #ifndef FWK_NOTIFIER_H_
 #define FWK_NOTIFIER_H_
 
+#include <string>
 #include <vector>
 
+#include "named_interface.h"
 #include "ptr.h"
-#include "ptr_interface.h"
 
 namespace Fwk {
 
 template <typename Notifier, typename Notifiee>
-class BaseNotifiee
-    : public PtrInterface<BaseNotifiee<Notifier, Notifiee> > {
+class BaseNotifiee : public NamedInterface {
  public:
   virtual void notifierIs(Ptr<Notifier> notifier) {
     notifier->notifieeIs(static_cast<Notifiee*>(this));
@@ -21,8 +21,8 @@ class BaseNotifiee
   }
 
  protected:
-  BaseNotifiee() { }
-  virtual ~BaseNotifiee() { }
+  BaseNotifiee() : NamedInterface("") { }
+  BaseNotifiee(const std::string& name) : NamedInterface(name) { }
   // NOTE(ms): References to the notifier are intentionally not
   //   kept. References to the notifier should be passed as the first argument
   //   to the notification handlers in the notifiee.
@@ -34,9 +34,11 @@ class BaseNotifiee
 
 
 template <typename Notifier, class Notifiee>
-class BaseNotifier
-    : public PtrInterface<BaseNotifier<Notifier, Notifiee> > {
+class BaseNotifier : public NamedInterface {
  protected:
+  BaseNotifier() : NamedInterface("") { }
+  BaseNotifier(const std::string& name) : NamedInterface(name) { }
+
   // Called by Notifiee::notifierIs().
   virtual void notifieeIs(Ptr<Notifiee> notifiee) {
     for (unsigned int i = 0; i < notifiees_.size(); ++i) {
@@ -60,31 +62,6 @@ class BaseNotifier
   std::vector<Ptr<Notifiee> > notifiees_;
 
   friend class BaseNotifiee<Notifier, Notifiee>;
-};
-
-
-class Notifier;
-
-class Notifiee : public PtrInterface<Notifiee> {
- public:
-  virtual void notifierIs(Ptr<Notifier> notifier);
-
- protected:
-  Notifiee();
-
-  Notifier* notifier_;
-};
-
-
-class Notifier : public PtrInterface<Notifier> {
- protected:
-  virtual void notifieeIs(Ptr<Notifiee> notifiee);
-  virtual void notifieeDel(Ptr<Notifiee> notifiee);
-
-  std::vector<Ptr<Notifiee> > notifiees_;
-
- private:
-  friend class Notifiee;
 };
 
 }  // Fwk

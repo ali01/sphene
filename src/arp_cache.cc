@@ -3,10 +3,12 @@
 #include <ctime>
 #include <pthread.h>
 
+#include "fwk/notifier.h"
+
 const size_t ARPCache::kMaxEntries = 32;
 
 
-ARPCache::ARPCache() { }
+ARPCache::ARPCache() : BaseNotifier("ARPCache") { }
 
 
 ARPCache::Entry::Ptr
