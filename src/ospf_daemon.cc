@@ -70,7 +70,9 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
     OSPFHelloPacket::New(buffer, buffer->size() - OSPFHelloPacket::kPacketSize);
 
   IPPacket::Ptr ip_pkt =
-    IPPacket::New(buffer, buffer->size() - ip_pkt_len);
+    IPPacket::NewDefault(buffer, ip_pkt_len,
+                         iface->interface()->ip(),
+                         OSPFHelloPacket::kBroadcastAddr);
 
   EthernetPacket::Ptr eth_pkt =
     EthernetPacket::New(buffer, buffer->size() - eth_pkt_len);
@@ -88,16 +90,7 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   ospf_pkt->checksumReset();
 
   /* IPPacket fields: */
-  ip_pkt->versionIs(IPPacket::kVersion);
-  ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4); /* Words, not bytes. */
-  ip_pkt->diffServicesAre(0);
-  ip_pkt->packetLengthIs(ip_pkt_len);
-  ip_pkt->identificationIs(0);
-  ip_pkt->flagsAre(0);
-  ip_pkt->fragmentOffsetIs(0);
   ip_pkt->ttlIs(1);
-  ip_pkt->srcIs(iface->interface()->ip());
-  ip_pkt->dstIs(OSPFHelloPacket::kBroadcastAddr);
   ip_pkt->checksumReset();
 
   /* EthernetPacket fields: */
