@@ -6,6 +6,7 @@
 #include "control_plane.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "ospf_gateway.h"
 #include "ospf_interface_map.h"
 #include "ospf_neighbor.h"
 #include "ospf_node.h"
@@ -127,7 +128,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     IPv4Addr subnet = gateway & subnet_mask;
 
     neighbor = OSPFNode::New(neighbor_id);
-    ifd->neighborIs(neighbor, gateway, subnet, subnet_mask);
+    ifd->gatewayIs(neighbor, gateway, subnet, subnet_mask);
 
     // TODO(ali): this may need to be a deep copy of neighbor.
     router_node_->neighborIs(neighbor, subnet, subnet_mask);
@@ -259,14 +260,13 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     }
 
     RouterID nbr_id = neighbor->routerID();
-    IPv4Addr nbr_subnet = dest->neighborSubnet(nbr_id);
-    IPv4Addr nbr_subnet_mask = dest->neighborSubnetMask(nbr_id);
+    OSPFGateway::Ptr nbr_gw = iface->gateway(nbr_id);
 
     /* Setting entry's subnet, subnet mask, outgoing interface, and gateway. */
     RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
-    entry->subnetIs(nbr_subnet, nbr_subnet_mask);
+    entry->subnetIs(nbr_gw->subnet(), nbr_gw->subnetMask());
     entry->interfaceIs(iface->interface());
-    entry->gatewayIs(iface->neighborGateway(next_hop_id));
+    entry->gatewayIs(nbr_gw->gateway());
 
     routing_table_->entryIs(entry);
   }
@@ -325,7 +325,7 @@ OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
   OSPFInterfaceMap::const_iterator if_it;
   for (if_it = interfaces_->begin(); if_it != interfaces_->end(); ++if_it) {
     OSPFInterface::PtrConst iface = if_it->second;
-    OSPFInterface::const_iterator nbr_it = iface->neighborsBegin();
+    OSPFInterface::const_nb_iterator nbr_it = iface->neighborsBegin();
     for (; nbr_it != iface->neighborsEnd(); ++nbr_it) {
       OSPFNode::Ptr nbr = nbr_it->second;
       RouterID nbr_id = nbr->routerID();
@@ -431,7 +431,8 @@ OSPFRouter::send_pkt_to_neighbor(const RouterID& neighbor_id,
   }
 
   IPv4Addr src_addr = iface->interface()->ip();
-  IPv4Addr dst_addr = iface->neighborGateway(neighbor_id);
+  OSPFGateway::PtrConst nbr_gw = iface->gateway(neighbor_id);
+  IPv4Addr dst_addr = nbr_gw->gateway();
 
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
   ip_pkt->srcIs(src_addr);
