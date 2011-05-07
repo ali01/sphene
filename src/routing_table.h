@@ -48,12 +48,11 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
     IPv4Addr subnetMask() const { return subnet_mask_; }
     IPv4Addr gateway() const { return gateway_; }
     Fwk::Ptr<const Interface> interface() const;
-    Fwk::Ptr<Interface> interface();
     Type type() const { return type_; }
 
     void subnetIs(const IPv4Addr& dest, const IPv4Addr& subnet_mask);
     void gatewayIs(const IPv4Addr& gateway) { gateway_ = gateway; }
-    void interfaceIs(Fwk::Ptr<Interface> iface);
+    void interfaceIs(Fwk::Ptr<const Interface> iface);
 
    protected:
     Entry(Type type);
@@ -62,7 +61,7 @@ class RoutingTable : public Fwk::PtrInterface<RoutingTable>,
     IPv4Addr subnet_;
     IPv4Addr subnet_mask_;
     IPv4Addr gateway_;
-    Fwk::Ptr<Interface> interface_;
+    Fwk::Ptr<const Interface> interface_;
     Type type_;
 
     /* Operations disallowed */

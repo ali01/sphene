@@ -34,7 +34,8 @@ AM_CPPFLAGS = -march=i586 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
               -I src -I src/cli -I src/lwtcp -I $(CK_DIR)/include \
               $(ARCH) $(MODE) $(CLI_FLAGS) \
               -fno-strict-aliasing
-AM_LDFLAGS  = -m32 $(SOCK) -lrt -lm -lresolv -lpthread -L$(CK_DIR)/src -lck
+AM_LDFLAGS  = -m32 $(SOCK) -lrt -lm -lresolv -lpthread -L$(CK_DIR)/src -lck \
+              -Wl,--no-undefined
 AM_LFLAGS   = -d -i
 AM_YFLAGS   = -d
 
@@ -135,7 +136,8 @@ libsr_base_a_SOURCES = \
                        src/nf2util.h \
                        src/ospf_daemon.cc \
                        src/ospf_daemon.h \
-                       src/ospf_interface_desc.cc \
+                       src/ospf_gateway.cc \
+                       src/ospf_interface.cc \
                        src/ospf_interface_map.cc \
                        src/ospf_neighbor.cc \
                        src/ospf_node.cc \

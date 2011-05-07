@@ -6,7 +6,8 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
-#include "ospf_interface_desc.h"
+#include "ospf_interface.h"
+#include "ospf_types.h"
 
 
 class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
@@ -14,32 +15,69 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   typedef Fwk::Ptr<const OSPFInterfaceMap> PtrConst;
   typedef Fwk::Ptr<OSPFInterfaceMap> Ptr;
 
-  typedef Fwk::Map<IPv4Addr,OSPFInterfaceDesc>::iterator iterator;
-  typedef Fwk::Map<IPv4Addr,OSPFInterfaceDesc>::const_iterator
+  typedef Fwk::Map<IPv4Addr,OSPFInterface>::iterator iterator;
+  typedef Fwk::Map<IPv4Addr,OSPFInterface>::const_iterator
     const_iterator;
 
   static Ptr New() {
     return new OSPFInterfaceMap();
   }
 
-  OSPFInterfaceDesc::PtrConst interfaceDesc(const IPv4Addr& addr) const;
-  OSPFInterfaceDesc::Ptr interfaceDesc(const IPv4Addr& addr);
+  OSPFInterface::PtrConst interface(const IPv4Addr& addr) const;
+  OSPFInterface::Ptr interface(const IPv4Addr& addr);
 
-  void interfaceDescIs(OSPFInterfaceDesc::Ptr iface_desc);
-  void interfaceDescDel(OSPFInterfaceDesc::Ptr iface_desc);
-  void interfaceDescDel(const IPv4Addr& addr);
+  OSPFInterface::PtrConst interface(const RouterID& neighbor_id) const;
+  OSPFInterface::Ptr interface(const RouterID& neighbor_id);
 
-  iterator begin() { return interfaces_.begin(); }
-  iterator end() { return interfaces_.end(); }
-  const_iterator begin() const { return interfaces_.begin(); }
-  const_iterator end() const { return interfaces_.end(); }
+  void interfaceIs(OSPFInterface::Ptr iface_desc);
+  void interfaceDel(OSPFInterface::Ptr iface_desc);
+  void interfaceDel(const IPv4Addr& addr);
+
+  iterator begin() { return ip_ifaces.begin(); }
+  iterator end() { return ip_ifaces.end(); }
+  const_iterator begin() const { return ip_ifaces.begin(); }
+  const_iterator end() const { return ip_ifaces.end(); }
 
  protected:
-  OSPFInterfaceMap() {}
+  OSPFInterfaceMap();
 
  private:
+  class InterfaceReactor : public OSPFInterface::Notifiee {
+   public:
+    typedef Fwk::Ptr<const InterfaceReactor> PtrConst;
+    typedef Fwk::Ptr<InterfaceReactor> Ptr;
+
+    static Ptr New(OSPFInterfaceMap::Ptr _im) {
+      return new InterfaceReactor(_im);
+    }
+
+    void onNeighbor(OSPFInterface::Ptr iface, const RouterID& id);
+    void onNeighborDel(OSPFInterface::Ptr iface, const RouterID& id);
+
+   private:
+    InterfaceReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}
+
+    /* Data members. */
+    OSPFInterfaceMap* iface_map_; /* Weak ptr prevents circular reference. */
+
+    /* Operations disallowed. */
+    InterfaceReactor(const InterfaceReactor&);
+    void operator=(const InterfaceReactor&);
+  };
+
   /* Data members. */
-  Fwk::Map<IPv4Addr,OSPFInterfaceDesc> interfaces_;
+
+  /* Map: Interface IP address => interface object. */
+  Fwk::Map<IPv4Addr,OSPFInterface> ip_ifaces;
+
+  /* Map: RouterID => interface object. */
+  Fwk::Map<RouterID,OSPFInterface> nbr_id_ifaces_;
+
+  /* Reactor to Interface notifications. */
+  InterfaceReactor::Ptr iface_reactor_;
+
+  /* Friends */
+  friend class InterfaceReactor;
 
   /* Operations disallowed. */
   OSPFInterfaceMap(const OSPFInterfaceMap&);

@@ -47,6 +47,7 @@
 #include "ip_packet.h"
 #include "lwtcp/lwip/sys.h"
 #include "ospf_daemon.h"
+#include "ospf_router.h"
 #include "packet_buffer.h"
 #include "router.h"
 #include "routing_table.h"
@@ -193,7 +194,8 @@ void sr_integ_hw_setup(struct sr_instance* sr)
 
   // Create OSPF daemon and add it to the task manager.
   // TODO(ms): Use real OSPFRouter instance here.
-  OSPFDaemon::Ptr ospf_daemon = OSPFDaemon::New(NULL, router->controlPlane());
+  OSPFDaemon::Ptr ospf_daemon =
+    OSPFDaemon::New(NULL, router->controlPlane(), router->dataPlane());
   ospf_daemon->periodIs(1);
   router->taskManager()->taskIs(ospf_daemon);
 
@@ -495,7 +497,7 @@ uint32_t sr_integ_ip_output(uint8_t* payload /* given */,
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(ntohl(src));
   ip_pkt->dstIs(ntohl(dest));
-  ip_pkt->ttlIs(64);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
 
   // Copy in data.
   memcpy(ip_pkt->data() + IPPacket::kHeaderSize, payload, len);

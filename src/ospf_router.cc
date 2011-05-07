@@ -1,7 +1,9 @@
 #include "ospf_router.h"
 
+#include "fwk/log.h"
 #include "fwk/scoped_lock.h"
 
+#include "control_plane.h"
 #include "interface.h"
 #include "ip_packet.h"
 #include "ospf_interface_map.h"
@@ -11,18 +13,23 @@
 #include "ospf_topology.h"
 #include "routing_table.h"
 
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFRouter");
+
+
 /* OSPFRouter */
 
-OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id)
-    : log_(Fwk::Log::LogNew("OSPFRouter")),
-      functor_(this),
+OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
+                       RoutingTable::Ptr rtable, Fwk::Ptr<ControlPlane> cp)
+    : functor_(this),
       router_id_(router_id),
       area_id_(area_id),
       router_node_(OSPFNode::New(router_id)),
       interfaces_(OSPFInterfaceMap::New()),
       topology_(OSPFTopology::New(router_node_)),
-      routing_table_(NULL),
-      topology_reactor_(TopologyReactor::New(this)) {
+      topology_reactor_(TopologyReactor::New(this)),
+      routing_table_(rtable),
+      control_plane_(cp.ptr()) {
   topology_->notifieeIs(topology_reactor_);
 }
 
@@ -52,19 +59,13 @@ OSPFRouter::routingTable() {
   return routing_table_;
 }
 
-void
-OSPFRouter::routingTableIs(RoutingTable::Ptr rtable) {
-  routing_table_ = rtable;
-}
-
 /* OSPFRouter::PacketFunctor */
 
 OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
     : ospf_router_(ospf_router),
       router_node_(ospf_router->router_node_.ptr()),
       interfaces_(ospf_router->interfaces_.ptr()),
-      topology_(ospf_router->topology_.ptr()),
-      log_(ospf_router->log_) {}
+      topology_(ospf_router->topology_.ptr()) {}
 
 void
 OSPFRouter::PacketFunctor::operator()(OSPFPacket* pkt,
@@ -96,16 +97,16 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
 
   // TODO(ali): Interfaces must be manually removed from OSPFRouter if they
   //   cease to exist. One approach could be to make use of notifications.
-  OSPFInterfaceDesc::Ptr ifd;
-  ifd = interfaces_->interfaceDesc(iface->ip());
+  OSPFInterface::Ptr ifd;
+  ifd = interfaces_->interface(iface->ip());
 
   if (ifd == NULL) {
     /* Packet was received on an interface that the dynamic router
      * was unaware about -- possibly a newly created virtual interface.
      * Creating a new interface description object and
      * adding it to the neighbor map. */
-    ifd = OSPFInterfaceDesc::New(iface, kDefaultHelloInterval);
-    interfaces_->interfaceDescIs(ifd);
+    ifd = OSPFInterface::New(iface, kDefaultHelloInterval);
+    interfaces_->interfaceIs(ifd);
   }
 
   if (ifd->helloint() != pkt->helloint()) {
@@ -121,12 +122,12 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
     IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-    IPv4Addr neighbor_addr = ip_pkt->src();
+    IPv4Addr gateway = ip_pkt->src();
     IPv4Addr subnet_mask = pkt->subnetMask();
-    IPv4Addr subnet = neighbor_addr & subnet_mask;
+    IPv4Addr subnet = gateway & subnet_mask;
 
     neighbor = OSPFNode::New(neighbor_id);
-    ifd->neighborIs(neighbor, subnet, subnet_mask);
+    ifd->neighborIs(neighbor, gateway, subnet, subnet_mask);
 
     // TODO(ali): this may need to be a deep copy of neighbor.
     router_node_->neighborIs(neighbor, subnet, subnet_mask);
@@ -174,8 +175,11 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   ospf_router_->process_lsu_advertisements(node, pkt);
   topology_->onUpdate();
 
-  // TODO(ali): flood LSU packet.
-  // TODO(ali): update the routing table.
+  if (pkt->ttl() > 1) {
+    pkt->ttlDec(1);
+    pkt->checksumReset();
+    ospf_router_->flood_lsu_packet(pkt);
+  }
 }
 
 
@@ -239,6 +243,13 @@ OSPFRouter::rtable_update() {
 void
 OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
                             OSPFNode::PtrConst dest) {
+  RouterID next_hop_id = next_hop->routerID();
+  OSPFInterface::Ptr iface = interfaces_->interface(next_hop_id);
+  if (iface == NULL) {
+    ELOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
+    return;
+  }
+
   OSPFNode::const_iterator it;
   for (it = dest->neighborsBegin(); it != dest->neighborsEnd(); ++it) {
     OSPFNode::Ptr neighbor = it->second;
@@ -251,12 +262,11 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     IPv4Addr nbr_subnet = dest->neighborSubnet(nbr_id);
     IPv4Addr nbr_subnet_mask = dest->neighborSubnetMask(nbr_id);
 
+    /* Setting entry's subnet, subnet mask, outgoing interface, and gateway. */
     RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
     entry->subnetIs(nbr_subnet, nbr_subnet_mask);
-
-    // TODO(ali): set entry's gateway and interface.
-    // entry->gatewayIs()
-    // entry->interfaceIs()
+    entry->interfaceIs(iface->interface());
+    entry->gatewayIs(iface->neighborGateway(next_hop_id));
 
     routing_table_->entryIs(entry);
   }
@@ -304,6 +314,23 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
         OSPFNeighbor::New(neighbor_nd, adv->subnet(), adv->subnetMask());
       nb_rel = NeighborRelationship::New(sender, neighbor);
       stage_nbr(nb_rel);
+    }
+  }
+}
+
+void
+OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
+  RouterID sender_id = pkt->routerID();
+
+  OSPFInterfaceMap::const_iterator if_it;
+  for (if_it = interfaces_->begin(); if_it != interfaces_->end(); ++if_it) {
+    OSPFInterface::PtrConst iface = if_it->second;
+    OSPFInterface::const_iterator nbr_it = iface->neighborsBegin();
+    for (; nbr_it != iface->neighborsEnd(); ++nbr_it) {
+      OSPFNode::Ptr nbr = nbr_it->second;
+      RouterID nbr_id = nbr->routerID();
+      if (nbr_id != sender_id)
+        send_pkt_to_neighbor(nbr_id, pkt);
     }
   }
 }
@@ -391,4 +418,26 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
     return true;
 
   return false;
+}
+
+void
+OSPFRouter::send_pkt_to_neighbor(const RouterID& neighbor_id,
+                                 OSPFPacket::Ptr pkt) const {
+  OSPFInterface::PtrConst iface = interfaces_->interface(neighbor_id);
+  if (iface == NULL) {
+    ELOG << "send_pkt_to_node: Node with NEIGHBOR_ID is not directly connected "
+         << "to this router";
+    return;
+  }
+
+  IPv4Addr src_addr = iface->interface()->ip();
+  IPv4Addr dst_addr = iface->neighborGateway(neighbor_id);
+
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+  ip_pkt->srcIs(src_addr);
+  ip_pkt->dstIs(dst_addr);
+  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
+  ip_pkt->checksumReset();
+
+  control_plane_->outputPacketNew(ip_pkt);
 }

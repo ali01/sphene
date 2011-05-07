@@ -4,36 +4,76 @@
 
 /* OSPFInterfaceMap */
 
-OSPFInterfaceDesc::PtrConst
-OSPFInterfaceMap::interfaceDesc(const IPv4Addr& addr) const {
+OSPFInterfaceMap::OSPFInterfaceMap()
+    : iface_reactor_(InterfaceReactor::New(this)) {}
+
+OSPFInterface::PtrConst
+OSPFInterfaceMap::interface(const IPv4Addr& addr) const {
   OSPFInterfaceMap* self = const_cast<OSPFInterfaceMap*>(this);
-  return self->interfaceDesc(addr);
+  return self->interface(addr);
 }
 
-OSPFInterfaceDesc::Ptr
-OSPFInterfaceMap::interfaceDesc(const IPv4Addr& addr) {
-  return interfaces_.elem(addr);
+OSPFInterface::Ptr
+OSPFInterfaceMap::interface(const IPv4Addr& addr) {
+  return ip_ifaces.elem(addr);
+}
+
+OSPFInterface::PtrConst
+OSPFInterfaceMap::interface(const RouterID& nb_id) const {
+  return nbr_id_ifaces_.elem(nb_id);
+}
+
+OSPFInterface::Ptr
+OSPFInterfaceMap::interface(const RouterID& nb_id) {
+  return nbr_id_ifaces_.elem(nb_id);
 }
 
 void
-OSPFInterfaceMap::interfaceDescIs(OSPFInterfaceDesc::Ptr iface_desc) {
-  if (iface_desc == NULL)
+OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
+  if (iface == NULL)
     return;
 
-  IPv4Addr key = iface_desc->interface()->ip();
-  interfaces_[key] = iface_desc;
+  IPv4Addr key = iface->interface()->ip();
+  ip_ifaces[key] = iface;
+
+  OSPFInterface::const_iterator it;
+  for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
+    OSPFNode::Ptr node = it->second;
+    nbr_id_ifaces_[node->routerID()] = iface;
+  }
 }
 
 void
-OSPFInterfaceMap::interfaceDescDel(OSPFInterfaceDesc::Ptr iface_desc) {
-  if (iface_desc == NULL)
+OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
+  if (iface == NULL)
     return;
 
-  IPv4Addr key = iface_desc->interface()->ip();
-  this->interfaceDescDel(key);
+  IPv4Addr key = iface->interface()->ip();
+  ip_ifaces.elemDel(key);
+
+  OSPFInterface::const_iterator it;
+  for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
+    OSPFNode::Ptr node = it->second;
+    nbr_id_ifaces_.elemDel(node->routerID());
+  }
 }
 
 void
-OSPFInterfaceMap::interfaceDescDel(const IPv4Addr& addr) {
-  interfaces_.elemDel(addr);
+OSPFInterfaceMap::interfaceDel(const IPv4Addr& addr) {
+  interfaceDel(interface(addr));
+}
+
+
+/* OSPFInterfaceMap::InterfaceReactor */
+
+void
+OSPFInterfaceMap::InterfaceReactor::onNeighbor(OSPFInterface::Ptr iface,
+                                               const RouterID& id) {
+  iface_map_->nbr_id_ifaces_[id] = iface;
+}
+
+void
+OSPFInterfaceMap::InterfaceReactor::onNeighborDel(OSPFInterface::Ptr iface,
+                                                  const RouterID& id) {
+  iface_map_->nbr_id_ifaces_.elemDel(id);
 }

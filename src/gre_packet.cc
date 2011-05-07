@@ -209,7 +209,7 @@ Packet::Ptr GREPacket::payload() {
       pkt = ARPPacket::ARPPacketNew(buffer(), payload_offset);
       break;
     case EthernetPacket::kIP:
-      pkt = IPPacket::IPPacketNew(buffer(), payload_offset);
+      pkt = IPPacket::New(buffer(), payload_offset);
       break;
     default:
       pkt = UnknownPacket::UnknownPacketNew(buffer(), payload_offset);
