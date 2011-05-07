@@ -15,13 +15,17 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   typedef Fwk::Ptr<const OSPFInterfaceMap> PtrConst;
   typedef Fwk::Ptr<OSPFInterfaceMap> Ptr;
 
-  typedef Fwk::Map<IPv4Addr,OSPFInterface>::iterator iterator;
-  typedef Fwk::Map<IPv4Addr,OSPFInterface>::const_iterator
-    const_iterator;
+  typedef Fwk::Map<IPv4Addr,OSPFInterface>::iterator if_iter;
+  typedef Fwk::Map<IPv4Addr,OSPFInterface>::const_iterator const_if_iter;
+
+  typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iter;
+  typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iter;
 
   static Ptr New() {
     return new OSPFInterfaceMap();
   }
+
+  /* Accessors. */
 
   OSPFInterface::PtrConst interface(const IPv4Addr& addr) const;
   OSPFInterface::Ptr interface(const IPv4Addr& addr);
@@ -29,14 +33,26 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   OSPFInterface::PtrConst interface(const RouterID& neighbor_id) const;
   OSPFInterface::Ptr interface(const RouterID& neighbor_id);
 
+  OSPFGateway::PtrConst gateway(const RouterID& id) const;
+  OSPFGateway::Ptr gateway(const RouterID& id);
+
+  /* Mutators. */
+
   void interfaceIs(OSPFInterface::Ptr iface_desc);
   void interfaceDel(OSPFInterface::Ptr iface_desc);
   void interfaceDel(const IPv4Addr& addr);
 
-  iterator begin() { return ip_ifaces.begin(); }
-  iterator end() { return ip_ifaces.end(); }
-  const_iterator begin() const { return ip_ifaces.begin(); }
-  const_iterator end() const { return ip_ifaces.end(); }
+  /* Iterators. */
+
+  if_iter ifacesBegin() { return ip_ifaces_.begin(); }
+  if_iter ifacesEnd() { return ip_ifaces_.end(); }
+  const_if_iter ifacesBegin() const { return ip_ifaces_.begin(); }
+  const_if_iter ifacesEnd() const { return ip_ifaces_.end(); }
+
+  gw_iter gatewaysBegin() { return gateways_.begin(); }
+  gw_iter gatewaysEnd() { return gateways_.end(); }
+  const_gw_iter gatewaysBegin() const { return gateways_.begin(); }
+  const_gw_iter gatewaysEnd() const { return gateways_.end(); }
 
  protected:
   OSPFInterfaceMap();
@@ -68,10 +84,13 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   /* Data members. */
 
   /* Map: Interface IP address => interface object. */
-  Fwk::Map<IPv4Addr,OSPFInterface> ip_ifaces;
+  Fwk::Map<IPv4Addr,OSPFInterface> ip_ifaces_;
 
-  /* Map: RouterID => interface object. */
-  Fwk::Map<RouterID,OSPFInterface> nbr_id_ifaces_;
+  /* Map: RouterID => Interface object. */
+  Fwk::Map<RouterID,OSPFInterface> nbr_ifaces_;
+
+  /* Map: RouterID => Gateway object. */
+  Fwk::Map<RouterID,OSPFGateway> gateways_;
 
   /* Reactor to Interface notifications. */
   InterfaceReactor::Ptr iface_reactor_;
