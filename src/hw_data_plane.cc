@@ -3,11 +3,6 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstring>
-#include <linux/netdevice.h>
-#include <linux/sockios.h>
-#include <netinet/in.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <unistd.h>
 
 #include "arp_cache.h"
@@ -184,40 +179,8 @@ void HWDataPlane::initializeInterface(Interface::Ptr iface) {
   if (iface->socketDescriptor() >= 0)
     return;
 
-  // Translate "ethX" to "nf2cX".
+  // Assume we are called as the interface map is growing.
   unsigned int index = iface_map_->interfaces() - 1;
-  char iface_name[32] = "nf2c";
-  sprintf(&(iface_name[4]), "%i", index);
-
-  DLOG << "Initializing hardware interface " << iface_name
-       << " as " << iface->name();
-
-  int s = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-  if (s < 0) {
-    perror("socket()");
-    exit(1);
-  }
-
-  struct ifreq ifr;
-  bzero(&ifr, sizeof(struct ifreq));
-  strncpy(ifr.ifr_ifrn.ifrn_name, iface_name, IFNAMSIZ);
-  if (ioctl(s, SIOCGIFINDEX, &ifr) < 0) {
-    perror("ioctl SIOCGIFINDEX");
-    exit(1);
-  }
-
-  struct sockaddr_ll saddr;
-  bzero(&saddr, sizeof(struct sockaddr_ll));
-  saddr.sll_family = AF_PACKET;
-  saddr.sll_protocol = htons(ETH_P_ALL);
-  saddr.sll_ifindex = ifr.ifr_ifru.ifru_ivalue;
-
-  if (bind(s, (struct sockaddr*)(&saddr), sizeof(saddr)) < 0) {
-    perror("bind error");
-    exit(1);
-  }
-
-  iface->socketDescriptorIs(s);
 
   // Open the NetFPGA for writing registers.
   struct nf2device nf2;
