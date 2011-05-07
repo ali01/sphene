@@ -21,12 +21,12 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   typedef Fwk::Ptr<const OSPFInterface> PtrConst;
   typedef Fwk::Ptr<OSPFInterface> Ptr;
 
-  typedef Fwk::Map<RouterID,OSPFNode>::iterator nb_iterator;
+  typedef Fwk::Map<RouterID,OSPFNode>::iterator nb_iter;
   typedef Fwk::Map<RouterID,OSPFNode>::const_iterator
-    const_nb_iterator;
+    const_nb_iter;
 
-  typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iterator;
-  typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iterator;
+  typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iter;
+  typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iter;
 
   static Ptr New(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
@@ -79,15 +79,15 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   /* Iterators. */
 
-  nb_iterator neighborsBegin() { return neighbors_.begin(); }
-  nb_iterator neighborsEnd() { return neighbors_.end(); }
-  const_nb_iterator neighborsBegin() const { return neighbors_.begin(); }
-  const_nb_iterator neighborsEnd() const { return neighbors_.end(); }
+  nb_iter neighborsBegin() { return neighbors_.begin(); }
+  nb_iter neighborsEnd() { return neighbors_.end(); }
+  const_nb_iter neighborsBegin() const { return neighbors_.begin(); }
+  const_nb_iter neighborsEnd() const { return neighbors_.end(); }
 
-  gw_iterator gatewaysBegin() { return gateways_.begin(); }
-  gw_iterator gatewaysEnd() { return gateways_.end(); }
-  const_gw_iterator gatewaysBegin() const { return gateways_.begin(); }
-  const_gw_iterator gatewaysEnd() const { return gateways_.end(); }
+  gw_iter gatewaysBegin() { return gateways_.begin(); }
+  gw_iter gatewaysEnd() { return gateways_.end(); }
+  const_gw_iter gatewaysBegin() const { return gateways_.begin(); }
+  const_gw_iter gatewaysEnd() const { return gateways_.end(); }
 
  private:
   OSPFInterface(Fwk::Ptr<const Interface> iface, uint16_t helloint);

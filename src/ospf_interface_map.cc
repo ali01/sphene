@@ -36,7 +36,7 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
   IPv4Addr key = iface->interface()->ip();
   ip_ifaces[key] = iface;
 
-  OSPFInterface::const_nb_iterator it;
+  OSPFInterface::const_nb_iter it;
   for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
     OSPFNode::Ptr node = it->second;
     nbr_id_ifaces_[node->routerID()] = iface;
@@ -51,7 +51,7 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   IPv4Addr key = iface->interface()->ip();
   ip_ifaces.elemDel(key);
 
-  OSPFInterface::const_nb_iterator it;
+  OSPFInterface::const_nb_iter it;
   for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
     OSPFNode::Ptr node = it->second;
     nbr_id_ifaces_.elemDel(node->routerID());
