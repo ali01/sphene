@@ -186,6 +186,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFTopology> topology_;
   TopologyReactor::Ptr topology_reactor_; /* Reactor: Topology notifications */
 
+  uint8_t lsu_seqno_;
+
   /* External references. */
   Fwk::Ptr<RoutingTable> routing_table_;
   ControlPlane* control_plane_; /* Weak pointer prevents circular references */
