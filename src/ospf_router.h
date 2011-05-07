@@ -179,8 +179,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   PacketFunctor functor_;
 
-  RouterID router_id_;
-  AreaID area_id_;
+  const RouterID router_id_;
+  const AreaID area_id_;
   Fwk::Ptr<OSPFNode> router_node_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
