@@ -36,6 +36,9 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   OSPFGateway::PtrConst gateway(const RouterID& id) const;
   OSPFGateway::Ptr gateway(const RouterID& id);
 
+  size_t interfaces() const { return ip_ifaces_.size(); }
+  size_t gateways() const { return gateways_.size(); }
+
   /* Mutators. */
 
   void interfaceIs(OSPFInterface::Ptr iface_desc);
