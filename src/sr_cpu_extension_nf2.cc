@@ -162,6 +162,7 @@ int sr_cpu_input(struct sr_instance* sr)
   InterfaceMap::Ptr if_map = router->dataPlane()->interfaceMap();
   vector<int> fds_vec;
   vector<string> names;
+  int max_fd = -1;
   {
     Fwk::ScopedLock<InterfaceMap> lock(if_map);
     InterfaceMap::iterator it;
@@ -172,6 +173,8 @@ int sr_cpu_input(struct sr_instance* sr)
         FD_SET(fd, &rfds);
         fds_vec.push_back(fd);
         names.push_back(iface->name());
+        if (fd > max_fd)
+          max_fd = fd;
       }
     }
   }
@@ -180,7 +183,8 @@ int sr_cpu_input(struct sr_instance* sr)
   tv.tv_sec = 5;
   tv.tv_usec = 0;
 
-  int ret = select(fds_vec.size(), &rfds, NULL, NULL, &tv);
+  // The 'nfds' argument of select() is the highest fd + 1.
+  int ret = select(max_fd + 1, &rfds, NULL, NULL, &tv);
   if (ret == -1) {
     perror("select()");
     return 0;
