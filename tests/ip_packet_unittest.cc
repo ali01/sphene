@@ -23,7 +23,7 @@ class IPPacketTest : public ::testing::Test {
 
     PacketBuffer::Ptr buf_ =
       PacketBuffer::New(packet_buffer, sizeof(packet_buffer));
-    pkt_ = IPPacket::IPPacketNew(buf_,
+    pkt_ = IPPacket::New(buf_,
                                  buf_->size() - sizeof(packet_buffer) + 3);
     ip_hdr_ = pkt_->data(); /* ptr to beginning of IP header */
   }

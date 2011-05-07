@@ -645,7 +645,7 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   // Add IP header.
   gre_pkt->buffer()->minimumSizeIs(gre_pkt->len() + IPPacket::kHeaderSize);
   IPPacket::Ptr ip_pkt =
-      IPPacket::IPPacketNew(gre_pkt->buffer(),
+      IPPacket::New(gre_pkt->buffer(),
                             gre_pkt->bufferOffset() - IPPacket::kHeaderSize);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
@@ -695,7 +695,7 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
     // Create a new buffer and IP packet for new fragment.
     PacketBuffer::Ptr buffer = PacketBuffer::New(fragment_size);
     IPPacket::Ptr fragment =
-        IPPacket::IPPacketNew(buffer, buffer->size() - fragment_size);
+        IPPacket::New(buffer, buffer->size() - fragment_size);
 
     // Copy fields into fragment.
     fragment->versionIs(4);
