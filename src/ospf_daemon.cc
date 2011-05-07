@@ -95,7 +95,7 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   ip_pkt->identificationIs(0);
   ip_pkt->flagsAre(0);
   ip_pkt->fragmentOffsetIs(0);
-  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
+  ip_pkt->ttlIs(1);
   ip_pkt->srcIs(iface->interface()->ip());
   ip_pkt->dstIs(OSPFHelloPacket::kBroadcastAddr);
   ip_pkt->checksumReset();
