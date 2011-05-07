@@ -133,6 +133,12 @@ class OSPFLSUPacket : public OSPFPacket {
   static const uint8_t kDefaultTTL = 255;
   static const size_t kHeaderSize;
 
+  static Ptr NewDefault(PacketBuffer::Ptr buffer,
+                        const RouterID& router_id,
+                        const AreaID& area_id,
+                        uint32_t adv_count,
+                        uint16_t lsu_seqno);
+
   /* OSPFLSUPacket factory constructor. */
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new OSPFLSUPacket(buffer, buffer_offset);
