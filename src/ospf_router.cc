@@ -179,7 +179,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   if (pkt->ttl() > 1) {
     pkt->ttlDec(1);
     pkt->checksumReset();
-    ospf_router_->flood_lsu_packet(pkt);
+    ospf_router_->forward_flood_lsu_packet(pkt);
   }
 }
 
@@ -319,7 +319,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
 }
 
 void
-OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
+OSPFRouter::forward_flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
   RouterID sender_id = pkt->routerID();
 
   OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
@@ -330,7 +330,7 @@ OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
       OSPFNode::Ptr nbr = nbr_it->second;
       RouterID nbr_id = nbr->routerID();
       if (nbr_id != sender_id)
-        send_pkt_to_neighbor(nbr_id, pkt);
+        forward_pkt_to_neighbor(nbr_id, pkt);
     }
   }
 }
@@ -421,7 +421,7 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 }
 
 void
-OSPFRouter::send_pkt_to_neighbor(const RouterID& neighbor_id,
+OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
                                  OSPFPacket::Ptr pkt) const {
   OSPFInterface::PtrConst iface = interfaces_->interface(neighbor_id);
   if (iface == NULL) {

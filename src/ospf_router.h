@@ -142,10 +142,10 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* Sends the given LSU packet to all neighbors except the packet's original
      sender. */
-  void flood_lsu_packet(Fwk::Ptr<OSPFLSUPacket> pkt) const;
+  void forward_flood_lsu_packet(Fwk::Ptr<OSPFLSUPacket> pkt) const;
 
   /* Sends PKT to the node in the topology with DEST_ID. */
-  void send_pkt_to_neighbor(const RouterID& neighbor_id,
+  void forward_pkt_to_neighbor(const RouterID& neighbor_id,
                             Fwk::Ptr<OSPFPacket> pkt) const;
 
   /* Obtains the staged NeighborRelationship object with the specified
