@@ -521,6 +521,13 @@ void ControlPlane::sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt) {
 }
 
 
+void
+ControlPlane::sendICMPDestUnreachFragRequired(IPPacket::PtrConst orig_pkt) {
+  DLOG << "sending ICMP Fragmentation Required to " << orig_pkt->src();
+  sendICMPDestUnreach(ICMPPacket::kFragRequired, orig_pkt);
+}
+
+
 void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
                                        IPPacket::PtrConst orig_pkt) {
   // Send at most IP header + 8 bytes of data.
