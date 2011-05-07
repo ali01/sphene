@@ -12,21 +12,19 @@
 #include "ip_packet.h"
 
 
-class InterfaceMap : public Fwk::LockedInterface,
-                     public Fwk::Notifier {
+class InterfaceMapNotifiee;
+
+class InterfaceMap
+    : public Fwk::LockedInterface,
+      public Fwk::BaseNotifier<InterfaceMap, InterfaceMapNotifiee> {
  public:
   typedef Fwk::Ptr<const InterfaceMap> PtrConst;
   typedef Fwk::Ptr<InterfaceMap> Ptr;
+  typedef InterfaceMapNotifiee Notifiee;
   typedef std::map<std::string, Interface::Ptr> NameInterfaceMap;
   typedef std::map<IPv4Addr, Interface::Ptr> IPInterfaceMap;
   typedef NameInterfaceMap::iterator iterator;
   typedef NameInterfaceMap::const_iterator const_iterator;
-
-  class Notifiee : public Fwk::Notifiee {
-   public:
-    virtual void onInterface(Interface::Ptr iface) { }
-    virtual void onInterfaceDel(Interface::Ptr iface) { }
-  };
 
   // Maximum number of interfaces in map.
   static const size_t kMaxInterfaces;
@@ -68,6 +66,14 @@ class InterfaceMap : public Fwk::LockedInterface,
 
   InterfaceMap(const InterfaceMap&);
   void operator=(const InterfaceMap&);
+};
+
+
+class InterfaceMapNotifiee
+    : public Fwk::BaseNotifiee<InterfaceMap, InterfaceMapNotifiee> {
+ public:
+  virtual void onInterface(InterfaceMap::Ptr map, Interface::Ptr iface) { }
+  virtual void onInterfaceDel(InterfaceMap::Ptr map, Interface::Ptr iface) { }
 };
 
 #endif

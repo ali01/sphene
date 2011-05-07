@@ -12,13 +12,16 @@
 #include "ip_packet.h"
 
 
+class ARPCacheNotifiee;
+
 /* Thread safety: in a threaded environment, methods of this class must be
    accessed with lockedIs(true) or by using the ScopedLock. */
 class ARPCache : public Fwk::LockedInterface,
-                 public Fwk::Notifier {
+                 public Fwk::BaseNotifier<ARPCache, ARPCacheNotifiee> {
  public:
   typedef Fwk::Ptr<const ARPCache> PtrConst;
   typedef Fwk::Ptr<ARPCache> Ptr;
+  typedef ARPCacheNotifiee Notifiee;
 
   /* Nested cache entry class. */
   class Entry : public Fwk::PtrInterface<Entry> {
@@ -63,12 +66,6 @@ class ARPCache : public Fwk::LockedInterface,
     void operator=(const Entry&);
   };
 
-  class Notifiee : public Fwk::Notifiee {
-   public:
-    virtual void onEntry(Entry::Ptr entry) { }
-    virtual void onEntryDel(Entry::Ptr entry) { }
-  };
-
   typedef std::map<IPv4Addr, Entry::Ptr>::iterator iterator;
   typedef std::map<IPv4Addr, Entry::Ptr>::const_iterator const_iterator;
 
@@ -102,5 +99,13 @@ class ARPCache : public Fwk::LockedInterface,
   ARPCache(const ARPCache&);
   void operator=(const ARPCache&);
 };
+
+
+class ARPCacheNotifiee : public Fwk::BaseNotifiee<ARPCache, ARPCacheNotifiee> {
+ public:
+  virtual void onEntry(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry) { }
+  virtual void onEntryDel(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry) { }
+};
+
 
 #endif

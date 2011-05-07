@@ -33,8 +33,8 @@ class HWDataPlane : public DataPlane {
   class ARPCacheReactor : public ARPCache::Notifiee {
    public:
     ARPCacheReactor(HWDataPlane* dp);
-    virtual void onEntry(ARPCache::Entry::Ptr entry);
-    virtual void onEntryDel(ARPCache::Entry::Ptr entry);
+    virtual void onEntry(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry);
+    virtual void onEntryDel(ARPCache::Ptr cache, ARPCache::Entry::Ptr entry);
 
    protected:
     HWDataPlane* dp_;
@@ -44,8 +44,10 @@ class HWDataPlane : public DataPlane {
   class InterfaceMapReactor : public InterfaceMap::Notifiee {
    public:
     InterfaceMapReactor(HWDataPlane* dp);
-    virtual void onInterface(Fwk::Ptr<Interface> iface);
-    virtual void onInterfaceDel(Fwk::Ptr<Interface> iface);
+    virtual void onInterface(InterfaceMap::Ptr map,
+                             Fwk::Ptr<Interface> iface);
+    virtual void onInterfaceDel(InterfaceMap::Ptr map,
+                                Fwk::Ptr<Interface> iface);
 
    protected:
     HWDataPlane* dp_;

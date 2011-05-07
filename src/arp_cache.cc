@@ -44,7 +44,7 @@ ARPCache::entryIs(Entry::Ptr entry) {
 
   // Dispatch notification.
   for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    Ptr::st_cast<Notifiee>(notifiees_[i])->onEntry(entry);
+    notifiees_[i]->onEntry(this, entry);
 }
 
 
@@ -68,5 +68,5 @@ ARPCache::entryDel(const IPv4Addr& ip) {
 
   // Dispatch notification.
   for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    Ptr::st_cast<Notifiee>(notifiees_[i])->onEntryDel(entry);
+    notifiees_[i]->onEntryDel(this, entry);
 }

@@ -12,8 +12,10 @@ class ARPCacheReactor : public ARPCache::Notifiee {
 
   static Ptr New() { return new ARPCacheReactor(); }
 
-  virtual void onEntry(ARPCache::Entry::Ptr entry) { ++entries_; }
-  virtual void onEntryDel(ARPCache::Entry::Ptr entry) { --entries_; }
+  virtual void onEntry(ARPCache::Ptr cache,
+                       ARPCache::Entry::Ptr entry) { ++entries_; }
+  virtual void onEntryDel(ARPCache::Ptr cache,
+                          ARPCache::Entry::Ptr entry) { --entries_; }
   size_t entries() { return entries_; }
 
  private:

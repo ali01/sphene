@@ -32,8 +32,8 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
                          RoutingTable::Ptr routing_table,
                          ARPCache::Ptr arp_cache)
     : DataPlane("HWDataPlane", sr, routing_table, arp_cache),
-      arp_cache_reactor_(ARPCacheReactor(this)),
-      interface_map_reactor_(InterfaceMapReactor(this)),
+      arp_cache_reactor_(this),
+      interface_map_reactor_(this),
       log_(Fwk::Log::LogNew("HWDataPlane")) {
   arp_cache_reactor_.notifierIs(arp_cache);
   interface_map_reactor_.notifierIs(iface_map_);
@@ -57,12 +57,14 @@ HWDataPlane::ARPCacheReactor::ARPCacheReactor(HWDataPlane* dp)
       log_(Fwk::Log::LogNew("HWDataPlane::ARPCacheReactor")) { }
 
 
-void HWDataPlane::ARPCacheReactor::onEntry(ARPCache::Entry::Ptr entry) {
+void HWDataPlane::ARPCacheReactor::onEntry(ARPCache::Ptr cache,
+                                           ARPCache::Entry::Ptr entry) {
   dp_->writeHWARPCache();
 }
 
 
-void HWDataPlane::ARPCacheReactor::onEntryDel(ARPCache::Entry::Ptr entry) {
+void HWDataPlane::ARPCacheReactor::onEntryDel(ARPCache::Ptr cache,
+                                              ARPCache::Entry::Ptr entry) {
   dp_->writeHWARPCache();
 }
 
@@ -72,13 +74,15 @@ HWDataPlane::InterfaceMapReactor::InterfaceMapReactor(HWDataPlane* dp)
       log_(Fwk::Log::LogNew("HWDataPlane::InterfaceMapReactor")) { }
 
 
-void HWDataPlane::InterfaceMapReactor::onInterface(Interface::Ptr iface) {
+void HWDataPlane::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
+                                                   Interface::Ptr iface) {
   dp_->initializeInterface(iface);
   dp_->writeHWIPFilterTable();
 }
 
 
-void HWDataPlane::InterfaceMapReactor::onInterfaceDel(Interface::Ptr iface) {
+void HWDataPlane::InterfaceMapReactor::onInterfaceDel(InterfaceMap::Ptr map,
+                                                      Interface::Ptr iface) {
   dp_->writeHWIPFilterTable();
 }
 
