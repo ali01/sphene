@@ -41,6 +41,9 @@ OSPFDaemon::run() {
   /* Sending HELLO packets to all connected neighbors
      every iface.HELLOINT seconds. */
   broadcast_timed_hello();
+
+  /* Timed flood of link-state updates. */
+  flood_timed_lsu();
 }
 
 void
