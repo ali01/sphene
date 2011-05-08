@@ -63,6 +63,14 @@ OSPFRouter::routingTable() {
   return routing_table_;
 }
 
+void
+OSPFRouter::onLSUUpdate() {
+  if (lsu_dirty_) {
+    flood_lsu();
+    lsu_dirty_ = false;
+  }
+}
+
 /* OSPFRouter::PacketFunctor */
 
 OSPFRouter::PacketFunctor::PacketFunctor(OSPFRouter* ospf_router)
@@ -226,12 +234,14 @@ OSPFRouter::InterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
   ospf_router_->router_node_->linkIs(gw->node(),
                                      gw->subnet(),
                                      gw->subnetMask());
+  lsu_dirty_ = true;
 }
 
 void
 OSPFRouter::InterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
                                               const RouterID& nd_id) {
   ospf_router_->router_node_->linkDel(nd_id);
+  lsu_dirty_ = true;
 }
 
 /* OSPFRouter private member functions */

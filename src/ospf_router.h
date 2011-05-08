@@ -50,6 +50,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   /* Signal to indicate that the LSU interval has elapsed. */
   void onLSUInt() { flood_lsu(); }
 
+  /* Signal: connectivity to direct neighbors may have changed*/
+  void onLSUUpdate();
+
  protected:
   OSPFRouter(const RouterID& router_id, const AreaID& area_id,
              Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp);
@@ -229,6 +232,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   InterfaceMapReactor::Ptr im_reactor_;
 
   uint8_t lsu_seqno_;
+  bool lsu_dirty_; /* Links to neighbors have changed since last LSU flood */
 
   /* External references. */
   Fwk::Ptr<RoutingTable> routing_table_;
