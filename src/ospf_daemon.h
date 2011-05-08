@@ -14,7 +14,6 @@ class OSPFInterface;
 class OSPFRouter;
 class ControlPlane;
 class DataPlane;
-class OSPFRouter;
 
 
 class OSPFDaemon : public PeriodicTask {
