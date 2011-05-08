@@ -37,10 +37,18 @@ class InterfaceMapTest : public ::testing::Test {
 
     eth1_ = Interface::InterfaceNew("eth1");
     eth1_->ipIs("4.2.2.1");
+
+    eth2_ = Interface::InterfaceNew("eth2");
+    eth2_->ipIs("1.2.3.4");
+
+    eth3_ = Interface::InterfaceNew("eth3");
+    eth3_->ipIs("4.3.2.1");
   }
 
   Interface::Ptr eth0_;
   Interface::Ptr eth1_;
+  Interface::Ptr eth2_;
+  Interface::Ptr eth3_;
   InterfaceMap::Ptr map_;
 };
 
@@ -129,4 +137,35 @@ TEST_F(InterfaceMapTest, reactor) {
   EXPECT_EQ((size_t)0, reactor->interfaces());
   map_->interfaceDel(eth1_);
   EXPECT_EQ((size_t)0, reactor->interfaces());
+}
+
+
+TEST_F(InterfaceMapTest, indices) {
+  // Insert interfaces.
+  map_->interfaceIs(eth0_);
+  map_->interfaceIs(eth1_);
+  map_->interfaceIs(eth2_);
+
+  // Make sure indexes are set in order.
+  EXPECT_EQ((unsigned int)0, eth0_->index());
+  EXPECT_EQ((unsigned int)1, eth1_->index());
+  EXPECT_EQ((unsigned int)2, eth2_->index());
+
+  // Remove max index interface. The indices for the other interfaces should
+  // remain unaffected.
+  map_->interfaceDel(eth2_);
+  EXPECT_EQ((unsigned int)0, eth0_->index());
+  EXPECT_EQ((unsigned int)1, eth1_->index());
+
+  // Remove the first interface. The indices should rearrange to be
+  // continguous, starting at 0.
+  map_->interfaceDel(eth0_);
+  EXPECT_EQ((unsigned int)0, eth1_->index());
+
+  // Add new interfaces. Their indices should be continguous.
+  map_->interfaceIs(eth3_);
+  map_->interfaceIs(eth2_);
+  EXPECT_EQ((unsigned int)0, eth1_->index());
+  EXPECT_EQ((unsigned int)1, eth3_->index());
+  EXPECT_EQ((unsigned int)2, eth2_->index());
 }

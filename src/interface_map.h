@@ -63,6 +63,7 @@ class InterfaceMap
  private:
   NameInterfaceMap name_if_map_;
   IPInterfaceMap ip_if_map_;
+  unsigned int next_index_;
 
   InterfaceMap(const InterfaceMap&);
   void operator=(const InterfaceMap&);
