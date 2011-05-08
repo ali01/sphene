@@ -63,6 +63,9 @@ OSPFDaemon::timeout_neighbor_links() {
     OSPFInterface::Ptr iface = if_it->second;
     timeout_interface_neighbor_links(iface);
   }
+
+  /* Signal possible change to router's link state. */
+  ospf_router_->onLSUUpdate();
 }
 
 void
@@ -75,7 +78,6 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
          three times its advertised HELLOINT. Remove from topology and
          trigger LSU flood. */
       iface->gatewayDel(gw->nodeRouterID());
-      // TODO: trigger LSU flood.
     }
   }
 }
