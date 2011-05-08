@@ -136,7 +136,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   }
 
   /* Refresh neighbor's age. */
-  neighbor->ageIs(0);
+  // TODO: refresh time since last hello
 }
 
 void
@@ -172,6 +172,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   /* Updating seqno and the node entry's age in topology database */
   node->latestSeqnoIs(pkt->seqno());
+  node->timeSinceLSUIs(0);
 
   ospf_router_->process_lsu_advertisements(node, pkt);
   topology_->onUpdate();

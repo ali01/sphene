@@ -2,7 +2,7 @@
 
 OSPFNode::OSPFNode(const RouterID& router_id)
     : router_id_(router_id),
-      last_refreshed_(time(NULL)),
+      last_lsu_(time(NULL)),
       latest_seqno_(0),
       distance_(0) {}
 

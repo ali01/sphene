@@ -62,7 +62,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode::Ptr prev() { return prev_; }
   OSPFNode::PtrConst prev() const { return prev_; }
 
-  time_t age() const { return time(NULL) - last_refreshed_; }
+  time_t timeSinceLSU() const { return time(NULL) - last_lsu_; }
   uint16_t latestSeqno() const { return latest_seqno_; }
   uint16_t distance() const { return distance_; }
 
@@ -79,7 +79,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
-  void ageIs(time_t age)  { last_refreshed_ = time(NULL) - age; }
+  void timeSinceLSUIs(time_t _t)  { last_lsu_ = time(NULL) - _t; }
   void latestSeqnoIs(uint16_t seqno) { latest_seqno_ = seqno; }
   void distanceIs(uint16_t dist) { distance_ = dist; }
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
@@ -101,7 +101,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Data members. */
   RouterID router_id_;
-  time_t last_refreshed_;
+  time_t last_lsu_;
   uint16_t latest_seqno_;
   uint16_t distance_;
 
