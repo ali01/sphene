@@ -148,7 +148,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
-  /* Sends PKT to the node in the topology with DEST_ID. */
+  /* Forwards PKT to the node in the topology with DEST_ID. */
   void forward_pkt_to_neighbor(const RouterID& neighbor_id,
                                Fwk::Ptr<OSPFPacket> pkt) const;
 
