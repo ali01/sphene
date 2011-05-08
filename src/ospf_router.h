@@ -151,6 +151,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      sender. */
   void forward_lsu_flood(Fwk::Ptr<OSPFLSUPacket> pkt) const;
 
+  void flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface);
+
   /* Constructs a full link-state update packet destined to neighbor with id
      NBR_ID connected at interface IFACE. */
   Fwk::Ptr<OSPFLSUPacket> build_lsu_to_neighbor(Fwk::Ptr<OSPFInterface> iface,
