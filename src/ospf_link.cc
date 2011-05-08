@@ -14,7 +14,8 @@ OSPFLink::OSPFLink(OSPFNode::Ptr neighbor,
          const IPv4Addr& subnet_mask)
     : node_(neighbor),
       subnet_(subnet & subnet_mask),
-      subnet_mask_(subnet_mask) {}
+      subnet_mask_(subnet_mask),
+      last_lsu_(time(NULL)) {}
 
 OSPFNode::PtrConst
 OSPFLink::node() const {

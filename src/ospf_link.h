@@ -1,6 +1,8 @@
 #ifndef OSPF_LINK_H_QJXYEZKS
 #define OSPF_LINK_H_QJXYEZKS
 
+#include <ctime>
+
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
@@ -24,11 +26,13 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
 
   Fwk::Ptr<const OSPFNode> node() const;
   Fwk::Ptr<OSPFNode> node();
-
   const RouterID& nodeRouterID() const;
 
   const IPv4Addr& subnet() const { return subnet_; }
   const IPv4Addr& subnetMask() const { return subnet_mask_; }
+
+  time_t timeSinceLSU() const { return time(NULL) - last_lsu_; }
+  void timeSinceLSUIs(time_t _t) { last_lsu_ = time(NULL) - _t; }
 
  protected:
   OSPFLink(Fwk::Ptr<OSPFNode> neighbor,
@@ -39,6 +43,9 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   Fwk::Ptr<OSPFNode> node_;
   IPv4Addr subnet_;
   IPv4Addr subnet_mask_;
+
+  /* Time this link was last confirmed by a link-state update. */
+  time_t last_lsu_;
 
   /* Operations disallowed. */
   OSPFLink(const OSPFLink&);
