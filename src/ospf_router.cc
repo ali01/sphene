@@ -135,8 +135,9 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     router_node_->linkIs(neighbor, subnet, subnet_mask);
   }
 
-  /* Refresh neighbor's age. */
-  // TODO: refresh time since last hello
+  /* Refresh neighbor's time since last HELLO. */
+  OSPFGateway::Ptr gw = ifd->gateway(neighbor_id);
+  gw->timeSinceHelloIs(0);
 }
 
 void
