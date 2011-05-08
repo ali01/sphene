@@ -48,7 +48,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   /* Signals. */
 
   /* Signal to indicate that the LSU interval has elapsed. */
-  void onLSUInt() { flood_lsu(); }
+  void onLinkStateInterval() { flood_lsu(); }
 
   /* Signal: connectivity to direct neighbors may have changed*/
   void onLinkStateUpdate();

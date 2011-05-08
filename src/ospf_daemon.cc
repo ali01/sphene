@@ -140,7 +140,7 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
 void
 OSPFDaemon::flood_timed_lsu() {
   if (timeSinceLSU() > OSPF::kDefaultLSUInt) {
-    ospf_router_->onLSUInt();
+    ospf_router_->onLinkStateInterval();
 
     /* Resetting time since last LSU. */
     timeSinceLSUIs(0);
