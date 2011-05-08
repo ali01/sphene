@@ -45,6 +45,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<const RoutingTable> routingTable() const;
   Fwk::Ptr<RoutingTable> routingTable();
 
+  /* Signals. */
+
+  /* Signal to indicate that the LSU interval has elapsed. */
+  void onLSUInt() { flood_lsu(); }
+
  protected:
   OSPFRouter(const RouterID& router_id, const AreaID& area_id,
              Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp);
