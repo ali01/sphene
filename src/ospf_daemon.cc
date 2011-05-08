@@ -55,6 +55,8 @@ OSPFDaemon::timeSinceLSUIs(Seconds delta) {
   latest_lsu_ = ::time(NULL) - delta.value();
 }
 
+/* OSPFDaemon private helper functions. */
+
 void
 OSPFDaemon::timeout_neighbor_links() {
   OSPFInterfaceMap::PtrConst ifaces = ospf_router_->interfaceMap();
