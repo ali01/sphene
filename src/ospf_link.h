@@ -4,6 +4,7 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
+#include "ospf_types.h"
 
 /* Forward declarations. */
 class OSPFNode;
@@ -23,6 +24,8 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
 
   Fwk::Ptr<const OSPFNode> node() const;
   Fwk::Ptr<OSPFNode> node();
+
+  const RouterID& nodeRouterID() const;
 
   const IPv4Addr& subnet() const { return subnet_; }
   const IPv4Addr& subnetMask() const { return subnet_mask_; }

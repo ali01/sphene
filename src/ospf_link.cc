@@ -25,3 +25,8 @@ OSPFNode::Ptr
 OSPFLink::node() {
   return node_;
 }
+
+const RouterID&
+OSPFLink::nodeRouterID() const {
+  return node_->routerID();
+}
