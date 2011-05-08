@@ -121,14 +121,12 @@ HWDataPlane::RoutingTableReactor::RoutingTableReactor(HWDataPlane* dp)
 
 void HWDataPlane::RoutingTableReactor::onEntry(
     RoutingTable::Ptr rtable, RoutingTable::Entry::Ptr entry) {
-  DLOG << "routing table entry changed";
   dp_->writeHWRoutingTable();
 }
 
 
 void HWDataPlane::RoutingTableReactor::onEntryDel(
     RoutingTable::Ptr rtable, RoutingTable::Entry::Ptr entry) {
-  DLOG << "routing table entry changed";
   dp_->writeHWRoutingTable();
 }
 
@@ -239,8 +237,6 @@ bool lpmSorter(RoutingTable::Entry::Ptr a,
 
 
 void HWDataPlane::writeHWRoutingTable() {
-  DLOG << "updating hardware routing table";
-
   // Get all routing table entries into a vector for sorting.
   vector<RoutingTable::Entry::Ptr> entries;
   for (RoutingTable::iterator it = routing_table_->entriesBegin();
@@ -255,10 +251,6 @@ void HWDataPlane::writeHWRoutingTable() {
 
   // Sort entries in LPM-first order.
   std::sort(entries.begin(), entries.end(), lpmSorter);
-
-  // Debug.
-  for (unsigned int i = 0; i < entries.size(); ++i)
-    DLOG << "  " << entries[i]->subnet() << " " << entries[i]->subnetMask();
 
   // Open the NetFPGA for writing registers.
   struct nf2device nf2;
@@ -312,8 +304,7 @@ void HWDataPlane::initializeInterface(Interface::Ptr iface) {
     return;
 
   // Translate "ethX" to "nf2cX".
-  // TODO(ms): Should be able to use iface->index() here.
-  unsigned int index = iface_map_->interfaces() - 1;
+  unsigned int index = iface->index();
   char iface_name[32] = "nf2c";
   sprintf(&(iface_name[4]), "%i", index);
 
