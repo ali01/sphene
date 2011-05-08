@@ -22,8 +22,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   typedef Fwk::Ptr<OSPFInterface> Ptr;
 
   typedef Fwk::Map<RouterID,OSPFNode>::iterator nb_iter;
-  typedef Fwk::Map<RouterID,OSPFNode>::const_iterator
-    const_nb_iter;
+  typedef Fwk::Map<RouterID,OSPFNode>::const_iterator const_nb_iter;
 
   typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iter;
   typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iter;
