@@ -9,7 +9,7 @@ OSPFInterface::New(Fwk::Ptr<const Interface> iface, uint16_t helloint) {
 
 OSPFInterface::OSPFInterface(Interface::PtrConst iface,
                              uint16_t helloint)
-    : iface_(iface), helloint_(helloint), latest_hello_(0) {}
+    : iface_(iface), helloint_(helloint), last_outgoing_hello_(0) {}
 
 Interface::PtrConst
 OSPFInterface::interface() const {
@@ -24,6 +24,11 @@ OSPFInterface::interfaceIP() const {
 IPv4Addr
 OSPFInterface::interfaceSubnetMask() const {
   return iface_->subnetMask();
+}
+
+Seconds
+OSPFInterface::timeSinceOutgoingHello() const {
+  return time(NULL) - last_outgoing_hello_;
 }
 
 OSPFGateway::Ptr
@@ -49,7 +54,7 @@ OSPFInterface::neighbor(const RouterID& router_id) const {
 
 void
 OSPFInterface::timeSinceOutgoingHelloIs(Seconds delta) {
-  latest_hello_ = time(NULL) - delta.value();
+  last_outgoing_hello_ = time(NULL) - delta.value();
 }
 
 void
