@@ -85,14 +85,6 @@ OSPFInterface::gatewayIs(OSPFNode::Ptr nb,
 }
 
 void
-OSPFInterface::gatewayDel(OSPFNode::Ptr nb) {
-  if (nb == NULL)
-    return;
-
-  gatewayDel(nb->routerID());
-}
-
-void
 OSPFInterface::gatewayDel(const RouterID& router_id) {
   /* Deleting from both maps. */
   gateways_.elemDel(router_id);
