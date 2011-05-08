@@ -398,6 +398,9 @@ OSPFRouter::flood_lsu() {
     OSPFInterface::Ptr iface = if_it->second;
     flood_lsu_out_interface(iface);
   }
+
+  if (notifiee_)
+    notifiee_->onLinkStateFlood(this);
 }
 
 void

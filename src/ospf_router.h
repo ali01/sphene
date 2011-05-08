@@ -33,8 +33,28 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     return new OSPFRouter(router_id, area_id, rtable, cp);
   }
 
+  class Notifiee : public Fwk::PtrInterface<Notifiee> {
+   public:
+    typedef Fwk::Ptr<const Notifiee> PtrConst;
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    /* Notifications supported. */
+    virtual void onLinkStateFlood(OSPFRouter::Ptr _r) = 0;
+
+   protected:
+    Notifiee() {}
+    virtual ~Notifiee() {}
+
+   private:
+    /* Operations disallowed. */
+    Notifiee(const Notifiee&);
+    void operator=(const Notifiee&);
+  };
+
   // TODO(ali): perhaps should take OSPFPacket instead of Packet.
   void packetNew(Packet::Ptr pkt, Fwk::Ptr<const Interface> iface);
+
+  /* Accessors. */
 
   const RouterID& routerID() const { return router_id_; }
   const AreaID& areaID() const { return area_id_; }
@@ -47,6 +67,13 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   Fwk::Ptr<const RoutingTable> routingTable() const;
   Fwk::Ptr<RoutingTable> routingTable();
+
+  Notifiee::PtrConst notifiee() const { return notifiee_; }
+  Notifiee::Ptr notifiee() { return notifiee_; }
+
+  /* Mutators. */
+
+  void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
   /* Signals. */
 
@@ -238,6 +265,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   uint8_t lsu_seqno_;
   bool lsu_dirty_; /* Links to neighbors have changed since last LSU flood */
+
+  /* Singleton notifiee. */
+  Notifiee::Ptr notifiee_;
 
   /* External references. */
   Fwk::Ptr<RoutingTable> routing_table_;
