@@ -42,6 +42,9 @@ OSPFDaemon::run() {
      than three times their advertised HELLOINT. */
   timeout_neighbor_links();
 
+  /* Removing nodes for whom no LSU has been received */
+  timeout_topology_entries();
+
   /* Sending HELLO packets to all connected neighbors
      every iface.HELLOINT seconds. */
   broadcast_timed_hello();
