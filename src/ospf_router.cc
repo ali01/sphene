@@ -325,6 +325,16 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   }
 }
 
+void
+OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
+  OSPFInterface::const_nb_iter it;
+  for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
+    OSPFNode::Ptr nbr = it->second;
+    OSPFLSUPacket::Ptr ospf_pkt = build_lsu_to_neighbor(iface, nbr->routerID());
+    outputPacketNew(ospf_pkt);
+  }
+}
+
 OSPFLSUPacket::Ptr
 OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
                                   const RouterID& nbr_id) const {
