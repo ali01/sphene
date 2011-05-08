@@ -34,7 +34,8 @@ OSPFDaemon::OSPFDaemon(OSPFRouter::Ptr ospf_router,
     : PeriodicTask("OSPFDaemon"),
       control_plane_(cp),
       data_plane_(dp),
-      ospf_router_(ospf_router) {}
+      ospf_router_(ospf_router),
+      router_reactor_(RouterReactor::New(this)) {}
 
 void
 OSPFDaemon::run() {

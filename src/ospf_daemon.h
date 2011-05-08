@@ -5,6 +5,7 @@
 
 #include "fwk/ptr.h"
 
+#include "ospf_router.h"
 #include "ospf_types.h"
 #include "task.h"
 #include "time_types.h"
@@ -12,7 +13,6 @@
 /* Forward declarations. */
 class OSPFInterface;
 class OSPFNode;
-class OSPFRouter;
 class ControlPlane;
 class DataPlane;
 
@@ -30,6 +30,28 @@ class OSPFDaemon : public PeriodicTask {
   OSPFDaemon(Fwk::Ptr<OSPFRouter> ospf_router,
              Fwk::Ptr<ControlPlane> cp,
              Fwk::Ptr<DataPlane> dp);
+
+  class RouterReactor : public OSPFRouter::Notifiee {
+   public:
+    typedef Fwk::Ptr<const RouterReactor> PtrConst;
+    typedef Fwk::Ptr<RouterReactor> Ptr;
+
+    static Ptr New(OSPFDaemon::Ptr daemon) {
+      return new RouterReactor(daemon);
+    }
+
+    void onLinkStateFlood(OSPFRouter::Ptr _r) { daemon_->timeSinceLSUIs(0); }
+
+   private:
+    RouterReactor(OSPFDaemon::Ptr daemon) : daemon_(daemon.ptr()) {}
+
+    /* Data members. */
+    OSPFDaemon* daemon_;
+
+    /* Operations disallowed. */
+    RouterReactor(const RouterReactor&);
+    void operator=(const RouterReactor&);
+  };
 
   /* Override. */
   void run();
@@ -72,6 +94,9 @@ class OSPFDaemon : public PeriodicTask {
   Fwk::Ptr<ControlPlane> control_plane_;
   Fwk::Ptr<DataPlane> data_plane_;
   Fwk::Ptr<OSPFRouter> ospf_router_;
+
+  /* Reactor to Router notifications. */
+  RouterReactor::Ptr router_reactor_;
 
   time_t latest_lsu_;
 
