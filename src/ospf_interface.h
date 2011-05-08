@@ -67,6 +67,8 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
+  size_t gateways() const { return gateways_.size(); }
+
   /* Mutators. */
 
   void timeSinceOutgoingHelloIs(Seconds delta);
