@@ -51,7 +51,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void onLSUInt() { flood_lsu(); }
 
   /* Signal: connectivity to direct neighbors may have changed*/
-  void onLSUUpdate();
+  void onLinkStateUpdate();
 
  protected:
   OSPFRouter(const RouterID& router_id, const AreaID& area_id,

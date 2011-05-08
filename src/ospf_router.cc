@@ -64,7 +64,7 @@ OSPFRouter::routingTable() {
 }
 
 void
-OSPFRouter::onLSUUpdate() {
+OSPFRouter::onLinkStateUpdate() {
   if (lsu_dirty_) {
     flood_lsu();
     lsu_dirty_ = false;

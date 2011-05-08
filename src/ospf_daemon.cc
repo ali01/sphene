@@ -65,7 +65,7 @@ OSPFDaemon::timeout_neighbor_links() {
   }
 
   /* Signal possible change to router's link state. */
-  ospf_router_->onLSUUpdate();
+  ospf_router_->onLinkStateUpdate();
 }
 
 void
