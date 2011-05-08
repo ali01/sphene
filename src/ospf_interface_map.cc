@@ -51,6 +51,9 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
     return;
   }
 
+  /* Set this interface map as IFACE's notifiee. */
+  iface->notifieeIs(iface_reactor_);
+
   ip_ifaces_[key] = iface;
   notifiee_->onInterface(this, key);
 
@@ -70,6 +73,9 @@ void
 OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   if (iface == NULL)
     return;
+
+  /* Remove this interface map as IFACE's notifiee. */
+  iface->notifieeIs(NULL);
 
   IPv4Addr key = iface->interfaceIP();
   ip_ifaces_.elemDel(key);
