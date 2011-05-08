@@ -49,6 +49,8 @@ OSPFNode::linkIs(OSPFNode::Ptr node,
     /* Signal notifiee. */
     if (notifiee_)
       notifiee_->onLink(nd_id);
+  } else {
+    nbr_prev->timeSinceLSUIs(0);
   }
 
   /* Relationship is bi-directional. */

@@ -520,7 +520,8 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   OSPFNode::Ptr lsu_sender = nbr->lsuSender();
   OSPFLink::Ptr adv_nb = nbr->advertisedNeighbor();
 
-  /* Establish bi-directional link. */
+  /* Establish bi-directional link.
+     This also refreshes the link's time since last LSU. */
   lsu_sender->linkIs(adv_nb->node(),
                      adv_nb->subnet(),
                      adv_nb->subnetMask());
