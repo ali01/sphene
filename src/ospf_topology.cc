@@ -87,7 +87,7 @@ OSPFTopology::nodeDel(const RouterID& router_id) {
   OSPFNode::nb_iter it;
   for (it = node->neighborsBegin(); it != node->neighborsEnd(); ++it) {
     OSPFNode::Ptr neighbor = it->second;
-    neighbor->linkDel(node);
+    neighbor->linkDel(node->routerID());
   }
 }
 

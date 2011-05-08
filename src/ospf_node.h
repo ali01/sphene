@@ -75,7 +75,6 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
               const IPv4Addr& subnet,
               const IPv4Addr& subnet_mask);
   void linkDel(const RouterID& id);
-  void linkDel(OSPFNode::Ptr node);
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 

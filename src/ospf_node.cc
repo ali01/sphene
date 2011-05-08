@@ -61,7 +61,7 @@ OSPFNode::linkDel(const RouterID& id) {
   OSPFNode::Ptr node = neighbor(id);
   if (node) {
     /* Deletion is bi-directional. */
-    node->linkDel(this);
+    node->linkDel(this->routerID());
 
     /* Deleting from both maps. */
     links_.elemDel(id);
@@ -71,12 +71,4 @@ OSPFNode::linkDel(const RouterID& id) {
     if (notifiee_)
       notifiee_->onLinkDel(id);
   }
-}
-
-void
-OSPFNode::linkDel(OSPFNode::Ptr node) {
-  if (node == NULL)
-    return;
-
-  linkDel(node->routerID());
 }
