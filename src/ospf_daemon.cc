@@ -7,6 +7,7 @@
 #include "data_plane.h"
 #include "ethernet_packet.h"
 #include "ip_packet.h"
+#include "ospf_constants.h"
 #include "ospf_interface.h"
 #include "ospf_interface_map.h"
 #include "ospf_packet.h"
@@ -56,6 +57,16 @@ OSPFDaemon::broadcast_timed_hello() {
     if (iface->timeSinceHello() > iface->helloint()) {
       broadcast_hello_out_interface(iface);
     }
+  }
+}
+
+void
+OSPFDaemon::flood_timed_lsu() {
+  if (timeSinceLSU() > OSPF::kDefaultLSUInt) {
+    ospf_router_->onLSUInt();
+
+    /* Resetting time since last LSU. */
+    timeSinceLSUIs(0);
   }
 }
 
