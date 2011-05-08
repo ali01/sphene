@@ -44,7 +44,15 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
     return;
 
   IPv4Addr key = iface->interfaceIP();
+  OSPFInterface::Ptr iface_prev = interface(key);
+  if (iface_prev == iface) {
+    /* Early return if IFACE interface already
+       exists in this interface map. */
+    return;
+  }
+
   ip_ifaces_[key] = iface;
+  notifiee_->onInterface(this, key);
 
   OSPFInterface::const_gw_iter it;
   for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
@@ -53,6 +61,8 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
 
     nbr_ifaces_[nd_id] = iface;
     gateways_[nd_id] = gateway;
+
+    notifiee_->onGateway(this, nd_id);
   }
 }
 
@@ -64,6 +74,8 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   IPv4Addr key = iface->interfaceIP();
   ip_ifaces_.elemDel(key);
 
+  notifiee_->onInterfaceDel(this, key);
+
   OSPFInterface::const_gw_iter it;
   for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
     OSPFGateway::Ptr gateway = it->second;
@@ -71,6 +83,8 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
 
     nbr_ifaces_.elemDel(nd_id);
     gateways_.elemDel(nd_id);
+
+    notifiee_->onGatewayDel(this, nd_id);
   }
 }
 

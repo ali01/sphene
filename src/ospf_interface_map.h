@@ -25,6 +25,28 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     return new OSPFInterfaceMap();
   }
 
+  /* Notification support. */
+  class Notifiee : public Fwk::PtrInterface<Notifiee> {
+   public:
+    typedef Fwk::Ptr<const Notifiee> PtrConst;
+    typedef Fwk::Ptr<Notifiee> Ptr;
+
+    /* Notifications supported */
+    virtual void onInterface(OSPFInterfaceMap::Ptr, const IPv4Addr&) {}
+    virtual void onInterfaceDel(OSPFInterfaceMap::Ptr, const IPv4Addr&) {}
+    virtual void onGateway(OSPFInterfaceMap::Ptr, const RouterID&) {}
+    virtual void onGatewayDel(OSPFInterfaceMap::Ptr, const RouterID&) {}
+
+   protected:
+    Notifiee() {}
+    virtual ~Notifiee() {}
+
+   private:
+    /* Operations disallowed. */
+    Notifiee(const Notifiee&);
+    void operator=(const Notifiee&);
+  };
+
   /* Accessors. */
 
   OSPFInterface::PtrConst interface(const IPv4Addr& addr) const;
@@ -39,11 +61,16 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   size_t interfaces() const { return ip_ifaces_.size(); }
   size_t gateways() const { return gateways_.size(); }
 
+  Notifiee::PtrConst notifiee() const { return notifiee_; }
+  Notifiee::Ptr notifiee() { return notifiee_; }
+
   /* Mutators. */
 
   void interfaceIs(OSPFInterface::Ptr iface_desc);
   void interfaceDel(OSPFInterface::Ptr iface_desc);
   void interfaceDel(const IPv4Addr& addr);
+
+  void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
   /* Iterators. */
 
@@ -97,6 +124,9 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
   /* Reactor to Interface notifications. */
   InterfaceReactor::Ptr iface_reactor_;
+
+  /* Singleton notifiee. */
+  Notifiee::Ptr notifiee_;
 
   /* Friends */
   friend class InterfaceReactor;
