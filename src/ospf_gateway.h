@@ -1,6 +1,8 @@
 #ifndef OSPF_GATEWAY_H_CTXOEZOH
 #define OSPF_GATEWAY_H_CTXOEZOH
 
+#include <time.h>
+
 #include "ipv4_addr.h"
 #include "ospf_link.h"
 
@@ -20,6 +22,9 @@ class OSPFGateway : public OSPFLink {
 
   const IPv4Addr& gateway() const { return gateway_; }
 
+  time_t timeSinceHello() const { return time(NULL) - last_hello_; }
+  void timeSinceHelloIs(time_t _t) { last_hello_ = time(NULL) - _t; }
+
  private:
   OSPFGateway(Fwk::Ptr<OSPFNode> neighbor,
               const IPv4Addr& gateway,
@@ -28,6 +33,8 @@ class OSPFGateway : public OSPFLink {
 
   /* Data members. */
   IPv4Addr gateway_;
+
+  time_t last_hello_;
 
   /* Operations disallowed. */
   OSPFGateway(const OSPFGateway&);
