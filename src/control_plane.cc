@@ -450,8 +450,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
       (orig_pkt->len() < max_data_len) ? orig_pkt->len() : max_data_len;
 
   // Create buffer for new packet.
-  const size_t pkt_len = (EthernetPacket::kHeaderSize +
-                          IPPacket::kHeaderSize +
+  const size_t pkt_len = (IPPacket::kHeaderSize +
                           ICMPPacket::kHeaderLen +
                           data_len);
   PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
@@ -472,17 +471,11 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   // Outgoing interface.
   Interface::PtrConst out_iface = r_entry->interface();
 
-  // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt =
-      EthernetPacket::New(buffer, buffer->size() - pkt_len);
-  eth_pkt->typeIs(EthernetPacket::kIP);
-
   // IP packet next.
-  IPPacket::Ptr ip_pkt =
-      Ptr::st_cast<IPPacket>(eth_pkt->payload());
+  IPPacket::Ptr ip_pkt = IPPacket::New(buffer, buffer->size() - pkt_len);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
-  ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
+  ip_pkt->packetLengthIs(pkt_len);
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->identificationIs(0);
@@ -528,6 +521,13 @@ void ControlPlane::sendICMPDestProtoUnreach(IPPacket::PtrConst orig_pkt) {
 }
 
 
+void
+ControlPlane::sendICMPDestUnreachFragRequired(IPPacket::PtrConst orig_pkt) {
+  DLOG << "sending ICMP Fragmentation Required to " << orig_pkt->src();
+  sendICMPDestUnreach(ICMPPacket::kFragRequired, orig_pkt);
+}
+
+
 void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
                                        IPPacket::PtrConst orig_pkt) {
   // Send at most IP header + 8 bytes of data.
@@ -536,8 +536,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
       (orig_pkt->len() < max_data_len) ? orig_pkt->len() : max_data_len;
 
   // Create buffer for new packet.
-  const size_t pkt_len = (EthernetPacket::kHeaderSize +
-                          IPPacket::kHeaderSize +
+  const size_t pkt_len = (IPPacket::kHeaderSize +
                           ICMPPacket::kHeaderLen +
                           data_len);
   PacketBuffer::Ptr buffer = PacketBuffer::New(pkt_len);
@@ -558,17 +557,11 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   // Outgoing interface.
   Interface::PtrConst out_iface = r_entry->interface();
 
-  // Ethernet packet first. Src and Dst are set when the IP packet is sent.
-  EthernetPacket::Ptr eth_pkt =
-      EthernetPacket::New(buffer, buffer->size() - pkt_len);
-  eth_pkt->typeIs(EthernetPacket::kIP);
-
   // IP packet next.
-  IPPacket::Ptr ip_pkt =
-      Ptr::st_cast<IPPacket>(eth_pkt->payload());
+  IPPacket::Ptr ip_pkt = IPPacket::New(buffer, buffer->size() - pkt_len);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
-  ip_pkt->packetLengthIs(pkt_len - EthernetPacket::kHeaderSize);
+  ip_pkt->packetLengthIs(pkt_len);
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->identificationIs(0);
@@ -671,12 +664,12 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
     return;
   }
 
-  // Must be a multiple of 64.
-  const size_t max_payload_size = 1472;
+  // Must be a multiple of 8.
+  const size_t max_payload_size = 1480;
   const uint16_t cksum = pkt->checksum();
 
   size_t bytes_left = pkt->len() - IPPacket::kHeaderSize;
-  size_t fragment_offset = 0;  // in 64-byte blocks
+  size_t fragment_offset = 0;  // in 8-byte blocks
   while (bytes_left > 0) {
     // Calculate size of this fragment's payload.
     size_t fragment_payload_size;
@@ -714,7 +707,7 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
 
     // Copy portion of data.
     memcpy(fragment->data() + IPPacket::kHeaderSize,
-           pkt->data() + IPPacket::kHeaderSize + (fragment_offset * 64),
+           pkt->data() + IPPacket::kHeaderSize + (fragment_offset * 8),
            fragment_payload_size);
 
     // Update checksum.
@@ -724,6 +717,6 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
     outputPacketNew(fragment);
 
     bytes_left -= fragment_payload_size;
-    fragment_offset += fragment_payload_size / 64;
+    fragment_offset += fragment_payload_size / 8;
   }
 }

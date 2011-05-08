@@ -28,6 +28,7 @@ class ICMPPacket : public Packet {
     kHostUnreach = 1,
     kProtoUnreach = 2,
     kPortUnreach = 3,
+    kFragRequired = 4,
 
     // Time Exceeded codes.
     kTTLExceeded = 0

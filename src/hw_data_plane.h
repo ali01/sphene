@@ -8,12 +8,13 @@
 #include "arp_cache.h"
 #include "packet.h"
 #include "data_plane.h"
+#include "interface.h"
 #include "interface_map.h"
+#include "routing_table.h"
 
 class ARPPacket;
 class EthernetPacket;
 class ICMPPacket;
-class Interface;
 class IPPacket;
 struct nf2device;
 
@@ -41,6 +42,17 @@ class HWDataPlane : public DataPlane {
     Fwk::Log::Ptr log_;
   };
 
+  class InterfaceReactor : public Interface::Notifiee {
+   public:
+    InterfaceReactor(HWDataPlane* dp);
+    virtual void onIP(Interface::Ptr iface);
+    virtual void onMAC(Interface::Ptr iface);
+
+   protected:
+    HWDataPlane* dp_;
+    Fwk::Log::Ptr log_;
+  };
+
   class InterfaceMapReactor : public InterfaceMap::Notifiee {
    public:
     InterfaceMapReactor(HWDataPlane* dp);
@@ -48,6 +60,19 @@ class HWDataPlane : public DataPlane {
                              Fwk::Ptr<Interface> iface);
     virtual void onInterfaceDel(InterfaceMap::Ptr map,
                                 Fwk::Ptr<Interface> iface);
+
+   protected:
+    HWDataPlane* dp_;
+    Fwk::Log::Ptr log_;
+  };
+
+  class RoutingTableReactor : public RoutingTable::Notifiee {
+   public:
+    RoutingTableReactor(HWDataPlane* dp);
+    virtual void onEntry(RoutingTable::Ptr rtable,
+                         RoutingTable::Entry::Ptr entry);
+    virtual void onEntryDel(RoutingTable::Ptr rtable,
+                            RoutingTable::Entry::Ptr entry);
 
    protected:
     HWDataPlane* dp_;
@@ -71,11 +96,14 @@ class HWDataPlane : public DataPlane {
   void writeHWIPFilterTableEntry(struct nf2device* nf2,
                                  const IPv4Addr& ip,
                                  unsigned int index);
+  void writeHWRoutingTable();
   void initializeInterface(Fwk::Ptr<Interface> iface);
 
  private:
   ARPCacheReactor arp_cache_reactor_;
+  InterfaceReactor interface_reactor_;
   InterfaceMapReactor interface_map_reactor_;
+  RoutingTableReactor routing_table_reactor_;
   Fwk::Log::Ptr log_;
 };
 

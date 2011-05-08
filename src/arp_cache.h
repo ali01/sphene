@@ -6,7 +6,7 @@
 
 #include "fwk/locked_interface.h"
 #include "fwk/notifier.h"
-#include "fwk/ptr_interface.h"
+#include "fwk/ptr.h"
 
 #include "ethernet_packet.h"
 #include "ip_packet.h"
