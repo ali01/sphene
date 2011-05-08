@@ -29,6 +29,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
       interfaces_(OSPFInterfaceMap::New()),
       topology_(OSPFTopology::New(router_node_)),
       topology_reactor_(TopologyReactor::New(this)),
+      lsu_seqno_(0),
       routing_table_(rtable),
       control_plane_(cp.ptr()) {
   topology_->notifieeIs(topology_reactor_);
@@ -179,7 +180,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   if (pkt->ttl() > 1) {
     pkt->ttlDec(1);
     pkt->checksumReset();
-    ospf_router_->flood_lsu_packet(pkt);
+    ospf_router_->forward_lsu_flood(pkt);
   }
 }
 
@@ -217,6 +218,12 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 }
 
 /* OSPFRouter private member functions */
+
+void
+OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(ospf_pkt->enclosingPacket());
+  control_plane_->outputPacketNew(ip_pkt);
+}
 
 void
 OSPFRouter::rtable_update() {
@@ -319,7 +326,72 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
 }
 
 void
-OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
+OSPFRouter::flood_lsu() {
+  OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
+  for (; if_it != interfaces_->ifacesEnd(); ++if_it) {
+    OSPFInterface::Ptr iface = if_it->second;
+    flood_lsu_out_interface(iface);
+  }
+}
+
+void
+OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
+  OSPFInterface::const_nb_iter it;
+  for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
+    OSPFNode::Ptr nbr = it->second;
+    OSPFLSUPacket::Ptr ospf_pkt = build_lsu_to_neighbor(iface, nbr->routerID());
+    outputPacketNew(ospf_pkt);
+  }
+}
+
+OSPFLSUPacket::Ptr
+OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
+                                  const RouterID& nbr_id) const {
+  if (iface->neighbor(nbr_id) == NULL) {
+    ELOG << "send_new_lsu_to_neighbor: Node with specified NBR_ID is not "
+         << "directly connected to IFACE.";
+    return NULL;
+  }
+
+  size_t adv_count = interfaces_->gateways();
+
+  size_t ospf_pkt_len = OSPFLSUPacket::kHeaderSize +
+                        adv_count * OSPFLSUAdvertisement::kSize;
+  size_t ip_pkt_len = IPPacket::kHeaderSize + ospf_pkt_len;
+  size_t eth_pkt_len = EthernetPacket::kHeaderSize + ip_pkt_len;
+
+  PacketBuffer::Ptr buffer = PacketBuffer::New(eth_pkt_len);
+
+  /* OSPFPacket. */
+  OSPFLSUPacket::Ptr ospf_pkt =
+    OSPFLSUPacket::NewDefault(buffer, routerID(), areaID(),
+                              adv_count, lsu_seqno_);
+
+  OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
+  for (uint32_t ix = 0; gw_it != iface->gatewaysEnd(); ++gw_it, ++ix) {
+    OSPFGateway::Ptr gw = gw_it->second;
+    OSPFLSUAdvertisement::Ptr adv = ospf_pkt->advertisement(ix);
+    adv->routerIDIs(gw->node()->routerID());
+    adv->subnetIs(gw->subnet());
+    adv->subnetMaskIs(gw->subnetMask());
+  }
+
+  /* IPPacket. */
+  OSPFGateway::Ptr gw_obj = iface->gateway(nbr_id);
+  IPPacket::Ptr ip_pkt =
+    IPPacket::NewDefault(buffer, ip_pkt_len, IPPacket::kOSPF,
+                         iface->interfaceIP(), gw_obj->gateway());
+  ip_pkt->ttlIs(1);
+  ip_pkt->checksumReset();
+
+  /* Setting enclosing packet. */
+  ospf_pkt->enclosingPacketIs(ip_pkt);
+
+  return ospf_pkt;
+}
+
+void
+OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
   RouterID sender_id = pkt->routerID();
 
   OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
@@ -330,7 +402,7 @@ OSPFRouter::flood_lsu_packet(OSPFLSUPacket::Ptr pkt) const {
       OSPFNode::Ptr nbr = nbr_it->second;
       RouterID nbr_id = nbr->routerID();
       if (nbr_id != sender_id)
-        send_pkt_to_neighbor(nbr_id, pkt);
+        forward_pkt_to_neighbor(nbr_id, pkt);
     }
   }
 }
@@ -421,8 +493,8 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 }
 
 void
-OSPFRouter::send_pkt_to_neighbor(const RouterID& neighbor_id,
-                                 OSPFPacket::Ptr pkt) const {
+OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
+                                    OSPFPacket::Ptr pkt) const {
   OSPFInterface::PtrConst iface = interfaces_->interface(neighbor_id);
   if (iface == NULL) {
     ELOG << "send_pkt_to_node: Node with NEIGHBOR_ID is not directly connected "
@@ -430,14 +502,14 @@ OSPFRouter::send_pkt_to_neighbor(const RouterID& neighbor_id,
     return;
   }
 
-  IPv4Addr src_addr = iface->interface()->ip();
+  IPv4Addr src_addr = iface->interfaceIP();
   OSPFGateway::PtrConst nbr_gw = iface->gateway(neighbor_id);
   IPv4Addr dst_addr = nbr_gw->gateway();
 
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
   ip_pkt->srcIs(src_addr);
   ip_pkt->dstIs(dst_addr);
-  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
+  ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
 
   control_plane_->outputPacketNew(ip_pkt);

@@ -13,6 +13,7 @@ using Fwk::LinkedList;
 /* Forward declarations. */
 class ControlPlane;
 class Interface;
+class OSPFInterface;
 class OSPFInterfaceMap;
 class OSPFLSUPacket;
 class OSPFLink;
@@ -43,6 +44,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   Fwk::Ptr<const RoutingTable> routingTable() const;
   Fwk::Ptr<RoutingTable> routingTable();
+
+  /* Signals. */
+
+  /* Signal to indicate that the LSU interval has elapsed. */
+  void onLSUInt() { flood_lsu(); }
 
  protected:
   OSPFRouter(const RouterID& router_id, const AreaID& area_id,
@@ -118,6 +124,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* -- OSPFRouter private member functions. -- */
 
+  void outputPacketNew(Fwk::Ptr<OSPFPacket> ospf_pkt);
+
   /* Uses the optimal spanning tree computed by OSPFTopology to update all
      entries in the routing table. */
   void rtable_update();
@@ -140,13 +148,24 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
+  /* Sends PKT to the node in the topology with DEST_ID. */
+  void forward_pkt_to_neighbor(const RouterID& neighbor_id,
+                               Fwk::Ptr<OSPFPacket> pkt) const;
+
   /* Sends the given LSU packet to all neighbors except the packet's original
      sender. */
-  void flood_lsu_packet(Fwk::Ptr<OSPFLSUPacket> pkt) const;
+  void forward_lsu_flood(Fwk::Ptr<OSPFLSUPacket> pkt) const;
 
-  /* Sends PKT to the node in the topology with DEST_ID. */
-  void send_pkt_to_neighbor(const RouterID& neighbor_id,
-                            Fwk::Ptr<OSPFPacket> pkt) const;
+  /* Sends a new LSU update to all connected neighbors. */
+  void flood_lsu();
+
+  /* Sends a new LSU update to all neighbors directly connected to IFACE. */
+  void flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface);
+
+  /* Constructs a full link-state update packet destined to neighbor with id
+     NBR_ID connected at interface IFACE. */
+  Fwk::Ptr<OSPFLSUPacket> build_lsu_to_neighbor(Fwk::Ptr<OSPFInterface> iface,
+                                                const RouterID& nbr_id) const;
 
   /* Obtains the staged NeighborRelationship object with the specified
      LSU_SENDER_ID and ADVERTISED_NEIGHBOR_ID from the LINKS_STAGED
@@ -179,12 +198,14 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   PacketFunctor functor_;
 
-  RouterID router_id_;
-  AreaID area_id_;
+  const RouterID router_id_;
+  const AreaID area_id_;
   Fwk::Ptr<OSPFNode> router_node_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
   TopologyReactor::Ptr topology_reactor_; /* Reactor: Topology notifications */
+
+  uint8_t lsu_seqno_;
 
   /* External references. */
   Fwk::Ptr<RoutingTable> routing_table_;

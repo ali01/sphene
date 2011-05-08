@@ -46,6 +46,12 @@ class IPPacket : public Packet {
   static const size_t kHeaderSize;
   static const IPVersion kVersion = 4;
 
+  static Ptr NewDefault(PacketBuffer::Ptr buffer,
+                        uint16_t packet_len,
+                        IPType protocol,
+                        const IPv4Addr& src,
+                        const IPv4Addr& dst);
+
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
     return new IPPacket(buffer, buffer_offset);
   }

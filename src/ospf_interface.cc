@@ -16,6 +16,16 @@ OSPFInterface::interface() const {
   return iface_;
 }
 
+IPv4Addr
+OSPFInterface::interfaceIP() const {
+  return iface_->ip();
+}
+
+IPv4Addr
+OSPFInterface::interfaceSubnetMask() const {
+  return iface_->subnetMask();
+}
+
 OSPFGateway::Ptr
 OSPFInterface::gateway(const RouterID& router_id) {
   return gateways_.elem(router_id);

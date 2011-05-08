@@ -53,6 +53,9 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   /* Accessors. */
 
   Fwk::Ptr<const Interface> interface() const;
+  IPv4Addr interfaceIP() const;
+  IPv4Addr interfaceSubnetMask() const;
+
   uint16_t helloint() const { return helloint_; }
   Seconds timeSinceHello() const { return time(NULL) - latest_hello_; }
 

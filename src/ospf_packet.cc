@@ -46,8 +46,13 @@ struct ospf_lsu_adv {
   uint32_t router_id;       /* ID of neighboring router on advertised link */
 } __attribute((packed));
 
+const uint8_t OSPFPacket::kVersion;
+
 const size_t OSPFHelloPacket::kPacketSize = sizeof(struct ospf_hello_pkt);
+
+const uint8_t OSPFLSUPacket::kDefaultTTL;
 const size_t OSPFLSUPacket::kHeaderSize = sizeof(struct ospf_lsu_hdr);
+
 const size_t OSPFLSUAdvertisement::kSize = sizeof(struct ospf_lsu_adv);
 
 
@@ -198,6 +203,32 @@ OSPFPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 const IPv4Addr OSPFHelloPacket::kBroadcastAddr(0xe0000005);
 
+OSPFHelloPacket::Ptr
+OSPFHelloPacket::NewDefault(PacketBuffer::Ptr buffer,
+                            const RouterID& router_id,
+                            const AreaID& area_id,
+                            const IPv4Addr& mask,
+                            uint16_t helloint) {
+  OSPFHelloPacket::Ptr pkt =
+    new OSPFHelloPacket(buffer, buffer->size() - OSPFHelloPacket::kPacketSize);
+
+  /* OSPFPacket fields. */
+  pkt->versionIs(OSPFPacket::kVersion);
+  pkt->typeIs(OSPFPacket::kHello);
+  pkt->lenIs(OSPFHelloPacket::kPacketSize);
+  pkt->routerIDIs(router_id);
+  pkt->areaIDIs(area_id);
+  pkt->autypeAndAuthAreZero();
+
+  /* OSPFHelloPacket fields. */
+  pkt->subnetMaskIs(mask);
+  pkt->hellointIs(helloint);
+  pkt->paddingIsZero();
+  pkt->checksumReset();
+
+  return pkt;
+}
+
 OSPFHelloPacket::OSPFHelloPacket(PacketBuffer::Ptr buffer,
                                  unsigned int buffer_offset)
     : OSPFPacket(buffer, buffer_offset),
@@ -255,6 +286,32 @@ OSPFHelloPacket::operator()(Functor* const f,
 
 
 /* OSPFLSUPacket */
+
+OSPFLSUPacket::Ptr
+OSPFLSUPacket::NewDefault(PacketBuffer::Ptr buffer,
+                         const RouterID& router_id,
+                         const AreaID& area_id,
+                         uint32_t adv_count,
+                         uint16_t lsu_seqno) {
+  size_t ospf_pkt_len =
+    OSPFLSUPacket::kHeaderSize + adv_count * OSPFLSUAdvertisement::kSize;
+
+  OSPFLSUPacket::Ptr ospf_pkt =
+    new OSPFLSUPacket(buffer, buffer->size() - ospf_pkt_len);
+
+  ospf_pkt->versionIs(OSPFPacket::kVersion);
+  ospf_pkt->typeIs(OSPFPacket::kLSU);
+  ospf_pkt->lenIs(ospf_pkt_len);
+  ospf_pkt->routerIDIs(router_id);
+  ospf_pkt->areaIDIs(area_id);
+  ospf_pkt->autypeAndAuthAreZero();
+  ospf_pkt->seqnoIs(lsu_seqno);
+  ospf_pkt->ttlIs(OSPFLSUPacket::kDefaultTTL);
+  ospf_pkt->advCountIs(adv_count);
+  ospf_pkt->checksumReset();
+
+  return ospf_pkt;
+}
 
 OSPFLSUPacket::OSPFLSUPacket(PacketBuffer::Ptr buffer,
                              unsigned int buffer_offset)

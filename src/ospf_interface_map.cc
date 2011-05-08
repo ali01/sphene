@@ -43,7 +43,7 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
   if (iface == NULL)
     return;
 
-  IPv4Addr key = iface->interface()->ip();
+  IPv4Addr key = iface->interfaceIP();
   ip_ifaces_[key] = iface;
 
   OSPFInterface::const_gw_iter it;
@@ -61,7 +61,7 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   if (iface == NULL)
     return;
 
-  IPv4Addr key = iface->interface()->ip();
+  IPv4Addr key = iface->interfaceIP();
   ip_ifaces_.elemDel(key);
 
   OSPFInterface::const_gw_iter it;

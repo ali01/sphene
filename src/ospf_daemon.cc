@@ -7,6 +7,7 @@
 #include "data_plane.h"
 #include "ethernet_packet.h"
 #include "ip_packet.h"
+#include "ospf_constants.h"
 #include "ospf_interface.h"
 #include "ospf_interface_map.h"
 #include "ospf_packet.h"
@@ -40,6 +41,9 @@ OSPFDaemon::run() {
   /* Sending HELLO packets to all connected neighbors
      every iface.HELLOINT seconds. */
   broadcast_timed_hello();
+
+  /* Timed flood of link-state updates. */
+  flood_timed_lsu();
 }
 
 void
@@ -60,6 +64,16 @@ OSPFDaemon::broadcast_timed_hello() {
 }
 
 void
+OSPFDaemon::flood_timed_lsu() {
+  if (timeSinceLSU() > OSPF::kDefaultLSUInt) {
+    ospf_router_->onLSUInt();
+
+    /* Resetting time since last LSU. */
+    timeSinceLSUIs(0);
+  }
+}
+
+void
 OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   size_t ip_pkt_len = OSPFHelloPacket::kPacketSize + IPPacket::kHeaderSize;
   size_t eth_pkt_len = ip_pkt_len + EthernetPacket::kHeaderSize;
@@ -67,43 +81,33 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   PacketBuffer::Ptr buffer = PacketBuffer::New(eth_pkt_len);
 
   OSPFHelloPacket::Ptr ospf_pkt =
-    OSPFHelloPacket::New(buffer, buffer->size() - OSPFHelloPacket::kPacketSize);
+    OSPFHelloPacket::NewDefault(buffer,
+                                ospf_router_->routerID(),
+                                ospf_router_->areaID(),
+                                iface->interfaceSubnetMask(),
+                                iface->helloint());
 
   IPPacket::Ptr ip_pkt =
-    IPPacket::New(buffer, buffer->size() - ip_pkt_len);
+    IPPacket::NewDefault(buffer, ip_pkt_len,
+                         IPPacket::kOSPF,
+                         iface->interfaceIP(),
+                         OSPFHelloPacket::kBroadcastAddr);
+
+  /* IPPacket fields: */
+  ip_pkt->ttlIs(1);
+  ip_pkt->checksumReset();
 
   EthernetPacket::Ptr eth_pkt =
     EthernetPacket::New(buffer, buffer->size() - eth_pkt_len);
-
-  /* OSPFHelloPacket fields: */
-  ospf_pkt->versionIs(OSPFPacket::kVersion);
-  ospf_pkt->typeIs(OSPFPacket::kHello);
-  ospf_pkt->lenIs(OSPFHelloPacket::kPacketSize);
-  ospf_pkt->routerIDIs(ospf_router_->routerID());
-  ospf_pkt->areaIDIs(ospf_router_->areaID());
-  ospf_pkt->autypeAndAuthAreZero();
-  ospf_pkt->subnetMaskIs(iface->interface()->subnetMask());
-  ospf_pkt->hellointIs(iface->helloint());
-  ospf_pkt->paddingIsZero();
-  ospf_pkt->checksumReset();
-
-  /* IPPacket fields: */
-  ip_pkt->versionIs(IPPacket::kVersion);
-  ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4); /* Words, not bytes. */
-  ip_pkt->diffServicesAre(0);
-  ip_pkt->packetLengthIs(ip_pkt_len);
-  ip_pkt->identificationIs(0);
-  ip_pkt->flagsAre(0);
-  ip_pkt->fragmentOffsetIs(0);
-  ip_pkt->ttlIs(IPPacket::kDefaultTTL);
-  ip_pkt->srcIs(iface->interface()->ip());
-  ip_pkt->dstIs(OSPFHelloPacket::kBroadcastAddr);
-  ip_pkt->checksumReset();
 
   /* EthernetPacket fields: */
   eth_pkt->srcIs(iface->interface()->mac());
   eth_pkt->dstIs(EthernetAddr::kBroadcast);
   eth_pkt->typeIs(EthernetPacket::kIP);
+
+  /* Setting enclosing packet. */
+  ospf_pkt->enclosingPacketIs(ip_pkt);
+  ip_pkt->enclosingPacketIs(eth_pkt);
 
   /* Sending packet. */
   data_plane_->outputPacketNew(eth_pkt, iface->interface());
