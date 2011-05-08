@@ -41,6 +41,14 @@ class OSPFDaemon : public PeriodicTask {
 
   /* -- OSPFDaemon private helper functions. -- */
 
+  /* Removes links to neighbors who haven't sent a HELLO packet in more
+     than three times their advertised HELLOINT. */
+  void timeout_neighbor_links();
+
+  /* Helper function for timeout_neighbor_links(). Accomplishes its task
+     for a single interface. */
+  void timeout_interface_neighbor_links(Fwk::Ptr<OSPFInterface> iface);
+
   /* For all neighbors N_i, sends a HELLO packet to N_i if the last HELLO sent
      through the interface, J_i, that N_i is connected to, occurred more than
      J_i.HELLOINT seconds ago. */

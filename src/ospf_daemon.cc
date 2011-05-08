@@ -52,6 +52,31 @@ OSPFDaemon::timeSinceLSUIs(Seconds delta) {
 }
 
 void
+OSPFDaemon::timeout_neighbor_links() {
+  OSPFInterfaceMap::PtrConst ifaces = ospf_router_->interfaceMap();
+  OSPFInterfaceMap::const_if_iter if_it = ifaces->ifacesBegin();
+  for (; if_it != ifaces->ifacesEnd(); ++if_it) {
+    OSPFInterface::Ptr iface = if_it->second;
+    timeout_interface_neighbor_links(iface);
+  }
+}
+
+void
+OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
+  OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
+  for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
+    OSPFGateway::Ptr gw = gw_it->second;
+    if (gw->timeSinceHello() > 3 * iface->helloint()) {
+      /* No HELLO packet has been received from this neighbor in more than
+         three times its advertised HELLOINT. Remove from topology and
+         trigger LSU flood. */
+      iface->gatewayDel(gw->nodeRouterID());
+      // TODO: trigger LSU flood.
+    }
+  }
+}
+
+void
 OSPFDaemon::broadcast_timed_hello() {
   OSPFInterfaceMap::PtrConst iface_map = ospf_router_->interfaceMap();
   OSPFInterfaceMap::const_if_iter if_it = iface_map->ifacesBegin();
