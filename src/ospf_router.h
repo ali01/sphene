@@ -74,6 +74,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   /* Mutators. */
 
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
+  void routerIDIs(const RouterID& id) { router_id_ = id; }
+  void areaIDIS(const AreaID& id) { area_id_ = id; }
 
   /* Signals. */
 
@@ -255,8 +257,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   PacketFunctor functor_;
 
-  const RouterID router_id_;
-  const AreaID area_id_;
+  RouterID router_id_;
+  AreaID area_id_;
   Fwk::Ptr<OSPFNode> router_node_;
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
