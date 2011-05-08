@@ -57,7 +57,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   IPv4Addr interfaceSubnetMask() const;
 
   uint16_t helloint() const { return helloint_; }
-  Seconds timeSinceHello() const { return time(NULL) - latest_hello_; }
+  Seconds timeSinceOutgoingHello() const { return time(NULL) - latest_hello_; }
 
   OSPFGateway::Ptr gateway(const RouterID& router_id);
   OSPFGateway::PtrConst gateway(const RouterID& router_id) const;
@@ -70,7 +70,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   /* Mutators. */
 
-  void timeSinceHelloIs(Seconds delta);
+  void timeSinceOutgoingHelloIs(Seconds delta);
 
   void gatewayIs(OSPFNode::Ptr nb,
                  const IPv4Addr& gateway,

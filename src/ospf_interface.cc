@@ -48,7 +48,7 @@ OSPFInterface::neighbor(const RouterID& router_id) const {
 }
 
 void
-OSPFInterface::timeSinceHelloIs(Seconds delta) {
+OSPFInterface::timeSinceOutgoingHelloIs(Seconds delta) {
   latest_hello_ = time(NULL) - delta.value();
 }
 

@@ -57,7 +57,7 @@ OSPFDaemon::broadcast_timed_hello() {
   OSPFInterfaceMap::const_if_iter if_it = iface_map->ifacesBegin();
   for (; if_it != iface_map->ifacesEnd(); ++if_it) {
     OSPFInterface::Ptr iface = if_it->second;
-    if (iface->timeSinceHello() > iface->helloint()) {
+    if (iface->timeSinceOutgoingHello() > iface->helloint()) {
       broadcast_hello_out_interface(iface);
     }
   }
@@ -113,5 +113,5 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   data_plane_->outputPacketNew(eth_pkt, iface->interface());
 
   /* Resetting time since last HELLO. */
-  iface->timeSinceHelloIs(0);
+  iface->timeSinceOutgoingHelloIs(0);
 }
