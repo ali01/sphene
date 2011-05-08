@@ -58,6 +58,26 @@ OSPFDaemon::timeSinceLSUIs(Seconds delta) {
 /* OSPFDaemon private helper functions. */
 
 void
+OSPFDaemon::timeout_topology_entries() {
+  OSPFTopology::Ptr topology = ospf_router_->topology();
+  OSPFTopology::const_iterator it;
+  for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
+    OSPFNode::Ptr node = it->second;
+    timeout_node_topology_entries(node);
+  }
+}
+
+void
+OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
+  OSPFNode::const_link_iter it;
+  for (it = node->linksBegin(); it != node->linksEnd(); ++it) {
+    OSPFLink::Ptr link = it->second;
+    if (link->timeSinceLSU() > OSPF::kDefaultLSUTimeout)
+      node->linkDel(link->nodeRouterID());
+  }
+}
+
+void
 OSPFDaemon::timeout_neighbor_links() {
   OSPFInterfaceMap::PtrConst ifaces = ospf_router_->interfaceMap();
   OSPFInterfaceMap::const_if_iter if_it = ifaces->ifacesBegin();

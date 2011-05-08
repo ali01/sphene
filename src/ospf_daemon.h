@@ -11,6 +11,7 @@
 
 /* Forward declarations. */
 class OSPFInterface;
+class OSPFNode;
 class OSPFRouter;
 class ControlPlane;
 class DataPlane;
@@ -39,6 +40,14 @@ class OSPFDaemon : public PeriodicTask {
   void timeSinceLSUIs(Seconds delta);
 
   /* -- OSPFDaemon private helper functions. -- */
+
+  /* Removes topology entries that have not been confirmed by an LSU in
+     more than LSU_TIMEOUT seconds.*/
+  void timeout_topology_entries();
+
+  /* Helper function for timeout_topology_entries(). Accomplishes its task
+     for a single node. */
+  void timeout_node_topology_entries(Fwk::Ptr<OSPFNode> node);
 
   /* Removes links to neighbors who haven't sent a HELLO packet in more
      than three times their advertised HELLOINT. */
