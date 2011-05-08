@@ -359,6 +359,9 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
   ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
 
+  /* Setting enclosing packet. */
+  ospf_pkt->enclosingPacketIs(ip_pkt);
+
   return ospf_pkt;
 }
 
