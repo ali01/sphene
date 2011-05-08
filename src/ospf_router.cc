@@ -172,7 +172,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   /* Updating seqno and the node entry's age in topology database */
   node->latestSeqnoIs(pkt->seqno());
-  node->ageIs(0);
 
   ospf_router_->process_lsu_advertisements(node, pkt);
   topology_->onUpdate();
