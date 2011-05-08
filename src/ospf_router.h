@@ -119,6 +119,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* -- OSPFRouter private member functions. -- */
 
+  void outputPacketNew(Fwk::Ptr<OSPFPacket> ospf_pkt);
+
   /* Uses the optimal spanning tree computed by OSPFTopology to update all
      entries in the routing table. */
   void rtable_update();

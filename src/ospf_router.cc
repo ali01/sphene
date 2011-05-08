@@ -220,6 +220,12 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 /* OSPFRouter private member functions */
 
 void
+OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(ospf_pkt->enclosingPacket());
+  control_plane_->outputPacketNew(ip_pkt);
+}
+
+void
 OSPFRouter::rtable_update() {
   Fwk::ScopedLock<RoutingTable> lock(routing_table_);
 
