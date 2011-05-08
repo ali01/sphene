@@ -29,10 +29,12 @@ OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
       interfaces_(OSPFInterfaceMap::New()),
       topology_(OSPFTopology::New(router_node_)),
       topology_reactor_(TopologyReactor::New(this)),
+      im_reactor_(InterfaceMapReactor::New(this)),
       lsu_seqno_(0),
       routing_table_(rtable),
       control_plane_(cp.ptr()) {
   topology_->notifieeIs(topology_reactor_);
+  interfaces_->notifieeIs(im_reactor_);
 }
 
 void
@@ -130,9 +132,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
 
     neighbor = OSPFNode::New(neighbor_id);
     ifd->gatewayIs(neighbor, gateway, subnet, subnet_mask);
-
-    // TODO(ali): this may need to be a deep copy of link.
-    router_node_->linkIs(neighbor, subnet, subnet_mask);
   }
 
   /* Refresh neighbor's time since last HELLO. */
@@ -216,6 +215,23 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() const {
 OSPFLink::Ptr
 OSPFRouter::NeighborRelationship::advertisedNeighbor() {
   return advertised_neighbor_;
+}
+
+/* OSPFRouter::InterfaceMapReactor */
+
+void
+OSPFRouter::InterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
+                                           const RouterID& nd_id) {
+  OSPFGateway::Ptr gw = _im->gateway(nd_id);
+  ospf_router_->router_node_->linkIs(gw->node(),
+                                     gw->subnet(),
+                                     gw->subnetMask());
+}
+
+void
+OSPFRouter::InterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
+                                              const RouterID& nd_id) {
+  ospf_router_->router_node_->linkDel(nd_id);
 }
 
 /* OSPFRouter private member functions */

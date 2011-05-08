@@ -6,6 +6,7 @@
 #include "fwk/ptr_interface.h"
 using Fwk::LinkedList;
 
+#include "ospf_interface_map.h"
 #include "ospf_topology.h"
 #include "ospf_types.h"
 #include "packet.h"
@@ -14,7 +15,6 @@ using Fwk::LinkedList;
 class ControlPlane;
 class Interface;
 class OSPFInterface;
-class OSPFInterfaceMap;
 class OSPFLSUPacket;
 class OSPFLink;
 class OSPFNode;
@@ -121,6 +121,28 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     void operator=(const TopologyReactor&);
   };
 
+  class InterfaceMapReactor : public OSPFInterfaceMap::Notifiee {
+   public:
+    typedef Fwk::Ptr<const InterfaceMapReactor> PtrConst;
+    typedef Fwk::Ptr<InterfaceMapReactor> Ptr;
+
+    static Ptr New(OSPFRouter::Ptr _r) {
+      return new InterfaceMapReactor(_r);
+    }
+
+    void onGateway(OSPFInterfaceMap::Ptr _im, const RouterID& nd_id);
+    void onGatewayDel(OSPFInterfaceMap::Ptr _im, const RouterID& nd_id);
+
+   private:
+    InterfaceMapReactor(OSPFRouter::Ptr _r) : ospf_router_(_r.ptr()) {}
+
+    /* Data members. */
+    OSPFRouter* ospf_router_;
+
+    /* Operations disallowed. */
+    InterfaceMapReactor(const InterfaceMapReactor&);
+    void operator=(const InterfaceMapReactor&);
+  };
 
   /* -- OSPFRouter private member functions. -- */
 
@@ -204,6 +226,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
   TopologyReactor::Ptr topology_reactor_; /* Reactor: Topology notifications */
+  InterfaceMapReactor::Ptr im_reactor_;
 
   uint8_t lsu_seqno_;
 
