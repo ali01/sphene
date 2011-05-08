@@ -38,6 +38,10 @@ OSPFDaemon::OSPFDaemon(OSPFRouter::Ptr ospf_router,
 
 void
 OSPFDaemon::run() {
+  /* Removing links to neighbors who haven't sent a HELLO packet in more
+     than three times their advertised HELLOINT. */
+  timeout_neighbor_links();
+
   /* Sending HELLO packets to all connected neighbors
      every iface.HELLOINT seconds. */
   broadcast_timed_hello();
