@@ -1,5 +1,6 @@
 #include "hw_data_plane.h"
 
+#include <algorithm>
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstring>
@@ -9,6 +10,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 
 #include "arp_cache.h"
 #include "ethernet_packet.h"
@@ -24,8 +26,11 @@
 #include "routing_table.h"
 #include "sr_cpu_extension_nf2.h"
 
+using std::vector;
+
 struct sr_instance;
 static const char* const kDefaultIfaceName = "nf2c0";
+static const size_t kMaxHWRoutingTableEntries = 32;
 
 
 HWDataPlane::HWDataPlane(struct sr_instance* sr,
@@ -221,9 +226,80 @@ void HWDataPlane::writeHWIPFilterTableEntry(struct nf2device* nf2,
 }
 
 
+namespace {
+
+// Comparison function for std::sort(). Sorts routing table entries, longest
+// subnet mask first.
+bool lpmSorter(RoutingTable::Entry::Ptr a,
+               RoutingTable::Entry::Ptr b) {
+  return (a->subnetMask() > b->subnetMask());
+}
+
+}  // namespace
+
+
 void HWDataPlane::writeHWRoutingTable() {
   DLOG << "updating hardware routing table";
-  // TODO(ms): Implement this.
+
+  // Get all routing table entries into a vector for sorting.
+  vector<RoutingTable::Entry::Ptr> entries;
+  for (RoutingTable::iterator it = routing_table_->entriesBegin();
+       it != routing_table_->entriesEnd();
+       ++it) {
+    // TODO(ms): Figure out how to include routes over virtual interfaces.
+    if (it->second->interface()->type() == Interface::kVirtual)
+      continue;
+
+    entries.push_back(it->second);
+  }
+
+  // Sort entries in LPM-first order.
+  std::sort(entries.begin(), entries.end(), lpmSorter);
+
+  // Debug.
+  for (unsigned int i = 0; i < entries.size(); ++i)
+    DLOG << "  " << entries[i]->subnet() << " " << entries[i]->subnetMask();
+
+  // Open the NetFPGA for writing registers.
+  struct nf2device nf2;
+  nf2.device_name = kDefaultIfaceName;
+  nf2.net_iface = 1;
+  if (openDescriptor(&nf2)) {
+    perror("openDescriptor()");
+    exit(1);
+  }
+
+  // Write the routing table entries, LPM first.
+  for (unsigned int i = 0; i < entries.size(); ++i) {
+    if (i >= kMaxHWRoutingTableEntries) {
+      WLOG << "Routing table is too large to fit entirely in hardware";
+      break;
+    }
+
+    RoutingTable::Entry::Ptr entry = entries[i];
+    Interface::PtrConst iface = entry->interface();
+
+    uint32_t ip_addr = ntohl(entry->subnet().nbo());
+    uint32_t mask = ntohl(entry->subnetMask().nbo());
+    uint32_t gw = ntohl(entry->gateway().nbo());
+
+    // The port number is calculated in "one-hot-encoded format":
+    //   iface num    port
+    //   0            1
+    //   1            4
+    //   2            16
+    //   3            64
+    // For iface num i, this is 4**i.
+
+    unsigned int encoded_port = (1 << (iface->index() * 2));
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP, ip_addr);
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK, mask);
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, gw);
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT, encoded_port);
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR, i);
+  }
+
+  closeDescriptor(&nf2);
 }
 
 
@@ -236,6 +312,7 @@ void HWDataPlane::initializeInterface(Interface::Ptr iface) {
     return;
 
   // Translate "ethX" to "nf2cX".
+  // TODO(ms): Should be able to use iface->index() here.
   unsigned int index = iface_map_->interfaces() - 1;
   char iface_name[32] = "nf2c";
   sprintf(&(iface_name[4]), "%i", index);
