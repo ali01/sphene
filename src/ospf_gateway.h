@@ -1,7 +1,7 @@
 #ifndef OSPF_GATEWAY_H_CTXOEZOH
 #define OSPF_GATEWAY_H_CTXOEZOH
 
-#include <time.h>
+#include <ctime>
 
 #include "ipv4_addr.h"
 #include "ospf_link.h"

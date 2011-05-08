@@ -1,7 +1,7 @@
 #ifndef OSPF_DAEMON_H_
 #define OSPF_DAEMON_H_
 
-#include <time.h>
+#include <ctime>
 
 #include "fwk/ptr.h"
 

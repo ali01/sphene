@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include <string>
-#include <time.h>
+#include <ctime>
 
 #include "task.h"
 #include "time_types.h"

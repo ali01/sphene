@@ -1,7 +1,7 @@
 #ifndef OSPF_INTERFACE_DESC_H_6WPUE39N
 #define OSPF_INTERFACE_DESC_H_6WPUE39N
 
-#include <time.h>
+#include <ctime>
 
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"

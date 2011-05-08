@@ -2,7 +2,7 @@
 #define TIME_TYPES_H
 
 #include <inttypes.h>
-#include <time.h>
+#include <ctime>
 
 #include "fwk/ordinal.h"
 

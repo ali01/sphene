@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <time.h>
+#include <ctime>
 
 #include "fwk/buffer.h"
 
