@@ -40,7 +40,10 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   const AreaID& areaID() const { return area_id_; }
 
   Fwk::Ptr<const OSPFInterfaceMap> interfaceMap() const;
+  Fwk::Ptr<OSPFInterfaceMap> interfaceMap();
+
   Fwk::Ptr<const OSPFTopology> topology() const;
+  Fwk::Ptr<OSPFTopology> topology();
 
   Fwk::Ptr<const RoutingTable> routingTable() const;
   Fwk::Ptr<RoutingTable> routingTable();

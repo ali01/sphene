@@ -48,8 +48,18 @@ OSPFRouter::interfaceMap() const {
   return interfaces_;
 }
 
+OSPFInterfaceMap::Ptr
+OSPFRouter::interfaceMap() {
+  return interfaces_;
+}
+
 OSPFTopology::PtrConst
 OSPFRouter::topology() const {
+  return topology_;
+}
+
+OSPFTopology::Ptr
+OSPFRouter::topology() {
   return topology_;
 }
 
