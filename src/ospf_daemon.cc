@@ -75,6 +75,7 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
 
   IPPacket::Ptr ip_pkt =
     IPPacket::NewDefault(buffer, ip_pkt_len,
+                         IPPacket::kOSPF,
                          iface->interfaceIP(),
                          OSPFHelloPacket::kBroadcastAddr);
 

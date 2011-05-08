@@ -34,6 +34,7 @@ const IPVersion IPPacket::kVersion;
 IPPacket::Ptr
 IPPacket::NewDefault(PacketBuffer::Ptr buffer,
                      uint16_t packet_len,
+                     IPType protocol,
                      const IPv4Addr& src,
                      const IPv4Addr& dst) {
   IPPacket::Ptr pkt = new IPPacket(buffer, buffer->size() - packet_len);
@@ -46,6 +47,7 @@ IPPacket::NewDefault(PacketBuffer::Ptr buffer,
   pkt->flagsAre(0);
   pkt->fragmentOffsetIs(0);
   pkt->ttlIs(kDefaultTTL);
+  pkt->protocolIs(protocol);
   pkt->srcIs(src);
   pkt->dstIs(dst);
   pkt->checksumReset();

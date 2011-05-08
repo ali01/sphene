@@ -48,6 +48,7 @@ class IPPacket : public Packet {
 
   static Ptr NewDefault(PacketBuffer::Ptr buffer,
                         uint16_t packet_len,
+                        IPType protocol,
                         const IPv4Addr& src,
                         const IPv4Addr& dst);
 

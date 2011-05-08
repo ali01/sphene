@@ -354,7 +354,7 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
   /* IPPacket. */
   OSPFGateway::Ptr gw_obj = iface->gateway(nbr_id);
   IPPacket::Ptr ip_pkt =
-    IPPacket::NewDefault(buffer, ip_pkt_len,
+    IPPacket::NewDefault(buffer, ip_pkt_len, IPPacket::kOSPF,
                          iface->interfaceIP(), gw_obj->gateway());
   ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
