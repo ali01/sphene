@@ -64,16 +64,6 @@ OSPFDaemon::broadcast_timed_hello() {
 }
 
 void
-OSPFDaemon::flood_timed_lsu() {
-  if (timeSinceLSU() > OSPF::kDefaultLSUInt) {
-    ospf_router_->onLSUInt();
-
-    /* Resetting time since last LSU. */
-    timeSinceLSUIs(0);
-  }
-}
-
-void
 OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   size_t ip_pkt_len = OSPFHelloPacket::kPacketSize + IPPacket::kHeaderSize;
   size_t eth_pkt_len = ip_pkt_len + EthernetPacket::kHeaderSize;
@@ -114,4 +104,14 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
 
   /* Resetting time since last HELLO. */
   iface->timeSinceOutgoingHelloIs(0);
+}
+
+void
+OSPFDaemon::flood_timed_lsu() {
+  if (timeSinceLSU() > OSPF::kDefaultLSUInt) {
+    ospf_router_->onLSUInt();
+
+    /* Resetting time since last LSU. */
+    timeSinceLSUIs(0);
+  }
 }

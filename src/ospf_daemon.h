@@ -46,10 +46,11 @@ class OSPFDaemon : public PeriodicTask {
      J_i.HELLOINT seconds ago. */
   void broadcast_timed_hello();
 
-  void flood_timed_lsu();
-
   /* Sends a HELLO packet to all neighbors connected to interface IFACE. */
   void broadcast_hello_out_interface(Fwk::Ptr<OSPFInterface> iface);
+
+  /* Triggers LSU floods to all directly connected neighbors. */
+  void flood_timed_lsu();
 
   /* Data members. */
   Fwk::Ptr<ControlPlane> control_plane_;
