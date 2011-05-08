@@ -91,6 +91,10 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   eth_pkt->dstIs(EthernetAddr::kBroadcast);
   eth_pkt->typeIs(EthernetPacket::kIP);
 
+  /* Setting enclosing packet. */
+  ospf_pkt->enclosingPacketIs(ip_pkt);
+  ip_pkt->enclosingPacketIs(eth_pkt);
+
   /* Sending packet. */
   data_plane_->outputPacketNew(eth_pkt, iface->interface());
 
