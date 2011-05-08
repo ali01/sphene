@@ -80,7 +80,8 @@ OSPFInterface::gatewayIs(OSPFNode::Ptr nb,
     gateways_[nd_id] = gw_obj;
 
     /* Signaling notifiee. */
-    notifiee_->onGateway(this, nd_id);
+    if (notifiee_)
+      notifiee_->onGateway(this, nd_id);
   }
 }
 
@@ -91,5 +92,6 @@ OSPFInterface::gatewayDel(const RouterID& router_id) {
   neighbors_.elemDel(router_id);
 
   /* Signaling notifiee. */
-  notifiee_->onGatewayDel(this, router_id);
+  if (notifiee_)
+    notifiee_->onGatewayDel(this, router_id);
 }
