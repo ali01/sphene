@@ -151,6 +151,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      sender. */
   void forward_lsu_flood(Fwk::Ptr<OSPFLSUPacket> pkt) const;
 
+  /* Sends a new LSU update to all connected neighbors. */
+  void flood_lsu();
+
   /* Sends a new LSU update to all neighbors directly connected to IFACE. */
   void flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface);
 

@@ -326,6 +326,15 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
 }
 
 void
+OSPFRouter::flood_lsu() {
+  OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
+  for (; if_it != interfaces_->ifacesEnd(); ++if_it) {
+    OSPFInterface::Ptr iface = if_it->second;
+    flood_lsu_out_interface(iface);
+  }
+}
+
+void
 OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
   OSPFInterface::const_nb_iter it;
   for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
