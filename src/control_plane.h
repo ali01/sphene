@@ -22,6 +22,7 @@ class ARPPacket;
 class EthernetPacket;
 class GREPacket;
 class IPPacket;
+class OSPFRouter;
 class UnknownPacket;
 
 
@@ -51,12 +52,14 @@ class ControlPlane : public Fwk::NamedInterface {
 
   RoutingTable::Ptr routingTable() const { return routing_table_; }
 
+  Fwk::Ptr<const OSPFRouter> ospfRouter() const;
+  Fwk::Ptr<OSPFRouter> ospfRouter();
+
   // Returns the associated TunnelMap.
   TunnelMap::Ptr tunnelMap() const { return tunnel_map_; }
 
  protected:
   ControlPlane(const std::string& name);
-  virtual ~ControlPlane() { }
 
  private:
   class PacketFunctor : public Packet::Functor {
@@ -99,6 +102,7 @@ class ControlPlane : public Fwk::NamedInterface {
   ARPCache::Ptr arp_cache_;
   ARPQueue::Ptr arp_queue_;
   RoutingTable::Ptr routing_table_;
+  Fwk::Ptr<OSPFRouter> ospf_router_;
   TunnelMap::Ptr tunnel_map_;
   DataPlane::Ptr dp_;
 

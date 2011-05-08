@@ -12,6 +12,8 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "ip_packet.h"
+#include "ospf_constants.h"
+#include "ospf_router.h"
 #include "packet_buffer.h"
 #include "tunnel.h"
 #include "tunnel_map.h"
@@ -28,6 +30,9 @@ ControlPlane::ControlPlane(const std::string& name)
       arp_cache_(ARPCache::New()),
       arp_queue_(ARPQueue::New()),
       routing_table_(RoutingTable::New()),
+      ospf_router_(OSPFRouter::New(OSPF::kInvalidRouterID,
+                                   OSPF::kDefaultAreaID,
+                                   routing_table_, this)),
       tunnel_map_(TunnelMap::New()) { }
 
 
@@ -139,6 +144,17 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   dp_->outputPacketNew(eth_pkt, out_iface);
 }
 
+OSPFRouter::PtrConst
+ControlPlane::ospfRouter() const {
+  return ospf_router_;
+}
+
+OSPFRouter::Ptr
+ControlPlane::ospfRouter() {
+  return ospf_router_;
+}
+
+/* ControlPlane::PacketFunctor */
 
 ControlPlane::PacketFunctor::PacketFunctor(ControlPlane* const cp)
     : cp_(cp), log_(cp->log_) { }
