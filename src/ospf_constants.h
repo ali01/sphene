@@ -3,11 +3,15 @@
 
 #include <inttypes.h>
 
+#include "ospf_types.h"
+
 namespace OSPF {
 
 /* Interval for OSPF LSU flood updates. */
 extern const uint8_t kDefaultLSUInt;
 extern const uint8_t kDefaultLSUTimeout;
+extern const AreaID kDefaultAreaID;
+extern const RouterID kInvalidRouterID;
 
 } /* end of namespace OSPF */
 
