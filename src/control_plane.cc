@@ -155,8 +155,8 @@ ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
   }
 
   /* Initializing OSPF router. */
-  ospf_router_ = OSPFRouter::New(rid, OSPF::kDefaultAreaID, routing_table_,
-                                 this, dp->interfaceMap());
+  ospf_router_ = OSPFRouter::New(rid, OSPF::kDefaultAreaID,
+                                 routing_table_, dp->interfaceMap(), this);
 }
 
 OSPFRouter::PtrConst

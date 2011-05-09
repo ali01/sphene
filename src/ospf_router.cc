@@ -22,9 +22,11 @@ static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFRouter");
 
 /* OSPFRouter */
 
-OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
-                       RoutingTable::Ptr rtable, ControlPlane::Ptr cp,
-                       InterfaceMap::Ptr iface_map)
+OSPFRouter::OSPFRouter(const RouterID& router_id,
+                       const AreaID& area_id,
+                       RoutingTable::Ptr rtable,
+                       InterfaceMap::Ptr iface_map,
+                       ControlPlane* cp)
     : functor_(this),
       router_id_(router_id),
       area_id_(area_id),
@@ -35,7 +37,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
       im_reactor_(OSPFInterfaceMapReactor::New(this)),
       lsu_seqno_(0),
       routing_table_(rtable),
-      control_plane_(cp.ptr()) {
+      control_plane_(cp) {
   topology_->notifieeIs(topology_reactor_);
   interfaces_->notifieeIs(im_reactor_);
 }

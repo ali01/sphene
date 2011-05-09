@@ -27,10 +27,12 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   typedef Fwk::Ptr<const OSPFRouter> PtrConst;
   typedef Fwk::Ptr<OSPFRouter> Ptr;
 
-  static Ptr New(const RouterID& router_id, const AreaID& area_id,
-                 Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp,
-                 Fwk::Ptr<InterfaceMap> iface_map) {
-    return new OSPFRouter(router_id, area_id, rtable, cp, iface_map);
+  static Ptr New(const RouterID& router_id,
+                 const AreaID& area_id,
+                 Fwk::Ptr<RoutingTable> rtable,
+                 Fwk::Ptr<InterfaceMap> iface_map,
+                 ControlPlane* cp) {
+    return new OSPFRouter(router_id, area_id, rtable, iface_map, cp);
   }
 
   class Notifiee : public Fwk::PtrInterface<Notifiee> {
@@ -84,9 +86,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void onLinkStateUpdate();
 
  protected:
-  OSPFRouter(const RouterID& router_id, const AreaID& area_id,
-             Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp,
-             Fwk::Ptr<InterfaceMap> iface_map);
+  OSPFRouter(const RouterID& router_id,
+             const AreaID& area_id,
+             Fwk::Ptr<RoutingTable> rtable,
+             Fwk::Ptr<InterfaceMap> iface_map,
+             ControlPlane* cp);
 
  private:
   /* Nested double-dispatch Packet::Functor. */
