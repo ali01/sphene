@@ -47,6 +47,7 @@
 #endif /* _LINUX_ */
 
 #include "cli/helper.h"
+#include "cli/cli_main.h"
 
 #include "lwip/tcp.h"
 #include "lwip/memp.h"
@@ -133,6 +134,7 @@ int sr_init_low_level_subsystem(int argc, char **argv)
     const char *rtable = "rtable";
     const char *itable = CPU_HW_FILENAME;
     const char  *server = "171.67.71.19";
+    uint16_t cli_port = 2300;
     uint16_t port =  3250;
     uint16_t topo =  0;
     int ospf = 0;
@@ -156,7 +158,7 @@ int sr_init_low_level_subsystem(int argc, char **argv)
     sr = (struct sr_instance*) malloc(sizeof(struct sr_instance));
     memset(sr, 0x0, sizeof(struct sr_instance));
 
-    while ((c = getopt(argc, argv, "hna:s:v:p:t:r:l:i:u:")) != EOF)
+    while ((c = getopt(argc, argv, "hna:s:v:p:c:t:r:l:i:u:")) != EOF)
     {
         switch (c)
         {
@@ -166,6 +168,9 @@ int sr_init_low_level_subsystem(int argc, char **argv)
                 break;
             case 'p':
                 port = atoi((char *) optarg);
+                break;
+            case 'c':
+                cli_port = atoi((char *) optarg);
                 break;
             case 't':
                 topo = atoi((char *) optarg);
@@ -278,6 +283,12 @@ int sr_init_low_level_subsystem(int argc, char **argv)
 
     /* -- start low-level network thread -- */
     sys_thread_new(sr_low_level_network_subsystem, (void*)sr);
+
+    /* start the command-line interface (blocks until the router terminates) */
+    if (cli_main(cli_port) == CLI_ERROR) {
+        fprintf(stderr,
+                "Error: unable to setup the command-line interface server\n");
+    }
 
     return 0;
 }/* -- main -- */
@@ -437,6 +448,6 @@ static void sr_destroy_instance(struct sr_instance* sr) {
 static void usage(char* argv0)
 {
     printf("Simple Router Client\n");
-    printf("Format: %s [-h] [-v host] [-s server] [-p port] \n",argv0);
+    printf("Format: %s [-h] [-v host] [-s server] [-p port] [-c cli_port] \n",argv0);
     printf("           [-t topo id] [-r rtable_file] [-l log_file] [-i interface_file]\n");
 } /* -- usage -- */

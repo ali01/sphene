@@ -30,11 +30,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "cli/cli_main.h"
 #include "sr_base.h"
-
-/** run the command-line interface on CLI_PORT */
-#define CLI_PORT 2300
 
 int main(int argc, char** argv)
 {
@@ -43,15 +39,11 @@ int main(int argc, char** argv)
      *
      *  Note: sr recognizes the following command
      *        line args (in getopt format)
-     *        "hs:v:p:c:t:r:l:" and doesn't
+     *        "hna:s:v:p:c:t:r:l:i:u:" and doesn't
      *        clean argv
      *                                            -- */
 
     sr_init_low_level_subsystem(argc, argv);
-
-    /* start the command-line interface (blocks until the router terminates) */
-    if( cli_main( CLI_PORT ) == CLI_ERROR )
-        fprintf( stderr, "Error: unable to setup the command-line interface server\n" );
 
     return 0;
 } /* -- main -- */
