@@ -14,6 +14,7 @@ using Fwk::LinkedList;
 /* Forward declarations. */
 class ControlPlane;
 class Interface;
+class InterfaceMap;
 class OSPFInterface;
 class OSPFLSUPacket;
 class OSPFLink;
@@ -27,8 +28,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   typedef Fwk::Ptr<OSPFRouter> Ptr;
 
   static Ptr New(const RouterID& router_id, const AreaID& area_id,
-                 Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp) {
-    return new OSPFRouter(router_id, area_id, rtable, cp);
+                 Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp,
+                 Fwk::Ptr<InterfaceMap> iface_map) {
+    return new OSPFRouter(router_id, area_id, rtable, cp, iface_map);
   }
 
   class Notifiee : public Fwk::PtrInterface<Notifiee> {
@@ -85,7 +87,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
  protected:
   OSPFRouter(const RouterID& router_id, const AreaID& area_id,
-             Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp);
+             Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp,
+             Fwk::Ptr<InterfaceMap> iface_map);
 
  private:
   /* Nested double-dispatch Packet::Functor. */

@@ -30,9 +30,6 @@ ControlPlane::ControlPlane(const std::string& name)
       arp_cache_(ARPCache::New()),
       arp_queue_(ARPQueue::New()),
       routing_table_(RoutingTable::New()),
-      ospf_router_(OSPFRouter::New(OSPF::kInvalidRouterID,
-                                   OSPF::kDefaultAreaID,
-                                   routing_table_, this)),
       tunnel_map_(TunnelMap::New()) { }
 
 
@@ -148,11 +145,18 @@ void
 ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
   dp_ = dp;
 
-  /* Setting OSPF router ID to the IP addr of the router's first interface. */
+  /* OSPF router ID should be the IP addr of the router's first interface. */
   InterfaceMap::Ptr iface_map = dp->interfaceMap();
   InterfaceMap::const_iterator it = iface_map->begin();
-  Interface::Ptr iface = it->second;
-  ospf_router_->routerIDIs((RouterID)iface->ip().value());
+  RouterID rid = OSPF::kInvalidRouterID;
+  if (it != iface_map->end()) {
+    Interface::Ptr iface = it->second;
+    rid = (RouterID)iface->ip().value();
+  }
+
+  /* Initializing OSPF router. */
+  ospf_router_ = OSPFRouter::New(rid, OSPF::kDefaultAreaID, routing_table_,
+                                 this, dp->interfaceMap());
 }
 
 OSPFRouter::PtrConst

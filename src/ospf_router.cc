@@ -5,6 +5,7 @@
 
 #include "control_plane.h"
 #include "interface.h"
+#include "interface_map.h"
 #include "ip_packet.h"
 #include "ospf_constants.h"
 #include "ospf_gateway.h"
@@ -22,12 +23,13 @@ static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFRouter");
 /* OSPFRouter */
 
 OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
-                       RoutingTable::Ptr rtable, Fwk::Ptr<ControlPlane> cp)
+                       RoutingTable::Ptr rtable, ControlPlane::Ptr cp,
+                       InterfaceMap::Ptr iface_map)
     : functor_(this),
       router_id_(router_id),
       area_id_(area_id),
       router_node_(OSPFNode::New(router_id)),
-      interfaces_(OSPFInterfaceMap::New(cp->dataPlane()->interfaceMap())),
+      interfaces_(OSPFInterfaceMap::New(iface_map)),
       topology_(OSPFTopology::New(router_node_)),
       topology_reactor_(TopologyReactor::New(this)),
       im_reactor_(InterfaceMapReactor::New(this)),
