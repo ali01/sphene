@@ -123,8 +123,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     return;
   }
 
-  // TODO(ali): Interfaces must be manually removed from OSPFRouter if they
-  //   cease to exist. One approach could be to make use of notifications.
   OSPFInterface::Ptr ifd;
   ifd = interfaces_->interface(iface->ip());
 
