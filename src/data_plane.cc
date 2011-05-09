@@ -12,6 +12,7 @@
 #include "icmp_packet.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "ospf_packet.h"
 #include "sr_integration.h"
 
 
@@ -146,8 +147,9 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   IPv4Addr dest_ip = pkt->dst();
   Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
 
-  // IP packets destined for the router go to the control plane immediately.
-  if (target_iface) {
+  // IP packets destined for the router or to the OSPF broadcast address
+  // go to the control plane immediately.
+  if (target_iface || dest_ip == OSPFHelloPacket::kBroadcastAddr) {
     dp_->controlPlane()->packetNew(pkt, iface);
     return;
   }
