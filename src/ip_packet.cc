@@ -5,6 +5,7 @@
 
 #include "gre_packet.h"
 #include "icmp_packet.h"
+#include "ospf_packet.h"
 #include "interface.h"
 #include "packet_buffer.h"
 #include "unknown_packet.h"
@@ -245,6 +246,9 @@ IPPacket::payload() {
       break;
     case kGRE:
       pkt = GREPacket::GREPacketNew(buffer(), payload_offset);
+      break;
+    case kOSPF:
+      pkt = OSPFPacket::New(buffer(), payload_offset);
       break;
     default:
       pkt = UnknownPacket::UnknownPacketNew(buffer(), payload_offset);
