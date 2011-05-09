@@ -36,6 +36,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
       topology_reactor_(TopologyReactor::New(this)),
       im_reactor_(OSPFInterfaceMapReactor::New(this)),
       lsu_seqno_(0),
+      lsu_dirty_(true),
       routing_table_(rtable),
       control_plane_(cp) {
   topology_->notifieeIs(topology_reactor_);
