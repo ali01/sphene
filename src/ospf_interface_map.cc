@@ -6,7 +6,7 @@
 /* OSPFInterfaceMap */
 
 OSPFInterfaceMap::OSPFInterfaceMap()
-    : iface_reactor_(OSPFInterfaceReactor::New(this)) {}
+    : ospf_iface_reactor_(OSPFInterfaceReactor::New(this)) {}
 
 OSPFInterface::PtrConst
 OSPFInterfaceMap::interface(const IPv4Addr& addr) const {
@@ -53,7 +53,7 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
   }
 
   /* Set this interface map as IFACE's notifiee. */
-  iface->notifieeIs(iface_reactor_);
+  iface->notifieeIs(ospf_iface_reactor_);
 
   ip_ifaces_[key] = iface;
 

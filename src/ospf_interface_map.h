@@ -147,7 +147,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   Fwk::Map<RouterID,OSPFGateway> gateways_;
 
   /* Reactors to Interface notifications. */
-  OSPFInterfaceReactor::Ptr iface_reactor_;
+  OSPFInterfaceReactor::Ptr ospf_iface_reactor_;
 
   /* Singleton notifiee. */
   Notifiee::Ptr notifiee_;
