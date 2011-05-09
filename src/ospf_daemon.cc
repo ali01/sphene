@@ -161,7 +161,7 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
 
 void
 OSPFDaemon::flood_timed_lsu() {
-  if (timeSinceLSU() > OSPF::kDefaultLSUInt) {
+  if (timeSinceLSU() > OSPF::kDefaultLinkStateInterval) {
     ospf_router_->onLinkStateInterval();
 
     /* Resetting time since last LSU. */

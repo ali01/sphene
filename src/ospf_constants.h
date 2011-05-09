@@ -8,7 +8,7 @@
 namespace OSPF {
 
 /* Interval for OSPF LSU flood updates. */
-extern const uint8_t kDefaultLSUInt;
+extern const uint8_t kDefaultLinkStateInterval;
 extern const uint8_t kDefaultHelloInterval;
 extern const uint8_t kDefaultLSUTimeout;
 extern const AreaID kDefaultAreaID;
