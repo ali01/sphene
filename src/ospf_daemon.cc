@@ -73,7 +73,7 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
   OSPFNode::const_link_iter it;
   for (it = node->linksBegin(); it != node->linksEnd(); ++it) {
     OSPFLink::Ptr link = it->second;
-    if (link->timeSinceLSU() > OSPF::kDefaultLSUTimeout)
+    if (link->timeSinceLSU() > OSPF::kDefaultLinkStateUpdateTimeout)
       node->linkDel(link->nodeRouterID());
   }
 }
