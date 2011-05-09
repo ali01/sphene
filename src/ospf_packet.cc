@@ -159,6 +159,7 @@ OSPFPacket::derivedInstance() {
       pkt = NULL;
   }
 
+  pkt->enclosingPacketIs(this->enclosingPacket());
   return pkt;
 }
 
