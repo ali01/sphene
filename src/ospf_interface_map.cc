@@ -1,6 +1,7 @@
 #include "ospf_interface_map.h"
 
 #include "interface.h"
+#include "ospf_constants.h"
 
 /* OSPFInterfaceMap */
 
@@ -119,4 +120,19 @@ OSPFInterfaceMap::OSPFInterfaceReactor::onGatewayDel(OSPFInterface::Ptr iface,
                                                      const RouterID& id) {
   iface_map_->nbr_ifaces_.elemDel(id);
   iface_map_->gateways_.elemDel(id);
+}
+
+void
+OSPFInterfaceMap::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
+                                                   Interface::Ptr iface) {
+  OSPFInterface::Ptr ospf_iface =
+    OSPFInterface::New(iface, OSPF::kDefaultLinkStateInterval);
+
+  iface_map_->interfaceIs(ospf_iface);
+}
+
+void
+OSPFInterfaceMap::InterfaceMapReactor::onInterfaceDel(InterfaceMap::Ptr map,
+                                                      Interface::Ptr iface) {
+  iface_map_->interfaceDel(iface->ip());
 }

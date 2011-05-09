@@ -5,6 +5,7 @@
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
+#include "interface_map.h"
 #include "ipv4_addr.h"
 #include "ospf_interface.h"
 #include "ospf_types.h"
@@ -111,6 +112,29 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     void operator=(const OSPFInterfaceReactor&);
   };
 
+  class InterfaceMapReactor : public InterfaceMap::Notifiee {
+   public:
+    typedef Fwk::Ptr<const InterfaceMapReactor> PtrConst;
+    typedef Fwk::Ptr<InterfaceMapReactor> Ptr;
+
+    static Ptr New(OSPFInterfaceMap::Ptr _im) {
+      return new InterfaceMapReactor(_im);
+    }
+
+    void onInterface(InterfaceMap::Ptr map, Interface::Ptr iface);
+    void onInterfaceDel(InterfaceMap::Ptr map, Interface::Ptr iface);
+
+   private:
+    InterfaceMapReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}
+
+    /* Data members. */
+    OSPFInterfaceMap* iface_map_;
+
+    /* Operations disallowed. */
+    InterfaceMapReactor(const InterfaceMapReactor&);
+    void operator=(const InterfaceMapReactor&);
+  };
+
   /* Data members. */
 
   /* Map: Interface IP address => interface object. */
@@ -122,7 +146,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   /* Map: RouterID => Gateway object. */
   Fwk::Map<RouterID,OSPFGateway> gateways_;
 
-  /* Reactor to Interface notifications. */
+  /* Reactors to Interface notifications. */
   OSPFInterfaceReactor::Ptr iface_reactor_;
 
   /* Singleton notifiee. */
