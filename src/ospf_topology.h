@@ -53,6 +53,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
+  size_t nodes() const { return nodes_.size(); }
   bool dirty() const { return dirty_; }
 
   /* Mutators. */
