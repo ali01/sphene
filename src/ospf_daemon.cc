@@ -31,7 +31,8 @@ OSPFDaemon::OSPFDaemon(ControlPlane::Ptr cp, DataPlane::Ptr dp)
       control_plane_(cp),
       data_plane_(dp),
       ospf_router_(cp->ospfRouter()),
-      router_reactor_(RouterReactor::New(this)) {}
+      router_reactor_(RouterReactor::New(this)),
+      latest_lsu_(0) {}
 
 void
 OSPFDaemon::run() {
