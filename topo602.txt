@@ -1,0 +1,30 @@
+Topology 602
+
+This file describes your particular setup for the VNS pwospf assignment.
+
+You have been assigned topology 602 which looks like this:
+
+                                  eth0:10.3.0.115
+                                  +======================+
+                                  |  router #2         (eth1) ======= App Server 1 (10.3.0.119)
+                                  |  vhost2              | eth1:10.3.0.118
+                                  +=====(eth0)=====(eth2)+
+                                          /          ||    eth2:10.3.0.120
+                                         /           ||
+                                        /            ||
+                                       /             ||
+                                      /              ||  vhost1:
+  (internet)           +============(eth1)==+        ||    eth0: 10.3.0.113
+  gateway rtr ======= (eth0)  router #1     |        ||    eth1: 10.3.0.114
+  172.24.74.17         |      vhost1        |        ||    eth2: 10.3.0.116
+                       +============(eth2)==+        ||
+                                      \              ||
+                                       \             ||
+                                        \            ||
+                                         \           ||
+                                          \          ||    eth2:10.3.0.121
+                                  +=====(eth0)=====(eth2)+
+                                  |  router #2           | eth1:10.3.0.122
+                                  |  vhost3            (eth1) ======= App Server 2 (10.3.0.123)
+                                  +======================+
+                                  eth0:10.3.0.117
