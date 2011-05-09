@@ -258,8 +258,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* -- OSPFRouter data members. -- */
 
-  PacketFunctor functor_;
-
   RouterID router_id_;
   const AreaID area_id_;
   Fwk::Ptr<OSPFNode> router_node_;
@@ -277,6 +275,10 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   /* External references. */
   Fwk::Ptr<RoutingTable> routing_table_;
   ControlPlane* control_plane_; /* Weak pointer prevents circular references */
+
+  /* Must be initialized last because constructor gains references to
+     several data members above through the this ptr of OSPFRouter. */
+  PacketFunctor functor_;
 
   /* Logical Multimap<LSUSenderRouterID,NeighborRelationshipList>: Keeps track
      of neighbor relationships that have not yet been commited to the topology.

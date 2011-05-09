@@ -27,8 +27,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
                        RoutingTable::Ptr rtable,
                        InterfaceMap::Ptr iface_map,
                        ControlPlane* cp)
-    : functor_(this),
-      router_id_(router_id),
+    : router_id_(router_id),
       area_id_(area_id),
       router_node_(OSPFNode::New(router_id)),
       interfaces_(OSPFInterfaceMap::New(iface_map)),
@@ -38,7 +37,8 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
       lsu_seqno_(0),
       lsu_dirty_(true),
       routing_table_(rtable),
-      control_plane_(cp) {
+      control_plane_(cp),
+      functor_(this) {
   topology_->notifieeIs(topology_reactor_);
   interfaces_->notifieeIs(im_reactor_);
 }
