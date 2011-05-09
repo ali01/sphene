@@ -157,13 +157,13 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     void operator=(const TopologyReactor&);
   };
 
-  class InterfaceMapReactor : public OSPFInterfaceMap::Notifiee {
+  class OSPFInterfaceMapReactor : public OSPFInterfaceMap::Notifiee {
    public:
-    typedef Fwk::Ptr<const InterfaceMapReactor> PtrConst;
-    typedef Fwk::Ptr<InterfaceMapReactor> Ptr;
+    typedef Fwk::Ptr<const OSPFInterfaceMapReactor> PtrConst;
+    typedef Fwk::Ptr<OSPFInterfaceMapReactor> Ptr;
 
     static Ptr New(OSPFRouter::Ptr _r) {
-      return new InterfaceMapReactor(_r);
+      return new OSPFInterfaceMapReactor(_r);
     }
 
     void onInterface(OSPFInterfaceMap::Ptr _im, const IPv4Addr& addr);
@@ -172,14 +172,14 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     void onGatewayDel(OSPFInterfaceMap::Ptr _im, const RouterID& nd_id);
 
    private:
-    InterfaceMapReactor(OSPFRouter::Ptr _r) : ospf_router_(_r.ptr()) {}
+    OSPFInterfaceMapReactor(OSPFRouter::Ptr _r) : ospf_router_(_r.ptr()) {}
 
     /* Data members. */
     OSPFRouter* ospf_router_;
 
     /* Operations disallowed. */
-    InterfaceMapReactor(const InterfaceMapReactor&);
-    void operator=(const InterfaceMapReactor&);
+    OSPFInterfaceMapReactor(const OSPFInterfaceMapReactor&);
+    void operator=(const OSPFInterfaceMapReactor&);
   };
 
   /* -- OSPFRouter private member functions. -- */
@@ -264,7 +264,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFInterfaceMap> interfaces_;
   Fwk::Ptr<OSPFTopology> topology_;
   TopologyReactor::Ptr topology_reactor_; /* Reactor: Topology notifications */
-  InterfaceMapReactor::Ptr im_reactor_;
+  OSPFInterfaceMapReactor::Ptr im_reactor_;
 
   uint8_t lsu_seqno_;
   bool lsu_dirty_; /* Links to neighbors have changed since last LSU flood */

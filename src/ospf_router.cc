@@ -32,7 +32,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id, const AreaID& area_id,
       interfaces_(OSPFInterfaceMap::New(iface_map)),
       topology_(OSPFTopology::New(router_node_)),
       topology_reactor_(TopologyReactor::New(this)),
-      im_reactor_(InterfaceMapReactor::New(this)),
+      im_reactor_(OSPFInterfaceMapReactor::New(this)),
       lsu_seqno_(0),
       routing_table_(rtable),
       control_plane_(cp.ptr()) {
@@ -237,11 +237,11 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
   return advertised_neighbor_;
 }
 
-/* OSPFRouter::InterfaceMapReactor */
+/* OSPFRouter::OSPFInterfaceMapReactor */
 
 void
-OSPFRouter::InterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
-                                             const IPv4Addr& addr) {
+OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
+                                                 const IPv4Addr& addr) {
   if (_im->gateways() > 0) {
     OSPFInterface::const_gw_iter it;
     for (it = _im->gatewaysBegin(); it != _im->gatewaysEnd(); ++it) {
@@ -256,8 +256,8 @@ OSPFRouter::InterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
 }
 
 void
-OSPFRouter::InterfaceMapReactor::onInterfaceDel(OSPFInterfaceMap::Ptr _im,
-                                                const IPv4Addr& addr) {
+OSPFRouter::OSPFInterfaceMapReactor::onInterfaceDel(OSPFInterfaceMap::Ptr _im,
+                                                    const IPv4Addr& addr) {
   if (_im->gateways() > 0) {
     OSPFInterface::const_gw_iter it;
     for (it = _im->gatewaysBegin(); it != _im->gatewaysEnd(); ++it) {
@@ -270,8 +270,8 @@ OSPFRouter::InterfaceMapReactor::onInterfaceDel(OSPFInterfaceMap::Ptr _im,
 }
 
 void
-OSPFRouter::InterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
-                                           const RouterID& nd_id) {
+OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
+                                               const RouterID& nd_id) {
   OSPFGateway::Ptr gw = _im->gateway(nd_id);
   ospf_router_->router_node_->linkIs(gw->node(),
                                      gw->subnet(),
@@ -280,8 +280,8 @@ OSPFRouter::InterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
 }
 
 void
-OSPFRouter::InterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
-                                              const RouterID& nd_id) {
+OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
+                                                  const RouterID& nd_id) {
   ospf_router_->router_node_->linkDel(nd_id);
   ospf_router_->lsu_dirty_ = true;
 }
