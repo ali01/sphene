@@ -270,9 +270,13 @@ OSPFHelloPacket::valid() const {
   }
 
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(enclosingPacket());
-  if (ip_pkt->dst() != kBroadcastAddr) {
-    DLOG << "Destination address is not the broadcast address";
-    return false;
+  if (ip_pkt) {
+    if (ip_pkt->dst() != kBroadcastAddr) {
+      DLOG << "Destination address is not the broadcast address";
+      return false;
+    }
+  } else {
+    WLOG << "No validation done on the IP header. Enclosing packet is NULL.";
   }
 
   return true;
