@@ -22,14 +22,10 @@ class OSPFDaemon : public PeriodicTask {
   typedef Fwk::Ptr<const OSPFDaemon> PtrConst;
   typedef Fwk::Ptr<OSPFDaemon> Ptr;
 
-  static Ptr New(Fwk::Ptr<OSPFRouter> ospf_router,
-                 Fwk::Ptr<ControlPlane> cp,
-                 Fwk::Ptr<DataPlane> dp);
+  static Ptr New(Fwk::Ptr<ControlPlane> cp, Fwk::Ptr<DataPlane> dp);
 
  protected:
-  OSPFDaemon(Fwk::Ptr<OSPFRouter> ospf_router,
-             Fwk::Ptr<ControlPlane> cp,
-             Fwk::Ptr<DataPlane> dp);
+  OSPFDaemon(Fwk::Ptr<ControlPlane> cp, Fwk::Ptr<DataPlane> dp);
 
   class RouterReactor : public OSPFRouter::Notifiee {
    public:

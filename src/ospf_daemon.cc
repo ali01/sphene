@@ -22,19 +22,15 @@ static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFDaemon");
 
 
 OSPFDaemon::Ptr
-OSPFDaemon::New(OSPFRouter::Ptr ospf_router,
-                ControlPlane::Ptr cp,
-                DataPlane::Ptr dp) {
-  return new OSPFDaemon(ospf_router, cp, dp);
+OSPFDaemon::New(ControlPlane::Ptr cp, DataPlane::Ptr dp) {
+  return new OSPFDaemon(cp, dp);
 }
 
-OSPFDaemon::OSPFDaemon(OSPFRouter::Ptr ospf_router,
-                       ControlPlane::Ptr cp,
-                       DataPlane::Ptr dp)
+OSPFDaemon::OSPFDaemon(ControlPlane::Ptr cp, DataPlane::Ptr dp)
     : PeriodicTask("OSPFDaemon"),
       control_plane_(cp),
       data_plane_(dp),
-      ospf_router_(ospf_router),
+      ospf_router_(cp->ospfRouter()),
       router_reactor_(RouterReactor::New(this)) {}
 
 void
