@@ -45,7 +45,7 @@ class ControlPlane : public Fwk::NamedInterface {
   DataPlane::Ptr dataPlane() const { return dp_; }
 
   // Sets the DataPlane.
-  void dataPlaneIs(DataPlane::Ptr dp) { dp_ = dp; }
+  void dataPlaneIs(DataPlane::Ptr dp);
 
   ARPCache::Ptr arpCache() const { return arp_cache_; }
   ARPQueue::Ptr arpQueue() const { return arp_queue_; }

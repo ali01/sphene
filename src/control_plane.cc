@@ -144,6 +144,17 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   dp_->outputPacketNew(eth_pkt, out_iface);
 }
 
+void
+ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
+  dp_ = dp;
+
+  /* Setting OSPF router ID to the IP addr of the router's first interface. */
+  InterfaceMap::Ptr iface_map = dp->interfaceMap();
+  InterfaceMap::const_iterator it = iface_map->begin();
+  Interface::Ptr iface = it->second;
+  ospf_router_->routerIDIs((RouterID)iface->ip().value());
+}
+
 OSPFRouter::PtrConst
 ControlPlane::ospfRouter() const {
   return ospf_router_;
