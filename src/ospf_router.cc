@@ -242,6 +242,13 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 void
 OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
                                                  const IPv4Addr& addr) {
+  /* router_id_ should always be equal to the IP addr of the first interface. */
+  if (ospf_router_->router_id_ == OSPF::kInvalidRouterID
+      || _im->interfaces() <= 1) {
+    OSPFInterface::Ptr iface = _im->interface(addr);
+    ospf_router_->router_id_ = (RouterID)iface->interfaceIP().value();
+  }
+
   if (_im->gateways() > 0) {
     OSPFInterface::const_gw_iter it;
     for (it = _im->gatewaysBegin(); it != _im->gatewaysEnd(); ++it) {
