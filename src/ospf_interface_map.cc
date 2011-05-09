@@ -5,7 +5,7 @@
 /* OSPFInterfaceMap */
 
 OSPFInterfaceMap::OSPFInterfaceMap()
-    : iface_reactor_(InterfaceReactor::New(this)) {}
+    : iface_reactor_(OSPFInterfaceReactor::New(this)) {}
 
 OSPFInterface::PtrConst
 OSPFInterfaceMap::interface(const IPv4Addr& addr) const {
@@ -105,18 +105,18 @@ OSPFInterfaceMap::interfaceDel(const IPv4Addr& addr) {
 }
 
 
-/* OSPFInterfaceMap::InterfaceReactor */
+/* OSPFInterfaceMap::OSPFInterfaceReactor */
 
 void
-OSPFInterfaceMap::InterfaceReactor::onGateway(OSPFInterface::Ptr iface,
-                                              const RouterID& id) {
+OSPFInterfaceMap::OSPFInterfaceReactor::onGateway(OSPFInterface::Ptr iface,
+                                                  const RouterID& id) {
   iface_map_->nbr_ifaces_[id] = iface;
   iface_map_->gateways_[id] = iface->gateway(id);
 }
 
 void
-OSPFInterfaceMap::InterfaceReactor::onGatewayDel(OSPFInterface::Ptr iface,
-                                                 const RouterID& id) {
+OSPFInterfaceMap::OSPFInterfaceReactor::onGatewayDel(OSPFInterface::Ptr iface,
+                                                     const RouterID& id) {
   iface_map_->nbr_ifaces_.elemDel(id);
   iface_map_->gateways_.elemDel(id);
 }

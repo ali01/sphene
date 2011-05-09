@@ -88,27 +88,27 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   OSPFInterfaceMap();
 
  private:
-  class InterfaceReactor : public OSPFInterface::Notifiee {
+  class OSPFInterfaceReactor : public OSPFInterface::Notifiee {
    public:
-    typedef Fwk::Ptr<const InterfaceReactor> PtrConst;
-    typedef Fwk::Ptr<InterfaceReactor> Ptr;
+    typedef Fwk::Ptr<const OSPFInterfaceReactor> PtrConst;
+    typedef Fwk::Ptr<OSPFInterfaceReactor> Ptr;
 
     static Ptr New(OSPFInterfaceMap::Ptr _im) {
-      return new InterfaceReactor(_im);
+      return new OSPFInterfaceReactor(_im);
     }
 
     void onGateway(OSPFInterface::Ptr iface, const RouterID& id);
     void onGatewayDel(OSPFInterface::Ptr iface, const RouterID& id);
 
    private:
-    InterfaceReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}
+    OSPFInterfaceReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}
 
     /* Data members. */
     OSPFInterfaceMap* iface_map_; /* Weak ptr prevents circular reference. */
 
     /* Operations disallowed. */
-    InterfaceReactor(const InterfaceReactor&);
-    void operator=(const InterfaceReactor&);
+    OSPFInterfaceReactor(const OSPFInterfaceReactor&);
+    void operator=(const OSPFInterfaceReactor&);
   };
 
   /* Data members. */
@@ -123,13 +123,13 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   Fwk::Map<RouterID,OSPFGateway> gateways_;
 
   /* Reactor to Interface notifications. */
-  InterfaceReactor::Ptr iface_reactor_;
+  OSPFInterfaceReactor::Ptr iface_reactor_;
 
   /* Singleton notifiee. */
   Notifiee::Ptr notifiee_;
 
   /* Friends */
-  friend class InterfaceReactor;
+  friend class OSPFInterfaceReactor;
 
   /* Operations disallowed. */
   OSPFInterfaceMap(const OSPFInterfaceMap&);
