@@ -94,7 +94,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     typedef Fwk::Ptr<const OSPFInterfaceReactor> PtrConst;
     typedef Fwk::Ptr<OSPFInterfaceReactor> Ptr;
 
-    static Ptr New(OSPFInterfaceMap::Ptr _im) {
+    static Ptr New(OSPFInterfaceMap* _im) {
       return new OSPFInterfaceReactor(_im);
     }
 
@@ -102,7 +102,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     void onGatewayDel(OSPFInterface::Ptr iface, const RouterID& id);
 
    private:
-    OSPFInterfaceReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}
+    OSPFInterfaceReactor(OSPFInterfaceMap* _im) : iface_map_(_im) {}
 
     /* Data members. */
     OSPFInterfaceMap* iface_map_; /* Weak ptr prevents circular reference. */
@@ -117,7 +117,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     typedef Fwk::Ptr<const InterfaceMapReactor> PtrConst;
     typedef Fwk::Ptr<InterfaceMapReactor> Ptr;
 
-    static Ptr New(OSPFInterfaceMap::Ptr _im) {
+    static Ptr New(OSPFInterfaceMap* _im) {
       return new InterfaceMapReactor(_im);
     }
 
@@ -125,7 +125,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     void onInterfaceDel(InterfaceMap::Ptr map, Interface::Ptr iface);
 
    private:
-    InterfaceMapReactor(OSPFInterfaceMap::Ptr _im) : iface_map_(_im.ptr()) {}
+    InterfaceMapReactor(OSPFInterfaceMap* _im) : iface_map_(_im) {}
 
     /* Data members. */
     OSPFInterfaceMap* iface_map_;

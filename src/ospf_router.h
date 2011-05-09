@@ -138,14 +138,14 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     typedef Fwk::Ptr<const TopologyReactor> PtrConst;
     typedef Fwk::Ptr<TopologyReactor> Ptr;
 
-    static Ptr New(OSPFRouter::Ptr _r) {
+    static Ptr New(OSPFRouter* _r) {
       return new TopologyReactor(_r);
     }
 
     void onDirtyCleared() { router_->rtable_update(); }
 
    private:
-    TopologyReactor(OSPFRouter::Ptr _r) : router_(_r.ptr()) {}
+    TopologyReactor(OSPFRouter* _r) : router_(_r) {}
 
     /* Data members. */
     OSPFRouter* router_;
@@ -160,7 +160,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     typedef Fwk::Ptr<const OSPFInterfaceMapReactor> PtrConst;
     typedef Fwk::Ptr<OSPFInterfaceMapReactor> Ptr;
 
-    static Ptr New(OSPFRouter::Ptr _r) {
+    static Ptr New(OSPFRouter* _r) {
       return new OSPFInterfaceMapReactor(_r);
     }
 
@@ -170,7 +170,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     void onGatewayDel(OSPFInterfaceMap::Ptr _im, const RouterID& nd_id);
 
    private:
-    OSPFInterfaceMapReactor(OSPFRouter::Ptr _r) : ospf_router_(_r.ptr()) {}
+    OSPFInterfaceMapReactor(OSPFRouter* _r) : ospf_router_(_r) {}
 
     /* Data members. */
     OSPFRouter* ospf_router_;

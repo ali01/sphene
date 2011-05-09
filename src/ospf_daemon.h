@@ -32,14 +32,14 @@ class OSPFDaemon : public PeriodicTask {
     typedef Fwk::Ptr<const RouterReactor> PtrConst;
     typedef Fwk::Ptr<RouterReactor> Ptr;
 
-    static Ptr New(OSPFDaemon::Ptr daemon) {
+    static Ptr New(OSPFDaemon* daemon) {
       return new RouterReactor(daemon);
     }
 
     void onLinkStateFlood(OSPFRouter::Ptr _r) { daemon_->timeSinceLSUIs(0); }
 
    private:
-    RouterReactor(OSPFDaemon::Ptr daemon) : daemon_(daemon.ptr()) {}
+    RouterReactor(OSPFDaemon* daemon) : daemon_(daemon) {}
 
     /* Data members. */
     OSPFDaemon* daemon_;

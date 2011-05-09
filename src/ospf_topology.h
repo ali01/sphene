@@ -88,7 +88,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     typedef Fwk::Ptr<const Notifiee> PtrConst;
     typedef Fwk::Ptr<Notifiee> Ptr;
 
-    static Ptr New(OSPFTopology::Ptr _t) {
+    static Ptr New(OSPFTopology* _t) {
       return new NodeReactor(_t);
     }
 
@@ -96,7 +96,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     void onLinkDel(const RouterID& id) { topology_->dirtyIs(true); }
 
    private:
-    NodeReactor(OSPFTopology::Ptr _t) : topology_(_t.ptr()) {}
+    NodeReactor(OSPFTopology* _t) : topology_(_t) {}
 
     /* Data members. */
     OSPFTopology* topology_; /* Weak ptr to prevent circular reference. */
