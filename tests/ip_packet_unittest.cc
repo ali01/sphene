@@ -95,20 +95,20 @@ TEST_F(IPPacketTest, ip_fl_off) {
   EXPECT_EQ(pkt_->flags(), 0);
   EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
-  pkt_->flagsAre(IPPacket::IP_RF);
-  EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF);
+  pkt_->flagsAre(IPPacket::kIP_RF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::kIP_RF);
   EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
-  pkt_->flagsAre(IPPacket::IP_DF);
-  EXPECT_EQ(pkt_->flags(), IPPacket::IP_DF);
+  pkt_->flagsAre(IPPacket::kIP_DF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::kIP_DF);
   EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
-  pkt_->flagsAre(IPPacket::IP_MF);
-  EXPECT_EQ(pkt_->flags(), IPPacket::IP_MF);
+  pkt_->flagsAre(IPPacket::kIP_MF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::kIP_MF);
   EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
-  pkt_->flagsAre(IPPacket::IP_RF | IPPacket::IP_MF);
-  EXPECT_EQ(pkt_->flags(), IPPacket::IP_RF | IPPacket::IP_MF);
+  pkt_->flagsAre(IPPacket::kIP_RF | IPPacket::kIP_MF);
+  EXPECT_EQ(pkt_->flags(), IPPacket::kIP_RF | IPPacket::kIP_MF);
   EXPECT_EQ(pkt_->flags(), ip_hdr_[6] >> 5);
 
   /* fragment offset */
@@ -118,7 +118,7 @@ TEST_F(IPPacketTest, ip_fl_off) {
   EXPECT_EQ(0xAD, pkt_->fragmentOffset());
 
   /* retesting flags */
-  EXPECT_EQ(IPPacket::IP_RF | IPPacket::IP_MF, pkt_->flags());
+  EXPECT_EQ(IPPacket::kIP_RF | IPPacket::kIP_MF, pkt_->flags());
 }
 
 TEST_F(IPPacketTest, ip_ttl) {

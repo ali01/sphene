@@ -29,9 +29,9 @@ class IPPacket : public Packet {
 
   /* IP Header Flags (ip_fl) */
   enum Flags {
-    IP_RF = 0x4, /* reserved fragment flag */
-    IP_DF = 0x2, /* dont fragment flag */
-    IP_MF = 0x1  /* more fragments flag */
+    kIP_RF = 0x4, /* reserved fragment flag */
+    kIP_DF = 0x2, /* dont fragment flag */
+    kIP_MF = 0x1  /* more fragments flag */
   };
 
   enum IPType {

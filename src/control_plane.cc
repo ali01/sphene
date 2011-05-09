@@ -510,7 +510,7 @@ void ControlPlane::sendICMPTTLExceeded(IPPacket::Ptr orig_pkt) {
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->identificationIs(0);
-  ip_pkt->flagsAre(IPPacket::IP_DF);
+  ip_pkt->flagsAre(IPPacket::kIP_DF);
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
@@ -596,7 +596,7 @@ void ControlPlane::sendICMPDestUnreach(const ICMPPacket::Code code,
   ip_pkt->diffServicesAre(0);
   ip_pkt->protocolIs(IPPacket::kICMP);
   ip_pkt->identificationIs(0);
-  ip_pkt->flagsAre(IPPacket::IP_DF);
+  ip_pkt->flagsAre(IPPacket::kIP_DF);
   ip_pkt->fragmentOffsetIs(0);
   ip_pkt->srcIs(out_iface->ip());
   ip_pkt->dstIs(orig_pkt->src());
@@ -690,7 +690,7 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
 
 
 void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
-  if (pkt->flags() & IPPacket::IP_DF) {
+  if (pkt->flags() & IPPacket::kIP_DF) {
     WLOG << "Tried to fragment a packet with Don't Fragment bit set; ignoring";
     return;
   }
@@ -733,7 +733,7 @@ void ControlPlane::fragmentAndSend(IPPacket::Ptr pkt) {
 
     // Set fragmentation fields.
     fragment->identificationIs(cksum);  // use cksum as identifier
-    fragment->flagsAre(last_fragment ? 0 : IPPacket::IP_MF);
+    fragment->flagsAre(last_fragment ? 0 : IPPacket::kIP_MF);
     fragment->fragmentOffsetIs(fragment_offset);
 
     // Copy portion of data.

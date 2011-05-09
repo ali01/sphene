@@ -154,6 +154,7 @@ int sr_init_low_level_subsystem(int argc, char **argv)
     }
 
     sr = (struct sr_instance*) malloc(sizeof(struct sr_instance));
+    memset(sr, 0x0, sizeof(struct sr_instance));
 
     while ((c = getopt(argc, argv, "hna:s:v:p:t:r:l:i:u:")) != EOF)
     {
@@ -425,7 +426,7 @@ void sr_init_instance(struct sr_instance* sr)
 static void sr_destroy_instance(struct sr_instance* sr) {
     assert(sr);
     sr_integ_destroy(sr);
-    free( sr );
+    free(sr) ;
 }
 
 /*-----------------------------------------------------------------------------
