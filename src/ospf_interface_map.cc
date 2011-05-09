@@ -5,8 +5,11 @@
 
 /* OSPFInterfaceMap */
 
-OSPFInterfaceMap::OSPFInterfaceMap()
-    : ospf_iface_reactor_(OSPFInterfaceReactor::New(this)) {}
+OSPFInterfaceMap::OSPFInterfaceMap(InterfaceMap::Ptr iface_map)
+    : ospf_iface_reactor_(OSPFInterfaceReactor::New(this)),
+      iface_map_reactor_(InterfaceMapReactor::New(this)) {
+  iface_map_reactor_->notifierIs(iface_map);
+}
 
 OSPFInterface::PtrConst
 OSPFInterfaceMap::interface(const IPv4Addr& addr) const {

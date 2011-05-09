@@ -22,8 +22,8 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iter;
   typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iter;
 
-  static Ptr New() {
-    return new OSPFInterfaceMap();
+  static Ptr New(InterfaceMap::Ptr iface_map) {
+    return new OSPFInterfaceMap(iface_map);
   }
 
   /* Notification support. */
@@ -86,7 +86,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   const_gw_iter gatewaysEnd() const { return gateways_.end(); }
 
  protected:
-  OSPFInterfaceMap();
+  OSPFInterfaceMap(InterfaceMap::Ptr iface_map);
 
  private:
   class OSPFInterfaceReactor : public OSPFInterface::Notifiee {
@@ -148,6 +148,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
   /* Reactors to Interface notifications. */
   OSPFInterfaceReactor::Ptr ospf_iface_reactor_;
+  InterfaceMapReactor::Ptr iface_map_reactor_;
 
   /* Singleton notifiee. */
   Notifiee::Ptr notifiee_;
