@@ -26,8 +26,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   typedef Fwk::Ptr<const OSPFRouter> PtrConst;
   typedef Fwk::Ptr<OSPFRouter> Ptr;
 
-  static const uint16_t kDefaultHelloInterval = 10;
-
   static Ptr New(const RouterID& router_id, const AreaID& area_id,
                  Fwk::Ptr<RoutingTable> rtable, Fwk::Ptr<ControlPlane> cp) {
     return new OSPFRouter(router_id, area_id, rtable, cp);

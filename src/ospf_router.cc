@@ -6,6 +6,7 @@
 #include "control_plane.h"
 #include "interface.h"
 #include "ip_packet.h"
+#include "ospf_constants.h"
 #include "ospf_gateway.h"
 #include "ospf_interface_map.h"
 #include "ospf_link.h"
@@ -127,7 +128,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
      * was unaware about -- possibly a newly created virtual interface.
      * Creating a new interface description object and
      * adding it to the neighbor map. */
-    ifd = OSPFInterface::New(iface, kDefaultHelloInterval);
+    ifd = OSPFInterface::New(iface, OSPF::kDefaultHelloInterval);
     interfaces_->interfaceIs(ifd);
   }
 
