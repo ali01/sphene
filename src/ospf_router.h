@@ -18,6 +18,7 @@ class InterfaceMap;
 class OSPFInterface;
 class OSPFLSUPacket;
 class OSPFLink;
+class OSPFPacket;
 class OSPFNode;
 class RoutingTable;
 
@@ -53,8 +54,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     void operator=(const Notifiee&);
   };
 
-  // TODO(ali): perhaps should take OSPFPacket instead of Packet.
-  void packetNew(Packet::Ptr pkt, Fwk::Ptr<const Interface> iface);
+  void packetNew(Fwk::Ptr<OSPFPacket> pkt, Fwk::Ptr<const Interface> iface);
 
   /* Accessors. */
 

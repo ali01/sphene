@@ -71,6 +71,7 @@ class ControlPlane : public Fwk::NamedInterface {
     void operator()(GREPacket*, Interface::PtrConst);
     void operator()(ICMPPacket*, Interface::PtrConst);
     void operator()(IPPacket*, Interface::PtrConst);
+    void operator()(OSPFPacket*, Interface::PtrConst);
     void operator()(UnknownPacket*, Interface::PtrConst);
 
    private:

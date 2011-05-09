@@ -13,6 +13,7 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "ospf_constants.h"
+#include "ospf_packet.h"
 #include "ospf_router.h"
 #include "packet_buffer.h"
 #include "tunnel.h"
@@ -349,6 +350,17 @@ void ControlPlane::PacketFunctor::operator()(IPPacket* const pkt,
   // Dispatch encapsulated packet.
   Packet::Ptr payload_pkt = pkt->payload();
   (*payload_pkt)(this, iface);
+}
+
+
+void ControlPlane::PacketFunctor::operator()(OSPFPacket* pkt,
+                                             Interface::PtrConst iface) {
+  DLOG << "OSPFPacket dispatch in ControlPlane";
+
+  if (cp_->ospf_router_)
+    cp_->ospf_router_->packetNew(pkt, iface);
+  else
+    ELOG << "  OSPFRouter is uninitialized: dropping packet.";
 }
 
 

@@ -44,7 +44,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
 }
 
 void
-OSPFRouter::packetNew(Packet::Ptr pkt, Interface::PtrConst iface) {
+OSPFRouter::packetNew(OSPFPacket::Ptr pkt, Interface::PtrConst iface) {
   /* double dispatch */
   (*pkt)(&functor_, iface);
 }
