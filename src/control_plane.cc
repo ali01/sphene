@@ -48,6 +48,13 @@ void ControlPlane::packetNew(Packet::Ptr pkt,
 void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   DLOG << "outputPacketNew() in ControlPlane";
 
+  if (pkt->ttl() < 1) {
+    // Send ICMP Time Exceeded Message to source.
+    pkt->ttlIs(pkt->ttl() + 1);
+    sendICMPTTLExceeded(pkt);
+    return;
+  }
+
   IPv4Addr dest_ip = pkt->dst();
   Interface::Ptr target_iface;
   {
@@ -89,20 +96,6 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
 
     return;
   }
-
-  // Decrement TTL. We do this last to avoid having to increase the TTL and
-  // recompute the checksum again if an error occurs.
-  pkt->ttlDec(1);
-  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
-  if (pkt->ttl() < 1) {
-    // Send ICMP Time Exceeded Message to source.
-    pkt->ttlIs(pkt->ttl() + 1);
-    sendICMPTTLExceeded(pkt);
-    return;
-  }
-
-  // Recompute the checksum since we changed the TTL.
-  pkt->checksumReset();
 
   // Outgoing interface.
   Interface::PtrConst out_iface = r_entry->interface();

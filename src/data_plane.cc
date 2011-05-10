@@ -157,6 +157,24 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   if (target_iface || dest_ip == OSPFHelloPacket::kBroadcastAddr) {
     dp_->controlPlane()->packetNew(pkt, iface);
     return;
+  }// Decrement TTL and recompute checksum.
+  pkt->ttlDec(1);
+  pkt->checksumReset();
+  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
+  if (pkt->ttl() < 1) {
+    // Send ICMP Time Exceeded Message to source.
+    dp_->controlPlane()->outputPacketNew(pkt);
+    return;
+  }
+
+  // Decrement TTL and recompute checksum.
+  pkt->ttlDec(1);
+  pkt->checksumReset();
+  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
+  if (pkt->ttl() < 1) {
+    // Send ICMP Time Exceeded Message to source.
+    dp_->controlPlane()->outputPacketNew(pkt);
+    return;
   }
 
   // Otherwise, we need to forward the packet.
@@ -204,21 +222,6 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
     return;
   }
 
-  // Decrement TTL. We do this last to avoid having to increase the TTL and
-  // recompute the checksum again if an error occurs.
-  pkt->ttlDec(1);
-  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
-  if (pkt->ttl() < 1) {
-    // Send ICMP Time Exceeded Message to source.
-    pkt->ttlIs(pkt->ttl() + 1);
-    // Send to control plane for error processing.
-    dp_->controlPlane()->outputPacketNew(pkt);
-    return;
-  }
-
-  // Recompute the checksum since we changed the TTL.
-  pkt->checksumReset();
-
   // Add Ethernet header using ARP entry data.
   pkt->buffer()->minimumSizeIs(pkt->len() + EthernetPacket::kHeaderSize);
   EthernetPacket::Ptr eth_pkt =
@@ -227,7 +230,6 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   eth_pkt->srcIs(out_iface->mac());
   eth_pkt->dstIs(arp_entry->ethernetAddr());
   eth_pkt->typeIs(EthernetPacket::kIP);
-
 
   // Send packet.
   DLOG << "Forwarding IP packet to " << string(next_hop_ip);
