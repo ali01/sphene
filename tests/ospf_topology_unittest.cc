@@ -21,6 +21,7 @@ class OSPFTopologyTest : public ::testing::Test {
     topology_ = OSPFTopology::New(root_node_);
   }
 
+  void setup_six_node_topology();
   
   RouterID ids_[kNodes];
   OSPFNode::Ptr nodes_[kNodes];
@@ -62,8 +63,8 @@ TEST_F(OSPFTopologyTest, two_node_reverse) {
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
 }
 
-TEST_F(OSPFTopologyTest, six_node_1) {
-
+void
+OSPFTopologyTest::setup_six_node_topology() {
   /* Topology:
               0        4
           ___/ \___   /
@@ -81,13 +82,16 @@ TEST_F(OSPFTopologyTest, six_node_1) {
   root_node_->linkIs(links_[1], false);
   root_node_->linkIs(links_[2], false);
 
+  nodes_[0]->linkIs(links_[1], false);
   nodes_[1]->linkIs(links_[2], false);
   nodes_[1]->linkIs(links_[3], false);
   nodes_[1]->linkIs(links_[4], false);
 
-  nodes_[2]->linkIs(links_[3], false);
-
   topology_->onUpdate();
+}
+
+TEST_F(OSPFTopologyTest, six_node_1) {
+  setup_six_node_topology();
 
   EXPECT_EQ(nodes_[0]->prev(), root_node_);
   EXPECT_EQ(nodes_[1]->prev(), root_node_);
@@ -100,4 +104,32 @@ TEST_F(OSPFTopologyTest, six_node_1) {
   EXPECT_EQ(topology_->nextHop(ids_[2]), nodes_[2]);
   EXPECT_EQ(topology_->nextHop(ids_[3]), nodes_[1]);
   EXPECT_EQ(topology_->nextHop(ids_[4]), nodes_[1]);
+}
+
+TEST_F(OSPFTopologyTest, six_node_2) {
+  setup_six_node_topology();
+  EXPECT_EQ(topology_->nodes(), (size_t)6);
+
+  root_node_->linkDel(ids_[1]);
+  root_node_->linkDel(ids_[2]);
+
+  /* Topology:
+              0        4
+          ___/ \___   /
+         /         \ /
+        R           1
+           ________/|
+          /         |
+        2           3
+  */
+
+  EXPECT_TRUE(root_node_->prev() == NULL);
+  EXPECT_EQ(nodes_[0]->prev(), root_node_);
+  EXPECT_EQ(nodes_[1]->prev(), nodes_[0]);
+  EXPECT_EQ(nodes_[2]->prev(), nodes_[1]);
+  EXPECT_EQ(nodes_[3]->prev(), nodes_[1]);
+  EXPECT_EQ(nodes_[4]->prev(), nodes_[1]);
+
+  for (int i = 0; i < 5; ++i)
+    EXPECT_EQ(topology_->nextHop(ids_[i]), nodes_[0]);
 }
