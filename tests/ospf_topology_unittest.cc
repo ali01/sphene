@@ -99,7 +99,7 @@ OSPFTopologyTest::setup_six_node_topology() {
   nodes_[1]->linkIs(links_[3], false);
   nodes_[1]->linkIs(links_[4], false);
 
-  topology_->onUpdate();
+  topology_->onPossibleUpdate();
 }
 
 TEST_F(OSPFTopologyTest, six_node_1) {

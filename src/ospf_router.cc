@@ -202,7 +202,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   node->latestSeqnoIs(pkt->seqno());
 
   ospf_router_->process_lsu_advertisements(node, pkt);
-  topology_->onUpdate();
+  topology_->onPossibleUpdate();
 
   if (pkt->ttl() > 1) {
     pkt->ttlDec(1);

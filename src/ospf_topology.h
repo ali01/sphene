@@ -72,8 +72,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   const_iterator nodesEnd() const { return nodes_.end(); }
 
   /* Signals. */
-  /* onUpdate signal: Recomputes shortest-path spanning tree. */
-  void onUpdate();
+  /* onPossibleUpdate signal: Recomputes shortest-path spanning tree if dirty.*/
+  void onPossibleUpdate();
 
  private:
   OSPFTopology(OSPFNode::Ptr root_node);
@@ -107,7 +107,11 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Private member functions. */
 
-  void dirtyIs(bool status) { dirty_ = status; }
+  void dirtyIs(bool status);
+
+  /* Depending on COMMIT, recomputes the
+     spanning tree or just sets the dirty bit. */
+  void process_update(bool commit);
 
   /* Data members. */
 
