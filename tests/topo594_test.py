@@ -88,6 +88,7 @@ class Test_Topo594:
     self._instance = subprocess.Popen(cmd)
 
     # Wait for interface to come up.
+    time.sleep(1)
     for i in range(5):
       if network_lib.ping(self._rtr_eth0):
         return
