@@ -294,10 +294,10 @@ OSPFHelloPacket::operator()(Functor* const f,
 
 OSPFLSUPacket::Ptr
 OSPFLSUPacket::NewDefault(PacketBuffer::Ptr buffer,
-                         const RouterID& router_id,
-                         const AreaID& area_id,
-                         uint32_t adv_count,
-                         uint16_t lsu_seqno) {
+                          const RouterID& router_id,
+                          const AreaID& area_id,
+                          uint32_t adv_count,
+                          uint16_t lsu_seqno) {
   size_t ospf_pkt_len =
     OSPFLSUPacket::kHeaderSize + adv_count * OSPFLSUAdvertisement::kSize;
 
