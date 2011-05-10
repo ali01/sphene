@@ -256,9 +256,10 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                OSPFInterface::Ptr iface,
                                                const RouterID& nd_id) {
   OSPFGateway::Ptr gw = _im->gateway(nd_id);
-  ospf_router_->router_node_->linkIs(gw->node(),
-                                     gw->subnet(),
-                                     gw->subnetMask());
+
+  OSPFLink::Ptr ln = OSPFLink::New(gw->node(), gw->subnet(), gw->subnetMask());
+  ospf_router_->router_node_->linkIs(ln);
+
   ospf_router_->lsu_dirty_ = true;
 
   /* Updating the routing table. */
@@ -556,9 +557,7 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   /* Establish bi-directional link.
      This also refreshes the link's time since last LSU. */
-  lsu_sender->linkIs(adv_nb->node(),
-                     adv_nb->subnet(),
-                     adv_nb->subnetMask());
+  lsu_sender->linkIs(adv_nb);
 
   /* Add both nodes to the topology if they weren't already there. */
   topology_->nodeIs(lsu_sender);
