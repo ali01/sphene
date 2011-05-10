@@ -27,7 +27,31 @@ OSPFNode::neighbor(const RouterID& id) const {
 }
 
 void
-OSPFNode::linkIs(OSPFLink::Ptr link, bool bi_directional) {
+OSPFNode::linkIs(OSPFLink::Ptr link) {
+  oneWayLinkIs(link);
+
+  /* Relationship is bi-directional. */
+  if (link) {
+    OSPFLink::Ptr reverse_link = OSPFLink::New(this, link->subnet(),
+                                               link->subnetMask());
+    link->node()->oneWayLinkIs(reverse_link);
+  }
+}
+
+void
+OSPFNode::linkDel(const RouterID& id) {
+  oneWayLinkDel(id);
+
+  /* Deletion is bi-directional. */
+  OSPFNode::Ptr node = neighbor(id);
+  if (node)
+    node->oneWayLinkDel(this->routerID());
+}
+
+/* OSPFNode private member functions. */
+
+void
+OSPFNode::oneWayLinkIs(OSPFLink::Ptr link) {
   if (link == NULL)
     return;
 
@@ -48,17 +72,10 @@ OSPFNode::linkIs(OSPFLink::Ptr link, bool bi_directional) {
   /* Signal notifiee. */
   if (notifiee_ && (prev_link == NULL || *link != *prev_link))
     notifiee_->onLink(nd_id);
-
-  if (bi_directional) {
-    /* Relationship is bi-directional. */
-    OSPFLink::Ptr reverse_link = OSPFLink::New(this, link->subnet(),
-                                               link->subnetMask());
-    node->linkIs(reverse_link, false);
-  }
 }
 
 void
-OSPFNode::linkDel(const RouterID& id, bool bi_directional) {
+OSPFNode::oneWayLinkDel(const RouterID& id) {
   OSPFNode::Ptr node = neighbor(id);
   if (node) {
     /* Deleting from both maps. */
@@ -68,10 +85,5 @@ OSPFNode::linkDel(const RouterID& id, bool bi_directional) {
     /* Signal notifiee. */
     if (notifiee_)
       notifiee_->onLinkDel(id);
-
-    if (bi_directional) {
-      /* Deletion is bi-directional. */
-      node->linkDel(this->routerID(), false);
-    }
   }
 }
