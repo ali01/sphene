@@ -403,7 +403,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
       neighbor_nd = topology_->node(adv->routerID());
       if (neighbor_nd == NULL) {
         neighbor_nd = OSPFNode::New(adv->routerID());
-        topology_->nodeIs(neighbor_nd);
+        topology_->nodeIs(neighbor_nd, false);
       }
 
       OSPFLink::Ptr neighbor =
@@ -560,11 +560,11 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   /* Establish bi-directional link.
      This also refreshes the link's time since last LSU. */
-  lsu_sender->linkIs(adv_nb);
+  lsu_sender->linkIs(adv_nb, false);
 
   /* Add both nodes to the topology if they weren't already there. */
-  topology_->nodeIs(lsu_sender);
-  topology_->nodeIs(adv_nb->node());
+  topology_->nodeIs(lsu_sender, false);
+  topology_->nodeIs(adv_nb->node(), false);
 
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);
