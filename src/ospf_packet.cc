@@ -313,7 +313,6 @@ OSPFLSUPacket::NewDefault(PacketBuffer::Ptr buffer,
   ospf_pkt->seqnoIs(lsu_seqno);
   ospf_pkt->ttlIs(OSPFLSUPacket::kDefaultTTL);
   ospf_pkt->advCountIs(adv_count);
-  ospf_pkt->checksumReset();
 
   return ospf_pkt;
 }
