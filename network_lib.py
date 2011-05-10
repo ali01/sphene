@@ -48,8 +48,36 @@ def ping(host):
     m = re.search('([0-9.])% packet loss', line)
     if m:
       loss = float(m.group(1))
-      print loss
       return (loss == 0)
 
   # Didn't find packet loss line?
   return False
+
+
+def traceroute(host):
+  '''Traceroutes a host.
+
+  Args:
+    host: target
+
+  Returns:
+    list of all hops in the path as strings, or None for an unknown hop
+  '''
+  ph = subprocess.Popen(['traceroute', host],
+                        stdin=None,
+                        stdout=subprocess.PIPE)
+  output = ph.stdout.read()
+
+  # Parse output lines.
+  lines = output.split('\n')
+  hops = []
+  for line in lines:
+    m = re.search('^\s*(\d+)\s+([a-z0-9\.\-\*]+)\s+', line, re.I)
+    if m:
+      dist = m.group(1)
+      hop = m.group(2)
+      if hop == '*':
+        hop = None
+      hops.append(hop)
+
+  return hops
