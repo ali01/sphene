@@ -5,18 +5,20 @@ import socket
 import subprocess
 
 
-def send_cli_command(host, port, command):
+def send_cli_command(host, port, command, timeout=3):
   '''Send a cli command to a sphene router.
 
   Args:
     host: hostname of router
     port: tcp port for CLI
     command: string command to send
+    timeout (optional): connection timeout in seconds
 
   Returns:
     True on success, False on failure (unable to connect to host)
   '''
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  s.settimeout(timeout)
   try:
     s.connect((host, port))
   except socket.error, e:
@@ -28,16 +30,17 @@ def send_cli_command(host, port, command):
   return send_success
 
 
-def ping(host):
-  '''Sends 3 ICMP pings to a host.
+def ping(host, count=1):
+  '''Sends ICMP pings to a host.
 
   Args:
     host: target
+    count (optional): number of pings to send
 
   Returns:
     True on 0% packet loss, False otherwise.
   '''
-  ph = subprocess.Popen(['ping', '-c', '3', host],
+  ph = subprocess.Popen(['ping', '-c', str(count), host],
                         stdin=None,
                         stdout=subprocess.PIPE);
   output = ph.stdout.read()

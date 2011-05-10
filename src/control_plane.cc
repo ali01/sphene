@@ -101,14 +101,6 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   Interface::PtrConst out_iface = r_entry->interface();
   DLOG << "  outgoing interface: " << out_iface->name();
 
-  if (r_entry->type() == RoutingTable::Entry::kStatic &&
-      !out_iface->enabled()) {
-    // We have a static route, but we cannot reach the target network.
-    DLOG << "  outgoing interface is disabled";
-    sendICMPDestNetworkUnreach(pkt);
-    return;
-  }
-
   if (out_iface->type() == Interface::kVirtual) {
     // Interface is virtual. We need to do an encapsulation here.
     encapsulateAndOutputPacket(pkt, out_iface);
