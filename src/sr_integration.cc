@@ -74,7 +74,6 @@ static void read_rtable(struct sr_instance* sr);
 void sr_integ_init(struct sr_instance* sr)
 {
   log_ = Fwk::Log::LogNew("root");
-  log_->levelIs(log_->debug());
 
   // Create ControlPlane.
   ControlPlane::Ptr cp = ControlPlane::ControlPlaneNew();
