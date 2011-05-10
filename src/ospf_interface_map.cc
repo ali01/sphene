@@ -87,9 +87,6 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   IPv4Addr key = iface->interfaceIP();
   ip_ifaces_.elemDel(key);
 
-  if (notifiee_)
-    notifiee_->onInterfaceDel(this, key);
-
   OSPFInterface::const_gw_iter it;
   for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
     OSPFGateway::Ptr gateway = it->second;
@@ -101,6 +98,9 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
     if (notifiee_)
       notifiee_->onGatewayDel(this, nd_id);
   }
+
+  if (notifiee_)
+    notifiee_->onInterfaceDel(this, key);
 }
 
 void
@@ -116,6 +116,9 @@ OSPFInterfaceMap::OSPFInterfaceReactor::onGateway(OSPFInterface::Ptr iface,
                                                   const RouterID& id) {
   iface_map_->nbr_ifaces_[id] = iface;
   iface_map_->gateways_[id] = iface->gateway(id);
+
+  if (iface_map_->notifiee_)
+    iface_map_->notifiee_->onGateway(iface_map_, id);
 }
 
 void
@@ -123,6 +126,9 @@ OSPFInterfaceMap::OSPFInterfaceReactor::onGatewayDel(OSPFInterface::Ptr iface,
                                                      const RouterID& id) {
   iface_map_->nbr_ifaces_.elemDel(id);
   iface_map_->gateways_.elemDel(id);
+
+  if (iface_map_->notifiee_)
+    iface_map_->notifiee_->onGatewayDel(iface_map_, id);
 }
 
 void
