@@ -157,14 +157,6 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   if (target_iface || dest_ip == OSPFHelloPacket::kBroadcastAddr) {
     dp_->controlPlane()->packetNew(pkt, iface);
     return;
-  }// Decrement TTL and recompute checksum.
-  pkt->ttlDec(1);
-  pkt->checksumReset();
-  DLOG << "  decremented TTL: " << (uint32_t)pkt->ttl();
-  if (pkt->ttl() < 1) {
-    // Send ICMP Time Exceeded Message to source.
-    dp_->controlPlane()->outputPacketNew(pkt);
-    return;
   }
 
   // Decrement TTL and recompute checksum.
@@ -195,14 +187,14 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
 
   // Outgoing interface.
   Interface::PtrConst out_iface = r_entry->interface();
-  if (!out_iface->enabled()) {
+  if (r_entry->type() == RoutingTable::Entry::kStatic &&
+      !out_iface->enabled()) {
     // We have a route, but can't reach the target network. The control plane
     // will deal with this case by sending an ICMP message.
     dp_->controlPlane()->outputPacketNew(pkt);
     return;
   }
-  if (r_entry->type() == RoutingTable::Entry::kStatic &&
-      out_iface->type() == Interface::kVirtual) {
+  if (out_iface->type() == Interface::kVirtual) {
     // Let ControlPlane deal with sending out virtual interfaces.
     dp_->controlPlane()->outputPacketNew(pkt);
     return;
