@@ -47,6 +47,10 @@ RoutingTable::lpm(const IPv4Addr& dest_ip) {
   for (const_iterator it = entriesBegin(); it != entriesEnd(); ++it) {
     Entry::Ptr entry = it->second;
 
+    // Routes on disabled interfaces are ignored; packets can't go out them.
+    if (!entry->interface()->enabled())
+      continue;
+
     if (entry->subnet() == (dest_ip & entry->subnetMask())) {
       if (lpm == NULL || entry->subnetMask() > lpm->subnetMask())
         lpm = entry;
