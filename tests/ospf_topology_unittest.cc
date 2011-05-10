@@ -10,7 +10,8 @@ class OSPFTopologyTest : public ::testing::Test {
  protected:
   OSPFTopologyTest() {
     for (unsigned int i = 0; i < kNodes; ++i) {
-      nodes_[i] = OSPFNode::New(i + 1);
+      node_ids_[i] = i;
+      nodes_[i] = OSPFNode::New(i);
       links_[i] = OSPFLink::New(nodes_[i], (uint32_t)0, (uint32_t)0);
     }
 
@@ -20,9 +21,12 @@ class OSPFTopologyTest : public ::testing::Test {
     topology_ = OSPFTopology::New(root_node_);
   }
 
-  RouterID root_node_id_;
+  
+  RouterID node_ids_[kNodes];
   OSPFNode::Ptr nodes_[kNodes];
   OSPFLink::Ptr links_[kNodes];
+
+  RouterID root_node_id_;
   OSPFNode::Ptr root_node_;
   OSPFLink::Ptr root_link_;
   OSPFTopology::Ptr topology_;
@@ -47,6 +51,7 @@ TEST_F(OSPFTopologyTest, two_node) {
   root_node_->linkIs(links_[0]);
 
   EXPECT_EQ(nodes_[0]->prev(), root_node_);
+  EXPECT_EQ(topology_->nextHop(node_ids_[0]), nodes_[0]);
 }
 
 TEST_F(OSPFTopologyTest, two_node_reverse) {
@@ -54,4 +59,5 @@ TEST_F(OSPFTopologyTest, two_node_reverse) {
   topology_->nodeIs(nodes_[0]);
 
   EXPECT_EQ(nodes_[0]->prev(), root_node_);
+  EXPECT_EQ(topology_->nextHop(node_ids_[0]), nodes_[0]);
 }
