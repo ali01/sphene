@@ -195,7 +195,14 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
 
   // Outgoing interface.
   Interface::PtrConst out_iface = r_entry->interface();
-  if (out_iface->type() == Interface::kVirtual) {
+  if (!out_iface->enabled()) {
+    // We have a route, but can't reach the target network. The control plane
+    // will deal with this case by sending an ICMP message.
+    dp_->controlPlane()->outputPacketNew(pkt);
+    return;
+  }
+  if (r_entry->type() == RoutingTable::Entry::kStatic &&
+      out_iface->type() == Interface::kVirtual) {
     // Let ControlPlane deal with sending out virtual interfaces.
     dp_->controlPlane()->outputPacketNew(pkt);
     return;
