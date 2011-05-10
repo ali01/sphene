@@ -345,6 +345,18 @@ OSPFRouter::rtable_add_gateway(OSPFGateway::Ptr gw,
 }
 
 void
+OSPFRouter::rtable_remove_gateway(OSPFGateway::Ptr gw,
+                                  OSPFInterface::Ptr iface) {
+  routing_table_->entryDel(gw->subnet());
+
+  DLOG << "Routing table entry removed:";
+  DLOG << "Subnet:      " << gw->subnet();
+  DLOG << "Subnet mask: " << gw->subnetMask();
+  DLOG << "Gateway:     " << gw->gateway();
+  DLOG << "Interface:   " << iface->interface()->name();
+}
+
+void
 OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                        OSPFLSUPacket::PtrConst pkt) {
   /* Processing each LSU advertisement enclosed in the LSU packet. */
