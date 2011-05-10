@@ -68,8 +68,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Mutators. */
 
-  void linkIs(OSPFLink::Ptr link, bool bi_directional=true);
-  void linkDel(const RouterID& id, bool bi_directional=true);
+  void linkIs(OSPFLink::Ptr link);
+  void linkDel(const RouterID& id);
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
@@ -91,6 +91,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
  private:
   OSPFNode(const RouterID& router_id);
+
+  /* Helper member functions. */
+  void oneWayLinkIs(OSPFLink::Ptr link);
+  void oneWayLinkDel(const RouterID& id);
 
   /* Data members. */
   RouterID router_id_;

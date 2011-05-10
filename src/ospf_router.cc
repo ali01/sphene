@@ -106,6 +106,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFPacket* pkt,
 void
 OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
                                       Interface::PtrConst iface) {
+  DLOG << "OSPFHelloPacket dispatch in OSPFRouter.";
+
   /* Packet validation. */
   if (!pkt->valid()) {
     DLOG << "Ignoring invalid OSPF Hello packet.";
@@ -164,6 +166,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
 void
 OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
                                       Interface::PtrConst iface) {
+  DLOG << "OSPFLSUPacket dispatch in OSPFRouter.";
+
   /* Packet validation. */
   if (!pkt->valid()) {
     DLOG << "Ignoring invalid OSPF LSU packet.";
@@ -190,6 +194,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
     /* Creating new node and inserting it into the topology database */
     node = OSPFNode::New(node_id);
     topology_->nodeIs(node);
+
+    DLOG << "Inserted node " << node_id << " to topology database.";
   }
 
   /* Updating seqno in topology database */
@@ -259,12 +265,10 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
 
   OSPFLink::Ptr ln = OSPFLink::New(gw->node(), gw->subnet(), gw->subnetMask());
   ospf_router_->router_node_->linkIs(ln);
-
   ospf_router_->lsu_dirty_ = true;
 
-  /* Updating the routing table. */
-  Fwk::ScopedLock<RoutingTable> lock(ospf_router_->routing_table_);
-  ospf_router_->rtable_add_gateway(gw, iface);
+  /* Add node to the topology if it wasn't already there. */
+  ospf_router_->topology_->nodeIs(gw->node());
 }
 
 void
@@ -274,11 +278,8 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
   ospf_router_->router_node_->linkDel(nd_id);
   ospf_router_->lsu_dirty_ = true;
 
-  /* Updating the routing table. */
-  OSPFGateway::Ptr gw = _im->gateway(nd_id);
-
-  Fwk::ScopedLock<RoutingTable> lock(ospf_router_->routing_table_);
-  ospf_router_->rtable_remove_gateway(gw, iface);
+  /* Remove node from topology. */
+  ospf_router_->topology_->nodeDel(nd_id);
 }
 
 /* OSPFRouter private member functions */
