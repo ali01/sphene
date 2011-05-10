@@ -1,10 +1,22 @@
 #include "gtest/gtest.h"
 
+#include <ostream>
+
 #include "ospf_link.h"
 #include "ospf_node.h"
 #include "ospf_topology.h"
 
 static const int kNodes = 10;
+
+static std::ostream&
+operator<<(std::ostream& os, OSPFNode::Ptr node) {
+  if (node == NULL)
+    os << "Node(NULL)";
+  else
+    os << "Node(" << node->routerID() << ")";
+
+  return os;
+}
 
 class OSPFTopologyTest : public ::testing::Test {
  protected:
