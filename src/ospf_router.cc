@@ -292,6 +292,8 @@ OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
 
 void
 OSPFRouter::rtable_update() {
+  DLOG << "Full routing table update.";
+
   Fwk::ScopedLock<RoutingTable> lock(routing_table_);
 
   /* Clear all dynamic entries in the routing table
