@@ -45,7 +45,7 @@ def ping(host):
   # Find packet loss.
   lines = output.split('\n')
   for line in lines:
-    m = re.search('([0-9.])% packet loss', line)
+    m = re.search('\s([0-9.]+)% packet loss', line)
     if m:
       loss = float(m.group(1))
       return (loss == 0)
