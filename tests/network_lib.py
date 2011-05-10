@@ -28,16 +28,17 @@ def send_cli_command(host, port, command):
   return send_success
 
 
-def ping(host):
-  '''Sends 3 ICMP pings to a host.
+def ping(host, count=1):
+  '''Sends ICMP pings to a host.
 
   Args:
     host: target
+    count (optional): number of pings to send
 
   Returns:
     True on 0% packet loss, False otherwise.
   '''
-  ph = subprocess.Popen(['ping', '-c', '3', host],
+  ph = subprocess.Popen(['ping', '-c', str(count), host],
                         stdin=None,
                         stdout=subprocess.PIPE);
   output = ph.stdout.read()
