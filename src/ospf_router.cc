@@ -260,6 +260,10 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                      gw->subnet(),
                                      gw->subnetMask());
   ospf_router_->lsu_dirty_ = true;
+
+  /* Updating the routing table. */
+  Fwk::ScopedLock<RoutingTable> lock(ospf_router_->routing_table_);
+  ospf_router_->rtable_add_gateway(gw, iface);
 }
 
 void
@@ -268,6 +272,12 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
                                                   const RouterID& nd_id) {
   ospf_router_->router_node_->linkDel(nd_id);
   ospf_router_->lsu_dirty_ = true;
+
+  /* Updating the routing table. */
+  OSPFGateway::Ptr gw = _im->gateway(nd_id);
+
+  Fwk::ScopedLock<RoutingTable> lock(ospf_router_->routing_table_);
+  ospf_router_->rtable_remove_gateway(gw, iface);
 }
 
 /* OSPFRouter private member functions */
