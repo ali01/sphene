@@ -14,8 +14,9 @@ class OSPFTopologyTest : public ::testing::Test {
       links_[i] = OSPFLink::New(nodes_[i], (uint32_t)0, (uint32_t)0);
     }
 
-    root_node_id_ = 0xdeadbeef;
+    root_node_id_ = 0xffffffff;
     root_node_ = OSPFNode::New(root_node_id_);
+    root_link_ = OSPFLink::New(root_node_, (uint32_t)0, (uint32_t)0);
     topology_ = OSPFTopology::New(root_node_);
   }
 
@@ -23,6 +24,7 @@ class OSPFTopologyTest : public ::testing::Test {
   OSPFNode::Ptr nodes_[kNodes];
   OSPFLink::Ptr links_[kNodes];
   OSPFNode::Ptr root_node_;
+  OSPFLink::Ptr root_link_;
   OSPFTopology::Ptr topology_;
 };
 
@@ -43,6 +45,13 @@ TEST_F(OSPFTopologyTest, basic) {
 TEST_F(OSPFTopologyTest, two_node) {
   topology_->nodeIs(nodes_[0]);
   root_node_->linkIs(links_[0]);
+
+  EXPECT_EQ(nodes_[0]->prev(), root_node_);
+}
+
+TEST_F(OSPFTopologyTest, two_node_reverse) {
+  nodes_[0]->linkIs(root_link_);
+  topology_->nodeIs(nodes_[0]);
 
   EXPECT_EQ(nodes_[0]->prev(), root_node_);
 }
