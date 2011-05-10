@@ -106,6 +106,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFPacket* pkt,
 void
 OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
                                       Interface::PtrConst iface) {
+  DLOG << "OSPFHelloPacket dispatch in OSPFRouter.";
+
   /* Packet validation. */
   if (!pkt->valid()) {
     DLOG << "Ignoring invalid OSPF Hello packet.";
@@ -164,6 +166,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
 void
 OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
                                       Interface::PtrConst iface) {
+  DLOG << "OSPFLSUPacket dispatch in OSPFRouter.";
+
   /* Packet validation. */
   if (!pkt->valid()) {
     DLOG << "Ignoring invalid OSPF LSU packet.";
@@ -190,6 +194,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
     /* Creating new node and inserting it into the topology database */
     node = OSPFNode::New(node_id);
     topology_->nodeIs(node);
+
+    DLOG << "Inserted node " << node_id << " to topology database.";
   }
 
   /* Updating seqno in topology database */
