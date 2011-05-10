@@ -320,14 +320,26 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     RouterID nbr_id = neighbor->routerID();
     OSPFGateway::Ptr nbr_gw = iface->gateway(nbr_id);
 
-    /* Setting entry's subnet, subnet mask, outgoing interface, and gateway. */
-    RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
-    entry->subnetIs(nbr_gw->subnet(), nbr_gw->subnetMask());
-    entry->interfaceIs(iface->interface());
-    entry->gatewayIs(nbr_gw->gateway());
-
-    routing_table_->entryIs(entry);
+    rtable_add_gateway(nbr_gw, iface);
   }
+}
+
+void
+OSPFRouter::rtable_add_gateway(OSPFGateway::Ptr gw,
+                               OSPFInterface::Ptr iface) {
+  /* Setting entry's subnet, subnet mask, outgoing interface, and gateway. */
+  RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
+  entry->subnetIs(gw->subnet(), gw->subnetMask());
+  entry->interfaceIs(iface->interface());
+  entry->gatewayIs(gw->gateway());
+
+  routing_table_->entryIs(entry);
+
+  DLOG << "Routing table entry added:";
+  DLOG << "Subnet:      " << gw->subnet();
+  DLOG << "Subnet mask: " << gw->subnetMask();
+  DLOG << "Gateway:     " << gw->gateway();
+  DLOG << "Interface:   " << iface->interface()->name();
 }
 
 void
