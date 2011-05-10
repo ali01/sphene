@@ -49,6 +49,8 @@
 #include "cli/helper.h"
 #include "cli/cli_main.h"
 
+#include "fwk/log.h"
+
 #include "lwip/tcp.h"
 #include "lwip/memp.h"
 #include "lwip/transport_subsys.h"
@@ -138,6 +140,7 @@ int sr_init_low_level_subsystem(int argc, char **argv)
     uint16_t port =  3250;
     uint16_t topo =  0;
     int ospf = 0;
+    int debug = 0;
 
     char  *logfile = 0;
     int free_logfile = 0;
@@ -165,6 +168,9 @@ int sr_init_low_level_subsystem(int argc, char **argv)
             case 'h':
                 usage(argv[0]);
                 exit(0);
+                break;
+            case 'd':
+                debug = 1;
                 break;
             case 'p':
                 port = atoi((char *) optarg);
@@ -217,6 +223,13 @@ int sr_init_low_level_subsystem(int argc, char **argv)
     Debug(" \n ");
 #endif /* _CPUMODE_ */
     Debug("\n\n");
+
+    /* Set log level. */
+    Fwk::Log::Ptr log_ = Fwk::Log::LogNew();
+    if (debug)
+      log_->levelIs(log_->debug());
+    else
+      log_->levelIs(log_->info());
 
     /* -- required by lwip, must be called from the main thread -- */
     sys_thread_init();
@@ -448,7 +461,7 @@ static void sr_destroy_instance(struct sr_instance* sr) {
 static void usage(char* argv0)
 {
     printf("sphene\n");
-    printf("usage: %s [-h] [-a auth_key] [-v host] [-s server] "
+    printf("usage: %s [-h] [-d] [-a auth_key] [-v host] [-s server] "
            " [-p port] [-c cli_port] \n", argv0);
     printf("           [-t topo id] [-r rtable_file] [-l log_file] "
            "[-i interface_file]\n");
