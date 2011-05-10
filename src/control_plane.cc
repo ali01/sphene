@@ -96,6 +96,14 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   Interface::PtrConst out_iface = r_entry->interface();
   DLOG << "  outgoing interface: " << out_iface->name();
 
+  if (r_entry->type() == RoutingTable::Entry::kStatic &&
+      !out_iface->enabled()) {
+    // We have a static route, but we cannot reach the target network.
+    DLOG << "  outgoing interface is disabled";
+    sendICMPDestNetworkUnreach(pkt);
+    return;
+  }
+
   if (out_iface->type() == Interface::kVirtual) {
     // Interface is virtual. We need to do an encapsulation here.
     encapsulateAndOutputPacket(pkt, out_iface);
@@ -142,8 +150,8 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   dp_->outputPacketNew(eth_pkt, out_iface);
 }
 
-void
-ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
+
+void ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
   dp_ = dp;
 
   /* OSPF router ID should be the IP addr of the router's first interface. */
@@ -160,15 +168,16 @@ ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
                                  routing_table_, dp->interfaceMap(), this);
 }
 
-OSPFRouter::PtrConst
-ControlPlane::ospfRouter() const {
+
+OSPFRouter::PtrConst ControlPlane::ospfRouter() const {
   return ospf_router_;
 }
 
-OSPFRouter::Ptr
-ControlPlane::ospfRouter() {
+
+OSPFRouter::Ptr ControlPlane::ospfRouter() {
   return ospf_router_;
 }
+
 
 /* ControlPlane::PacketFunctor */
 
