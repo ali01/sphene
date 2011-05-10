@@ -15,6 +15,8 @@
 #include "ospf_packet.h"
 #include "sr_integration.h"
 
+using std::string;
+
 
 DataPlane::DataPlane(const std::string& name,
                      struct sr_instance *sr,
