@@ -38,6 +38,7 @@ void cli_local_main( void* pport ) {
         die( "Error: SO_REUSEADDR failed" );
 
     /* bind to the requested port */
+    addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = 0;
     memset(&(addr.sin_zero), 0, sizeof(addr.sin_zero));
