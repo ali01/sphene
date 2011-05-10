@@ -263,12 +263,12 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                const RouterID& nd_id) {
   OSPFGateway::Ptr gw = _im->gateway(nd_id);
 
+  /* Add node to the topology if it wasn't already there. */
+  ospf_router_->topology_->nodeIs(gw->node(), false);
+
   OSPFLink::Ptr ln = OSPFLink::New(gw->node(), gw->subnet(), gw->subnetMask());
   ospf_router_->router_node_->linkIs(ln);
   ospf_router_->lsu_dirty_ = true;
-
-  /* Add node to the topology if it wasn't already there. */
-  ospf_router_->topology_->nodeIs(gw->node());
 }
 
 void
