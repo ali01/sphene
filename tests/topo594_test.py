@@ -82,25 +82,25 @@ class Test_Topo594:
 
   def test_http_app_server1_basic(self):
     '''Test basic HTTP on app server 1'''
-    url = urllib2.urlopen('http://%s' % self._app1)
+    url = urllib2.urlopen('http://%s' % self._app1, timeout=3)
     content = url.read()
     assert_true('application server' in content)
 
   def test_http_app_server2_basic(self):
     '''Test basic HTTP on app server 2'''
-    url = urllib2.urlopen('http://%s' % self._app2)
+    url = urllib2.urlopen('http://%s' % self._app2, timeout=3)
     content = url.read()
     assert_true('application server' in content)
 
   def test_http_app_server1_big(self):
     '''Fetch big photo from app server 1'''
-    url = urllib2.urlopen('http://%s/big.jpg' % self._app1)
+    url = urllib2.urlopen('http://%s/big.jpg' % self._app1, timeout=3)
     content = url.read()
     assert_equal(len(content), self._big_photo_size)
 
   def test_http_app_server2_big(self):
     '''Fetch big photo from app server 2'''
-    url = urllib2.urlopen('http://%s/big.jpg' % self._app2)
+    url = urllib2.urlopen('http://%s/big.jpg' % self._app2, timeout=3)
     content = url.read()
     assert_equal(len(content), self._big_photo_size)
 
