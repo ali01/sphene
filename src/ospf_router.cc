@@ -142,9 +142,9 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   }
 
   RouterID neighbor_id = pkt->routerID();
-  OSPFNode::Ptr neighbor = ifd->neighbor(neighbor_id);
+  OSPFGateway::Ptr gw_obj = ifd->gateway(neighbor_id);
 
-  if (neighbor == NULL) {
+  if (gw_obj == NULL) {
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
     IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
@@ -152,13 +152,13 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     IPv4Addr subnet_mask = pkt->subnetMask();
     IPv4Addr subnet = gateway & subnet_mask;
 
-    neighbor = OSPFNode::New(neighbor_id);
-    ifd->gatewayIs(neighbor, gateway, subnet, subnet_mask);
+    OSPFNode::Ptr neighbor = OSPFNode::New(neighbor_id);
+    gw_obj = OSPFGateway::New(neighbor, gateway, subnet, subnet_mask);
+    ifd->gatewayIs(gw_obj);
   }
 
   /* Refresh neighbor's time since last HELLO. */
-  OSPFGateway::Ptr gw = ifd->gateway(neighbor_id);
-  gw->timeSinceHelloIs(0);
+  gw_obj->timeSinceHelloIs(0);
 }
 
 void

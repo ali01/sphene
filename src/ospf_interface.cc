@@ -58,32 +58,23 @@ OSPFInterface::timeSinceOutgoingHelloIs(Seconds delta) {
 }
 
 void
-OSPFInterface::gatewayIs(OSPFNode::Ptr nb,
-                         const IPv4Addr& gateway,
-                         const IPv4Addr& subnet,
-                         const IPv4Addr& subnet_mask) {
-  if (nb == NULL)
+OSPFInterface::gatewayIs(OSPFGateway::Ptr gw_obj) {
+  if (gw_obj == NULL)
     return;
 
-  RouterID nd_id = nb->routerID();
-  OSPFGateway::Ptr nbr_prev = gateways_.elem(nd_id);
-  if (nbr_prev == NULL
-      || nbr_prev->node() != nb
-      || nbr_prev->subnet() != subnet
-      || nbr_prev->subnetMask() != subnet_mask) {
+  OSPFNode::Ptr node = gw_obj->node();
+  RouterID nd_id = node->routerID();
 
-    /* Adding to direct OSPFNode pointer map. */
-    neighbors_[nd_id] = nb;
+  OSPFGateway::Ptr gw_prev = gateways_.elem(nd_id);
 
-    /* Adding to OSPFGateway pointer map. */
-    OSPFGateway::Ptr gw_obj =
-      OSPFGateway::New(nb, gateway, subnet, subnet_mask);
-    gateways_[nd_id] = gw_obj;
+  /* Adding to OSPFGateway pointer map. */
+  gateways_[nd_id] = gw_obj;
 
-    /* Signaling notifiee. */
-    if (notifiee_)
-      notifiee_->onGateway(this, nd_id);
-  }
+  /* Adding to direct OSPFNode pointer map. */
+  neighbors_[nd_id] = node;
+
+  if (notifiee_ && (gw_prev == NULL || *gw_obj != *gw_prev))
+    notifiee_->onGateway(this, nd_id);
 }
 
 void

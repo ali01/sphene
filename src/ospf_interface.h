@@ -73,10 +73,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   void timeSinceOutgoingHelloIs(Seconds delta);
 
-  void gatewayIs(OSPFNode::Ptr nb,
-                 const IPv4Addr& gateway,
-                 const IPv4Addr& subnet,
-                 const IPv4Addr& subnet_mask);
+  void gatewayIs(OSPFGateway::Ptr gateway);
   void gatewayDel(const RouterID& router_id);
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
