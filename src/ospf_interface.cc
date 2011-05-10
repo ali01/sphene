@@ -67,7 +67,8 @@ OSPFInterface::gatewayIs(OSPFNode::Ptr nb,
 
   RouterID nd_id = nb->routerID();
   OSPFGateway::Ptr nbr_prev = gateways_.elem(nd_id);
-  if (nbr_prev->node() != nb
+  if (nbr_prev == NULL
+      || nbr_prev->node() != nb
       || nbr_prev->subnet() != subnet
       || nbr_prev->subnetMask() != subnet_mask) {
 
