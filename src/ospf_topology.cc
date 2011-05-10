@@ -45,7 +45,7 @@ OSPFTopology::nextHop(const RouterID& router_id) const {
 }
 
 void
-OSPFTopology::nodeIs(OSPFNode::Ptr node) {
+OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
   if (node == NULL)
     return;
 
@@ -57,21 +57,23 @@ OSPFTopology::nodeIs(OSPFNode::Ptr node) {
     /* Subscribing from notifications. */
     node->notifieeIs(node_reactor_);
 
-    /* Setting topology dirty bit. */
-    dirtyIs(true);
+    if (commit)
+      onUpdate();
+    else
+      dirtyIs(true);
   }
 }
 
 void
-OSPFTopology::nodeDel(OSPFNode::Ptr node) {
+OSPFTopology::nodeDel(OSPFNode::Ptr node, bool commit) {
   if (node == NULL)
     return;
 
-  nodeDel(node->routerID());
+  nodeDel(node->routerID(), commit);
 }
 
 void
-OSPFTopology::nodeDel(const RouterID& router_id) {
+OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
   OSPFNode::Ptr node = nodes_.elem(router_id);
   if (node) {
     nodes_.elemDel(router_id);
@@ -79,8 +81,10 @@ OSPFTopology::nodeDel(const RouterID& router_id) {
     /* Unsubscribing from notifications. */
     node->notifieeIs(NULL);
 
-    /* Setting topology dirty bit. */
-    dirtyIs(true);
+    if (commit)
+      onUpdate();
+    else
+      dirtyIs(true);
   }
 
   /* Removing the node from the neighbor lists of all neighbors. */
@@ -158,4 +162,25 @@ OSPFTopology::min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map) {
   }
 
   return min_nd;
+}
+
+/* OSPFTopology::NodeReactor */
+void
+OSPFTopology::NodeReactor::onLink(OSPFNode::Ptr node,
+                                  OSPFLink::Ptr link,
+                                  bool commit) {
+  if (commit)
+    topology_->onUpdate();
+  else
+    topology_->dirtyIs(true);
+}
+
+void
+OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node,
+                                     const RouterID& rid,
+                                     bool commit) {
+  if (commit)
+    topology_->onUpdate();
+  else
+    topology_->dirtyIs(true);
 }

@@ -33,8 +33,12 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
     typedef Fwk::Ptr<Notifiee> Ptr;
 
     /* Notifications supported. */
-    virtual void onLink(const RouterID& id) {}
-    virtual void onLinkDel(const RouterID& id) {}
+    virtual void onLink(OSPFNode::Ptr node,
+                        OSPFLink::Ptr link,
+                        bool commit) {}
+    virtual void onLinkDel(OSPFNode::Ptr node,
+                           const RouterID& rid,
+                           bool commit) {}
 
    protected:
     Notifiee() {}
@@ -68,8 +72,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Mutators. */
 
-  void linkIs(OSPFLink::Ptr link);
-  void linkDel(const RouterID& id);
+  void linkIs(OSPFLink::Ptr link, bool commit=true);
+  void linkDel(const RouterID& id, bool commit=true);
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
@@ -93,8 +97,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode(const RouterID& router_id);
 
   /* Helper member functions. */
-  void oneWayLinkIs(OSPFLink::Ptr link);
-  void oneWayLinkDel(const RouterID& id);
+  void oneWayLinkIs(OSPFLink::Ptr link, bool commit=false);
+  void oneWayLinkDel(const RouterID& id, bool commit=false);
 
   /* Data members. */
   RouterID router_id_;
