@@ -4,13 +4,13 @@
 #include "ospf_node.h"
 #include "ospf_topology.h"
 
-static const unsigned int kNodes = 10;
+static const int kNodes = 10;
 
 class OSPFTopologyTest : public ::testing::Test {
  protected:
   OSPFTopologyTest() {
-    for (unsigned int i = 0; i < kNodes; ++i) {
-      node_ids_[i] = i;
+    for (int i = 0; i < kNodes; ++i) {
+      ids_[i] = i;
       nodes_[i] = OSPFNode::New(i);
       links_[i] = OSPFLink::New(nodes_[i], (uint32_t)0, (uint32_t)0);
     }
@@ -22,7 +22,7 @@ class OSPFTopologyTest : public ::testing::Test {
   }
 
   
-  RouterID node_ids_[kNodes];
+  RouterID ids_[kNodes];
   OSPFNode::Ptr nodes_[kNodes];
   OSPFLink::Ptr links_[kNodes];
 
@@ -51,7 +51,7 @@ TEST_F(OSPFTopologyTest, two_node) {
   root_node_->linkIs(links_[0]);
 
   EXPECT_EQ(nodes_[0]->prev(), root_node_);
-  EXPECT_EQ(topology_->nextHop(node_ids_[0]), nodes_[0]);
+  EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
 }
 
 TEST_F(OSPFTopologyTest, two_node_reverse) {
@@ -59,5 +59,45 @@ TEST_F(OSPFTopologyTest, two_node_reverse) {
   topology_->nodeIs(nodes_[0]);
 
   EXPECT_EQ(nodes_[0]->prev(), root_node_);
-  EXPECT_EQ(topology_->nextHop(node_ids_[0]), nodes_[0]);
+  EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
+}
+
+TEST_F(OSPFTopologyTest, six_node_1) {
+
+  /* Topology:
+              0        4
+          ___/ \___   /
+         /         \ /
+        R --------- 1
+        |  ________/|
+        | /         |
+        2           3
+  */
+
+  for (int i = 0; i < 5; ++i)
+    topology_->nodeIs(nodes_[i], false);
+
+  root_node_->linkIs(links_[0], false);
+  root_node_->linkIs(links_[1], false);
+  root_node_->linkIs(links_[2], false);
+
+  nodes_[1]->linkIs(links_[2], false);
+  nodes_[1]->linkIs(links_[3], false);
+  nodes_[1]->linkIs(links_[4], false);
+
+  nodes_[2]->linkIs(links_[3], false);
+
+  topology_->onUpdate();
+
+  EXPECT_EQ(nodes_[0]->prev(), root_node_);
+  EXPECT_EQ(nodes_[1]->prev(), root_node_);
+  EXPECT_EQ(nodes_[2]->prev(), root_node_);
+  EXPECT_EQ(nodes_[3]->prev(), nodes_[1]);
+  EXPECT_EQ(nodes_[4]->prev(), nodes_[1]);
+
+  EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
+  EXPECT_EQ(topology_->nextHop(ids_[1]), nodes_[1]);
+  EXPECT_EQ(topology_->nextHop(ids_[2]), nodes_[2]);
+  EXPECT_EQ(topology_->nextHop(ids_[3]), nodes_[1]);
+  EXPECT_EQ(topology_->nextHop(ids_[4]), nodes_[1]);
 }
