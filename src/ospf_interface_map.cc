@@ -72,7 +72,7 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
     gateways_[nd_id] = gateway;
 
     if (notifiee_)
-      notifiee_->onGateway(this, nd_id);
+      notifiee_->onGateway(this, iface, nd_id);
   }
 }
 
@@ -96,7 +96,7 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
     gateways_.elemDel(nd_id);
 
     if (notifiee_)
-      notifiee_->onGatewayDel(this, nd_id);
+      notifiee_->onGatewayDel(this, iface, nd_id);
   }
 
   if (notifiee_)
@@ -118,7 +118,7 @@ OSPFInterfaceMap::OSPFInterfaceReactor::onGateway(OSPFInterface::Ptr iface,
   iface_map_->gateways_[id] = iface->gateway(id);
 
   if (iface_map_->notifiee_)
-    iface_map_->notifiee_->onGateway(iface_map_, id);
+    iface_map_->notifiee_->onGateway(iface_map_, iface, id);
 }
 
 void
@@ -128,7 +128,7 @@ OSPFInterfaceMap::OSPFInterfaceReactor::onGatewayDel(OSPFInterface::Ptr iface,
   iface_map_->gateways_.elemDel(id);
 
   if (iface_map_->notifiee_)
-    iface_map_->notifiee_->onGatewayDel(iface_map_, id);
+    iface_map_->notifiee_->onGatewayDel(iface_map_, iface, id);
 }
 
 void

@@ -35,8 +35,10 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     /* Notifications supported */
     virtual void onInterface(OSPFInterfaceMap::Ptr, const IPv4Addr&) {}
     virtual void onInterfaceDel(OSPFInterfaceMap::Ptr, const IPv4Addr&) {}
-    virtual void onGateway(OSPFInterfaceMap::Ptr, const RouterID&) {}
-    virtual void onGatewayDel(OSPFInterfaceMap::Ptr, const RouterID&) {}
+    virtual void onGateway(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr iface,
+                           const RouterID&) {}
+    virtual void onGatewayDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr iface,
+                              const RouterID&) {}
 
    protected:
     Notifiee() {}

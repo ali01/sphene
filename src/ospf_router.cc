@@ -253,6 +253,7 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
 
 void
 OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
+                                               OSPFInterface::Ptr iface,
                                                const RouterID& nd_id) {
   OSPFGateway::Ptr gw = _im->gateway(nd_id);
   ospf_router_->router_node_->linkIs(gw->node(),
@@ -263,6 +264,7 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
 
 void
 OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
+                                                  OSPFInterface::Ptr iface,
                                                   const RouterID& nd_id) {
   ospf_router_->router_node_->linkDel(nd_id);
   ospf_router_->lsu_dirty_ = true;
