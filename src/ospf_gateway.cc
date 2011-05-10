@@ -17,3 +17,21 @@ OSPFGateway::OSPFGateway(Fwk::Ptr<OSPFNode> neighbor,
     : OSPFLink::OSPFLink(neighbor, subnet, subnet_mask),
       gateway_(gateway),
       last_hello_(time(NULL)) {}
+
+bool
+OSPFGateway::operator==(const OSPFGateway& other) const {
+  const OSPFLink* self_link = static_cast<const OSPFLink*>(this);
+  const OSPFLink* other_link = static_cast<const OSPFLink*>(&other);
+  if (*self_link != *other_link)
+    return false;
+
+  if (this->gateway() != other.gateway())
+    return false;
+
+  return true;
+}
+
+bool
+OSPFGateway::operator!=(const OSPFGateway& other) const {
+  return !(other == *this);
+}

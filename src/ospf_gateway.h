@@ -25,6 +25,10 @@ class OSPFGateway : public OSPFLink {
   time_t timeSinceHello() const { return time(NULL) - last_hello_; }
   void timeSinceHelloIs(time_t _t) { last_hello_ = time(NULL) - _t; }
 
+  /* Comparison operator. */
+  bool operator==(const OSPFGateway&) const;
+  bool operator!=(const OSPFGateway&) const;
+
  private:
   OSPFGateway(Fwk::Ptr<OSPFNode> neighbor,
               const IPv4Addr& gateway,
