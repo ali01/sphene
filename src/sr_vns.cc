@@ -23,6 +23,7 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 
+#include "fwk/log.h"
 #include "sha1.h"
 #include "sr_vns.h"
 #include "sr_dumper.h"
@@ -31,6 +32,9 @@
 
 #include "vnscommand.h"
 
+static Fwk::Log::Ptr log_;
+
+
 /*-----------------------------------------------------------------------------
  * Method: sr_vns_init_log(..)
  * Scope: Global
@@ -38,6 +42,8 @@
 
 void sr_vns_init_log(struct sr_instance* sr, char* logfile)
 {
+    log_ = Fwk::Log::LogNew("VNS");
+
     if (!logfile)
     { return; }
 
@@ -150,12 +156,12 @@ int sr_vns_connect_to_server(struct sr_instance* sr,unsigned short port,
         return -1;
     }
 
-    fprintf(stderr, "waiting for expected messages ...\n");
+    DLOG << "waiting for expected messages";
     /* wait for authentication to be completed (server sends the first message) */
     if(sr_read_from_server_expect(sr, VNS_AUTH_REQUEST)!= 1 ||
        sr_read_from_server_expect(sr, VNS_AUTH_STATUS) != 1)
         return -1; /* failed to receive expected message */
-    fprintf(stderr, "got expected messages ...\n");
+    DLOG << "got expected messages";
 
     if(strlen(sr->template_name) > 0) {
         /* send VNS_OPEN_TEMPLATE message to server */
@@ -221,7 +227,7 @@ int sr_handle_hwinfo(struct sr_instance* sr, c_hwinfo* hwinfo)
         switch( ntohl(hwinfo->mHWInfo[i].mKey))
         {
             case HWFIXEDIP:
-                fprintf(stderr,"Fixed IP: %s\n",inet_ntoa(
+                fprintf(stdout,"Fixed IP: %s\n",inet_ntoa(
                             *((struct in_addr*)(hwinfo->mHWInfo[i].value))));
                 break;
             case HWINTERFACE:
@@ -324,7 +330,7 @@ int sr_handle_auth_request(struct sr_instance* sr, c_auth_request* req) {
 
 int sr_handle_auth_status(struct sr_instance* sr, c_auth_status* status) {
     if(status->auth_ok)
-        printf("successfully authenticated as %s\n", sr->user);
+        DLOG << "successfully authenticated as " << sr->user;
     else
         fprintf(stderr, "Authentication failed as %s: %s\n", sr->user, status->msg);
     return status->auth_ok;
@@ -465,7 +471,7 @@ int sr_read_from_server_expect(struct sr_instance* sr /* borrowed */, int expect
             /* -------------        VNSBANNER      -------------------- */
 
         case VNSBANNER:
-            fprintf(stderr,"%s",((c_banner*)buf)->mBannerMessage);
+            DLOG << ((c_banner*)buf)->mBannerMessage;
             break;
 
             /* -------------     VNSHWINFO     -------------------- */
