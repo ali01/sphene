@@ -28,13 +28,36 @@ Run a live test against a Sphene router running in VNS with topology 594.
                                            Application Server
 '''
 from nose.tools import *
+import getpass
+import os
+import subprocess
+import sys
+import time
 import urllib2
 
 import network_lib
 
 
+def base_dir():
+  '''Returns the base path of the sphene project directory.'''
+  return os.path.normpath(os.path.join(tests_dir(), '..'))
+
+
+def tests_dir():
+  '''Returns the path to the tests directory that contains this file.'''
+  return os.path.dirname(os.path.abspath(__file__))
+
+
+def sphene_binary():
+  '''Returns the path to the built sphene binary.'''
+  return os.path.normpath(os.path.join(base_dir(), 'build', 'sr'))
+
+
 class Test_Topo594:
   def setUp(self):
+    self._instance = None
+
+    self._topo_id = 594
     self._big_photo_size = 1053791  # bytes
     self._cli_port = 2300
     self._rtr_eth0 = '10.3.0.24'
@@ -42,6 +65,39 @@ class Test_Topo594:
     self._rtr_eth2 = '10.3.0.30'
     self._app1 = '10.3.0.29'
     self._app2 = '10.3.0.31'
+
+    # Should we bootstrap the system with our own sphene instance?
+    if os.getenv('BOOTSTRAP', 1):
+      self._cli_port = 23000  # we can set our own when bootstrapping
+      self._bootstrap()
+
+  def tearDown(self):
+    if self._instance:
+      self._instance.terminate()
+
+  def _bootstrap(self):
+    '''Initialize a sphene instance for tests.'''
+    auth_key_file = os.path.join(base_dir(), 'auth_key')
+    rtable_file = os.path.join(base_dir(), 'rtable_%d' % self._topo_id)
+    cmd = [sphene_binary(),
+           '-a', auth_key_file,
+           '-t', str(self._topo_id),
+           '-r', rtable_file,
+           '-s', 'vns-1.stanford.edu',
+           '-u', getpass.getuser(),
+           '-c', str(self._cli_port)]
+    # Enable debug mode through an environment variable.
+    if os.getenv('DEBUG', 0):
+      cmd.append('-d')
+    self._instance = subprocess.Popen(cmd)
+
+    # Wait for interface to come up.
+    for i in range(5):
+      if network_lib.ping(self._rtr_eth0):
+        return
+
+    # Failed to bootstrap.
+    raise Exception('timeout waiting for router to come up')
 
   def test_ping_router_eth0(self):
     '''Ping eth0 on router'''
