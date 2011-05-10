@@ -145,7 +145,12 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
 
   // Look up IP Packet's destination.
   IPv4Addr dest_ip = pkt->dst();
-  Interface::Ptr target_iface = dp_->interfaceMap()->interfaceAddr(dest_ip);
+  Interface::Ptr target_iface;
+  {
+    InterfaceMap::Ptr iface_map = dp_->interfaceMap();
+    Fwk::ScopedLock<InterfaceMap> lock(iface_map);
+    target_iface = iface_map->interfaceAddr(dest_ip);
+  }
 
   // IP packets destined for the router or to the OSPF broadcast address
   // go to the control plane immediately.
