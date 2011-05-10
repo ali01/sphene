@@ -65,7 +65,8 @@ def traceroute(host):
   '''
   ph = subprocess.Popen(['traceroute', host],
                         stdin=None,
-                        stdout=subprocess.PIPE)
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
   output = ph.stdout.read()
 
   # Parse output lines.
