@@ -23,7 +23,7 @@
 
 #define LINKTYPE_ETHERNET 1
 
-#define min(a,b) ( (a) < (b) ? (a) : (b) )
+//#define min(a,b) ( (a) < (b) ? (a) : (b) )
 
 #define SR_PACKET_DUMP_SIZE 1514
 
