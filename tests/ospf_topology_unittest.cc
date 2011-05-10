@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include "ospf_link.h"
 #include "ospf_node.h"
 #include "ospf_topology.h"
 
@@ -10,6 +11,7 @@ class OSPFTopologyTest : public ::testing::Test {
   OSPFTopologyTest() {
     for (unsigned int i = 0; i < kNodes; ++i) {
       nodes_[i] = OSPFNode::New(i + 1);
+      links_[i] = OSPFLink::New(nodes_[i], (uint32_t)0, (uint32_t)0);
     }
 
     root_node_id_ = 0xdeadbeef;
@@ -19,6 +21,7 @@ class OSPFTopologyTest : public ::testing::Test {
 
   RouterID root_node_id_;
   OSPFNode::Ptr nodes_[kNodes];
+  OSPFLink::Ptr links_[kNodes];
   OSPFNode::Ptr root_node_;
   OSPFTopology::Ptr topology_;
 };
@@ -35,4 +38,11 @@ TEST_F(OSPFTopologyTest, basic) {
 
   temp = topology_->node(root_node_id_);
   EXPECT_EQ(temp, root_node_);
+}
+
+TEST_F(OSPFTopologyTest, two_node) {
+  topology_->nodeIs(nodes_[0]);
+  root_node_->linkIs(links_[0]);
+
+  EXPECT_EQ(nodes_[0]->prev(), root_node_);
 }
