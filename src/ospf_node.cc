@@ -28,7 +28,7 @@ OSPFNode::neighbor(const RouterID& id) const {
 
 void
 OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
-  oneWayLinkIs(link);
+  oneWayLinkIs(link, commit);
 
   /* Relationship is bi-directional. */
   if (link) {
@@ -40,7 +40,7 @@ OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
 
 void
 OSPFNode::linkDel(const RouterID& id, bool commit) {
-  oneWayLinkDel(id);
+  oneWayLinkDel(id, commit);
 
   /* Deletion is bi-directional. */
   OSPFNode::Ptr node = neighbor(id);

@@ -97,8 +97,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode(const RouterID& router_id);
 
   /* Helper member functions. */
-  void oneWayLinkIs(OSPFLink::Ptr link, bool commit=false);
-  void oneWayLinkDel(const RouterID& id, bool commit=false);
+  void oneWayLinkIs(OSPFLink::Ptr link, bool commit);
+  void oneWayLinkDel(const RouterID& id, bool commit);
 
   /* Data members. */
   RouterID router_id_;
