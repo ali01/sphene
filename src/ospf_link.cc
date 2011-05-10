@@ -31,3 +31,22 @@ const RouterID&
 OSPFLink::nodeRouterID() const {
   return node_->routerID();
 }
+
+bool
+OSPFLink::operator==(const OSPFLink& other) const {
+  if (this->node() != other.node()) /* Node pointer equivalence */
+    return false;
+
+  if (this->subnet() != other.subnet())
+    return false;
+
+  if (this->subnetMask() != other.subnetMask())
+    return false;
+
+  return true;
+}
+
+bool
+OSPFLink::operator!=(const OSPFLink& other) const {
+  return !(other == *this);
+}

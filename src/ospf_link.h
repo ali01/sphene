@@ -34,6 +34,10 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   time_t timeSinceLSU() const { return time(NULL) - last_lsu_; }
   void timeSinceLSUIs(time_t _t) { last_lsu_ = time(NULL) - _t; }
 
+  /* Comparison operator. */
+  bool operator==(const OSPFLink&) const;
+  bool operator!=(const OSPFLink&) const;
+
  protected:
   OSPFLink(Fwk::Ptr<OSPFNode> neighbor,
                const IPv4Addr& subnet,
