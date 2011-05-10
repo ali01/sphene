@@ -249,32 +249,6 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
     OSPFInterface::Ptr iface = _im->interface(addr);
     ospf_router_->router_id_ = (RouterID)iface->interfaceIP().value();
   }
-
-  if (_im->gateways() > 0) {
-    OSPFInterface::const_gw_iter it;
-    for (it = _im->gatewaysBegin(); it != _im->gatewaysEnd(); ++it) {
-      OSPFGateway::Ptr gw = it->second;
-      ospf_router_->router_node_->linkIs(gw->node(),
-                                         gw->subnet(),
-                                         gw->subnetMask());
-    }
-
-    ospf_router_->lsu_dirty_ = true;
-  }
-}
-
-void
-OSPFRouter::OSPFInterfaceMapReactor::onInterfaceDel(OSPFInterfaceMap::Ptr _im,
-                                                    const IPv4Addr& addr) {
-  if (_im->gateways() > 0) {
-    OSPFInterface::const_gw_iter it;
-    for (it = _im->gatewaysBegin(); it != _im->gatewaysEnd(); ++it) {
-      OSPFGateway::Ptr gw = it->second;
-      ospf_router_->router_node_->linkDel(gw->nodeRouterID());
-    }
-
-    ospf_router_->lsu_dirty_ = true;
-  }
 }
 
 void
