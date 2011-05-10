@@ -1,6 +1,8 @@
 import os
+import re
 import sys
 import socket
+import subprocess
 
 
 def send_cli_command(host, port, command):
@@ -24,3 +26,30 @@ def send_cli_command(host, port, command):
   command = '%s\n' % command
   send_success = (s.send(command) == len(command))
   return send_success
+
+
+def ping(host):
+  '''Sends 3 ICMP pings to a host.
+
+  Args:
+    host: target
+
+  Returns:
+    True on 0% packet loss, False otherwise.
+  '''
+  ph = subprocess.Popen(['ping', '-c', '3', host],
+                        stdin=None,
+                        stdout=subprocess.PIPE);
+  output = ph.stdout.read()
+
+  # Find packet loss.
+  lines = output.split('\n')
+  for line in lines:
+    m = re.search('([0-9.])% packet loss', line)
+    if m:
+      loss = float(m.group(1))
+      print loss
+      return (loss == 0)
+
+  # Didn't find packet loss line?
+  return False
