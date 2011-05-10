@@ -161,7 +161,7 @@ int sr_init_low_level_subsystem(int argc, char **argv)
     sr = (struct sr_instance*) malloc(sizeof(struct sr_instance));
     memset(sr, 0x0, sizeof(struct sr_instance));
 
-    while ((c = getopt(argc, argv, "hna:s:v:p:c:t:r:l:i:u:")) != EOF)
+    while ((c = getopt(argc, argv, "hdna:s:v:p:c:t:r:l:i:u:")) != EOF)
     {
         switch (c)
         {
