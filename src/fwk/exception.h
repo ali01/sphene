@@ -11,78 +11,78 @@
 
 #include "named_interface.h"
 
-using std::string;
-
 namespace Fwk {
 
 class Exception {
 public:
   Fwk::NamedInterface *entity() const { return entity_; }
-  string funcName() const { return funcName_; }
-  string message() const { return message_; }
+  std::string funcName() const { return funcName_; }
+  std::string message() const { return message_; }
 
 protected:
   Fwk::NamedInterface *entity_;
-  string funcName_;
-  string message_;
+  std::string funcName_;
+  std::string message_;
 
-  Exception(const string& funcName, const string& message)
-    : entity_(NULL), funcName_(funcName), message_(message) { }
+  Exception(const std::string& funcName, const std::string& message)
+      : entity_(NULL), funcName_(funcName), message_(message) { }
 
-  Exception(Fwk::NamedInterface *entity, const string& funcName,
-            const string& message)
-    : entity_(entity), funcName_(funcName), message_(message) { }
+  Exception(Fwk::NamedInterface *entity, const std::string& funcName,
+            const std::string& message)
+      : entity_(entity), funcName_(funcName), message_(message) { }
 };
 
 
 class RangeException : public Exception {
 public:
-  RangeException(const string& funcName, const string& message)
-    : Exception(funcName, message) { }
-  RangeException(Fwk::NamedInterface *entity, const string& funcName,
-                 const string& message)
-    : Exception(entity, funcName, message) { }
+  RangeException(const std::string& funcName, const std::string& message)
+      : Exception(funcName, message) { }
+  RangeException(Fwk::NamedInterface *entity, const std::string& funcName,
+                 const std::string& message)
+      : Exception(entity, funcName, message) { }
 };
 
 
 class ResourceException : public Exception {
 public:
-  ResourceException(const string& funcName, const string& message)
-    : Exception(funcName, message) { }
-  ResourceException(Fwk::NamedInterface *entity, const string& funcName,
-                    const string& message)
-    : Exception(entity, funcName, message) { }
+  ResourceException(const std::string& funcName, const std::string& message)
+      : Exception(funcName, message) { }
+  ResourceException(Fwk::NamedInterface *entity, const std::string& funcName,
+                    const std::string& message)
+      : Exception(entity, funcName, message) { }
 };
 
 
 class NameInUseException : public ResourceException {
 public:
-  NameInUseException(const string& funcName, const string& message)
-    : ResourceException(funcName, message) { }
-  NameInUseException(Fwk::NamedInterface *entity, const string& funcName,
-                     const string& message)
-    : ResourceException(entity, funcName, message) { }
+  NameInUseException(const std::string& funcName, const std::string& message)
+      : ResourceException(funcName, message) { }
+  NameInUseException(Fwk::NamedInterface *entity, const std::string& funcName,
+                     const std::string& message)
+      : ResourceException(entity, funcName, message) { }
 };
 
 
 class TimeoutException : public ResourceException {
 public:
-  TimeoutException(const string& funcName, const string& message)
-    : ResourceException(funcName, message) { }
-  TimeoutException(Fwk::NamedInterface *entity, const string& funcName,
-                   const string& message)
-    : ResourceException(entity, funcName, message) { }
+  TimeoutException(const std::string& funcName, const std::string& message)
+      : ResourceException(funcName, message) { }
+  TimeoutException(Fwk::NamedInterface *entity, const std::string& funcName,
+                   const std::string& message)
+      : ResourceException(entity, funcName, message) { }
 };
 
 
 class NotImplementedException : public Exception {
 public:
-  NotImplementedException(const string& funcName, const string& message)
-    : Exception(funcName, message) { }
+  NotImplementedException(const std::string& funcName,
+                          const std::string& message)
+      : Exception(funcName, message) { }
 
-  NotImplementedException(Fwk::NamedInterface *entity, const string& funcName,
-                          const string& message)
-    : Exception(entity, funcName, message) { }
+  NotImplementedException(Fwk::NamedInterface *entity,
+                          const std::string& funcName,
+                          const std::string& message)
+      : Exception(entity, funcName, message) { }
 };
 
 }

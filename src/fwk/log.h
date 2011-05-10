@@ -69,7 +69,7 @@ public:
     std::stringstream ss_;
   };
 
-  static Log::Ptr LogNew(const string& loggerName="root") {
+  static Log::Ptr LogNew(const std::string& loggerName="root") {
     if (rootLog == NULL)
       rootLog = new Log("root");
     if (loggerName == "root")
@@ -84,7 +84,7 @@ public:
   Level error() { return error_; }
   Level critical() { return critical_; }
 
-  string levelName(Level level) { return levelNames[level]; }
+  std::string levelName(Level level) { return levelNames[level]; }
 
   inline Level level() const { return logLevel_; }
   void levelIs(Level level) {
@@ -94,8 +94,8 @@ public:
       rootLog->levelIs(level);
   }
 
-  inline string name() const { return loggerName_; }
-  void nameIs(const string& name) { loggerName_ = name; }
+  inline std::string name() const { return loggerName_; }
+  void nameIs(const std::string& name) { loggerName_ = name; }
 
   LogStream::Ptr operator()(Level level) {
     return LogStream::LogStreamNew(this, level);
@@ -105,7 +105,7 @@ public:
   }
 
   virtual void entryNew(Level level, Fwk::NamedInterface *entity,
-                        string funcName, string cond) {
+                        std::string funcName, std::string cond) {
     if (level < rootLog->level())
       return;
 
@@ -120,23 +120,23 @@ public:
   }
 
   virtual void entryNew(Fwk::NamedInterface *entity,
-                        string funcName, string cond) {
+                        std::string funcName, std::string cond) {
     entryNew(info_, entity, funcName, cond);
   }
 
-  virtual void entryNew(Level level, string funcName, string cond) {
+  virtual void entryNew(Level level, std::string funcName, std::string cond) {
     entryNew(level, NULL, funcName, cond);
   }
 
-  virtual void entryNew(string funcName, string cond) {
+  virtual void entryNew(std::string funcName, std::string cond) {
     entryNew(info_, NULL, funcName, cond);
   }
 
-  virtual void entryNew(Level level, string cond) {
+  virtual void entryNew(Level level, std::string cond) {
     entryNew(level, NULL, "", cond);
   }
 
-  virtual void entryNew(string cond) {
+  virtual void entryNew(std::string cond) {
     entryNew(info_, NULL, "", cond);
   }
 
@@ -150,10 +150,10 @@ public:
 
 protected:
   virtual ~Log() { }
-  Log(const string& loggerName)
+  Log(const std::string& loggerName)
     : loggerName_(loggerName), logLevel_(info_) { }
 
-  string timestamp() {
+  std::string timestamp() {
     char buf[50];
     time_t rawtime;
     struct tm timeinfo;
@@ -162,10 +162,10 @@ protected:
     localtime_r(&rawtime, &timeinfo);
 
     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
-    return string(buf);
+    return std::string(buf);
   }
 
-  string loggerName_;
+  std::string loggerName_;
   Level logLevel_;
 
   // Log is a singleton

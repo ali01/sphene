@@ -19,6 +19,8 @@
 #include "tunnel.h"
 #include "tunnel_map.h"
 
+using std::string;
+
 
 // Input to TCP stack.
 void sr_transport_input(uint8_t* packet);
