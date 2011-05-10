@@ -6,3 +6,4 @@ vns_run.sh
 run_vns.sh
 rtable
 cpuhw
+*.pyc
