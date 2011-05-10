@@ -4,14 +4,14 @@
 
 OSPFLink::Ptr
 OSPFLink::New(OSPFNode::Ptr neighbor,
-                  const IPv4Addr& subnet,
-                  const IPv4Addr& subnet_mask) {
+              const IPv4Addr& subnet,
+              const IPv4Addr& subnet_mask) {
   return new OSPFLink(neighbor, subnet, subnet_mask);
 }
 
 OSPFLink::OSPFLink(OSPFNode::Ptr neighbor,
-         const IPv4Addr& subnet,
-         const IPv4Addr& subnet_mask)
+                   const IPv4Addr& subnet,
+                   const IPv4Addr& subnet_mask)
     : node_(neighbor),
       subnet_(subnet & subnet_mask),
       subnet_mask_(subnet_mask),

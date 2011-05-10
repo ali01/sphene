@@ -68,10 +68,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Mutators. */
 
-  void linkIs(OSPFNode::Ptr node,
-              const IPv4Addr& subnet,
-              const IPv4Addr& subnet_mask);
-  void linkDel(const RouterID& id);
+  void linkIs(OSPFLink::Ptr link, bool bi_directional=true);
+  void linkDel(const RouterID& id, bool bi_directional=true);
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 

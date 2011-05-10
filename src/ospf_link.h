@@ -40,8 +40,8 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
 
  protected:
   OSPFLink(Fwk::Ptr<OSPFNode> neighbor,
-               const IPv4Addr& subnet,
-               const IPv4Addr& subnet_mask);
+           const IPv4Addr& subnet,
+           const IPv4Addr& subnet_mask);
  private:
   /* Data members. */
   Fwk::Ptr<OSPFNode> node_;

@@ -27,35 +27,27 @@ OSPFNode::neighbor(const RouterID& id) const {
 }
 
 void
-OSPFNode::linkIs(OSPFNode::Ptr node,
-                 const IPv4Addr& subnet,
-                 const IPv4Addr& subnet_mask) {
+OSPFNode::linkIs(OSPFLink::Ptr link, bool bi_directional=true) {
   if (node == NULL)
     return;
 
+  OSPFNode::Ptr node = link->node();
   RouterID nd_id = node->routerID();
-  OSPFLink::Ptr nbr_prev = links_.elem(nd_id);
-  if (nbr_prev == NULL
-      || nbr_prev->node() != node
-      || nbr_prev->subnet() != subnet
-      || nbr_prev->subnetMask() != subnet_mask) {
 
-    /* Adding to OSPFLink pointer map. */
-    OSPFLink::Ptr nbr_new = OSPFLink::New(node, subnet, subnet_mask);
-    links_[nd_id] = nbr_new;
+  OSPFLink::Ptr prev_link = links_.elem(nd_id);
 
-    /* Adding to direct OSPFNode pointer map. */
-    neighbors_[nd_id] = node;
+  /* Adding to OSPFLink pointer map. */
+  links_[nd_id] = link;
 
-    /* Signal notifiee. */
-    if (notifiee_)
-      notifiee_->onLink(nd_id);
-  } else {
-    nbr_prev->timeSinceLSUIs(0);
-  }
+  /* Adding to direct OSPFNode pointer map. */
+  neighbors_[nd_id] = node;
+
+  /* Signal notifiee. */
+  if (notifiee_ && *link != *prev_link)
+    notifiee_->onLink(nd_id);
 
   /* Relationship is bi-directional. */
-  node->linkIs(this, subnet, subnet_mask);
+  node->linkIs(this, subnet, subnet_mask, false);
 }
 
 void
