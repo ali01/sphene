@@ -141,31 +141,3 @@ class Test_Topo594:
     url = urllib2.urlopen('http://%s/big.jpg' % self._app2, timeout=3)
     content = url.read()
     assert_equal(len(content), self._big_photo_size)
-
-  def test_break_link_app_server1(self):
-    '''Break link to app server 1 and ping'''
-    assert_true(network_lib.send_cli_command(
-        self._rtr_eth0, self._cli_port, 'ip intf eth1 down'))
-    assert_true(network_lib.ping(self._rtr_eth0))
-    assert_false(network_lib.ping(self._app1))
-    assert_true(network_lib.ping(self._app2))
-
-    assert_true(network_lib.send_cli_command(
-        self._rtr_eth0, self._cli_port, 'ip intf eth1 up'))
-    assert_true(network_lib.ping(self._rtr_eth0))
-    assert_true(network_lib.ping(self._app1))
-    assert_true(network_lib.ping(self._app2))
-
-  def test_break_link_app_server2(self):
-    '''Break link to app server 2 and ping'''
-    assert_true(network_lib.send_cli_command(
-        self._rtr_eth0, self._cli_port, 'ip intf eth2 down'))
-    assert_true(network_lib.ping(self._rtr_eth0))
-    assert_true(network_lib.ping(self._app1))
-    assert_false(network_lib.ping(self._app2))
-
-    assert_true(network_lib.send_cli_command(
-        self._rtr_eth0, self._cli_port, 'ip intf eth2 up'))
-    assert_true(network_lib.ping(self._rtr_eth0))
-    assert_true(network_lib.ping(self._app1))
-    assert_true(network_lib.ping(self._app2))
