@@ -35,7 +35,8 @@ OSPFNode::linkIs(OSPFNode::Ptr node,
 
   RouterID nd_id = node->routerID();
   OSPFLink::Ptr nbr_prev = links_.elem(nd_id);
-  if (nbr_prev->node() != node
+  if (nbr_prev == NULL
+      || nbr_prev->node() != node
       || nbr_prev->subnet() != subnet
       || nbr_prev->subnetMask() != subnet_mask) {
 
