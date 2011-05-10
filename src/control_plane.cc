@@ -186,9 +186,13 @@ ControlPlane::PacketFunctor::PacketFunctor(ControlPlane* const cp)
 
 void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
                                              const Interface::PtrConst iface) {
-  // TODO(ms): Validate all of the fields in the ARP packet.
-
   DLOG << "ARPPacket dispatch in ControlPlane";
+
+  if (!pkt->valid()) {
+    DLOG << "  packet is invalid; dropping";
+    return;
+  }
+
   DLOG << "  operation: " << pkt->operationName();
   DLOG << "  sender HW addr: " << (string)pkt->senderHWAddr();
   DLOG << "  sender IP addr: " << (string)pkt->senderPAddr();
