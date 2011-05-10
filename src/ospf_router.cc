@@ -467,6 +467,8 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
     adv->subnetMaskIs(gw->subnetMask());
   }
 
+  ospf_pkt->checksumReset();
+
   /* IPPacket. */
   OSPFGateway::Ptr gw_obj = iface->gateway(nbr_id);
   IPPacket::Ptr ip_pkt =
