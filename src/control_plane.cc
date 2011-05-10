@@ -48,8 +48,20 @@ void ControlPlane::packetNew(Packet::Ptr pkt,
 void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   DLOG << "outputPacketNew() in ControlPlane";
 
-  // Look up routing table entry of the longest prefix match.
   IPv4Addr dest_ip = pkt->dst();
+  Interface::Ptr target_iface;
+  {
+    InterfaceMap::Ptr iface_map = dp_->interfaceMap();
+    Fwk::ScopedLock<InterfaceMap> lock(iface_map);
+    target_iface = iface_map->interfaceAddr(dest_ip);
+  }
+
+  if (target_iface) {
+    ELOG << "ControlPlane::outputPacketNew() packet is destined to this router";
+    return;
+  }
+
+  // Look up routing table entry of the longest prefix match.
   RoutingTable::Entry::Ptr r_entry;
   {
     RoutingTable::Ptr rtable = dp_->controlPlane()->routingTable();
