@@ -78,9 +78,6 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
  private:
   OSPFTopology(OSPFNode::Ptr root_node);
 
-  void compute_optimal_spanning_tree();
-  static OSPFNode::Ptr min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map);
-
   /* Reactor to OSPFNode notifications. */
   class NodeReactor : public OSPFNode::Notifiee {
    public:
@@ -107,11 +104,14 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Private member functions. */
 
+  void compute_optimal_spanning_tree();
   void dirtyIs(bool status);
 
   /* Depending on COMMIT, recomputes the
      spanning tree or just sets the dirty bit. */
   void process_update(bool commit);
+
+  static OSPFNode::Ptr min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map);
 
   /* Data members. */
 
