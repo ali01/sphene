@@ -22,15 +22,18 @@
 #include "control_plane.h"
 #include "interface.h"
 #include "interface_map.h"
+#include "nf2.h"
+#include "nf2util.h"
+#include "reg_defines.h"
 #include "router.h"
 #include "routing_table.h"
+#include "sr_cpu_extension_nf2.h"
 #include "tunnel.h"
 #include "tunnel_map.h"
 
 #include "cli_stubs.h"
 
 using std::string;
-
 
 /** whether to shutdown the server or not */
 static int router_shutdown;
@@ -46,6 +49,8 @@ static int* pverbose;
 
 /** whether to skip next prompt call */
 static int skip_next_prompt;
+
+static const char* const kDefaultIfaceName = "nf2c0";
 
 #ifdef _STANDALONE_CLI_
 /**
@@ -215,7 +220,50 @@ void cli_show_hw_about() {
 }
 
 void cli_show_hw_arp() {
-    cli_send_str( "not yet implemented: cli_show_hw_arp()\n" );
+  char line_buf[256];
+  const char* const format = "  %-16s   %-19s\n";
+
+  // Open the NetFPGA for reading registers.
+  struct nf2device nf2;
+  nf2.device_name = kDefaultIfaceName;
+  nf2.net_iface = 1;
+  if (openDescriptor(&nf2)) {
+    perror("openDescriptor()");
+    exit(1);
+  }
+
+  cli_send_str("HW ARP cache:\n");
+  for (unsigned int index = 0; index < ARPCache::kMaxEntries; ++index) {
+    // Set index.
+    writeReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_WR_ADDR, index);
+
+    unsigned int mac_hi;
+    unsigned int mac_lo;
+    readReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_HI, &mac_hi);
+    readReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_LO, &mac_lo);
+
+    // Read MAC address.
+    uint8_t mac_addr[6];
+    mac_addr[0] = (mac_hi & 0x0000FF00) >> 8;
+    mac_addr[1] = (mac_hi & 0x000000FF);
+    mac_addr[2] = (mac_lo & 0xFF000000) >> 24;
+    mac_addr[3] = (mac_lo & 0x00FF0000) >> 16;
+    mac_addr[4] = (mac_lo & 0x0000FF00) >> 8;
+    mac_addr[5] = (mac_lo & 0x000000FF);
+
+    // Read IP address.
+    uint32_t ip_addr;
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, &ip_addr);
+
+    EthernetAddr mac(mac_addr);
+    IPv4Addr ip(ip_addr);
+
+    snprintf(line_buf, sizeof(line_buf), format,
+             string(ip).c_str(), string(mac).c_str());
+    cli_send_str(line_buf);
+  }
+
+  closeDescriptor(&nf2);
 }
 
 void cli_show_hw_intf() {
