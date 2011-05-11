@@ -79,15 +79,15 @@ OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
     /* Unsubscribing from notifications. */
     node->notifieeIs(NULL);
 
+    /* Removing the node from the neighbor lists of all neighbors. */
+    OSPFNode::nb_iter it;
+    for (it = node->neighborsBegin(); it != node->neighborsEnd(); ++it) {
+      OSPFNode::Ptr neighbor = it->second;
+      neighbor->linkDel(node->routerID());
+    }
+
     /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
     process_update(commit);
-  }
-
-  /* Removing the node from the neighbor lists of all neighbors. */
-  OSPFNode::nb_iter it;
-  for (it = node->neighborsBegin(); it != node->neighborsEnd(); ++it) {
-    OSPFNode::Ptr neighbor = it->second;
-    neighbor->linkDel(node->routerID());
   }
 }
 
