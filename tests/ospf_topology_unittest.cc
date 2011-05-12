@@ -145,3 +145,8 @@ TEST_F(OSPFTopologyTest, six_node_2) {
   for (int i = 0; i < 5; ++i)
     EXPECT_EQ(topology_->nextHop(ids_[i]), nodes_[0]);
 }
+
+TEST_F(OSPFTopologyTest, self_link) {
+  nodes_[0]->linkIs(links_[0]);
+  EXPECT_EQ(nodes_[0]->links(), (size_t)0);
+}
