@@ -4,13 +4,19 @@
 #include <cstring>
 #include <inttypes.h>
 #include <string>
-#include "ethernet_packet.h"
+
 #include "fwk/exception.h"
+#include "fwk/log.h"
+
+#include "ethernet_packet.h"
 #include "interface.h"
 #include "ip_packet.h"
 #include "ipv4_addr.h"
 #include "packet_buffer.h"
 
+
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("ARPPacket");
 
 const size_t
 ARPPacket::kHeaderSize = sizeof(struct ARPHeader);
@@ -33,17 +39,39 @@ void ARPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 bool
 ARPPacket::valid() const {
   // Verify length.
-  if (len() != kPacketLen)
+  if (len() != kPacketLen){
+    DLOG << "Packet length is incorrect.";
+    DLOG << "  Expected: " << kPacketLen;
+    DLOG << "  Actual:   " << len();
     return false;
+  }
 
   // Verify hardware and protocol types and lengths.
-  if (hwType() != kEthernet || hwAddrLen() != EthernetAddr::kAddrLen ||
-      pType() != kIP || pAddrLen() != IPv4Addr::kAddrLen)
+  if (hwType() != kEthernet) {
+    DLOG << "Packet hardware type is not ethernet.";
     return false;
+  }
+
+  if (hwAddrLen() != EthernetAddr::kAddrLen) {
+    DLOG << "Packet hardware address length is not that of ethernet.";
+    return false;
+  }
+
+  if (pType() != kIP) {
+    DLOG << "Packet protocol address is not IP.";
+    return false;
+  }
+
+  if (pAddrLen() != IPv4Addr::kAddrLen) {
+    DLOG << "Packet protocol address length is not that of IP";
+    return false;
+  }
 
   // Verify operation.
-  if (operation() != kRequest && operation() != kReply)
+  if (operation() != kRequest && operation() != kReply) {
+    DLOG << "Packet operation field is incorrect.";
     return false;
+  }
 
   return true;
 }
