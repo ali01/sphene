@@ -3,12 +3,17 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include "fwk/log.h"
+
 #include "gre_packet.h"
 #include "icmp_packet.h"
 #include "ospf_packet.h"
 #include "interface.h"
 #include "packet_buffer.h"
 #include "unknown_packet.h"
+
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("IPPacket");
 
 /* IP Header packet struct. */
 
@@ -67,17 +72,25 @@ void IPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 bool
 IPPacket::valid() const {
-  if (len() < sizeof(struct ip_hdr) || len() < packetLength())
+  if (len() <= sizeof(struct ip_hdr) || len() != packetLength()) {
+    DLOG << "Packet length is incorrect.";
     return false;
+  }
 
-  if (headerLength() < 5)  // in words, not bytes
+  if (headerLength() < 5) {  // in words, not bytes
+    DLOG << "Packet header length field is incorrect.";
     return false;
+  }
 
-  if (version() != 4)
+  if (version() != 4){
+    DLOG << "Packet version is incorrect.";
     return false;
+  }
 
-  if (!checksumValid())
+  if (!checksumValid()){
+    DLOG << "Packet checksum invalid.";
     return false;
+  }
 
   return true;
 }
