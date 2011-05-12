@@ -385,7 +385,7 @@ void cli_show_hw_route() {
     IPv4Addr mask(mask_reg);
     IPv4Addr gw(gw_reg);
 
-    if (ip != 0 && mask != 0 && gw != 0) {
+    if (ip != 0) {
       snprintf(line_buf, sizeof(line_buf), format,
                index, string(ip).c_str(), string(gw).c_str(),
                string(mask).c_str(), intf_num);
