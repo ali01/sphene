@@ -1,5 +1,7 @@
 #include "routing_table.h"
 
+#include "fwk/deque.h"
+
 #include "interface.h"
 
 /* RoutingTable::Entry */
@@ -119,9 +121,17 @@ RoutingTable::entryDel(const IPv4Addr& subnet) {
 
 void
 RoutingTable::clearDynamicEntries() {
+  Fwk::Deque<IPv4Addr> del_entries;
+
   const_iterator it = rtable_dynamic_.begin();
   for (; it != rtable_dynamic_.end(); ++it) {
     IPv4Addr key = it->first;
+    del_entries.pushBack(key);
+  }
+
+  Fwk::Deque<IPv4Addr>::const_iterator del_it;
+  for (del_it = del_entries.begin(); del_it != del_entries.end(); ++del_it) {
+    IPv4Addr key = *del_it;
     entryDel(key);
   }
 }
