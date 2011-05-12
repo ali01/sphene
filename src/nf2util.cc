@@ -26,7 +26,11 @@
 #include "nf2.h"
 #include "nf2util.h"
 
+#ifdef REF_REG_DEFINES
 #include "reg_defines.h"
+#else
+#include "custom_reg_defines.h"
+#endif
 
 /* Function declarations */
 static int readRegNet(struct nf2device *nf2, unsigned reg, unsigned *val);

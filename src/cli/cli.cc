@@ -24,7 +24,11 @@
 #include "interface_map.h"
 #include "nf2.h"
 #include "nf2util.h"
+#ifdef REF_REG_DEFINES
 #include "reg_defines.h"
+#else
+#include "custom_reg_defines.h"
+#endif
 #include "router.h"
 #include "routing_table.h"
 #include "sr_cpu_extension_nf2.h"

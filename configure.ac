@@ -36,6 +36,18 @@ AC_ARG_ENABLE(
   [cpumode=no])
 AM_CONDITIONAL([CPUMODE], [test x$cpumode = xyes])
 
+# Option to use the reference reg_defines.h for the reference bitfile.
+AC_ARG_ENABLE(
+  [ref_reg_defines],
+  [  --enable-ref-reg-defines     Use reference reg_defines.h ],
+  [case "${enableval}" in
+     yes) ref_reg_defines=yes ;;
+     no)  ref_reg_defines=no ;;
+     *) AC_MSG_ERROR([bad value ${enableval} for --enable-ref-reg-defines]) ;;
+   esac],
+  [ref_reg_defines=no])
+AM_CONDITIONAL([REF_REG_DEFINES], [test x$ref_reg_defines = xyes])
+
 
 # Determine the operating system.
 AC_MSG_CHECKING([uname -s for detecting host operating system])
@@ -63,4 +75,5 @@ AC_OUTPUT
 echo
 echo "Building standalone cli: $standalone_cli"
 echo "CPU mode:                $cpumode"
+echo "Reference reg_defines:   $ref_reg_defines"
 echo

@@ -25,6 +25,10 @@ if STANDALONE_CLI
 CLI_FLAGS
 endif
 
+if REF_REG_DEFINES
+REF_REG_DEFINES = -DREF_REG_DEFINES
+endif
+
 # Force debug build.
 #CXXFLAGS += -O0
 
@@ -32,7 +36,7 @@ AM_CXXFLAGS = -m32
 AM_CPPFLAGS = -march=i586 -Wall -Werror -D_GNU_SOURCE_ -ggdb \
               -D__STDC_LIMIT_MACROS \
               -I src -I src/cli -I src/lwtcp -I $(CK_DIR)/include \
-              $(ARCH) $(MODE) $(CLI_FLAGS) \
+              $(ARCH) $(MODE) $(CLI_FLAGS) $(REF_REG_DEFINES) \
               -fno-strict-aliasing
 AM_LDFLAGS  = -m32 $(SOCK) -lrt -lm -lresolv -lpthread -L$(CK_DIR)/src -lck \
               -Wl,--no-undefined

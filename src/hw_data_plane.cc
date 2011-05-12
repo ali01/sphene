@@ -22,7 +22,11 @@
 #include "ipv4_addr.h"
 #include "nf2.h"
 #include "nf2util.h"
+#ifdef REF_REG_DEFINES
 #include "reg_defines.h"
+#else
+#include "custom_reg_defines.h"
+#endif
 #include "routing_table.h"
 #include "sr_cpu_extension_nf2.h"
 
@@ -175,15 +179,15 @@ void HWDataPlane::writeHWARPCacheEntry(struct nf2device* nf2,
   mac_lo |= ((unsigned int)mac_addr[3]) << 16;
   mac_lo |= ((unsigned int)mac_addr[4]) << 8;
   mac_lo |= ((unsigned int)mac_addr[5]);
-  writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_HI, mac_hi);
-  writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_LO, mac_lo);
+  writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_HI_REG, mac_hi);
+  writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_LO_REG, mac_lo);
 
   // Write IP address.
   const uint32_t ip_addr = ntohl(ip.nbo());
-  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, ip_addr);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, ip_addr);
 
   // Set index.
-  writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_WR_ADDR, index);
+  writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_WR_ADDR_REG, index);
 }
 
 
@@ -219,8 +223,8 @@ void HWDataPlane::writeHWIPFilterTableEntry(struct nf2device* nf2,
                                             const IPv4Addr& ip,
                                             unsigned int index) {
   uint32_t ip_addr = ntohl(ip.nbo());  // little endian
-  writeReg(nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_ENTRY_IP, ip_addr);
-  writeReg(nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_WR_ADDR, index);
+  writeReg(nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_ENTRY_IP_REG, ip_addr);
+  writeReg(nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_WR_ADDR_REG, index);
 }
 
 
@@ -308,11 +312,11 @@ void HWDataPlane::writeHWRoutingTableEntry(struct nf2device* nf2,
   uint32_t mask_reg = ntohl(mask.nbo());
   uint32_t gw_reg = ntohl(gw.nbo());
 
-  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP, ip_addr_reg);
-  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK, mask_reg);
-  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, gw_reg);
-  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT, encoded_port);
-  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR, index);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP_REG, ip_addr_reg);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK_REG, mask_reg);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, gw_reg);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT_REG, encoded_port);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR_REG, index);
 }
 
 
@@ -378,8 +382,8 @@ void HWDataPlane::initializeInterface(Interface::Ptr iface) {
   mac_lo |= ((unsigned int)mac_addr[3]) << 16;
   mac_lo |= ((unsigned int)mac_addr[4]) << 8;
   mac_lo |= ((unsigned int)mac_addr[5]);
-  writeReg(&nf2, ROUTER_OP_LUT_MAC_0_HI + (index * 0x8), mac_hi);
-  writeReg(&nf2, ROUTER_OP_LUT_MAC_0_LO + (index * 0x8), mac_lo);
+  writeReg(&nf2, ROUTER_OP_LUT_MAC_0_HI_REG + (index * 0x8), mac_hi);
+  writeReg(&nf2, ROUTER_OP_LUT_MAC_0_LO_REG + (index * 0x8), mac_lo);
 
   closeDescriptor(&nf2);
 }
