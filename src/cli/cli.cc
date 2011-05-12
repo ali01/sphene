@@ -243,7 +243,7 @@ void cli_show_hw_arp() {
   cli_send_str("HW ARP cache:\n");
   for (unsigned int index = 0; index < ARPCache::kMaxEntries; ++index) {
     // Set index.
-    writeReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_WR_ADDR_REG, index);
+    writeReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_RD_ADDR_REG, index);
 
     unsigned int mac_hi;
     unsigned int mac_lo;
@@ -292,7 +292,7 @@ void cli_show_hw_intf() {
   cli_send_str("HW IP filter table:\n");
   for (unsigned int index = 0; index < InterfaceMap::kMaxInterfaces; ++index) {
     // Set index.
-    writeReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_WR_ADDR_REG, index);
+    writeReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_RD_ADDR_REG, index);
 
     // Read IP address.
     uint32_t ip_addr;
@@ -326,7 +326,7 @@ void cli_show_hw_route() {
   cli_send_str("HW Forwarding table:\n");
   for (unsigned int index = 0; index < kMaxHWRoutingTableEntries; ++index) {
     // Set index.
-    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR_REG, index);
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_RD_ADDR_REG, index);
 
     // The port number is calculated in "one-hot-encoded format":
     //   iface num    port
