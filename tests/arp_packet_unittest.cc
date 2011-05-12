@@ -61,6 +61,11 @@ class ARPPacketTest : public ::testing::Test {
 };
 
 
+TEST_F(ARPPacketTest, construct) {
+  EXPECT_TRUE(pkt_->valid());
+}
+
+
 TEST_F(ARPPacketTest, htype) {
   // Change the hardware type and ensure it changes.
   ARPPacket::HWType new_type = (ARPPacket::HWType)42;
