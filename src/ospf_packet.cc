@@ -76,7 +76,8 @@ OSPFPacket::OSPFPacket(PacketBuffer::Ptr buffer,
                        const AreaID& area_id,
                        OSPFType packet_type,
                        uint16_t packet_len)
-    : Packet(buffer, buffer->size() - packet_len) {
+    : Packet(buffer, buffer->size() - packet_len),
+      ospf_pkt_((struct ospf_pkt*)offsetAddress(0)) {
   versionIs(OSPFPacket::kVersion);
   typeIs(packet_type);
   lenIs(packet_len);
@@ -332,7 +333,8 @@ OSPFLSUPacket::OSPFLSUPacket(PacketBuffer::Ptr buffer,
                              uint16_t lsu_seqno)
     : OSPFPacket(buffer, router_id, area_id, OSPFPacket::kLSU,
                  OSPFLSUPacket::kHeaderSize +
-                 adv_count * OSPFLSUAdvertisement::kSize) {
+                 adv_count * OSPFLSUAdvertisement::kSize),
+      ospf_lsu_hdr_((struct ospf_lsu_hdr*)offsetAddress(0)) {
   seqnoIs(lsu_seqno);
   ttlIs(OSPFLSUPacket::kDefaultTTL);
   advCountIs(adv_count);
