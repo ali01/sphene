@@ -30,6 +30,12 @@ class OSPFPacket : public Packet {
     return new OSPFPacket(buffer, buffer_offset);
   }
 
+  static Ptr NewDefault(PacketBuffer::Ptr buffer,
+                        const RouterID& router_id,
+                        const AreaID& area_id,
+                        OSPFType packet_type,
+                        uint16_t packet_len);
+
   uint8_t version() const;
   void versionIs(uint8_t version);
 
@@ -66,6 +72,13 @@ class OSPFPacket : public Packet {
 
  protected:
   OSPFPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
+
+  /* For default construction. */
+  OSPFPacket(PacketBuffer::Ptr buffer,
+             const RouterID& router_id,
+             const AreaID& area_id,
+             OSPFType packet_type,
+             uint16_t packet_len);
 
  private:
   /* Data members. */

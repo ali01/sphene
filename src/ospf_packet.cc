@@ -58,9 +58,32 @@ const size_t OSPFLSUAdvertisement::kSize = sizeof(struct ospf_lsu_adv);
 
 /* OSPFPacket */
 
+OSPFPacket::Ptr
+OSPFPacket::NewDefault(PacketBuffer::Ptr buffer,
+                       const RouterID& router_id,
+                       const AreaID& area_id,
+                       OSPFType packet_type,
+                       uint16_t packet_len) {
+  return new OSPFPacket(buffer, router_id, area_id, packet_type, packet_len);
+}
+
 OSPFPacket::OSPFPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ospf_pkt_((struct ospf_pkt*)offsetAddress(0)) {}
+
+OSPFPacket::OSPFPacket(PacketBuffer::Ptr buffer,
+                       const RouterID& router_id,
+                       const AreaID& area_id,
+                       OSPFType packet_type,
+                       uint16_t packet_len)
+    : Packet(buffer, buffer->size() - packet_len) {
+  versionIs(OSPFPacket::kVersion);
+  typeIs(packet_type);
+  lenIs(packet_len);
+  routerIDIs(router_id);
+  areaIDIs(area_id);
+  autypeAndAuthAreZero();
+}
 
 uint8_t
 OSPFPacket::version() const {
