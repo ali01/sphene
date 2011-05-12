@@ -67,6 +67,8 @@ OSPFDaemon::timeout_topology_entries() {
     OSPFNode::Ptr node = it->second;
     timeout_node_topology_entries(node);
   }
+
+  topology->onPossibleUpdate();
 }
 
 void
@@ -91,7 +93,7 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
   Fwk::Deque<OSPFLink::Ptr>::const_iterator del_it;
   for (del_it = del_links.begin(); del_it != del_links.end(); ++del_it) {
     OSPFLink::Ptr link = *del_it;
-    node->linkDel(link->nodeRouterID());
+    node->linkDel(link->nodeRouterID(), false);
   }
 }
 
