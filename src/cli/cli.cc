@@ -267,7 +267,35 @@ void cli_show_hw_arp() {
 }
 
 void cli_show_hw_intf() {
-    cli_send_str( "not yet implemented: cli_show_hw_intf()\n" );
+  char line_buf[256];
+  const char* const format = "  %-16s\n";
+
+  // Open the NetFPGA for reading registers.
+  struct nf2device nf2;
+  nf2.device_name = kDefaultIfaceName;
+  nf2.net_iface = 1;
+  if (openDescriptor(&nf2)) {
+    perror("openDescriptor()");
+    exit(1);
+  }
+
+  cli_send_str("HW IP filter table:\n");
+  for (unsigned int index = 0; index < InterfaceMap::kMaxEntries; ++index) {
+    // Set index.
+    writeReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_WR_ADDR, index);
+
+    // Read IP address.
+    uint32_t ip_addr;
+    readReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_ENTRY_IP, &ip_addr);
+
+    IPv4Addr ip(ip_addr);
+
+    snprintf(line_buf, sizeof(line_buf), format,
+             string(ip).c_str());
+    cli_send_str(line_buf);
+  }
+
+  closeDescriptor(&nf2);
 }
 
 void cli_show_hw_route() {
