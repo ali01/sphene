@@ -463,6 +463,7 @@ ControlPlane::sendEnqueued(IPv4Addr ip_addr, EthernetAddr eth_addr) {
     EthernetPacket::Ptr eth_pkt;
     while (pkt_wrapper != NULL) {
       eth_pkt = pkt_wrapper->packet();
+      eth_pkt->srcIs(out_iface->mac());
       eth_pkt->dstIs(eth_addr);
 
       DLOG << "  forwarding queued packet to " << ip_addr;
