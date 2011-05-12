@@ -446,7 +446,7 @@ OSPFLSUAdvertisement::routerID() const {
 
 void
 OSPFLSUAdvertisement::routerIDIs(const RouterID& id) {
-  ospf_lsu_adv_->mask = htonl(id);
+  ospf_lsu_adv_->router_id = htonl(id);
 }
 
 void
