@@ -52,7 +52,7 @@ void DataPlane::outputPacketNew(EthernetPacket::PtrConst pkt,
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
   DLOG << "  length: " << pkt->len();
-  DLOG << "  type: " << pkt->typeName();
+  DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
 
   if (pkt->type() == EthernetPacket::kIP) {
     EthernetPacket* _pkt = const_cast<EthernetPacket*>(pkt.ptr());
