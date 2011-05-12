@@ -262,13 +262,14 @@ void HWDataPlane::writeHWRoutingTable() {
   }
 
   // Write the routing table entries, LPM first.
-  for (unsigned int i = 0; i < entries.size(); ++i) {
-    if (i >= kMaxHWRoutingTableEntries) {
+  unsigned int index;
+  for (index = 0; index < entries.size(); ++index) {
+    if (index >= kMaxHWRoutingTableEntries) {
       WLOG << "Routing table is too large to fit entirely in hardware";
       break;
     }
 
-    RoutingTable::Entry::Ptr entry = entries[i];
+    RoutingTable::Entry::Ptr entry = entries[index];
     Interface::PtrConst iface = entry->interface();
 
     // The port number is calculated in "one-hot-encoded format":
@@ -284,8 +285,14 @@ void HWDataPlane::writeHWRoutingTable() {
                              entry->subnet(),
                              entry->subnetMask(),
                              entry->gateway(),
-                             encoded_port, i);
+                             encoded_port,
+                             index);
   }
+
+  // Zero-out remaining entries.
+  IPv4Addr zero_ip;
+  for (; index < kMaxHWRoutingTableEntries; ++index)
+    writeHWRoutingTableEntry(&nf2, zero_ip, zero_ip, zero_ip, 0, index);
 
   closeDescriptor(&nf2);
 }
