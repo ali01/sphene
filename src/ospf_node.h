@@ -93,6 +93,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   const_link_iter linksBegin() const { return links_.begin(); }
   const_link_iter linksEnd() const { return links_.end(); }
 
+  size_t links() const { return links_.size(); }
+
  private:
   OSPFNode(const RouterID& router_id);
 

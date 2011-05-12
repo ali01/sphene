@@ -145,3 +145,31 @@ TEST_F(OSPFTopologyTest, six_node_2) {
   for (int i = 0; i < 5; ++i)
     EXPECT_EQ(topology_->nextHop(ids_[i]), nodes_[0]);
 }
+
+TEST_F(OSPFTopologyTest, self_link) {
+  nodes_[0]->linkIs(links_[0]);
+  EXPECT_EQ(nodes_[0]->links(), (size_t)0);
+}
+
+TEST_F(OSPFTopologyTest, link_delete) {
+  nodes_[0]->linkIs(links_[1]);
+  EXPECT_EQ(nodes_[0]->links(), (size_t)1);
+  EXPECT_EQ(nodes_[1]->links(), (size_t)1);
+
+  for (int i = 0, j = 1; i < 2; ++i, j = (i + 1) % 2) {
+    OSPFLink::Ptr link = nodes_[i]->link(nodes_[j]->routerID());
+    ASSERT_TRUE(link != NULL);
+    EXPECT_EQ(link->node(), nodes_[j]);
+  }
+
+  nodes_[0]->linkDel(nodes_[1]->routerID());
+  EXPECT_EQ(nodes_[0]->links(), (size_t)0);
+  EXPECT_EQ(nodes_[1]->links(), (size_t)0);
+}
+
+TEST_F(OSPFTopologyTest, link_delete_reverse) {
+  nodes_[0]->linkIs(links_[1]);
+  nodes_[0]->linkDel(nodes_[1]->routerID());
+  EXPECT_EQ(nodes_[0]->links(), (size_t)0);
+  EXPECT_EQ(nodes_[1]->links(), (size_t)0);
+}
