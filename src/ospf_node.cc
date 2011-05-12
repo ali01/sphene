@@ -48,12 +48,12 @@ OSPFNode::linkDel(const RouterID& id, bool commit) {
   if (id == routerID())
     return;
 
-  oneWayLinkDel(id, commit);
-
   /* Deletion is bi-directional. */
   OSPFNode::Ptr node = neighbor(id);
   if (node)
     node->oneWayLinkDel(this->routerID(), commit);
+
+  oneWayLinkDel(id, commit);
 }
 
 /* OSPFNode private member functions. */
