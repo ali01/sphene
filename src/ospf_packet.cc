@@ -378,8 +378,8 @@ OSPFLSUPacket::advCountIs(uint32_t count) {
 OSPFLSUAdvertisement::Ptr
 OSPFLSUPacket::advertisement(uint32_t index) {
   unsigned int off = bufferOffset() +
-                     sizeof(struct ospf_lsu_hdr) +
-                     index * sizeof(struct ospf_lsu_adv);
+                     OSPFLSUPacket::kHeaderSize +
+                     index * OSPFLSUAdvertisement::kSize;
   return OSPFLSUAdvertisement::New(buffer(), off);
 }
 
