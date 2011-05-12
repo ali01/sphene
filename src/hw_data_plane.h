@@ -97,6 +97,12 @@ class HWDataPlane : public DataPlane {
                                  const IPv4Addr& ip,
                                  unsigned int index);
   void writeHWRoutingTable();
+  void writeHWRoutingTableEntry(struct nf2device* nf2,
+                                const IPv4Addr& ip,
+                                const IPv4Addr& mask,
+                                const IPv4Addr& gw,
+                                unsigned int encoded_port,
+                                unsigned int index);
   void initializeInterface(Fwk::Ptr<Interface> iface);
 
  private:

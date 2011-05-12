@@ -271,10 +271,6 @@ void HWDataPlane::writeHWRoutingTable() {
     RoutingTable::Entry::Ptr entry = entries[i];
     Interface::PtrConst iface = entry->interface();
 
-    uint32_t ip_addr = ntohl(entry->subnet().nbo());
-    uint32_t mask = ntohl(entry->subnetMask().nbo());
-    uint32_t gw = ntohl(entry->gateway().nbo());
-
     // The port number is calculated in "one-hot-encoded format":
     //   iface num    port
     //   0            1
@@ -282,16 +278,34 @@ void HWDataPlane::writeHWRoutingTable() {
     //   2            16
     //   3            64
     // For iface num i, this is 4**i.
-
     unsigned int encoded_port = (1 << (iface->index() * 2));
-    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP, ip_addr);
-    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK, mask);
-    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, gw);
-    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT, encoded_port);
-    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR, i);
+
+    writeHWRoutingTableEntry(&nf2,
+                             entry->subnet(),
+                             entry->subnetMask(),
+                             entry->gateway(),
+                             encoded_port, i);
   }
 
   closeDescriptor(&nf2);
+}
+
+
+void HWDataPlane::writeHWRoutingTableEntry(struct nf2device* nf2,
+                                           const IPv4Addr& subnet,
+                                           const IPv4Addr& mask,
+                                           const IPv4Addr& gw,
+                                           unsigned int encoded_port,
+                                           unsigned int index) {
+  uint32_t ip_addr_reg = ntohl(subnet.nbo());
+  uint32_t mask_reg = ntohl(mask.nbo());
+  uint32_t gw_reg = ntohl(gw.nbo());
+
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP, ip_addr_reg);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK, mask_reg);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, gw_reg);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT, encoded_port);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR, index);
 }
 
 
