@@ -55,6 +55,7 @@ static int* pverbose;
 static int skip_next_prompt;
 
 static const char* const kDefaultIfaceName = "nf2c0";
+static const size_t kMaxHWRoutingTableEntries = 32;
 
 #ifdef _STANDALONE_CLI_
 /**
@@ -242,12 +243,12 @@ void cli_show_hw_arp() {
   cli_send_str("HW ARP cache:\n");
   for (unsigned int index = 0; index < ARPCache::kMaxEntries; ++index) {
     // Set index.
-    writeReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_WR_ADDR, index);
+    writeReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_WR_ADDR_REG, index);
 
     unsigned int mac_hi;
     unsigned int mac_lo;
-    readReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_HI, &mac_hi);
-    readReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_LO, &mac_lo);
+    readReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_HI_REG, &mac_hi);
+    readReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_MAC_LO_REG, &mac_lo);
 
     // Read MAC address.
     uint8_t mac_addr[6];
@@ -260,7 +261,7 @@ void cli_show_hw_arp() {
 
     // Read IP address.
     uint32_t ip_addr;
-    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, &ip_addr);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, &ip_addr);
 
     EthernetAddr mac(mac_addr);
     IPv4Addr ip(ip_addr);
@@ -289,13 +290,13 @@ void cli_show_hw_intf() {
   }
 
   cli_send_str("HW IP filter table:\n");
-  for (unsigned int index = 0; index < InterfaceMap::kMaxEntries; ++index) {
+  for (unsigned int index = 0; index < InterfaceMap::kMaxInterfaces; ++index) {
     // Set index.
-    writeReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_WR_ADDR, index);
+    writeReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_WR_ADDR_REG, index);
 
     // Read IP address.
     uint32_t ip_addr;
-    readReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_ENTRY_IP, &ip_addr);
+    readReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_ENTRY_IP_REG, &ip_addr);
 
     IPv4Addr ip(ip_addr);
 
@@ -325,7 +326,7 @@ void cli_show_hw_route() {
   cli_send_str("HW Forwarding table:\n");
   for (unsigned int index = 0; index < kMaxHWRoutingTableEntries; ++index) {
     // Set index.
-    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR, i);
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR_REG, index);
 
     // The port number is calculated in "one-hot-encoded format":
     //   iface num    port
@@ -340,14 +341,16 @@ void cli_show_hw_route() {
     uint32_t gw_reg;
     uint32_t port_reg;
 
-    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP, &ip_addr_reg);
-    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK, &mask_reg);
-    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, &gw_reg);
-    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT, &port_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP_REG, &ip_addr_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK_REG, &mask_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, &gw_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT_REG, &port_reg);
 
     // Decode interface number.
-    unsigned int intf_num;
-    for (unsigned int intf_num = 0; i < InterfaceMap::kMaxEntries; ++i) {
+    unsigned int intf_num = 0;
+    for (intf_num = 0;
+         intf_num < InterfaceMap::kMaxInterfaces;
+         ++intf_num) {
       if ((1 << (intf_num * 2)) == port_reg) {
         break;
       }
@@ -357,7 +360,7 @@ void cli_show_hw_route() {
     IPv4Addr mask(mask_reg);
     IPv4Addr gw(gw_reg);
 
-    if (ip != 0 && mask && != 0 && gw != 0) {
+    if (ip != 0 && mask != 0 && gw != 0) {
       snprintf(line_buf, sizeof(line_buf), format,
                index, string(ip).c_str(), string(gw).c_str(),
                string(mask).c_str(), intf_num);
