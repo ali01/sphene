@@ -461,8 +461,8 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
     OSPFLSUPacket::NewDefault(buffer, routerID(), areaID(),
                               adv_count, lsu_seqno_);
 
-  OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
-  for (uint32_t ix = 0; gw_it != iface->gatewaysEnd(); ++gw_it, ++ix) {
+  OSPFInterface::const_gw_iter gw_it = interfaces_->gatewaysBegin();
+  for (uint32_t ix = 0; gw_it != interfaces_->gatewaysEnd(); ++gw_it, ++ix) {
     OSPFGateway::Ptr gw = gw_it->second;
     OSPFLSUAdvertisement::Ptr adv = ospf_pkt->advertisement(ix);
     adv->routerIDIs(gw->node()->routerID());
