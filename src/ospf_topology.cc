@@ -3,7 +3,9 @@
 #include <queue>
 
 OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
-    : root_node_(root_node), node_reactor_(NodeReactor::New(this)) {
+    : root_node_(root_node),
+      node_reactor_(NodeReactor::New(this)),
+      dirty_(false) {
   this->nodeIs(root_node_);
 }
 
