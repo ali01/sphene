@@ -30,8 +30,9 @@ class EthernetAddr {
   static const EthernetAddr kBroadcast;
   static const EthernetAddr kZero;
 
-  // Copy constructor.
+  // Comparison operators.
   bool operator==(const EthernetAddr& other) const;
+  bool operator!=(const EthernetAddr& other) const;
 
   // Stringify the EthernetAddr into something like 'DE:AD:BE:EF:BA:BE'.
   operator std::string() const;

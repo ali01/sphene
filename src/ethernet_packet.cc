@@ -80,6 +80,11 @@ bool EthernetAddr::operator==(const EthernetAddr& other) const {
 }
 
 
+bool EthernetAddr::operator!=(const EthernetAddr& other) const {
+  return !operator==(other);
+}
+
+
 EthernetAddr::operator std::string() const {
   char mac[18];
   sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
