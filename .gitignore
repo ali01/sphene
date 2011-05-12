@@ -4,6 +4,8 @@ build
 auth_key
 vns_run.sh
 run_vns.sh
+run_vns
 rtable
 cpuhw
+log.dump
 *.pyc
