@@ -303,7 +303,62 @@ void cli_show_hw_intf() {
 }
 
 void cli_show_hw_route() {
-    cli_send_str( "not yet implemented: cli_show_hw_route()\n" );
+  char line_buf[256];
+  const char* const format = "  %-2d  %-16s %-16s %-16s %-2d\n";
+
+  // Open the NetFPGA for reading registers.
+  struct nf2device nf2;
+  nf2.device_name = kDefaultIfaceName;
+  nf2.net_iface = 1;
+  if (openDescriptor(&nf2)) {
+    perror("openDescriptor()");
+    exit(1);
+  }
+
+  cli_send_str("HW Forwarding table:\n");
+  for (unsigned int index = 0; index < kMaxHWRoutingTableEntries; ++index) {
+    // Set index.
+    writeReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR, i);
+
+    // The port number is calculated in "one-hot-encoded format":
+    //   iface num    port
+    //   0            1
+    //   1            4
+    //   2            16
+    //   3            64
+    // For iface num i, this is 4**i.
+
+    uint32_t ip_addr_reg;
+    uint32_t mask_reg;
+    uint32_t gw_reg;
+    uint32_t port_reg;
+
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP, &ip_addr_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK, &mask_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP, &gw_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT, &port_reg);
+
+    // Decode interface number.
+    unsigned int intf_num;
+    for (unsigned int intf_num = 0; i < InterfaceMap::kMaxEntries; ++i) {
+      if ((1 << (intf_num * 2)) == port_reg) {
+        break;
+      }
+    }
+
+    IPv4Addr ip(ip_addr_reg);
+    IPv4Addr mask(mask_reg);
+    IPv4Addr gw(gw_reg);
+
+    if (ip != 0 && mask && != 0 && gw != 0) {
+      snprintf(line_buf, sizeof(line_buf), format,
+               index, string(ip).c_str(), string(gw).c_str(),
+               string(mask).c_str(), intf_num);
+      cli_send_str(line_buf);
+    }
+  }
+
+  closeDescriptor(&nf2);
 }
 #endif
 
