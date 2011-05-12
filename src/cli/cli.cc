@@ -221,7 +221,7 @@ void cli_show_hw_about() {
 
 void cli_show_hw_arp() {
   char line_buf[256];
-  const char* const format = "  %-16s   %-19s\n";
+  const char* const format = "  %-2d  %-16s   %-19s\n";
 
   // Open the NetFPGA for reading registers.
   struct nf2device nf2;
@@ -258,9 +258,11 @@ void cli_show_hw_arp() {
     EthernetAddr mac(mac_addr);
     IPv4Addr ip(ip_addr);
 
-    snprintf(line_buf, sizeof(line_buf), format,
-             string(ip).c_str(), string(mac).c_str());
-    cli_send_str(line_buf);
+    if (mac != "00:00:00:00:00:00" && ip != 0) {
+      snprintf(line_buf, sizeof(line_buf), format,
+               index, string(ip).c_str(), string(mac).c_str());
+      cli_send_str(line_buf);
+    }
   }
 
   closeDescriptor(&nf2);
@@ -268,7 +270,7 @@ void cli_show_hw_arp() {
 
 void cli_show_hw_intf() {
   char line_buf[256];
-  const char* const format = "  %-16s\n";
+  const char* const format = "  %-2d  %-16s\n";
 
   // Open the NetFPGA for reading registers.
   struct nf2device nf2;
@@ -290,9 +292,11 @@ void cli_show_hw_intf() {
 
     IPv4Addr ip(ip_addr);
 
-    snprintf(line_buf, sizeof(line_buf), format,
-             string(ip).c_str());
-    cli_send_str(line_buf);
+    if (ip != 0) {
+      snprintf(line_buf, sizeof(line_buf), format,
+               index, string(ip).c_str());
+      cli_send_str(line_buf);
+    }
   }
 
   closeDescriptor(&nf2);
