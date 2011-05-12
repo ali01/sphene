@@ -30,6 +30,12 @@ class OSPFPacket : public Packet {
     return new OSPFPacket(buffer, buffer_offset);
   }
 
+  static Ptr NewDefault(PacketBuffer::Ptr buffer,
+                        const RouterID& router_id,
+                        const AreaID& area_id,
+                        OSPFType packet_type,
+                        uint16_t packet_len);
+
   uint8_t version() const;
   void versionIs(uint8_t version);
 
@@ -66,6 +72,13 @@ class OSPFPacket : public Packet {
 
  protected:
   OSPFPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
+
+  /* For default construction. */
+  OSPFPacket(PacketBuffer::Ptr buffer,
+             const RouterID& router_id,
+             const AreaID& area_id,
+             OSPFType packet_type,
+             uint16_t packet_len);
 
  private:
   /* Data members. */
@@ -115,6 +128,13 @@ class OSPFHelloPacket : public OSPFPacket {
 
  private:
   OSPFHelloPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
+
+  /* For default construction. */
+  OSPFHelloPacket(PacketBuffer::Ptr buffer,
+                  const RouterID& router_id,
+                  const AreaID& area_id,
+                  const IPv4Addr& mask,
+                  uint16_t helloint);
 
   /* Data members. */
   struct ospf_hello_pkt* ospf_hello_pkt_;
@@ -168,6 +188,13 @@ class OSPFLSUPacket : public OSPFPacket {
 
  private:
   OSPFLSUPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
+
+  /* For default construction. */
+  OSPFLSUPacket(PacketBuffer::Ptr buffer,
+                const RouterID& router_id,
+                const AreaID& area_id,
+                uint32_t adv_count,
+                uint16_t lsu_seqno);
 
   /* Data members. */
   struct ospf_lsu_hdr* ospf_lsu_hdr_;
