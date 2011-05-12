@@ -166,3 +166,10 @@ TEST_F(OSPFTopologyTest, link_delete) {
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
   EXPECT_EQ(nodes_[1]->links(), (size_t)0);
 }
+
+TEST_F(OSPFTopologyTest, link_delete_reverse) {
+  nodes_[0]->linkIs(links_[1]);
+  nodes_[0]->linkDel(nodes_[1]->routerID());
+  EXPECT_EQ(nodes_[0]->links(), (size_t)0);
+  EXPECT_EQ(nodes_[1]->links(), (size_t)0);
+}
