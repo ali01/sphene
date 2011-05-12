@@ -286,6 +286,9 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
 
 void
 OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
+  if (ospf_pkt->type() == OSPFPacket::kLSU)
+    ++lsu_seqno_;
+
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(ospf_pkt->enclosingPacket());
   control_plane_->outputPacketNew(ip_pkt);
 }
