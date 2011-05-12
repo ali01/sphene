@@ -66,7 +66,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   }
 
   if (target_iface) {
-    ELOG << "ControlPlane::outputPacketNew() packet is destined to this router";
+    DLOG << "outputPacketNew: ignoring outgoing packet destined to this router";
     return;
   }
 

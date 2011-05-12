@@ -202,7 +202,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   node->latestSeqnoIs(pkt->seqno());
 
   ospf_router_->process_lsu_advertisements(node, pkt);
-  topology_->onUpdate();
+  topology_->onPossibleUpdate();
 
   if (pkt->ttl() > 1) {
     pkt->ttlDec(1);
@@ -263,12 +263,12 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                const RouterID& nd_id) {
   OSPFGateway::Ptr gw = _im->gateway(nd_id);
 
+  /* Add node to the topology if it wasn't already there. */
+  ospf_router_->topology_->nodeIs(gw->node(), false);
+
   OSPFLink::Ptr ln = OSPFLink::New(gw->node(), gw->subnet(), gw->subnetMask());
   ospf_router_->router_node_->linkIs(ln);
   ospf_router_->lsu_dirty_ = true;
-
-  /* Add node to the topology if it wasn't already there. */
-  ospf_router_->topology_->nodeIs(gw->node());
 }
 
 void
@@ -292,6 +292,8 @@ OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
 
 void
 OSPFRouter::rtable_update() {
+  DLOG << "Full routing table update.";
+
   Fwk::ScopedLock<RoutingTable> lock(routing_table_);
 
   /* Clear all dynamic entries in the routing table
@@ -403,7 +405,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
       neighbor_nd = topology_->node(adv->routerID());
       if (neighbor_nd == NULL) {
         neighbor_nd = OSPFNode::New(adv->routerID());
-        topology_->nodeIs(neighbor_nd);
+        topology_->nodeIs(neighbor_nd, false);
       }
 
       OSPFLink::Ptr neighbor =
@@ -560,11 +562,11 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   /* Establish bi-directional link.
      This also refreshes the link's time since last LSU. */
-  lsu_sender->linkIs(adv_nb);
+  lsu_sender->linkIs(adv_nb, false);
 
   /* Add both nodes to the topology if they weren't already there. */
-  topology_->nodeIs(lsu_sender);
-  topology_->nodeIs(adv_nb->node());
+  topology_->nodeIs(lsu_sender, false);
+  topology_->nodeIs(adv_nb->node(), false);
 
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);

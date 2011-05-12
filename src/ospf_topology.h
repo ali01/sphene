@@ -58,13 +58,11 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Mutators. */
 
-  void nodeIs(OSPFNode::Ptr node);
-  void nodeDel(OSPFNode::Ptr node);
-  void nodeDel(const RouterID& router_id);
+  void nodeIs(OSPFNode::Ptr node, bool commit=true);
+  void nodeDel(OSPFNode::Ptr node, bool commit=true);
+  void nodeDel(const RouterID& router_id, bool commit=true);
 
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
-
-  void dirtyIs(bool status) { dirty_ = status; }
 
   /* Iterators. */
 
@@ -74,14 +72,11 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   const_iterator nodesEnd() const { return nodes_.end(); }
 
   /* Signals. */
-  /* onUpdate signal: Recomputes shortest-path spanning tree. */
-  void onUpdate();
+  /* onPossibleUpdate signal: Recomputes shortest-path spanning tree if dirty.*/
+  void onPossibleUpdate();
 
  private:
   OSPFTopology(OSPFNode::Ptr root_node);
-
-  void compute_optimal_spanning_tree();
-  static OSPFNode::Ptr min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map);
 
   /* Reactor to OSPFNode notifications. */
   class NodeReactor : public OSPFNode::Notifiee {
@@ -93,8 +88,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
       return new NodeReactor(_t);
     }
 
-    void onLink(const RouterID& id) { topology_->dirtyIs(true); }
-    void onLinkDel(const RouterID& id) { topology_->dirtyIs(true); }
+    void onLink(OSPFNode::Ptr node, OSPFLink::Ptr link, bool commit);
+    void onLinkDel(OSPFNode::Ptr node, const RouterID& rid, bool commit);
 
    private:
     NodeReactor(OSPFTopology* _t) : topology_(_t) {}
@@ -106,6 +101,17 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     NodeReactor(const NodeReactor&);
     void operator=(const NodeReactor&);
   };
+
+  /* Private member functions. */
+
+  void compute_optimal_spanning_tree();
+  void dirtyIs(bool status);
+
+  /* Depending on COMMIT, recomputes the
+     spanning tree or just sets the dirty bit. */
+  void process_update(bool commit);
+
+  static OSPFNode::Ptr min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map);
 
   /* Data members. */
 

@@ -30,7 +30,7 @@ REF_REG_DEFINES = -DREF_REG_DEFINES
 endif
 
 # Force debug build.
-#CXXFLAGS += -O0
+CXXFLAGS += -O0
 
 AM_CXXFLAGS = -m32
 AM_CPPFLAGS = -march=i586 -Wall -Werror -D_GNU_SOURCE_ -ggdb \

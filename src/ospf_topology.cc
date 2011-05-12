@@ -45,7 +45,7 @@ OSPFTopology::nextHop(const RouterID& router_id) const {
 }
 
 void
-OSPFTopology::nodeIs(OSPFNode::Ptr node) {
+OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
   if (node == NULL)
     return;
 
@@ -57,21 +57,21 @@ OSPFTopology::nodeIs(OSPFNode::Ptr node) {
     /* Subscribing from notifications. */
     node->notifieeIs(node_reactor_);
 
-    /* Setting topology dirty bit. */
-    dirtyIs(true);
+    /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
+    process_update(commit);
   }
 }
 
 void
-OSPFTopology::nodeDel(OSPFNode::Ptr node) {
+OSPFTopology::nodeDel(OSPFNode::Ptr node, bool commit) {
   if (node == NULL)
     return;
 
-  nodeDel(node->routerID());
+  nodeDel(node->routerID(), commit);
 }
 
 void
-OSPFTopology::nodeDel(const RouterID& router_id) {
+OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
   OSPFNode::Ptr node = nodes_.elem(router_id);
   if (node) {
     nodes_.elemDel(router_id);
@@ -79,30 +79,22 @@ OSPFTopology::nodeDel(const RouterID& router_id) {
     /* Unsubscribing from notifications. */
     node->notifieeIs(NULL);
 
-    /* Setting topology dirty bit. */
-    dirtyIs(true);
-  }
+    /* Removing the node from the neighbor lists of all neighbors. */
+    OSPFNode::nb_iter it;
+    for (it = node->neighborsBegin(); it != node->neighborsEnd(); ++it) {
+      OSPFNode::Ptr neighbor = it->second;
+      neighbor->linkDel(node->routerID());
+    }
 
-  /* Removing the node from the neighbor lists of all neighbors. */
-  OSPFNode::nb_iter it;
-  for (it = node->neighborsBegin(); it != node->neighborsEnd(); ++it) {
-    OSPFNode::Ptr neighbor = it->second;
-    neighbor->linkDel(node->routerID());
+    /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
+    process_update(commit);
   }
 }
 
 void
-OSPFTopology::onUpdate() {
-  if (dirty()) {
+OSPFTopology::onPossibleUpdate() {
+  if (dirty())
     compute_optimal_spanning_tree();
-
-    /* Resetting topology dirty bit. */
-    dirtyIs(false);
-
-    /* Signal notifiee. */
-    if (notifiee_)
-      notifiee_->onDirtyCleared();
-  }
 }
 
 /* Implementation of Dijkstra's algorithm. */
@@ -145,6 +137,9 @@ OSPFTopology::compute_optimal_spanning_tree() {
       }
     }
   }
+
+  /* Resetting topology dirty bit. */
+  dirtyIs(false);
 }
 
 // TODO(ali): make use of a heap instead.
@@ -158,4 +153,38 @@ OSPFTopology::min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map) {
   }
 
   return min_nd;
+}
+
+void
+OSPFTopology::dirtyIs(bool status) {
+  /* Notify if dirty_ transitions from true to false. */
+  bool notify = (dirty_ && !status) ? true : false;
+  dirty_ = status;
+
+  /* Signal notifiee. */
+  if (notifiee_ && notify)
+    notifiee_->onDirtyCleared();
+}
+
+void
+OSPFTopology::process_update(bool commit) {
+  if (commit)
+    compute_optimal_spanning_tree();
+  else
+    dirtyIs(true);
+}
+
+/* OSPFTopology::NodeReactor */
+void
+OSPFTopology::NodeReactor::onLink(OSPFNode::Ptr node,
+                                  OSPFLink::Ptr link,
+                                  bool commit) {
+  topology_->process_update(commit);
+}
+
+void
+OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node,
+                                     const RouterID& rid,
+                                     bool commit) {
+  topology_->process_update(commit);
 }
