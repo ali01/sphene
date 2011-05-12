@@ -40,7 +40,7 @@ class EthernetAddr {
   const uint8_t* data() const { return addr_; }
 
   // Address length in bytes.
-  static const int kAddrLen = 6;
+  static const size_t kAddrLen = 6;
 
  protected:
   void init(const std::string& str);
