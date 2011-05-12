@@ -289,7 +289,29 @@ void cli_show_hw_intf() {
     exit(1);
   }
 
-  cli_send_str("HW IP filter table:\n");
+  // Read hardware MAC addresses.
+  cli_send_str("HW Interfaces:\n");
+  for (unsigned int i = 0; i < 4; ++i) {
+    unsigned int mac_hi;
+    unsigned int mac_lo;
+    readReg(&nf2, ROUTER_OP_LUT_MAC_0_HI_REG + (i * 0x8), &mac_hi);
+    readReg(&nf2, ROUTER_OP_LUT_MAC_0_LO_REG + (i * 0x8), &mac_lo);
+
+    uint8_t mac_addr[6];
+    mac_addr[0] = (mac_hi & 0x0000FF00) >> 8;
+    mac_addr[1] = (mac_hi & 0x000000FF);
+    mac_addr[2] = (mac_lo & 0xFF000000) >> 24;
+    mac_addr[3] = (mac_lo & 0x00FF0000) >> 16;
+    mac_addr[4] = (mac_lo & 0x0000FF00) >> 8;
+    mac_addr[5] = (mac_lo & 0x000000FF);
+
+    EthernetAddr mac(mac_addr);
+    snprintf(line_buf, sizeof(line_buf), format,
+             i, string(mac).c_str());
+    cli_send_str(line_buf);
+  }
+
+  cli_send_str("\nHW IP filter table:\n");
   for (unsigned int index = 0; index < InterfaceMap::kMaxInterfaces; ++index) {
     // Set index.
     writeReg(&nf2, ROUTER_OP_LUT_DST_IP_FILTER_TABLE_RD_ADDR_REG, index);
