@@ -209,8 +209,8 @@ void cli_send_no_hw_str() {
 #else
 void cli_show_hw() {
     cli_send_str("HW State:\n");
-    cli_show_hw_about();
-    cli_send_str("\n");
+    //cli_show_hw_about();
+    //cli_send_str("\n");
     cli_show_hw_arp();
     cli_send_str("\n");
     cli_show_hw_intf();
