@@ -105,6 +105,7 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* const pkt,
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
   DLOG << "  type: " << pkt->typeName();
+  DLOG << "  length: " << pkt->len();
 
   // Dispatch encapsulated packet.
   Packet::Ptr payload_pkt = pkt->payload();
