@@ -19,7 +19,7 @@ static const int kAddrStrLen = 18;
 
 const EthernetAddr EthernetAddr::kBroadcast("FF:FF:FF:FF:FF:FF");
 const EthernetAddr EthernetAddr::kZero;
-const int EthernetAddr::kAddrLen;
+const size_t EthernetAddr::kAddrLen;
 
 const size_t EthernetPacket::kHeaderSize;
 const size_t EthernetPacket::kMTU = 1500;
@@ -46,40 +46,42 @@ EthernetAddr::EthernetAddr(const char* const str) {
 
 
 void EthernetAddr::init(const std::string& str) {
+  // Start with a clear address.
+  memset(addr_, 0, kAddrLen);
+
   // TODO(ms): Throw exception here?
   if (str.size() != kAddrStrLen - 1)  // -1 for NULL terminator
-    goto error;
+    return;
+
+  // Temporary array for sscanf.
+  unsigned int scan[kAddrLen];
 
   // Try uppercase first.
   if (sscanf(str.c_str(), "%02X:%02X:%02X:%02X:%02X:%02X",
-             (unsigned int*)(&addr_[0]),
-             (unsigned int*)(&addr_[1]),
-             (unsigned int*)(&addr_[2]),
-             (unsigned int*)(&addr_[3]),
-             (unsigned int*)(&addr_[4]),
-             (unsigned int*)(&addr_[5])) != kAddrLen) {
+             &scan[0], &scan[1], &scan[2],
+             &scan[3], &scan[4], &scan[5]) != (int)kAddrLen) {
     // Try lowercase.
     if (sscanf(str.c_str(), "%02x:%02x:%02x:%02x:%02x:%02x",
-               (unsigned int*)(&addr_[0]),
-               (unsigned int*)(&addr_[1]),
-               (unsigned int*)(&addr_[2]),
-               (unsigned int*)(&addr_[3]),
-               (unsigned int*)(&addr_[4]),
-               (unsigned int*)(&addr_[5])) != kAddrLen) {
+               &scan[0], &scan[1], &scan[2],
+               &scan[3], &scan[4], &scan[5]) != (int)kAddrLen) {
       // Still failed to find a valid MAC.
-      goto error;
+      return;
     }
   }
 
-  return;
-error:
-  // Something went wrong. Clear address.
-  memset(addr_, 0, kAddrLen);
+  // Copy in bytes from scan.
+  for (unsigned int i = 0; i < kAddrLen; ++i)
+    addr_[i] = (scan[i] & 0xFF);
 }
 
 
 bool EthernetAddr::operator==(const EthernetAddr& other) const {
   return (memcmp(addr_, other.addr_, ETH_ALEN) == 0);
+}
+
+
+bool EthernetAddr::operator!=(const EthernetAddr& other) const {
+  return !operator==(other);
 }
 
 
