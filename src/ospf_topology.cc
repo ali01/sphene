@@ -184,10 +184,10 @@ OSPFTopology::dirtyIs(bool status) {
 
 void
 OSPFTopology::process_update(bool commit) {
+  dirtyIs(true);
+
   if (commit)
     compute_optimal_spanning_tree();
-  else
-    dirtyIs(true);
 }
 
 /* OSPFTopology::NodeReactor */
