@@ -44,6 +44,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Accessors. */
 
+  OSPFNode::PtrConst rootNode() const;
+  OSPFNode::Ptr rootNode();
+
   OSPFNode::Ptr node(const RouterID& router_id);
   OSPFNode::PtrConst node(const RouterID& router_id) const;
 
@@ -53,7 +56,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
-  size_t nodes() const { return nodes_.size(); }
+  size_t nodes() const { return nodes_.size() + 1; } /* +1 for root node. */
   bool dirty() const { return dirty_; }
 
   /* Mutators. */
@@ -66,6 +69,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Iterators. */
 
+  /* Iterators do not include root node. */
   iterator nodesBegin() { return nodes_.begin(); }
   iterator nodesEnd() { return nodes_.end(); }
   const_iterator nodesBegin() const { return nodes_.begin(); }

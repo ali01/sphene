@@ -80,7 +80,7 @@ OSPFPacket::OSPFPacket(PacketBuffer::Ptr buffer,
       ospf_pkt_((struct ospf_pkt*)offsetAddress(0)) {
   versionIs(OSPFPacket::kVersion);
   typeIs(packet_type);
-  lenIs(packet_len);
+  packetLengthIs(packet_len);
   routerIDIs(router_id);
   areaIDIs(area_id);
   autypeAndAuthAreZero();
@@ -107,12 +107,12 @@ OSPFPacket::typeIs(OSPFType type) {
 }
 
 uint16_t
-OSPFPacket::len() const {
+OSPFPacket::packetLength() const {
   return ntohs(ospf_pkt_->len);
 }
 
 void
-OSPFPacket::lenIs(uint16_t len) {
+OSPFPacket::packetLengthIs(uint16_t len) {
   ospf_pkt_->len = htons(len);
 }
 
@@ -189,9 +189,15 @@ OSPFPacket::derivedInstance() {
 
 bool
 OSPFPacket::valid() const {
-  size_t mem_size = buffer()->len() - bufferOffset();
-  if (mem_size < sizeof(struct ospf_pkt) || mem_size < len()){
-    DLOG << "Packet buffer too small.";
+  if (len() < sizeof(struct ospf_pkt)) {
+    DLOG << "Packet is smaller than a base OSPF packet.";
+    return false;
+  }
+
+  if (len() != packetLength()) {
+    DLOG << "Packet length is incorrect.";
+    DLOG << "  expected: " << packetLength();
+    DLOG << "  actual:   " << len();
     return false;
   }
 
@@ -284,6 +290,11 @@ bool
 OSPFHelloPacket::valid() const {
   if (!OSPFPacket::valid())
     return false;
+
+  if (len() < sizeof(struct ospf_hello_pkt)) {
+    DLOG << "Packet is smaller than a standard OSPF hello packet";
+    return false;
+  }
 
   if (ospf_hello_pkt_->padding != 0) {
     DLOG << "Padding is not zero.";
@@ -394,10 +405,9 @@ OSPFLSUPacket::valid() const {
   if (!OSPFPacket::valid())
     return false;
 
-  size_t mem_size = buffer()->len() - bufferOffset();
   size_t required_mem = sizeof(struct ospf_lsu_hdr) +
                         advCount() * sizeof(struct ospf_lsu_adv);
-  if (mem_size < required_mem) {
+  if (len() < required_mem) {
     DLOG << "Packet buffer too small to accommodate "
          << "stated number of LSU advertisements.";
     return false;

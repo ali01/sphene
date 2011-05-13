@@ -2,6 +2,7 @@
 #define OSPF_INTERFACE_DESC_H_6WPUE39N
 
 #include <ctime>
+#include <string>
 
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
@@ -54,6 +55,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   Fwk::Ptr<const Interface> interface() const;
   IPv4Addr interfaceIP() const;
   IPv4Addr interfaceSubnetMask() const;
+  std::string interfaceName() const;
 
   uint16_t helloint() const { return helloint_; }
   Seconds timeSinceOutgoingHello() const;

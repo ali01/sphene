@@ -42,8 +42,8 @@ class OSPFPacket : public Packet {
   OSPFType type() const;
   void typeIs(OSPFType type);
 
-  uint16_t len() const;
-  void lenIs(uint16_t len);
+  uint16_t packetLength() const;
+  void packetLengthIs(uint16_t len);
 
   /* Router ID of the sender of this OSPF Packet. */
   RouterID routerID() const;

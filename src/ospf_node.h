@@ -71,6 +71,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   Notifiee::Ptr notifiee() { return notifiee_; }
 
   /* Mutators. */
+  void routerIDIs(const RouterID& id) { router_id_ = id; }
 
   void linkIs(OSPFLink::Ptr link, bool commit=true);
   void linkDel(const RouterID& id, bool commit=true);

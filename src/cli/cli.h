@@ -11,9 +11,13 @@
 #include <stdint.h> /* uintX_t */
 #endif
 #include "cli_help.h"
+#include "fwk/ptr.h"
 
 #define PROMPT "sphene% "
 #define STRLEN_PROMPT 8
+
+/* Forward definitions. */
+class OSPFNode;
 
 /* This nasty struct stores values until we know it is time to execute the
    command (very gross).  Better perhaps to have a class hierarchy with children
@@ -125,6 +129,7 @@ void cli_show_opt_verbose();
 void cli_show_ospf();
 void cli_show_ospf_neighbors();
 void cli_show_ospf_topo();
+void cli_show_ospf_node(Fwk::Ptr<const OSPFNode> node);
 
 #ifndef _VNS_MODE_
     void cli_send_no_vns_str();
