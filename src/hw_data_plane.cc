@@ -184,7 +184,7 @@ void HWDataPlane::writeHWARPCacheEntry(struct nf2device* nf2,
 
   // Write IP address.
   const uint32_t ip_addr = ntohl(ip.nbo());
-  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, ip_addr);
+  writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_NEXT_HOP_IP_REG, ip_addr);
 
   // Set index.
   writeReg(nf2, ROUTER_OP_LUT_ARP_TABLE_WR_ADDR_REG, index);
