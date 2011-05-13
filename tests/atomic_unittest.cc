@@ -17,6 +17,16 @@ class AtomicInt32Test : public testing::Test {
 };
 
 
+class AtomicUInt32Test : public testing::Test {
+ protected:
+  Fwk::AtomicUInt32 f;
+
+  virtual void SetUp() {
+    f = 0;
+  }
+};
+
+
 class AtomicInt64Test : public testing::Test {
  protected:
   Fwk::AtomicInt64 f;
@@ -36,7 +46,7 @@ class AtomicStruct32Test : public testing::Test {
     bool operator==(const Struct32& other) const {
       return (a == other.a && b == other.b);
     }
-  } CC_CC_ALIGN;
+  } CK_CC_ALIGN;
 
   typedef Fwk::AtomicType32<Struct32> AtomicStruct32;
 
@@ -112,6 +122,48 @@ TEST_F(AtomicInt32Test, copy) {
 
   f = 30;
   ASSERT_EQ(20, g.value());
+}
+
+
+/**************************/
+/**** AtomicUInt32Test ****/
+/**************************/
+
+TEST_F(AtomicUInt32Test, plus_equal) {
+  f = 10;
+
+  // operator+= with a negative value.
+  int s = -5;
+  f += s;
+  ASSERT_EQ((uint32_t)5, f.value());
+
+  // operator+= with a positive value.
+  f += 20;
+  ASSERT_EQ((uint32_t)25, f.value());
+
+  // Big values.
+  f = 4294967295u;  // 2^32 - 1
+  f += 1;
+  ASSERT_EQ((uint32_t)0, f.value());
+}
+
+
+TEST_F(AtomicUInt32Test, minus_equal) {
+  f = 50;
+
+  // operator-= with a negative value.
+  int s = -5;
+  f -= s;
+  ASSERT_EQ((uint32_t)55, f.value());
+
+  // operator-= with a positive value.
+  f -= 20;
+  ASSERT_EQ((uint32_t)35, f.value());
+
+  // Big values.
+  f = 0;
+  f -= 1;
+  ASSERT_EQ(4294967295u, f.value());
 }
 
 
