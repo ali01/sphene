@@ -159,7 +159,7 @@ void ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
   RouterID rid = OSPF::kInvalidRouterID;
   if (it != iface_map->end()) {
     Interface::Ptr iface = it->second;
-    rid = (RouterID)iface->ip().value();
+    rid = ntohl((RouterID)iface->ip().nbo());
   }
 
   /* Initializing OSPF router. */
