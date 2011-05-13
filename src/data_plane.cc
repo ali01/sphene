@@ -202,7 +202,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
 
   // Next hop IP address.
   IPv4Addr next_hop_ip = r_entry->gateway();
-  if (next_hop_ip == 0)
+  if (next_hop_ip == 0u)
     next_hop_ip = pkt->dst();
 
   // Look up ARP entry for next hop.

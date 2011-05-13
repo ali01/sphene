@@ -172,7 +172,7 @@ TEST_F(IPv4AddrTest, int_construction) {
   EXPECT_EQ(ip_val_nbo_, addr_.nbo());
 
   EXPECT_TRUE(addr_ == ip_val_);
-  EXPECT_TRUE(ip_val_ == addr_);
+  EXPECT_TRUE(ip_val_ == addr_.value());
 }
 
 TEST_F(IPv4AddrTest, str_construction) {

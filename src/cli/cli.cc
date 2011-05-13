@@ -266,7 +266,7 @@ void cli_show_hw_arp() {
     EthernetAddr mac(mac_addr);
     IPv4Addr ip(ip_addr);
 
-    if (mac != "00:00:00:00:00:00" && ip != 0) {
+    if (mac != "00:00:00:00:00:00" && ip != 0u) {
       snprintf(line_buf, sizeof(line_buf), format,
                index, string(ip).c_str(), string(mac).c_str());
       cli_send_str(line_buf);
@@ -322,7 +322,7 @@ void cli_show_hw_intf() {
 
     IPv4Addr ip(ip_addr);
 
-    if (ip != 0) {
+    if (ip != 0u) {
       snprintf(line_buf, sizeof(line_buf), format,
                index, string(ip).c_str());
       cli_send_str(line_buf);
@@ -382,7 +382,7 @@ void cli_show_hw_route() {
     IPv4Addr mask(mask_reg);
     IPv4Addr gw(gw_reg);
 
-    if (ip != 0) {
+    if (ip != 0u) {
       snprintf(line_buf, sizeof(line_buf), format,
                index, string(ip).c_str(), string(gw).c_str(),
                string(mask).c_str(), intf_num);

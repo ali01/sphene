@@ -118,7 +118,7 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
 
   // Next hop IP address.
   IPv4Addr next_hop_ip = r_entry->gateway();
-  if (next_hop_ip == 0)
+  if (next_hop_ip == 0u)
     next_hop_ip = pkt->dst();
   DLOG << "  next hop: " << next_hop_ip;
 
@@ -159,7 +159,7 @@ void ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
   RouterID rid = OSPF::kInvalidRouterID;
   if (it != iface_map->end()) {
     Interface::Ptr iface = it->second;
-    rid = ntohl((RouterID)iface->ip().nbo());
+    rid = (RouterID)iface->ip().value();
   }
 
   /* Initializing OSPF router. */
