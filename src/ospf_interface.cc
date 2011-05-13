@@ -7,8 +7,7 @@ OSPFInterface::New(Fwk::Ptr<const Interface> iface, uint16_t helloint) {
   return new OSPFInterface(iface, helloint);
 }
 
-OSPFInterface::OSPFInterface(Interface::PtrConst iface,
-                             uint16_t helloint)
+OSPFInterface::OSPFInterface(Interface::PtrConst iface, uint16_t helloint)
     : iface_(iface), helloint_(helloint), last_outgoing_hello_(0) {}
 
 Interface::PtrConst
@@ -24,6 +23,11 @@ OSPFInterface::interfaceIP() const {
 IPv4Addr
 OSPFInterface::interfaceSubnetMask() const {
   return iface_->subnetMask();
+}
+
+std::string
+OSPFInterface::interfaceName() const {
+  return iface_->name();
 }
 
 Seconds
