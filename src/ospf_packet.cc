@@ -80,7 +80,7 @@ OSPFPacket::OSPFPacket(PacketBuffer::Ptr buffer,
       ospf_pkt_((struct ospf_pkt*)offsetAddress(0)) {
   versionIs(OSPFPacket::kVersion);
   typeIs(packet_type);
-  lenIs(packet_len);
+  packetLengthIs(packet_len);
   routerIDIs(router_id);
   areaIDIs(area_id);
   autypeAndAuthAreZero();
@@ -107,12 +107,12 @@ OSPFPacket::typeIs(OSPFType type) {
 }
 
 uint16_t
-OSPFPacket::len() const {
+OSPFPacket::packetLength() const {
   return ntohs(ospf_pkt_->len);
 }
 
 void
-OSPFPacket::lenIs(uint16_t len) {
+OSPFPacket::packetLengthIs(uint16_t len) {
   ospf_pkt_->len = htons(len);
 }
 
