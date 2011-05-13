@@ -36,6 +36,10 @@ import time
 import urllib2
 
 import network_lib
+import spheneinstance
+
+# Global instances to avoid setup and teardown for each test.
+instance = None
 
 
 def base_dir():
@@ -44,15 +48,8 @@ def base_dir():
   return os.path.normpath(os.path.join(tests_dir, '..'))
 
 
-def sphene_binary():
-  '''Returns the path to the built sphene binary.'''
-  return os.path.normpath(os.path.join(base_dir(), 'build', 'sr'))
-
-
 class Test_Topo594:
   def setUp(self):
-    self._instance = None
-
     self._topo_id = 594
     self._big_photo_size = 1053791  # bytes
     self._cli_port = 2300
@@ -62,30 +59,31 @@ class Test_Topo594:
     self._app1 = '10.3.0.29'
     self._app2 = '10.3.0.31'
 
+    # Set up an instance if it doesn't exist yet.
+    if instance is None:
+      self._reset()
+
+  def _reset(self):
+    '''Re-bootstrap.'''
+    global instance
+
+    # Destruct existing instance.
+    instance = None
+
     # Should we bootstrap the system with our own sphene instance?
     if os.getenv('BOOTSTRAP', 1):
-      self._cli_port = 23000  # we can set our own when bootstrapping
-      self._bootstrap()
+      cli_port = 23000
+      instance = self._bootstrap(cli_port, pass_rtable=True)
 
-  def tearDown(self):
-    if self._instance:
-      self._instance.terminate()
-
-  def _bootstrap(self):
+  def _bootstrap(self, cli_port, pass_rtable=False):
     '''Initialize a sphene instance for tests.'''
     auth_key_file = os.path.join(base_dir(), 'auth_key')
-    rtable_file = os.path.join(base_dir(), 'rtable_%d' % self._topo_id)
-    cmd = [sphene_binary(),
-           '-a', auth_key_file,
-           '-t', str(self._topo_id),
-           '-r', rtable_file,
-           '-s', 'vns-1.stanford.edu',
-           '-u', getpass.getuser(),
-           '-c', str(self._cli_port)]
-    # Enable debug mode through an environment variable.
-    if os.getenv('DEBUG', 0):
-      cmd.append('-d')
-    self._instance = subprocess.Popen(cmd)
+    if pass_rtable:
+      rtable_file = os.path.join(base_dir(), 'rtable_%d' % self._topo_id)
+    else:
+      rtable_file = os.path.join(base_dir(), 'rtable_empty')
+    return spheneinstance.SpheneInstance(self._topo_id, cli_port, auth_key_file,
+                                         rtable_file=rtable_file)
 
     # Wait for interface to come up.
     time.sleep(1)

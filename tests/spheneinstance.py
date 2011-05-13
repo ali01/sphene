@@ -8,7 +8,8 @@ class SpheneInstance(object):
                rtable_file=None, vhost=None):
     tests_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.normpath(os.path.join(tests_dir, '..'))
-    binary = os.path.normpath(os.path.join(base_dir, 'build', binary_name)
+    binary_name = 'sr'
+    binary = os.path.normpath(os.path.join(base_dir, 'build', binary_name))
 
     cmd = [binary,
            '-a', auth_key_file,
