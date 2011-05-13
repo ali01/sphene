@@ -39,7 +39,7 @@ void ARPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 bool
 ARPPacket::valid() const {
   // Verify length.
-  if (len() < kPacketLen) {
+  if (len() != kPacketLen) {
     DLOG << "Packet length is too short";
     DLOG << "  Expected: " << kPacketLen;
     DLOG << "  Actual:   " << len();

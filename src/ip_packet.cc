@@ -77,9 +77,9 @@ IPPacket::valid() const {
     return false;
   }
 
-  if (len() < packetLength()) {
+  if (len() != packetLength()) {
     DLOG << "Packet length is incorrect.";
-    DLOG << "  expected: >=" << packetLength();
+    DLOG << "  expected: " << packetLength();
     DLOG << "  actual: " << len();
     return false;
   }
