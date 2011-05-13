@@ -81,7 +81,7 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
     RouterID nd_id = node->routerID();
     RouterID end_point_id = link->nodeRouterID();
     if (ospf_router_->routerID() == end_point_id
-        && ospf_router_->interfaceMap()->interface(nd_id) != NULL) {
+        && ospf_router_->interfaceMap()->gateway(nd_id) != NULL) {
       /* Do not remove link if NODE is directly connected to this router.
          HELLO protocol takes precedence. */
       continue;
