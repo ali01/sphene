@@ -28,8 +28,11 @@ class AtomicType32 {
   }
 
   bool operator==(const T& other) const {
-    T v = value();
-    return (v == other);
+    return (value() == other);
+  }
+
+  bool operator!=(const T& other) const {
+    return !operator==(other);
   }
 
   bool cas(const T& compare, const T& update) {
@@ -104,8 +107,11 @@ class AtomicType64 {
   }
 
   bool operator==(const T& other) const {
-    T v = value();
-    return (v == other);
+    return (value() == other);
+  }
+
+  bool operator!=(const T& other) const {
+    return !operator==(other);
   }
 
   bool cas(const T& compare, const T& update) {
