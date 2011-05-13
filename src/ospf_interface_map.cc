@@ -135,7 +135,7 @@ void
 OSPFInterfaceMap::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
                                                    Interface::Ptr iface) {
   OSPFInterface::Ptr ospf_iface =
-    OSPFInterface::New(iface, OSPF::kDefaultLinkStateInterval);
+    OSPFInterface::New(iface, OSPF::kDefaultHelloInterval);
 
   iface_map_->interfaceIs(ospf_iface);
 }
