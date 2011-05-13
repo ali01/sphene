@@ -27,8 +27,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
                        RoutingTable::Ptr rtable,
                        InterfaceMap::Ptr iface_map,
                        ControlPlane* cp)
-    : router_id_(router_id),
-      area_id_(area_id),
+    : area_id_(area_id),
       router_node_(OSPFNode::New(router_id)),
       interfaces_(OSPFInterfaceMap::New(iface_map)),
       topology_(OSPFTopology::New(router_node_)),
@@ -249,11 +248,11 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 void
 OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
                                                  const IPv4Addr& addr) {
-  /* router_id_ should always be equal to the IP addr of the first interface. */
-  if (ospf_router_->router_id_ == OSPF::kInvalidRouterID
+  /* router ID should always be equal to the IP addr of the first interface. */
+  if (ospf_router_->routerID() == OSPF::kInvalidRouterID
       || _im->interfaces() <= 1) {
     OSPFInterface::Ptr iface = _im->interface(addr);
-    ospf_router_->router_id_ = (RouterID)iface->interfaceIP().value();
+    ospf_router_->routerIDIs((RouterID)iface->interfaceIP().value());
   }
 }
 
