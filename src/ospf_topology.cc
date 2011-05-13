@@ -9,6 +9,16 @@ OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
   this->nodeIs(root_node_);
 }
 
+OSPFNode::PtrConst
+OSPFTopology::rootNode() const {
+  return root_node_;
+}
+
+OSPFNode::Ptr
+OSPFTopology::rootNode() {
+  return root_node_;
+}
+
 OSPFNode::Ptr
 OSPFTopology::node(const RouterID& router_id) {
   return nodes_.elem(router_id);

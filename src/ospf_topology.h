@@ -44,6 +44,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Accessors. */
 
+  OSPFNode::PtrConst rootNode() const;
+  OSPFNode::Ptr rootNode();
+
   OSPFNode::Ptr node(const RouterID& router_id);
   OSPFNode::PtrConst node(const RouterID& router_id) const;
 
