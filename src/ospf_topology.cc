@@ -6,7 +6,7 @@ OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
     : root_node_(root_node),
       node_reactor_(NodeReactor::New(this)),
       dirty_(false) {
-  this->nodeIs(root_node_);
+  root_node_->notifieeIs(node_reactor_);
 }
 
 OSPFNode::PtrConst
@@ -21,6 +21,9 @@ OSPFTopology::rootNode() {
 
 OSPFNode::Ptr
 OSPFTopology::node(const RouterID& router_id) {
+  if (router_id == root_node_->routerID())
+    return root_node_;
+
   return nodes_.elem(router_id);
 }
 
@@ -58,7 +61,7 @@ OSPFTopology::nextHop(const RouterID& router_id) const {
 
 void
 OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
-  if (node == NULL)
+  if (node == NULL || node->routerID() == root_node_->routerID())
     return;
 
   RouterID nd_id = node->routerID();
@@ -114,6 +117,7 @@ void
 OSPFTopology::compute_optimal_spanning_tree() {
   /* Set of all nodes: shallow copy of nodes_. */
   Fwk::Map<RouterID,OSPFNode> node_set(nodes_);
+  node_set[root_node_->routerID()] = root_node_;
 
   /* Initializing distance to all nodes to kMaxDistance. */
   for (iterator it = node_set.begin(); it != node_set.end(); ++it) {

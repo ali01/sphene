@@ -626,9 +626,6 @@ void cli_show_ospf_topo() {
   OSPFTopology::const_iterator it;
   for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
     OSPFNode::Ptr node = it->second;
-    if (node->routerID() == root_node->routerID())
-      continue;
-
     cli_show_ospf_node(node);
   }
 }
