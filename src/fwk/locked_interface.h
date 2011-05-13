@@ -10,7 +10,14 @@ namespace Fwk {
 class LockedInterface {
  public:
   LockedInterface() {
-    pthread_mutex_init(&li_lock_, NULL);
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    // Lock is recursive.
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+
+    pthread_mutex_init(&li_lock_, &attr);
+
+    pthread_mutexattr_destroy(&attr);
   }
 
   void lockedIs(bool locked) {
