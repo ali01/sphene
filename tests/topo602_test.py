@@ -45,8 +45,8 @@ instance3 = None
 
 def base_dir():
   '''Returns the base path of the sphene project directory.'''
-   tests_dir = os.path.dirname(os.path.abspath(__file__))
-   return os.path.normpath(os.path.join(tests_dir, '..'))
+  tests_dir = os.path.dirname(os.path.abspath(__file__))
+  return os.path.normpath(os.path.join(tests_dir, '..'))
 
 
 class Test_Topo602:
