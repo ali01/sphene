@@ -436,6 +436,8 @@ OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
   for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
     OSPFNode::Ptr nbr = it->second;
     OSPFLSUPacket::Ptr ospf_pkt = build_lsu_to_neighbor(iface, nbr->routerID());
+
+    DLOG << "Sending link-state update to " << nbr->routerID();
     outputPacketNew(ospf_pkt);
   }
 }
