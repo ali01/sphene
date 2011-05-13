@@ -617,7 +617,56 @@ void cli_show_ospf_neighbors() {
 }
 
 void cli_show_ospf_topo() {
-    cli_send_str( "not yet implemented: show PWOSPF topology of SR (e.g., for each router, show its ID, last pwospf seq #, and a list of all its links (e.g., router ID + subnet))\n" );
+  struct sr_instance* sr = get_sr();
+  OSPFRouter::PtrConst ospf_router = sr->router->controlPlane()->ospfRouter();
+  OSPFTopology::PtrConst topology = ospf_router->topology();
+  OSPFNode::PtrConst root_node = topology->rootNode();
+
+  cli_send_str("OSPF Topology:\n");
+  cli_send_str("  Root Node:\n");
+  cli_show_ospf_node(root_node);
+
+  OSPFTopology::const_iterator it;
+  for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
+    OSPFNode::Ptr node = it->second;
+    if (node->routerID() == root_node->routerID())
+      continue;
+
+    cli_show_ospf_node(node);
+  }
+}
+
+void cli_show_ospf_node(OSPFNode::PtrConst node) {
+  // Buffers for proper formatting.
+  char line_buf[256];
+
+  string format = "  Router ID: %u\n"
+                  "  Prev. ID:  %u\n"
+                  "  Distance:  %u\n"
+                  "  Links:     %u\n"
+                  "  Neighbors:\n";
+
+  RouterID prev = node->prev() ? node->prev()->routerID() : 0;
+
+  snprintf(line_buf, sizeof(line_buf), format.c_str(),
+           node->routerID(), prev, node->distance(),
+           node->links());
+
+  cli_send_str(line_buf);
+
+  const char* const nbr_format = "    %-16u %-16s %-16s\n";
+
+  OSPFNode::const_link_iter it;
+  for (it = node->linksBegin(); it != node->linksEnd(); ++it) {
+    OSPFLink::Ptr link = it->second;
+    const string& subnet_str = link->subnet();
+    const string& mask_str = link->subnetMask();
+    snprintf(line_buf, sizeof(line_buf), nbr_format,
+             link->nodeRouterID(), subnet_str.c_str(), mask_str.c_str());
+    cli_send_str(line_buf);
+  }
+
+  cli_send_str("\n");
 }
 
 #ifndef _VNS_MODE_
