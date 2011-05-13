@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <string>
 
+#include "fwk/atomic.h"
 #include "fwk/notifier.h"
 #include "fwk/ptr.h"
 
@@ -55,10 +56,10 @@ class Interface
   void speedIs(uint32_t speed) { speed_ = speed; }
 
   // Returns whether or not the interface is enabled.
-  bool enabled() const { return enabled_; }
+  bool enabled() const { return (enabled_.value() > 0); }
 
   // Sets the enabled flag.
-  void enabledIs(bool enabled) { enabled_ = enabled; }
+  void enabledIs(bool enabled) { enabled_ = (enabled > 0); }
 
   // Returns the type of interface.
   Type type() const { return type_; }
@@ -82,7 +83,7 @@ class Interface
  protected:
   Interface(const std::string& name);
 
-  bool enabled_;
+  Fwk::AtomicUInt32 enabled_;
   EthernetAddr mac_;
   IPv4Addr ip_;
   IPv4Addr mask_;
