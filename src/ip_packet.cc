@@ -72,8 +72,15 @@ void IPPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 
 bool
 IPPacket::valid() const {
-  if (len() <= sizeof(struct ip_hdr) || len() != packetLength()) {
+  if (len() < sizeof(struct ip_hdr)) {
+    DLOG << "Packet is smaller than an IP header.";
+    return false;
+  }
+
+  if (len() != packetLength()) {
     DLOG << "Packet length is incorrect.";
+    DLOG << "  expected: " << packetLength();
+    DLOG << "  actual: " << len();
     return false;
   }
 
@@ -82,12 +89,12 @@ IPPacket::valid() const {
     return false;
   }
 
-  if (version() != 4){
+  if (version() != 4) {
     DLOG << "Packet version is incorrect.";
     return false;
   }
 
-  if (!checksumValid()){
+  if (!checksumValid()) {
     DLOG << "Packet checksum invalid.";
     return false;
   }
