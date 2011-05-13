@@ -82,14 +82,14 @@ class Test_Topo594:
       rtable_file = os.path.join(base_dir(), 'rtable_%d' % self._topo_id)
     else:
       rtable_file = os.path.join(base_dir(), 'rtable_empty')
-    return spheneinstance.SpheneInstance(self._topo_id, cli_port, auth_key_file,
+    inst = spheneinstance.SpheneInstance(self._topo_id, cli_port, auth_key_file,
                                          rtable_file=rtable_file)
 
     # Wait for interface to come up.
     time.sleep(1)
     for i in range(5):
       if network_lib.ping(self._rtr_eth0):
-        return
+        return inst
 
     # Failed to bootstrap.
     raise Exception('timeout waiting for router to come up')
