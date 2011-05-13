@@ -300,7 +300,7 @@ atomic_unittest_LDADD = libgtest.a -L$(CK_DIR)/src -lck
 
 buffer_unittest_SOURCES = tests/buffer_unittest.cc
 buffer_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-buffer_unittest_LDADD = libgtest.a $(USER_LIBS)
+buffer_unittest_LDADD = libgtest.a
 
 ethernet_packet_unittest_SOURCES = tests/ethernet_packet_unittest.cc $(FWK_SRCS)
 ethernet_packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
@@ -336,7 +336,7 @@ packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 packet_buffer_unittest_SOURCES = tests/packet_buffer_unittest.cc $(FWK_SRCS)
 packet_buffer_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-packet_buffer_unittest_LDADD = libgtest.a $(USER_LIBS)
+packet_buffer_unittest_LDADD = libgtest.a
 
 routing_table_unittest_SOURCES = tests/routing_table_unittest.cc
 routing_table_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
@@ -348,9 +348,9 @@ sw_data_plane_unittest_SOURCES = tests/sw_data_plane_unittest.cc \
 sw_data_plane_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 sw_data_plane_unittest_LDADD = libgtest.a $(USER_LIBS)
 
-task_unittest_SOURCES = tests/task_unittest.cc
+task_unittest_SOURCES = tests/task_unittest.cc src/task.cc
 task_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-task_unittest_LDADD = libgtest.a $(USER_LIBS)
+task_unittest_LDADD = libgtest.a
 
 tunnel_unittest_SOURCES = tests/tunnel_unittest.cc $(FWK_SRCS)
 tunnel_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
