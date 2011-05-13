@@ -571,10 +571,7 @@ void cli_show_opt_verbose() {
 }
 
 void cli_show_ospf() {
-    cli_send_str( "Neighbor Information:\n" );
     cli_show_ospf_neighbors();
-
-    cli_send_str( "Topology:\n" );
     cli_show_ospf_topo();
 }
 
