@@ -261,7 +261,7 @@ void cli_show_hw_arp() {
 
     // Read IP address.
     uint32_t ip_addr;
-    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, &ip_addr);
+    readReg(&nf2, ROUTER_OP_LUT_ARP_TABLE_ENTRY_NEXT_HOP_IP_REG, &ip_addr);
 
     EthernetAddr mac(mac_addr);
     IPv4Addr ip(ip_addr);
