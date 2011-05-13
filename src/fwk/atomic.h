@@ -27,13 +27,13 @@ class AtomicType32 {
     return v;
   }
 
-  bool operator==(const T& other) const {
-    return (value() == other);
-  }
+  bool operator==(const T& o) const { return (value() == o); }
+  bool operator!=(const T& o) const { return !operator==(o); }
 
-  bool operator!=(const T& other) const {
-    return !operator==(other);
-  }
+  bool operator==(const AtomicType32& o) const {
+    return (value() == o.value()); }
+  bool operator!=(const AtomicType32& o) const {
+    return !operator==(o); }
 
   bool cas(const T& compare, const T& update) {
     return ck_pr_cas_32((uint32_t*)&value_,
@@ -53,6 +53,46 @@ class AtomicTypeInt32 : public AtomicType32<T> {
  public:
   AtomicTypeInt32(const T& v) : AtomicType32<T>(v) { }
   AtomicTypeInt32() { }
+
+  bool operator<=(const T& o) const {
+    return (AtomicTypeInt32<T>::value() <= o); }
+  bool operator>=(const T& o) const {
+    return (AtomicTypeInt32<T>::value() >= o); }
+  bool operator< (const T& o) const {
+    return (AtomicTypeInt32<T>::value() <  o); }
+  bool operator> (const T& o) const {
+    return (AtomicTypeInt32<T>::value() >  o); }
+
+  bool operator<=(const AtomicTypeInt32<T>& o) const {
+    return (AtomicTypeInt32<T>::value() <= o.value()); }
+  bool operator>=(const AtomicTypeInt32<T>& o) const {
+    return (AtomicTypeInt32<T>::value() >= o.value()); }
+  bool operator< (const AtomicTypeInt32<T>& o) const {
+    return (AtomicTypeInt32<T>::value() <  o.value()); }
+  bool operator> (const AtomicTypeInt32<T>& o) const {
+    return (AtomicTypeInt32<T>::value() >  o.value()); }
+
+  T operator&(const T& o) const {
+    return (AtomicType32<T>::value() & o); }
+  T operator|(const T& o) const {
+    return (AtomicType32<T>::value() | o); }
+
+  T operator&(const AtomicTypeInt32<T>& o) const {
+    return (AtomicType32<T>::value() & o.value()); }
+  T operator|(const AtomicTypeInt32<T>& o) const {
+    return (AtomicType32<T>::value() | o.value()); }
+
+  T operator&=(const AtomicTypeInt32<T>& other) {
+    T* const value_ptr = AtomicType32<T>::valuePtr();
+    ck_pr_and_32((uint32_t*)value_ptr, other.value());
+    return AtomicType32<T>::value();
+  }
+
+  T operator|=(const AtomicTypeInt32<T>& other) {
+    T* const value_ptr = AtomicType32<T>::valuePtr();
+    ck_pr_or_32((uint32_t*)value_ptr, other.value());
+    return AtomicType32<T>::value();
+  }
 
   T operator+=(const T& other) {
     T* const value_ptr = AtomicType32<T>::valuePtr();
@@ -106,13 +146,13 @@ class AtomicType64 {
     return v;
   }
 
-  bool operator==(const T& other) const {
-    return (value() == other);
-  }
+  bool operator==(const T& o) const { return (value() == o); }
+  bool operator!=(const T& o) const { return !operator==(o); }
 
-  bool operator!=(const T& other) const {
-    return !operator==(other);
-  }
+  bool operator==(const AtomicType64& o) const {
+    return (value() == o.value()); }
+  bool operator!=(const AtomicType64& o) const {
+    return !operator==(o); }
 
   bool cas(const T& compare, const T& update) {
     return ck_pr_cas_64((uint64_t*)&value_,
@@ -132,6 +172,46 @@ class AtomicTypeInt64 : public AtomicType64<T> {
  public:
   AtomicTypeInt64(const T& v) : AtomicType64<T>(v) { }
   AtomicTypeInt64() { }
+
+  bool operator<=(const T& o) const {
+    return (AtomicTypeInt64<T>::value() <= o); }
+  bool operator>=(const T& o) const {
+    return (AtomicTypeInt64<T>::value() >= o); }
+  bool operator< (const T& o) const {
+    return (AtomicTypeInt64<T>::value() <  o); }
+  bool operator> (const T& o) const {
+    return (AtomicTypeInt64<T>::value() >  o); }
+
+  bool operator<=(const AtomicTypeInt64<T>& o) const {
+    return (AtomicTypeInt64<T>::value() <= o.value()); }
+  bool operator>=(const AtomicTypeInt64<T>& o) const {
+    return (AtomicTypeInt64<T>::value() >= o.value()); }
+  bool operator< (const AtomicTypeInt64<T>& o) const {
+    return (AtomicTypeInt64<T>::value() <  o.value()); }
+  bool operator> (const AtomicTypeInt64<T>& o) const {
+    return (AtomicTypeInt64<T>::value() >  o.value()); }
+
+  T operator&(const T& o) const {
+    return (AtomicType64<T>::value() & o); }
+  T operator|(const T& o) const {
+    return (AtomicType64<T>::value() | o); }
+
+  T operator&(const AtomicTypeInt32<T>& o) const {
+    return (AtomicType64<T>::value() & o.value()); }
+  T operator|(const AtomicTypeInt32<T>& o) const {
+    return (AtomicType64<T>::value() | o.value()); }
+
+  T operator&=(const AtomicTypeInt64<T>& other) {
+    T* const value_ptr = AtomicType64<T>::valuePtr();
+    ck_pr_and_64((uint64_t*)value_ptr, other.value());
+    return AtomicType64<T>::value();
+  }
+
+  T operator|=(const AtomicTypeInt64<T>& other) {
+    T* const value_ptr = AtomicType64<T>::valuePtr();
+    ck_pr_or_32((uint64_t*)value_ptr, other.value());
+    return AtomicType64<T>::value();
+  }
 
   T operator+=(const T& other) {
     T* const value_ptr = AtomicType64<T>::valuePtr();
