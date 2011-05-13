@@ -321,6 +321,8 @@ void
 OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
                             OSPFNode::PtrConst dest) {
   RouterID next_hop_id = next_hop->routerID();
+  RouterID dest_id = dest->routerID();
+
   OSPFInterface::Ptr iface = interfaces_->interface(next_hop_id);
   if (iface == NULL) {
     ELOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
@@ -330,8 +332,9 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
   OSPFNode::const_nb_iter it;
   for (it = dest->neighborsBegin(); it != dest->neighborsEnd(); ++it) {
     OSPFNode::Ptr neighbor = it->second;
-    if (dest->prev() == NULL || dest->prev() == neighbor) {
-      /* Don't add the subnet through which we are connected to DEST. */
+    if (dest->prev() == neighbor && dest_id != next_hop_id) {
+      /* Don't add the subnet through which we are connected to DEST unless
+         the next hop to DEST is DEST itself. */
       continue;
     }
 
