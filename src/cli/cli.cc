@@ -24,6 +24,9 @@
 #include "interface_map.h"
 #include "nf2.h"
 #include "nf2util.h"
+#include "ospf_gateway.h"
+#include "ospf_interface_map.h"
+#include "ospf_router.h"
 #ifdef REF_REG_DEFINES
 #include "reg_defines.h"
 #else
@@ -576,7 +579,41 @@ void cli_show_ospf() {
 }
 
 void cli_show_ospf_neighbors() {
-    cli_send_str( "not yet implemented: show list of neighbors for each interface of SR\n" );
+  struct sr_instance* sr = get_sr();
+  OSPFRouter::PtrConst ospf_router = sr->router->controlPlane()->ospfRouter();
+  OSPFInterfaceMap::PtrConst iface_map = ospf_router->interfaceMap();
+
+  // Buffers for proper formatting
+  char line_buf[256];
+
+  // Line format.
+  const char* const header_format = "  %-11s %-16s %-16s %-16s %-16s\n";
+  const char* const line_format = "  %-11s %-16u %-16s %-16s %-16s\n";
+
+  // Output header.
+  cli_send_str("OSPF Neighbors:\n");
+  snprintf(line_buf, sizeof(line_buf), header_format,
+          "Interface", "Router ID", "Gateway", "Subnet", "Mask");
+  cli_send_str(line_buf);
+
+  OSPFInterfaceMap::const_gw_iter it;
+  for (it = iface_map->gatewaysBegin(); it != iface_map->gatewaysEnd(); ++it) {
+    OSPFGateway::PtrConst gw_obj = it->second;
+    RouterID nd_id = gw_obj->nodeRouterID();
+    OSPFInterface::PtrConst iface = iface_map->interface(nd_id);
+
+    const string& iface_str = iface->interfaceName();
+    const string& gw_str = gw_obj->gateway();
+    const string& subnet_str = gw_obj->gateway();
+    const string& mask_str = gw_obj->subnetMask();
+
+    snprintf(line_buf, sizeof(line_buf), line_format,
+             iface_str.c_str(), nd_id, gw_str.c_str(),
+             subnet_str.c_str(), mask_str.c_str());
+    cli_send_str(line_buf);
+  }
+
+  cli_send_str("\n");
 }
 
 void cli_show_ospf_topo() {
