@@ -109,32 +109,30 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* pkt,
   // packets have trailing zero-bytes for padding. It is convenient to make the
   // assumption that Packet::len() will give us the actual length of a packet
   // (EthernetPacket or otherwise), so we strip off the trailing bytes before
-  // doing any further processing. We only need to do this for packets smaller
-  // than the minimum Ethernet packet size.
+  // doing any further processing. This also handles the case that the payload
+  // has trailing bytes.
   EthernetPacket::Ptr new_pkt = NULL;  // outside of if statement for scope
   const size_t wire_length = pkt->len();
-  if (pkt->len() == 60) {  // 64 bytes - CRC
-    size_t payload_len = 0;
+  size_t payload_len = 0;
+  if (pkt->type() == EthernetPacket::kARP) {
+    // ARP packets we care about (IP over Ethernet) are fixed in size.
+    payload_len = ARPPacket::kPacketLen;
+  } else if (pkt->type() == EthernetPacket::kIP) {
+    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(payload_pkt);
+    payload_len = ip_pkt->packetLength();  // from header
+  }
 
-    if (pkt->type() == EthernetPacket::kARP) {
-      // ARP packets we care about (IP over Ethernet) are fixed in size.
-      payload_len = ARPPacket::kPacketLen;
-    } else if (pkt->type() == EthernetPacket::kIP) {
-      IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(payload_pkt);
-      payload_len = ip_pkt->packetLength();  // from header
-    }
+  // Create a new buffer only if there really is a trailer.
+  if (payload_len > 0 &&
+      payload_len < (pkt->len() - EthernetPacket::kHeaderSize)) {
+    const size_t new_len = EthernetPacket::kHeaderSize + payload_len;
+    PacketBuffer::Ptr buffer = PacketBuffer::New(new_len);
+    new_pkt = EthernetPacket::New(buffer, buffer->size() - new_len);
+    memcpy(new_pkt->data(), pkt->data(), new_len);
 
-    // Create a new buffer only if there really is an Ethernet trailer.
-    if (payload_len > 0 && payload_len < 60 - EthernetPacket::kHeaderSize) {
-      const size_t new_len = EthernetPacket::kHeaderSize + payload_len;
-      PacketBuffer::Ptr buffer = PacketBuffer::New(new_len);
-      new_pkt = EthernetPacket::New(buffer, buffer->size() - new_len);
-      memcpy(new_pkt->data(), pkt->data(), new_len);
-
-      // Swap packets.
-      pkt = new_pkt.ptr();
-      payload_pkt = new_pkt->payload();
-    }
+    // Swap packets.
+    pkt = new_pkt.ptr();
+    payload_pkt = new_pkt->payload();
   }
 
   DLOG << "  iface: " << iface->name();
