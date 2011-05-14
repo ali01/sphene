@@ -8,7 +8,7 @@
 
 /* Forward declarations. */
 class OSPFNode;
-
+class OSPFInterface;
 
 class OSPFGateway : public OSPFLink {
  public:
@@ -25,6 +25,10 @@ class OSPFGateway : public OSPFLink {
   time_t timeSinceHello() const { return time(NULL) - last_hello_; }
   void timeSinceHelloIs(time_t _t) { last_hello_ = time(NULL) - _t; }
 
+  const OSPFInterface* interface() const;
+  OSPFInterface* interface();
+  void interfaceIs(OSPFInterface* iface);
+
   /* Comparison operator. */
   bool operator==(const OSPFGateway&) const;
   bool operator!=(const OSPFGateway&) const;
@@ -37,8 +41,8 @@ class OSPFGateway : public OSPFLink {
 
   /* Data members. */
   IPv4Addr gateway_;
-
   time_t last_hello_;
+  OSPFInterface* iface_;
 
   /* Operations disallowed. */
   OSPFGateway(const OSPFGateway&);
