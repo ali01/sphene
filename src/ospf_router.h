@@ -200,7 +200,10 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* Adds an entry for the given gateway to the routing table.
      Assumes that routing_table_ is already locked. */
-  void rtable_add_gateway(OSPFGateway::Ptr gateway, OSPFInterface::Ptr iface);
+  void rtable_add_gateway(const IPv4Addr& subnet,
+                          const IPv4Addr& mask,
+                          const IPv4Addr& gateway,
+                          OSPFInterface::PtrConst iface);
 
   /* Removes the given gateway's entry from the routing table.
      Assumes that routing_table_ is already locked. */

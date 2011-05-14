@@ -323,8 +323,8 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
   RouterID next_hop_id = next_hop->routerID();
   RouterID dest_id = dest->routerID();
 
-  OSPFInterface::Ptr iface = interfaces_->interface(next_hop_id);
-  if (iface == NULL) {
+  OSPFGateway::Ptr gw_obj = interfaces_->gateway(next_hop_id);
+  if (gw_obj == NULL) {
     ELOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
     return;
   }
@@ -338,28 +338,31 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
       continue;
     }
 
-    RouterID nbr_id = neighbor->routerID();
-    OSPFGateway::Ptr nbr_gw = iface->gateway(nbr_id);
-
-    rtable_add_gateway(nbr_gw, iface);
+    OSPFLink::PtrConst link = dest->link(neighbor->routerID());
+    rtable_add_gateway(link->subnet(),
+                       link->subnetMask(),
+                       gw_obj->gateway(),
+                       gw_obj->interface());
   }
 }
 
 void
-OSPFRouter::rtable_add_gateway(OSPFGateway::Ptr gw,
-                               OSPFInterface::Ptr iface) {
+OSPFRouter::rtable_add_gateway(const IPv4Addr& subnet,
+                               const IPv4Addr& mask,
+                               const IPv4Addr& gateway,
+                               OSPFInterface::PtrConst iface) {
   /* Setting entry's subnet, subnet mask, outgoing interface, and gateway. */
   RoutingTable::Entry::Ptr entry = RoutingTable::Entry::New();
-  entry->subnetIs(gw->subnet(), gw->subnetMask());
+  entry->subnetIs(subnet, mask);
+  entry->gatewayIs(gateway);
   entry->interfaceIs(iface->interface());
-  entry->gatewayIs(gw->gateway());
 
   routing_table_->entryIs(entry);
 
   DLOG << "Routing table entry added:";
-  DLOG << "Subnet:      " << gw->subnet();
-  DLOG << "Subnet mask: " << gw->subnetMask();
-  DLOG << "Gateway:     " << gw->gateway();
+  DLOG << "Subnet:      " << subnet;
+  DLOG << "Subnet mask: " << mask;
+  DLOG << "Gateway:     " << gateway;
   DLOG << "Interface:   " << iface->interface()->name();
 }
 
