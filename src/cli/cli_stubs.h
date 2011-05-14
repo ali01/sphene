@@ -88,13 +88,11 @@ void router_set_ospf_enabled(struct sr_instance* sr, int enabled);
 /** Adds a route to the appropriate routing table. */
 void rtable_route_add(struct sr_instance* sr,
                       uint32_t dest, uint32_t gw, uint32_t mask,
-                      Interface::Ptr iface,
-                      int is_static_route);
+                      Interface::Ptr iface);
 
 /** Removes the specified route from the routing table, if present. */
 int rtable_route_remove(struct sr_instance* sr,
-                        uint32_t dest, uint32_t mask,
-                        int is_static);
+                        uint32_t dest, uint32_t mask);
 
 /** Remove all routes from the router. */
 void rtable_purge_all(struct sr_instance* sr);

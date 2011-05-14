@@ -145,12 +145,9 @@ void rtable_route_add(struct sr_instance* const sr,
                       const uint32_t dest,
                       const uint32_t gw,
                       const uint32_t mask,
-                      Interface::Ptr iface,
-                      const int is_static_route) {
+                      Interface::Ptr iface) {
   RoutingTable::Entry::Ptr entry =
-    RoutingTable::Entry::New(is_static_route ?
-                             RoutingTable::Entry::kStatic :
-                             RoutingTable::Entry::kDynamic);
+    RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
   entry->subnetIs(ntohl(dest), ntohl(mask));
   entry->gatewayIs(ntohl(gw));
   entry->interfaceIs(iface);
@@ -170,8 +167,7 @@ void rtable_route_add(struct sr_instance* const sr,
 
 int rtable_route_remove(struct sr_instance* const sr,
                         const uint32_t dest,
-                        const uint32_t mask,
-                        const int is_static) {
+                        const uint32_t mask) {
   RoutingTable::Ptr rtable = sr->router->controlPlane()->routingTable();
   Fwk::ScopedLock<RoutingTable> lock(rtable);
 
@@ -183,9 +179,7 @@ int rtable_route_remove(struct sr_instance* const sr,
     RoutingTable::Entry::Ptr entry = it->second;
     if (entry->subnet() == ntohl(dest) &&
         entry->subnetMask() == ntohl(mask) &&
-        entry->type() == (is_static ?
-                          RoutingTable::Entry::kStatic :
-                          RoutingTable::Entry::kDynamic)) {
+        entry->type() == RoutingTable::Entry::kStatic) {
       rtable->entryDel(entry);
 
       fprintf(stdout, "Removed route: %s/%s gw %s\n",

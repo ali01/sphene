@@ -848,13 +848,13 @@ void cli_manip_ip_route_add( gross_route_t* data ) {
         cli_send_strs( 3, "Error: no interface with the name ",
                        data->intf_name, " exists.\n" );
     else {
-        rtable_route_add(SR, data->dest, data->gw, data->mask, intf, 1);
+        rtable_route_add(SR, data->dest, data->gw, data->mask, intf);
         cli_send_str( "The route has been added.\n" );
     }
 }
 
 void cli_manip_ip_route_del( gross_route_t* data ) {
-    if( rtable_route_remove( SR, data->dest, data->mask, 1 ) )
+    if( rtable_route_remove( SR, data->dest, data->mask) )
         cli_send_str( "The route has been removed.\n" );
     else
         cli_send_str( "That route does not exist.\n" );
