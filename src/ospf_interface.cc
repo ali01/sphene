@@ -77,6 +77,9 @@ OSPFInterface::gatewayIs(OSPFGateway::Ptr gw_obj) {
   /* Adding to direct OSPFNode pointer map. */
   neighbors_[nd_id] = node;
 
+  /* Adding this interface to gw_obj. */
+  gw_obj->interfaceIs(this);
+
   if (notifiee_ && (gw_prev == NULL || *gw_obj != *gw_prev))
     notifiee_->onGateway(this, nd_id);
 }
