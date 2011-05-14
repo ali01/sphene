@@ -56,6 +56,10 @@ class RoutingTable
     void gatewayIs(const IPv4Addr& gateway) { gateway_ = gateway; }
     void interfaceIs(Fwk::Ptr<const Interface> iface);
 
+    /* Comparison operators. */
+    bool operator==(const Entry&) const;
+    bool operator!=(const Entry&) const;
+
    protected:
     Entry(Type type);
 

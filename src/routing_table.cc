@@ -27,6 +27,31 @@ RoutingTable::Entry::interfaceIs(Interface::PtrConst iface) {
   interface_ = iface;
 }
 
+bool
+RoutingTable::Entry::operator==(const Entry& other) const {
+  if (this->interface() != other.interface()) /* Interface ptr equivalence */
+    return false;
+
+  if (this->subnet() != other.subnet())
+    return false;
+
+  if (this->subnetMask() != other.subnetMask())
+    return false;
+
+  if (this->gateway() != other.gateway())
+    return false;
+
+  if (this->type() != other.type())
+    return false;
+
+  return true;
+}
+
+bool
+RoutingTable::Entry::operator!=(const Entry& other) const {
+  return !(other == *this);
+}
+
 /* RoutingTable */
 
 RoutingTable::RoutingTable() { }
