@@ -111,7 +111,7 @@ RoutingTable::entryDel(Entry::Ptr entry) {
   }
 
   for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    notifiees_[i]->onEntry(this, entry);
+    notifiees_[i]->onEntryDel(this, entry);
 }
 
 void
