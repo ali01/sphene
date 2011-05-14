@@ -104,18 +104,6 @@ FWK_SRCS = \
            src/fwk/ptr_interface.h \
            src/fwk/utility.cc
 
-PACKET_SRCS = \
-              src/arp_packet.cc \
-              src/ethernet_packet.cc \
-              src/gre_packet.cc \
-              src/icmp_packet.cc \
-              src/ip_packet.cc \
-              src/ipv4_addr.cc \
-              src/ospf_packet.cc \
-              src/packet.cc \
-              src/unknown_packet.cc \
-              $(FWK_SRCS)
-
 libsr_base_a_SOURCES = \
                        src/arp_cache.cc \
                        src/arp_cache_daemon.cc \
@@ -342,9 +330,9 @@ ospf_topology_unittest_SOURCES = tests/ospf_topology_unittest.cc $(FWK_SRCS)
 ospf_topology_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 ospf_topology_unittest_LDADD = libgtest.a $(USER_LIBS)
 
-packet_unittest_SOURCES = tests/packet_unittest.cc $(PACKET_SRCS)
+packet_unittest_SOURCES = tests/packet_unittest.cc
 packet_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
-packet_unittest_LDADD = libgtest.a
+packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 packet_buffer_unittest_SOURCES = tests/packet_buffer_unittest.cc $(FWK_SRCS)
 packet_buffer_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
