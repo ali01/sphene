@@ -42,6 +42,8 @@ class Interface
   // Sets the interface IP address.
   void ipIs(const IPv4Addr& ip);
 
+  IPv4Addr subnet() const { return ip_ & mask_; }
+
   // Returns subnet mask.
   IPv4Addr subnetMask() const { return mask_; }
 
