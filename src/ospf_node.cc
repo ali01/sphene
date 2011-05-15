@@ -30,7 +30,7 @@ OSPFNode::neighbor(const RouterID& id) const {
 
 void
 OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
-  if (link->nodeRouterID() == routerID()){
+  if (link->nodeRouterID() == routerID()) {
     /* Should not establish links to self. */
     return;
   }
