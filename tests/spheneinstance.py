@@ -57,9 +57,8 @@ class SpheneInstance(object):
       buf = in_stream.read(64)
       if not buf:  # EOF
         return
-      buf = buf.strip()
-      if buf:
-        print >>out_stream, "[%s] %s" % (self._binary, buf)
+      if buf and os.getenv('DEBUG', 0):
+        out_stream.write(buf)
 
   def start(self):
     self._quit = False

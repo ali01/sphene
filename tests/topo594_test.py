@@ -140,11 +140,11 @@ class Test_Topo594:
 
   def test_http_app_servers_big(self):
     '''Fetch big photo from app servers'''
-    url = urllib2.urlopen('http://%s/big.jpg' % self._app1, timeout=5)
+    url = urllib2.urlopen('http://%s/big.jpg' % self._app1, timeout=10)
     content = url.read()
     assert_equal(len(content), self._big_photo_size)
 
-    url = urllib2.urlopen('http://%s/big.jpg' % self._app2, timeout=5)
+    url = urllib2.urlopen('http://%s/big.jpg' % self._app2, timeout=10)
     content = url.read()
     assert_equal(len(content), self._big_photo_size)
 
