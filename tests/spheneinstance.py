@@ -5,11 +5,13 @@ import subprocess
 
 class SpheneInstance(object):
   def __init__(self, topo_id, cli_port, auth_key_file,
-               rtable_file=None, vhost=None):
+               rtable_file=None, vhost=None, binary=None):
     tests_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.normpath(os.path.join(tests_dir, '..'))
-    binary_name = 'sr'
-    binary = os.path.normpath(os.path.join(base_dir, 'build', binary_name))
+
+    if binary is None:
+      binary_name = 'sr'
+      binary = os.path.normpath(os.path.join(base_dir, 'build', binary_name))
 
     cmd = [binary,
            '-a', auth_key_file,

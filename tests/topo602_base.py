@@ -46,10 +46,21 @@ instance3 = None
 def base_dir():
   '''Returns the base path of the sphene project directory.'''
   tests_dir = os.path.dirname(os.path.abspath(__file__))
-  return os.path.normpath(os.path.join(tests_dir, '..'))
+  return os.path.relpath(os.path.join(tests_dir, '..'))
 
 
-class Test_Topo602:
+BINARY = os.getenv('BINARY', os.path.join(base_dir(), 'build', 'sr'))
+REF_BINARY = os.getenv('REF_BINARY', os.path.join(base_dir(), 'sr_ref'))
+
+
+
+class Topo602:
+  def __init__(self, binary1, binary2, binary3):
+    '''Base class for topology 602 tests.'''
+    self._binary1 = binary1
+    self._binary2 = binary2
+    self._binary3 = binary3
+
   def setUp(self):
     self._topo_id = 602
     self._big_photo_size = 1053791  # bytes
@@ -80,17 +91,18 @@ class Test_Topo602:
     instance2 = None
     instance3 = None
 
-    # Should we bootstrap the system with our own sphene instance?
-    if os.getenv('BOOTSTRAP', 1):
-      cli_port = 23000
-      instance1 = self._bootstrap(cli_port, 'vhost1', pass_rtable=True)
-      instance2 = self._bootstrap(cli_port + 1, 'vhost2', pass_rtable=False)
-      instance3 = self._bootstrap(cli_port + 2, 'vhost3', pass_rtable=False)
+    cli_port = 23000
+    instance1 = self._bootstrap(self._binary1, cli_port, 'vhost1',
+                                pass_rtable=True)
+    instance2 = self._bootstrap(self._binary2, cli_port + 1, 'vhost2',
+                                pass_rtable=False)
+    instance3 = self._bootstrap(self._binary3, cli_port + 2, 'vhost3',
+                                pass_rtable=False)
 
     # Wait for convergence.
     time.sleep(13)  # a few seconds after a full helloint of 10 seconds
 
-  def _bootstrap(self, cli_port, vhost, pass_rtable=False):
+  def _bootstrap(self, binary, cli_port, vhost, pass_rtable=False):
     '''Initialize a sphene instance for tests.'''
     auth_key_file = os.path.join(base_dir(), 'auth_key')
     if pass_rtable:
@@ -98,7 +110,8 @@ class Test_Topo602:
     else:
       rtable_file = os.path.join(base_dir(), 'rtable_empty')
     return spheneinstance.SpheneInstance(self._topo_id, cli_port, auth_key_file,
-                                         rtable_file=rtable_file, vhost=vhost)
+                                         rtable_file=rtable_file, vhost=vhost,
+                                         binary=binary)
 
   def test_ping_router1_interfaces(self):
     '''Ping router 1 interfaces'''
