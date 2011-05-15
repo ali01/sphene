@@ -262,8 +262,7 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
   /* router ID should always be equal to the IP addr of the first interface. */
   if (ospf_router_->routerID() == OSPF::kInvalidRouterID
       || _im->interfaces() <= 1) {
-    OSPFInterface::Ptr iface = _im->interface(addr);
-    ospf_router_->routerIDIs((RouterID)iface->interfaceIP().value());
+    ospf_router_->routerIDIs((RouterID)addr.value());
   }
 }
 
