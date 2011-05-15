@@ -151,6 +151,8 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
 
 
 void ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
+  if (dp_ == dp)
+    return;
   dp_ = dp;
 
   /* OSPF router ID should be the IP addr of the router's first interface. */
