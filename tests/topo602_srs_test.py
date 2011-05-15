@@ -7,3 +7,6 @@ class Test_Topo602_srs(topo602_base.Topo602):
                                   topo602_base.BINARY,
                                   topo602_base.REF_BINARY,
                                   topo602_base.BINARY)
+
+
+teardown = topo602_base.kill_all_instances

@@ -53,7 +53,6 @@ BINARY = os.getenv('BINARY', os.path.join(base_dir(), 'build', 'sr'))
 REF_BINARY = os.getenv('REF_BINARY', os.path.join(base_dir(), 'sr_ref'))
 
 
-
 class Topo602:
   def __init__(self, binary1, binary2, binary3):
     '''Base class for topology 602 tests.'''
@@ -86,18 +85,24 @@ class Topo602:
     global instance2
     global instance3
 
-    # Destruct existing instances (if any).
-    instance1 = None
-    instance2 = None
-    instance3 = None
+    # Kill existing instances (if any).
+    if instance1:
+      instance1.stop()
+    if instance2:
+      instance2.stop()
+    if instance3:
+      instance3.stop()
 
     cli_port = 23000
     instance1 = self._bootstrap(self._binary1, cli_port, 'vhost1',
                                 pass_rtable=True)
+    instance1.start()
     instance2 = self._bootstrap(self._binary2, cli_port + 1, 'vhost2',
                                 pass_rtable=False)
+    instance2.start()
     instance3 = self._bootstrap(self._binary3, cli_port + 2, 'vhost3',
                                 pass_rtable=False)
+    instance3.start()
 
     # Wait for convergence.
     time.sleep(13)  # a few seconds after a full helloint of 10 seconds
@@ -130,3 +135,12 @@ class Topo602:
     assert_true(network_lib.ping(self._rtr3_eth0))
     assert_true(network_lib.ping(self._rtr3_eth1))
     assert_true(network_lib.ping(self._rtr3_eth2))
+
+
+def kill_all_instances():
+  if instance1:
+    instance1.stop()
+  if instance2:
+    instance2.stop()
+  if instance3:
+    instance3.stop()
