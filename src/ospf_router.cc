@@ -470,8 +470,8 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
          Bypass two-phase commit logic. */
       OSPFLink::Ptr link =
         OSPFLink::New(OSPFNode::kZero, adv->subnet(), adv->subnetMask());
-      nb_rel = NeighborRelationship::New(sender, link);
-      commit_nbr(nb_rel);
+      sender->linkIs(link, false);
+      topology_->nodeIs(sender, false); /* In case it's not already there. */
     }
   }
 }
