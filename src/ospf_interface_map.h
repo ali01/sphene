@@ -52,8 +52,8 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
   /* Accessors. */
 
-  OSPFInterface::PtrConst interface(const IPv4Addr& addr) const;
-  OSPFInterface::Ptr interface(const IPv4Addr& addr);
+  OSPFInterface::PtrConst interface(const IPv4Addr& iface_ip) const;
+  OSPFInterface::Ptr interface(const IPv4Addr& iface_ip);
 
   OSPFInterface::PtrConst interface(const RouterID& neighbor_id) const;
   OSPFInterface::Ptr interface(const RouterID& neighbor_id);
