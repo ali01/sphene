@@ -299,6 +299,8 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
   if (entry->type() == RoutingTable::Entry::kDynamic)
     return;
 
+  DLOG << "Processing static routing table entry.";
+
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
   OSPFGateway::Ptr gw_obj = OSPFGateway::New(OSPFNode::kZero,
