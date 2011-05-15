@@ -54,6 +54,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   Fwk::Ptr<const Interface> interface() const;
   IPv4Addr interfaceIP() const;
+  IPv4Addr interfaceSubnet() const;
   IPv4Addr interfaceSubnetMask() const;
   std::string interfaceName() const;
 
