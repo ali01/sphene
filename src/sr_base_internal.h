@@ -104,7 +104,7 @@ struct sr_instance
     char lhost[32]; /* host name of machine running client */
     char template_name[30]; /* template name if any */
     char auth_key_fn[64]; /* auth key filename */
-    char rtable[32];/* filename for routing table          */
+    char rtable[64]; /* filename for routing table          */
     char server[32];
     unsigned short topo_id; /* topology id */
     struct sockaddr_in sr_addr; /* address to server */
