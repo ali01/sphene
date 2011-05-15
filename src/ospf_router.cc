@@ -506,6 +506,11 @@ OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
   OSPFInterface::const_nb_iter it;
   for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
     OSPFNode::Ptr nbr = it->second;
+    if (nbr->routerID() == 0 || nbr->routerID() == OSPF::kInvalidRouterID){
+      /* Do not send link-state updates to non-OSPF endpoints. */
+      continue;
+    }
+
     OSPFLSUPacket::Ptr ospf_pkt = build_lsu_to_neighbor(iface, nbr->routerID());
 
     DLOG << "Sending link-state update to " << nbr->routerID();
@@ -516,6 +521,11 @@ OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
 OSPFLSUPacket::Ptr
 OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
                                   const RouterID& nbr_id) const {
+  if (nbr_id == 0 || nbr_id == OSPF::kInvalidRouterID) {
+    /* Do not build link-state updates to non-OSPF neighbors. */
+    return NULL;
+  }
+
   if (iface->neighbor(nbr_id) == NULL) {
     ELOG << "send_new_lsu_to_neighbor: Node with specified NBR_ID is not "
          << "directly connected to IFACE.";
