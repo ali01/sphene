@@ -22,8 +22,8 @@ class OSPFTopologyTest : public ::testing::Test {
  protected:
   OSPFTopologyTest() {
     for (int i = 0; i < kNodes; ++i) {
-      ids_[i] = i;
-      nodes_[i] = OSPFNode::New(i);
+      ids_[i] = i + 1;
+      nodes_[i] = OSPFNode::New(i + 1);
       links_[i] = OSPFLink::New(nodes_[i], (uint32_t)0, (uint32_t)0);
     }
 
