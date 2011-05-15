@@ -80,6 +80,11 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
     OSPFLink::Ptr link = it->second;
     RouterID nd_id = node->routerID();
     RouterID end_point_id = link->nodeRouterID();
+    if (end_point_id == 0) {
+      /* Do not remove links to non-OSPF endpoints. */
+      continue;
+    }
+
     if (ospf_router_->routerID() == end_point_id
         && ospf_router_->interfaceMap()->gateway(nd_id) != NULL) {
       /* Do not remove link if NODE is directly connected to this router.
@@ -118,7 +123,8 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
   OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
   for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
     OSPFGateway::Ptr gw = gw_it->second;
-    if (gw->timeSinceHello() > 3 * iface->helloint()) {
+    if (gw->nodeRouterID() != 0 &&
+        gw->timeSinceHello() > 3 * iface->helloint()) {
       /* No HELLO packet has been received from this neighbor in more than
          three times its advertised HELLOINT. Remove from topology and
          trigger LSU flood. */
