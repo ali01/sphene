@@ -4,7 +4,7 @@
 
 #include "interface.h"
 
-/* RoutingTable::Entry */
+// RoutingTable::Entry
 
 RoutingTable::Entry::Entry(Type type)
     : subnet_((uint32_t)0), subnet_mask_((uint32_t)0), gateway_((uint32_t)0),
@@ -52,7 +52,7 @@ RoutingTable::Entry::operator!=(const Entry& other) const {
   return !(other == *this);
 }
 
-/* RoutingTable */
+// RoutingTable
 
 RoutingTable::RoutingTable() { }
 
@@ -102,6 +102,8 @@ RoutingTable::entryIs(Entry::Ptr entry) {
     return;
 
   IPv4Addr subnet = entry->subnet();
+  Entry::Ptr prev_entry = this->entry(subnet);
+
   rtable_[subnet] = entry;
 
   switch (entry->type()) {
@@ -114,8 +116,10 @@ RoutingTable::entryIs(Entry::Ptr entry) {
       break;
   }
 
-  for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    notifiees_[i]->onEntry(this, entry);
+  if (prev_entry == NULL || *entry != *prev_entry) {
+    for (unsigned int i = 0; i < notifiees_.size(); ++i)
+      notifiees_[i]->onEntry(this, entry);
+  }
 }
 
 void
@@ -124,19 +128,26 @@ RoutingTable::entryDel(Entry::Ptr entry) {
     return;
 
   IPv4Addr subnet = entry->subnet();
-  rtable_.elemDel(subnet);
+  entry = this->entry(subnet);
 
-  switch (entry->type()) {
-    case Entry::kDynamic:
-      rtable_dynamic_.elemDel(subnet);
-      break;
-    case Entry::kStatic:
-      rtable_static_.elemDel(subnet);
-      break;
+  // Only attempt perform deletion (and trigger notification),
+  // if ENTRY is actually in the routing table.
+  if (entry) {
+    rtable_.elemDel(subnet);
+
+    switch (entry->type()) {
+      case Entry::kDynamic:
+        rtable_dynamic_.elemDel(subnet);
+        break;
+
+      case Entry::kStatic:
+        rtable_static_.elemDel(subnet);
+        break;
+    }
+
+    for (unsigned int i = 0; i < notifiees_.size(); ++i)
+      notifiees_[i]->onEntryDel(this, entry);
   }
-
-  for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    notifiees_[i]->onEntryDel(this, entry);
 }
 
 void
