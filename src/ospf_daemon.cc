@@ -113,6 +113,8 @@ OSPFDaemon::timeout_neighbor_links() {
 
 void
 OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
+  Fwk::Deque<OSPFGateway::Ptr> del_gw;
+
   OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
   for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
     OSPFGateway::Ptr gw = gw_it->second;
@@ -120,8 +122,14 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
       /* No HELLO packet has been received from this neighbor in more than
          three times its advertised HELLOINT. Remove from topology and
          trigger LSU flood. */
-      iface->gatewayDel(gw->nodeRouterID());
+      del_gw.pushFront(gw);
     }
+  }
+
+  Fwk::Deque<OSPFGateway::Ptr>::const_iterator del_it;
+  for (del_it = del_gw.begin(); del_it != del_gw.end(); ++del_it) {
+    OSPFGateway::Ptr gw = *del_it;
+    iface->gatewayDel(gw->nodeRouterID());
   }
 }
 
