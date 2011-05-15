@@ -48,6 +48,10 @@ def base_dir():
   return os.path.normpath(os.path.join(tests_dir, '..'))
 
 
+BINARY = os.getenv('BINARY', os.path.join(base_dir(), 'build', 'sr'))
+REF_BINARY = os.getenv('REF_BINARY', os.path.join(base_dir(), 'sr_ref'))
+
+
 class Test_Topo594:
   def setUp(self):
     self._topo_id = 594
@@ -68,7 +72,8 @@ class Test_Topo594:
     global instance
 
     # Destruct existing instance.
-    instance = None
+    if instance:
+      instance.stop()
 
     # Should we bootstrap the system with our own sphene instance?
     if os.getenv('BOOTSTRAP', 1):
@@ -83,7 +88,9 @@ class Test_Topo594:
     else:
       rtable_file = os.path.join(base_dir(), 'rtable_empty')
     inst = spheneinstance.SpheneInstance(self._topo_id, cli_port, auth_key_file,
-                                         rtable_file=rtable_file)
+                                         rtable_file=rtable_file,
+                                         binary=BINARY)
+    inst.start()
 
     # Wait for interface to come up.
     time.sleep(1)
@@ -133,10 +140,15 @@ class Test_Topo594:
 
   def test_http_app_servers_big(self):
     '''Fetch big photo from app servers'''
-    url = urllib2.urlopen('http://%s/big.jpg' % self._app1, timeout=3)
+    url = urllib2.urlopen('http://%s/big.jpg' % self._app1, timeout=5)
     content = url.read()
     assert_equal(len(content), self._big_photo_size)
 
-    url = urllib2.urlopen('http://%s/big.jpg' % self._app2, timeout=3)
+    url = urllib2.urlopen('http://%s/big.jpg' % self._app2, timeout=5)
     content = url.read()
     assert_equal(len(content), self._big_photo_size)
+
+
+def teardown():
+  if instance:
+    instance.stop()
