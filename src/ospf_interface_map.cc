@@ -85,6 +85,12 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   iface->notifieeIs(NULL);
 
   IPv4Addr key = iface->interfaceIP();
+  iface = this->interface(key);
+  if (iface == NULL) {
+    /* Early return if IFACE doesn't exist in this interface map. */
+    return;
+  }
+
   ip_ifaces_.elemDel(key);
 
   OSPFInterface::const_gw_iter it;

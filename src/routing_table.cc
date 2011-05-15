@@ -4,7 +4,7 @@
 
 #include "interface.h"
 
-/* RoutingTable::Entry */
+// RoutingTable::Entry
 
 RoutingTable::Entry::Entry(Type type)
     : subnet_((uint32_t)0), subnet_mask_((uint32_t)0), gateway_((uint32_t)0),
@@ -27,19 +27,44 @@ RoutingTable::Entry::interfaceIs(Interface::PtrConst iface) {
   interface_ = iface;
 }
 
-/* RoutingTable */
+bool
+RoutingTable::Entry::operator==(const Entry& other) const {
+  if (this->interface() != other.interface()) /* Interface ptr equivalence */
+    return false;
+
+  if (this->subnet() != other.subnet())
+    return false;
+
+  if (this->subnetMask() != other.subnetMask())
+    return false;
+
+  if (this->gateway() != other.gateway())
+    return false;
+
+  if (this->type() != other.type())
+    return false;
+
+  return true;
+}
+
+bool
+RoutingTable::Entry::operator!=(const Entry& other) const {
+  return !(other == *this);
+}
+
+// RoutingTable
 
 RoutingTable::RoutingTable() { }
 
 RoutingTable::Entry::Ptr
-RoutingTable::entry(const IPv4Addr& subnet) {
-  return rtable_.elem(subnet);
+RoutingTable::entry(const IPv4Addr& subnet, const IPv4Addr& mask) {
+  return rtable_.elem(std::make_pair(subnet, mask));
 }
 
 RoutingTable::Entry::PtrConst
-RoutingTable::entry(const IPv4Addr& subnet) const {
+RoutingTable::entry(const IPv4Addr& subnet, const IPv4Addr& mask) const {
   RoutingTable* self = const_cast<RoutingTable*>(this);
-  return self->entry(subnet);
+  return self->entry(subnet, mask);
 }
 
 RoutingTable::Entry::Ptr
@@ -77,20 +102,27 @@ RoutingTable::entryIs(Entry::Ptr entry) {
     return;
 
   IPv4Addr subnet = entry->subnet();
-  rtable_[subnet] = entry;
+  IPv4Addr mask = entry->subnetMask();
+
+  Entry::Ptr prev_entry = this->entry(subnet, mask);
+
+  Subnet key = std::make_pair(subnet, mask);
+  rtable_[key] = entry;
 
   switch (entry->type()) {
     case Entry::kDynamic:
-      rtable_dynamic_[subnet] = entry;
+      rtable_dynamic_[key] = entry;
       break;
 
     case Entry::kStatic:
-      rtable_static_[subnet] = entry;
+      rtable_static_[key] = entry;
       break;
   }
 
-  for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    notifiees_[i]->onEntry(this, entry);
+  if (prev_entry == NULL || *entry != *prev_entry) {
+    for (unsigned int i = 0; i < notifiees_.size(); ++i)
+      notifiees_[i]->onEntry(this, entry);
+  }
 }
 
 void
@@ -99,39 +131,49 @@ RoutingTable::entryDel(Entry::Ptr entry) {
     return;
 
   IPv4Addr subnet = entry->subnet();
-  rtable_.elemDel(subnet);
+  IPv4Addr mask = entry->subnetMask();
 
-  switch (entry->type()) {
-    case Entry::kDynamic:
-      rtable_dynamic_.elemDel(subnet);
-      break;
-    case Entry::kStatic:
-      rtable_static_.elemDel(subnet);
-      break;
+  entry = this->entry(subnet, mask);
+
+  // Only attempt perform deletion (and trigger notification),
+  // if ENTRY is actually in the routing table.
+  if (entry) {
+    Subnet key = std::make_pair(subnet, mask);
+    rtable_.elemDel(key);
+
+    switch (entry->type()) {
+      case Entry::kDynamic:
+        rtable_dynamic_.elemDel(key);
+        break;
+
+      case Entry::kStatic:
+        rtable_static_.elemDel(key);
+        break;
+    }
+
+    for (unsigned int i = 0; i < notifiees_.size(); ++i)
+      notifiees_[i]->onEntryDel(this, entry);
   }
-
-  for (unsigned int i = 0; i < notifiees_.size(); ++i)
-    notifiees_[i]->onEntry(this, entry);
 }
 
 void
-RoutingTable::entryDel(const IPv4Addr& subnet) {
-  entryDel(entry(subnet));
+RoutingTable::entryDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
+  entryDel(entry(subnet, mask));
 }
 
 void
 RoutingTable::clearDynamicEntries() {
-  Fwk::Deque<IPv4Addr> del_entries;
+  Fwk::Deque<Subnet> del_entries;
 
   const_iterator it = rtable_dynamic_.begin();
   for (; it != rtable_dynamic_.end(); ++it) {
-    IPv4Addr key = it->first;
+    Subnet key = it->first;
     del_entries.pushBack(key);
   }
 
-  Fwk::Deque<IPv4Addr>::const_iterator del_it;
+  Fwk::Deque<Subnet>::const_iterator del_it;
   for (del_it = del_entries.begin(); del_it != del_entries.end(); ++del_it) {
-    IPv4Addr key = *del_it;
-    entryDel(key);
+    Subnet key = *del_it;
+    entryDel(key.first, key.second);
   }
 }

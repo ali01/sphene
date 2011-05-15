@@ -65,8 +65,7 @@ OSPFNode::oneWayLinkIs(OSPFLink::Ptr link, bool commit) {
 
   OSPFNode::Ptr node = link->node();
   RouterID nd_id = node->routerID();
-
-  OSPFLink::Ptr prev_link = links_.elem(nd_id);
+  OSPFLink::Ptr prev_link = this->link(nd_id);
 
   /* Adding to OSPFLink pointer map. */
   links_[nd_id] = link;

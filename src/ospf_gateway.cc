@@ -1,5 +1,6 @@
 #include "ospf_gateway.h"
 
+#include "ospf_interface.h"
 #include "ospf_node.h"
 
 OSPFGateway::Ptr
@@ -17,6 +18,21 @@ OSPFGateway::OSPFGateway(Fwk::Ptr<OSPFNode> neighbor,
     : OSPFLink::OSPFLink(neighbor, subnet, subnet_mask),
       gateway_(gateway),
       last_hello_(time(NULL)) {}
+
+const OSPFInterface*
+OSPFGateway::interface() const {
+  return iface_;
+}
+
+OSPFInterface*
+OSPFGateway::interface() {
+  return iface_;
+}
+
+void
+OSPFGateway::interfaceIs(OSPFInterface* iface) {
+  iface_ = iface;
+}
 
 bool
 OSPFGateway::operator==(const OSPFGateway& other) const {
