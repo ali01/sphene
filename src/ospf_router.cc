@@ -296,6 +296,9 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
 void
 OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
                                          RoutingTable::Entry::Ptr entry) {
+  if (entry->type() == RoutingTable::Entry::kDynamic)
+    return;
+
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
   OSPFGateway::Ptr gw_obj = OSPFGateway::New(OSPFNode::kZero,
@@ -308,6 +311,9 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
 void
 OSPFRouter::RoutingTableReactor::onEntryDel(RoutingTable::Ptr rtable,
                                             RoutingTable::Entry::Ptr entry) {
+  if (entry->type() == RoutingTable::Entry::kDynamic)
+    return;
+
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
   iface->gatewayDel(entry->gateway());
