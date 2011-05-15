@@ -4,54 +4,6 @@
 
 #include "interface.h"
 
-// RoutingTable::Entry
-
-RoutingTable::Entry::Entry(Type type)
-    : subnet_((uint32_t)0), subnet_mask_((uint32_t)0), gateway_((uint32_t)0),
-      interface_(NULL), type_(type) {}
-
-void
-RoutingTable::Entry::subnetIs(const IPv4Addr& dest_ip,
-                              const IPv4Addr& subnet_mask) {
-  subnet_ = dest_ip & subnet_mask;
-  subnet_mask_ = subnet_mask;
-}
-
-Interface::PtrConst
-RoutingTable::Entry::interface() const {
-  return interface_;
-}
-
-void
-RoutingTable::Entry::interfaceIs(Interface::PtrConst iface) {
-  interface_ = iface;
-}
-
-bool
-RoutingTable::Entry::operator==(const Entry& other) const {
-  if (this->interface() != other.interface()) /* Interface ptr equivalence */
-    return false;
-
-  if (this->subnet() != other.subnet())
-    return false;
-
-  if (this->subnetMask() != other.subnetMask())
-    return false;
-
-  if (this->gateway() != other.gateway())
-    return false;
-
-  if (this->type() != other.type())
-    return false;
-
-  return true;
-}
-
-bool
-RoutingTable::Entry::operator!=(const Entry& other) const {
-  return !(other == *this);
-}
-
 // RoutingTable
 
 RoutingTable::RoutingTable(InterfaceMap::Ptr iface_map)
@@ -190,6 +142,56 @@ RoutingTable::clearDynamicEntries() {
     entryDel(key.first, key.second);
   }
 }
+
+
+// RoutingTable::Entry
+
+RoutingTable::Entry::Entry(Type type)
+    : subnet_((uint32_t)0), subnet_mask_((uint32_t)0), gateway_((uint32_t)0),
+      interface_(NULL), type_(type) {}
+
+void
+RoutingTable::Entry::subnetIs(const IPv4Addr& dest_ip,
+                              const IPv4Addr& subnet_mask) {
+  subnet_ = dest_ip & subnet_mask;
+  subnet_mask_ = subnet_mask;
+}
+
+Interface::PtrConst
+RoutingTable::Entry::interface() const {
+  return interface_;
+}
+
+void
+RoutingTable::Entry::interfaceIs(Interface::PtrConst iface) {
+  interface_ = iface;
+}
+
+bool
+RoutingTable::Entry::operator==(const Entry& other) const {
+  if (this->interface() != other.interface()) /* Interface ptr equivalence */
+    return false;
+
+  if (this->subnet() != other.subnet())
+    return false;
+
+  if (this->subnetMask() != other.subnetMask())
+    return false;
+
+  if (this->gateway() != other.gateway())
+    return false;
+
+  if (this->type() != other.type())
+    return false;
+
+  return true;
+}
+
+bool
+RoutingTable::Entry::operator!=(const Entry& other) const {
+  return !(other == *this);
+}
+
 
 // RoutingTable::InterfaceMapReactor
 
