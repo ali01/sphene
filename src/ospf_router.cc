@@ -41,6 +41,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
       functor_(this) {
   topology_->notifieeIs(topology_reactor_);
   interfaces_->notifieeIs(im_reactor_);
+  rtable_reactor_->notifierIs(routing_table_);
 
   /* Process existing routes in RTABLE. */
   RoutingTable::const_iterator it;
