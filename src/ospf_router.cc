@@ -582,8 +582,18 @@ OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
     for (; nbr_it != iface->neighborsEnd(); ++nbr_it) {
       OSPFNode::Ptr nbr = nbr_it->second;
       RouterID nbr_id = nbr->routerID();
-      if (nbr_id != sender_id)
-        forward_pkt_to_neighbor(nbr_id, pkt);
+
+      if (nbr_id == 0 || nbr_id == OSPF::kInvalidRouterID) {
+        /* Do not forward link-state update floods to non-OSPF neighbors. */
+        continue;
+      }
+
+      if (nbr_id == sender_id) {
+        /* Do not forward link-state update flood to its original sender. */
+        continue;
+      }
+
+      forward_pkt_to_neighbor(nbr_id, pkt);
     }
   }
 }
@@ -675,6 +685,11 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 void
 OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
                                     OSPFPacket::Ptr pkt) const {
+  if (neighbor_id == 0 || neighbor_id == OSPF::kInvalidRouterID) {
+    /* Do not forward OSPF packets to non-OSPF neighbors. */
+    return;
+  }
+
   OSPFInterface::PtrConst iface = interfaces_->interface(neighbor_id);
   if (iface == NULL) {
     ELOG << "send_pkt_to_node: Node with NEIGHBOR_ID is not directly connected "
