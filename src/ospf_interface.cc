@@ -68,7 +68,6 @@ OSPFInterface::gatewayIs(OSPFGateway::Ptr gw_obj) {
 
   OSPFNode::Ptr node = gw_obj->node();
   RouterID nd_id = node->routerID();
-
   OSPFGateway::Ptr gw_prev = gateways_.elem(nd_id);
 
   /* Adding to OSPFGateway pointer map. */
@@ -86,11 +85,14 @@ OSPFInterface::gatewayIs(OSPFGateway::Ptr gw_obj) {
 
 void
 OSPFInterface::gatewayDel(const RouterID& router_id) {
-  /* Deleting from both maps. */
-  gateways_.elemDel(router_id);
-  neighbors_.elemDel(router_id);
+  OSPFGateway::Ptr gw_obj = gateway(router_id);
+  if (gw_obj) {
+    /* Deleting from both maps. */
+    gateways_.elemDel(router_id);
+    neighbors_.elemDel(router_id);
 
-  /* Signaling notifiee. */
-  if (notifiee_)
-    notifiee_->onGatewayDel(this, router_id);
+    /* Signaling notifiee. */
+    if (notifiee_)
+      notifiee_->onGatewayDel(this, router_id);
+  }
 }
