@@ -1,6 +1,6 @@
 #include "ospf_node.h"
 
-const OSPFNode::Ptr OSPFNode::kZero(0);
+const OSPFNode::Ptr OSPFNode::kZero = OSPFNode::New(0);
 
 OSPFNode::OSPFNode(const RouterID& router_id)
     : router_id_(router_id),
