@@ -264,6 +264,18 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
       || _im->interfaces() <= 1) {
     ospf_router_->routerIDIs((RouterID)addr.value());
   }
+
+  /* Process any unprocessed static routes that correspond to
+     the added interface. */
+  OSPFInterface::Ptr iface = _im->interface(addr);
+  RoutingTable::Ptr rtable = ospf_router_->routingTable();
+  RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
+                                                 iface->interfaceSubnetMask());
+  if (entry) {
+    OSPFGateway::Ptr gw_obj = iface->gateway(entry->gateway());
+    if (gw_obj == NULL)
+      ospf_router_->rtable_reactor_->onEntry(rtable, entry);
+  }
 }
 
 void
@@ -302,11 +314,13 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
 
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
-  OSPFGateway::Ptr gw_obj = OSPFGateway::New(OSPFNode::kZero,
-                                             entry->gateway(),
-                                             entry->subnet(),
-                                             entry->subnetMask());
-  iface->gatewayIs(gw_obj);
+  if (iface) {
+    OSPFGateway::Ptr gw_obj = OSPFGateway::New(OSPFNode::kZero,
+                                               entry->gateway(),
+                                               entry->subnet(),
+                                               entry->subnetMask());
+    iface->gatewayIs(gw_obj);
+  }
 }
 
 void

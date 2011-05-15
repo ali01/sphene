@@ -54,7 +54,20 @@ RoutingTable::Entry::operator!=(const Entry& other) const {
 
 // RoutingTable
 
-RoutingTable::RoutingTable() { }
+RoutingTable::RoutingTable(InterfaceMap::Ptr iface_map)
+    : iface_map_reactor_(InterfaceMapReactor::New(this)) {
+
+  if (iface_map) {
+    iface_map_reactor_->notifierIs(iface_map);
+
+    // Process existing interfaces in IFACE_MAP.
+    InterfaceMap::const_iterator it;
+    for (it = iface_map->begin(); it != iface_map->end(); ++it) {
+      Interface::Ptr iface = it->second;
+      iface_map_reactor_->onInterface(iface_map, iface);
+    }
+  }
+}
 
 RoutingTable::Entry::Ptr
 RoutingTable::entry(const IPv4Addr& subnet, const IPv4Addr& mask) {
@@ -176,4 +189,22 @@ RoutingTable::clearDynamicEntries() {
     Subnet key = *del_it;
     entryDel(key.first, key.second);
   }
+}
+
+// RoutingTable::InterfaceMapReactor
+
+void
+RoutingTable::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
+                                               Interface::Ptr iface) {
+  Entry::Ptr entry = Entry::New(Entry::kStatic);
+  entry->subnetIs(iface->subnet(), iface->subnetMask());
+  entry->gatewayIs(IPv4Addr::kZero);
+  entry->interfaceIs(iface);
+  rtable_->entryIs(entry);
+}
+
+void
+RoutingTable::InterfaceMapReactor::onInterfaceDel(InterfaceMap::Ptr map,
+                                                  Interface::Ptr iface) {
+  rtable_->entryDel(iface->subnet(), iface->subnetMask());
 }

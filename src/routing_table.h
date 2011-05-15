@@ -5,6 +5,7 @@
 #include "fwk/notifier.h"
 #include "fwk/map.h"
 
+#include "interface_map.h"
 #include "ipv4_addr.h"
 
 
@@ -80,8 +81,8 @@ class RoutingTable
   typedef Fwk::Map<Subnet,Entry>::const_iterator const_iterator;
   typedef Fwk::Map<Subnet,Entry>::iterator iterator;
 
-  static Ptr New() {
-    return new RoutingTable();
+  static Ptr New(InterfaceMap::Ptr iface_map) {
+    return new RoutingTable(iface_map);
   }
 
   /* Accessors. */
@@ -111,12 +112,38 @@ class RoutingTable
   const_iterator entriesEnd() const { return rtable_.end(); }
 
  protected:
-  RoutingTable();
+  RoutingTable(InterfaceMap::Ptr iface_map);
 
  private:
+  class InterfaceMapReactor : public InterfaceMap::Notifiee {
+   public:
+    typedef Fwk::Ptr<const InterfaceMapReactor> PtrConst;
+    typedef Fwk::Ptr<InterfaceMapReactor> Ptr;
+
+    static Ptr New(RoutingTable* _rt) {
+      return new InterfaceMapReactor(_rt);
+    }
+
+    void onInterface(InterfaceMap::Ptr map, Interface::Ptr iface);
+    void onInterfaceDel(InterfaceMap::Ptr map, Interface::Ptr iface);
+
+   private:
+    InterfaceMapReactor(RoutingTable* _rt) : rtable_(_rt) {}
+
+    /* Data members. */
+    RoutingTable* rtable_;
+
+    /* Operations disallowed. */
+    InterfaceMapReactor(const InterfaceMapReactor&);
+    void operator=(const InterfaceMapReactor&);
+  };
+
+  /* Data members. */
   Fwk::Map<Subnet,Entry> rtable_;
   Fwk::Map<Subnet,Entry> rtable_dynamic_;
   Fwk::Map<Subnet,Entry> rtable_static_;
+
+  InterfaceMapReactor::Ptr iface_map_reactor_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);
