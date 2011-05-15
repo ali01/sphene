@@ -10,6 +10,7 @@ using Fwk::LinkedList;
 #include "ospf_topology.h"
 #include "ospf_types.h"
 #include "packet.h"
+#include "routing_table.h"
 
 /* Forward declarations. */
 class ControlPlane;
@@ -20,7 +21,6 @@ class OSPFLSUPacket;
 class OSPFLink;
 class OSPFPacket;
 class OSPFNode;
-class RoutingTable;
 
 
 class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
@@ -184,6 +184,32 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     /* Operations disallowed. */
     OSPFInterfaceMapReactor(const OSPFInterfaceMapReactor&);
     void operator=(const OSPFInterfaceMapReactor&);
+  };
+
+  class RoutingTableReactor : public RoutingTable::Notifiee {
+   public:
+    typedef Fwk::Ptr<const RoutingTableReactor> PtrConst;
+    typedef Fwk::Ptr<RoutingTableReactor> Ptr;
+
+    static Ptr New(OSPFRouter* _r) {
+      return new RoutingTableReactor(_r);
+    }
+
+    void onEntry(RoutingTable::Ptr rtable,
+                 RoutingTable::Entry::Ptr entry);
+
+    void onEntryDel(RoutingTable::Ptr rtable,
+                    RoutingTable::Entry::Ptr entry);
+
+   private:
+    RoutingTableReactor(OSPFRouter* _r) : ospf_router_(_r) {}
+
+    /* Data members. */
+    OSPFRouter* ospf_router_;
+
+    /* Operations disallowed. */
+    RoutingTableReactor(const RoutingTableReactor&);
+    void operator=(const RoutingTableReactor&);
   };
 
   /* -- OSPFRouter private member functions. -- */

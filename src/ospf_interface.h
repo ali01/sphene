@@ -63,13 +63,16 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   OSPFGateway::Ptr gateway(const RouterID& router_id);
   OSPFGateway::PtrConst gateway(const RouterID& router_id) const;
 
+  OSPFGateway::Ptr gateway(const IPv4Addr& gateway);
+  OSPFGateway::PtrConst gateway(const IPv4Addr& gateway) const;
+
   OSPFNode::Ptr neighbor(const RouterID& router_id);
   OSPFNode::PtrConst neighbor(const RouterID& router_id) const;
 
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
-  size_t gateways() const { return gateways_.size(); }
+  size_t gateways() const { return rid_gateways_.size(); }
 
   /* Mutators. */
 
@@ -77,6 +80,7 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
 
   void gatewayIs(OSPFGateway::Ptr gateway);
   void gatewayDel(const RouterID& router_id);
+  void gatewayDel(const IPv4Addr& addr);
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
   /* Iterators. */
@@ -86,10 +90,10 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   const_nb_iter neighborsBegin() const { return neighbors_.begin(); }
   const_nb_iter neighborsEnd() const { return neighbors_.end(); }
 
-  gw_iter gatewaysBegin() { return gateways_.begin(); }
-  gw_iter gatewaysEnd() { return gateways_.end(); }
-  const_gw_iter gatewaysBegin() const { return gateways_.begin(); }
-  const_gw_iter gatewaysEnd() const { return gateways_.end(); }
+  gw_iter gatewaysBegin() { return rid_gateways_.begin(); }
+  gw_iter gatewaysEnd() { return rid_gateways_.end(); }
+  const_gw_iter gatewaysBegin() const { return rid_gateways_.begin(); }
+  const_gw_iter gatewaysEnd() const { return rid_gateways_.end(); }
 
  private:
   OSPFInterface(Fwk::Ptr<const Interface> iface, uint16_t helloint);
@@ -100,7 +104,8 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   time_t last_outgoing_hello_;
 
   /* Map of all neighbors directly attached to this router. */
-  Fwk::Map<RouterID,OSPFGateway> gateways_;
+  Fwk::Map<RouterID,OSPFGateway> rid_gateways_;
+  Fwk::Map<IPv4Addr,OSPFGateway> ip_gateways_;
 
   /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
      OSPFLink objects). Used to provide iterators. If space constraints

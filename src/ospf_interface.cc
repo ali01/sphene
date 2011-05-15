@@ -37,12 +37,22 @@ OSPFInterface::timeSinceOutgoingHello() const {
 
 OSPFGateway::Ptr
 OSPFInterface::gateway(const RouterID& router_id) {
-  return gateways_.elem(router_id);
+  return rid_gateways_.elem(router_id);
 }
 
 OSPFGateway::PtrConst
 OSPFInterface::gateway(const RouterID& router_id) const {
-  return gateways_.elem(router_id);
+  return rid_gateways_.elem(router_id);
+}
+
+OSPFGateway::Ptr
+OSPFInterface::gateway(const IPv4Addr& gateway) {
+  return ip_gateways_.elem(gateway);
+}
+
+OSPFGateway::PtrConst
+OSPFInterface::gateway(const IPv4Addr& gateway) const {
+  return ip_gateways_.elem(gateway);
 }
 
 OSPFNode::Ptr
@@ -68,12 +78,11 @@ OSPFInterface::gatewayIs(OSPFGateway::Ptr gw_obj) {
 
   OSPFNode::Ptr node = gw_obj->node();
   RouterID nd_id = node->routerID();
-  OSPFGateway::Ptr gw_prev = gateways_.elem(nd_id);
+  OSPFGateway::Ptr gw_prev = rid_gateways_.elem(nd_id);
 
-  /* Adding to OSPFGateway pointer map. */
-  gateways_[nd_id] = gw_obj;
-
-  /* Adding to direct OSPFNode pointer map. */
+  /* Adding to OSPFGateway pointer maps. */
+  rid_gateways_[nd_id] = gw_obj;
+  ip_gateways_[nd_id] = gw_obj;
   neighbors_[nd_id] = node;
 
   /* Adding this interface to gw_obj. */
@@ -87,12 +96,20 @@ void
 OSPFInterface::gatewayDel(const RouterID& router_id) {
   OSPFGateway::Ptr gw_obj = gateway(router_id);
   if (gw_obj) {
-    /* Deleting from both maps. */
-    gateways_.elemDel(router_id);
+    /* Deleting from all three maps. */
+    rid_gateways_.elemDel(router_id);
+    ip_gateways_.elemDel(router_id);
     neighbors_.elemDel(router_id);
 
     /* Signaling notifiee. */
     if (notifiee_)
       notifiee_->onGatewayDel(this, router_id);
   }
+}
+
+void
+OSPFInterface::gatewayDel(const IPv4Addr& addr) {
+  OSPFGateway::Ptr gw_obj = ip_gateways_[addr];
+  if (gw_obj)
+    gatewayDel(gw_obj->nodeRouterID());
 }

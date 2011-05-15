@@ -2,6 +2,8 @@
 
 #include <queue>
 
+#include "ospf_constants.h"
+
 OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
     : root_node_(root_node),
       node_reactor_(NodeReactor::New(this)),
@@ -61,7 +63,10 @@ OSPFTopology::nextHop(const RouterID& router_id) const {
 
 void
 OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
-  if (node == NULL || node->routerID() == root_node_->routerID())
+  if (node == NULL
+      || node->routerID() == root_node_->routerID()
+      || node->routerID() == OSPF::kInvalidRouterID
+      || node->routerID() == 0)
     return;
 
   RouterID nd_id = node->routerID();

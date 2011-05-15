@@ -265,8 +265,7 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
   /* Add node to the topology if it wasn't already there. */
   ospf_router_->topology_->nodeIs(gw->node(), false);
 
-  OSPFLink::Ptr ln = OSPFLink::New(gw->node(), gw->subnet(), gw->subnetMask());
-  ospf_router_->router_node_->linkIs(ln);
+  ospf_router_->router_node_->linkIs(gw);
   ospf_router_->lsu_dirty_ = true;
 }
 
@@ -279,6 +278,28 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
 
   /* Remove node from topology. */
   ospf_router_->topology_->nodeDel(nd_id);
+}
+
+/* OSPFRouter::RoutingTableReactor. */
+
+void
+OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
+                                         RoutingTable::Entry::Ptr entry) {
+  OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
+  OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
+  OSPFGateway::Ptr gw_obj = OSPFGateway::New(OSPFNode::kZero,
+                                             entry->gateway(),
+                                             entry->subnet(),
+                                             entry->subnetMask());
+  iface->gatewayIs(gw_obj);
+}
+
+void
+OSPFRouter::RoutingTableReactor::onEntryDel(RoutingTable::Ptr rtable,
+                                            RoutingTable::Entry::Ptr entry) {
+  OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
+  OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
+  iface->gatewayDel(entry->gateway());
 }
 
 /* OSPFRouter private member functions */
@@ -387,39 +408,51 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     adv = pkt->advertisement(adv_index);
 
-    /* Check if the advertised neighbor has also advertised connectivity to
-       SENDER. If it has, then there will exist a NeighborRelationship object
-       in the LINKS_STAGED multimap. */
-    NeighborRelationship::Ptr nb_rel =
-      staged_nbr(adv->routerID(), sender->routerID());
-    if (nb_rel) {
-      /* Staged NeighborRelationship object exists. If the subnets advertised
-         for both endpoints of the link, then the neighbor relationship can be
-         committed to the router's network topology. */
+    NeighborRelationship::Ptr nb_rel;
+    if (adv->routerID() != 0) {
+      /* Non-zero router ID indicates an endpoint that is also running OSPF. */
 
-      OSPFLink::Ptr sender_staged = nb_rel->advertisedNeighbor();
-      if (adv->subnet() == sender_staged->subnet()) {
-        /* Subnets match. The advertised neighbor relationship is valid. */
-        commit_nbr(nb_rel);
+      /* Check if the advertised neighbor has also advertised connectivity to
+         SENDER. If it has, then there will exist a NeighborRelationship object
+         in the LINKS_STAGED multimap. */
+      nb_rel = staged_nbr(adv->routerID(), sender->routerID());
+      if (nb_rel) {
+        /* Staged NeighborRelationship object exists. If the subnets advertised
+           for both endpoints of the link, then the neighbor relationship can be
+           committed to the router's network topology. */
+
+        OSPFLink::Ptr sender_staged = nb_rel->advertisedNeighbor();
+        if (adv->subnet() == sender_staged->subnet()) {
+          /* Subnets match. The advertised neighbor relationship is valid. */
+          commit_nbr(nb_rel);
+        }
+
+      } else {
+
+        /* The advertised neighbor is added to the network topology. The
+           neighbor relationship between NEIGHBOR and SENDER, however, is
+           staged for now. It is committed when NEIGHBOR confirms connectivity
+           to SENDER with an LSU of its own. */
+
+        neighbor_nd = topology_->node(adv->routerID());
+        if (neighbor_nd == NULL) {
+          neighbor_nd = OSPFNode::New(adv->routerID());
+          topology_->nodeIs(neighbor_nd, false);
+        }
+
+        OSPFLink::Ptr neighbor =
+          OSPFLink::New(neighbor_nd, adv->subnet(), adv->subnetMask());
+        nb_rel = NeighborRelationship::New(sender, neighbor);
+        stage_nbr(nb_rel);
       }
 
     } else {
-
-      /* The advertised neighbor is added to the network topology. The
-         neighbor relationship between NEIGHBOR and SENDER, however, is
-         staged for now. It is committed when NEIGHBOR confirms connectivity
-         to SENDER with an LSU of its own. */
-
-      neighbor_nd = topology_->node(adv->routerID());
-      if (neighbor_nd == NULL) {
-        neighbor_nd = OSPFNode::New(adv->routerID());
-        topology_->nodeIs(neighbor_nd, false);
-      }
-
-      OSPFLink::Ptr neighbor =
-        OSPFLink::New(neighbor_nd, adv->subnet(), adv->subnetMask());
-      nb_rel = NeighborRelationship::New(sender, neighbor);
-      stage_nbr(nb_rel);
+      /* Advertisement corresponds to an endpoint that is not running OSPF.
+         Bypass two-phase commit logic. */
+      OSPFLink::Ptr link =
+        OSPFLink::New(OSPFNode::kZero, adv->subnet(), adv->subnetMask());
+      nb_rel = NeighborRelationship::New(sender, link);
+      commit_nbr(nb_rel);
     }
   }
 }
