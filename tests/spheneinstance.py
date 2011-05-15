@@ -54,7 +54,7 @@ class SpheneInstance(object):
       events = p.poll(1000)
       if not events:
         continue
-      buf = in_stream.read()
+      buf = in_stream.read(64)
       if not buf:  # EOF
         return
       buf = buf.strip()
