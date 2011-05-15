@@ -304,6 +304,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFTopology> topology_;
   TopologyReactor::Ptr topology_reactor_; /* Reactor: Topology notifications */
   OSPFInterfaceMapReactor::Ptr im_reactor_;
+  RoutingTableReactor::Ptr rtable_reactor_;
 
   uint8_t lsu_seqno_;
   bool lsu_dirty_; /* Links to neighbors have changed since last LSU flood */

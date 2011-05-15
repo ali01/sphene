@@ -33,6 +33,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
       topology_(OSPFTopology::New(router_node_)),
       topology_reactor_(TopologyReactor::New(this)),
       im_reactor_(OSPFInterfaceMapReactor::New(this)),
+      rtable_reactor_(RoutingTableReactor::New(this)),
       lsu_seqno_(0),
       lsu_dirty_(true),
       routing_table_(rtable),
@@ -40,6 +41,15 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
       functor_(this) {
   topology_->notifieeIs(topology_reactor_);
   interfaces_->notifieeIs(im_reactor_);
+
+  /* Process existing routes in RTABLE. */
+  RoutingTable::const_iterator it;
+  for (it = routing_table_->entriesBegin();
+       it != routing_table_->entriesEnd();
+       ++it) {
+    RoutingTable::Entry::Ptr entry = it->second;
+    rtable_reactor_->onEntry(routing_table_, entry);
+  }
 }
 
 void
