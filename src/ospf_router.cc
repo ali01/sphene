@@ -369,7 +369,7 @@ OSPFRouter::rtable_add_gateway(const IPv4Addr& subnet,
 void
 OSPFRouter::rtable_remove_gateway(OSPFGateway::Ptr gw,
                                   OSPFInterface::Ptr iface) {
-  routing_table_->entryDel(gw->subnet());
+  routing_table_->entryDel(gw->subnet(), gw->subnetMask());
 
   DLOG << "Routing table entry removed:";
   DLOG << "Subnet:      " << gw->subnet();

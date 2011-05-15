@@ -21,6 +21,7 @@ class RoutingTable
   typedef Fwk::Ptr<const RoutingTable> PtrConst;
   typedef Fwk::Ptr<RoutingTable> Ptr;
   typedef RoutingTableNotifiee Notifiee;
+  typedef std::pair<IPv4Addr,IPv4Addr> Subnet;
 
   /* Nested routing table entry class */
   class Entry : public Fwk::PtrInterface<Entry> {
@@ -76,8 +77,8 @@ class RoutingTable
   };
 
   /* Iterator types. */
-  typedef Fwk::Map<IPv4Addr,Entry>::const_iterator const_iterator;
-  typedef Fwk::Map<IPv4Addr,Entry>::iterator iterator;
+  typedef Fwk::Map<Subnet,Entry>::const_iterator const_iterator;
+  typedef Fwk::Map<Subnet,Entry>::iterator iterator;
 
   static Ptr New() {
     return new RoutingTable();
@@ -85,8 +86,8 @@ class RoutingTable
 
   /* Accessors. */
 
-  Entry::Ptr entry(const IPv4Addr& subnet);
-  Entry::PtrConst entry(const IPv4Addr& subnet) const;
+  Entry::Ptr entry(const IPv4Addr& subnet, const IPv4Addr& mask);
+  Entry::PtrConst entry(const IPv4Addr& subnet, const IPv4Addr& mask) const;
 
   Entry::Ptr lpm(const IPv4Addr& dest_ip);
   Entry::PtrConst lpm(const IPv4Addr& dest_ip) const;
@@ -97,7 +98,7 @@ class RoutingTable
 
   void entryIs(Entry::Ptr entry);
   void entryDel(Entry::Ptr entry);
-  void entryDel(const IPv4Addr& subnet);
+  void entryDel(const IPv4Addr& subnet, const IPv4Addr& mask);
 
   /* Calls entryDel on all entries of type
      Entry::kDynamic in the routing table. */
@@ -113,10 +114,9 @@ class RoutingTable
   RoutingTable();
 
  private:
-  /* Routing table is a linked list. */
-  Fwk::Map<IPv4Addr,Entry> rtable_;
-  Fwk::Map<IPv4Addr,Entry> rtable_dynamic_;
-  Fwk::Map<IPv4Addr,Entry> rtable_static_;
+  Fwk::Map<Subnet,Entry> rtable_;
+  Fwk::Map<Subnet,Entry> rtable_dynamic_;
+  Fwk::Map<Subnet,Entry> rtable_static_;
 
   /* Operations disallowed. */
   RoutingTable(const RoutingTable&);

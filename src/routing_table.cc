@@ -57,14 +57,14 @@ RoutingTable::Entry::operator!=(const Entry& other) const {
 RoutingTable::RoutingTable() { }
 
 RoutingTable::Entry::Ptr
-RoutingTable::entry(const IPv4Addr& subnet) {
-  return rtable_.elem(subnet);
+RoutingTable::entry(const IPv4Addr& subnet, const IPv4Addr& mask) {
+  return rtable_.elem(std::make_pair(subnet, mask));
 }
 
 RoutingTable::Entry::PtrConst
-RoutingTable::entry(const IPv4Addr& subnet) const {
+RoutingTable::entry(const IPv4Addr& subnet, const IPv4Addr& mask) const {
   RoutingTable* self = const_cast<RoutingTable*>(this);
-  return self->entry(subnet);
+  return self->entry(subnet, mask);
 }
 
 RoutingTable::Entry::Ptr
@@ -102,17 +102,20 @@ RoutingTable::entryIs(Entry::Ptr entry) {
     return;
 
   IPv4Addr subnet = entry->subnet();
-  Entry::Ptr prev_entry = this->entry(subnet);
+  IPv4Addr mask = entry->subnetMask();
 
-  rtable_[subnet] = entry;
+  Entry::Ptr prev_entry = this->entry(subnet, mask);
+
+  Subnet key = std::make_pair(subnet, mask);
+  rtable_[key] = entry;
 
   switch (entry->type()) {
     case Entry::kDynamic:
-      rtable_dynamic_[subnet] = entry;
+      rtable_dynamic_[key] = entry;
       break;
 
     case Entry::kStatic:
-      rtable_static_[subnet] = entry;
+      rtable_static_[key] = entry;
       break;
   }
 
@@ -128,20 +131,23 @@ RoutingTable::entryDel(Entry::Ptr entry) {
     return;
 
   IPv4Addr subnet = entry->subnet();
-  entry = this->entry(subnet);
+  IPv4Addr mask = entry->subnetMask();
+
+  entry = this->entry(subnet, mask);
 
   // Only attempt perform deletion (and trigger notification),
   // if ENTRY is actually in the routing table.
   if (entry) {
-    rtable_.elemDel(subnet);
+    Subnet key = std::make_pair(subnet, mask);
+    rtable_.elemDel(key);
 
     switch (entry->type()) {
       case Entry::kDynamic:
-        rtable_dynamic_.elemDel(subnet);
+        rtable_dynamic_.elemDel(key);
         break;
 
       case Entry::kStatic:
-        rtable_static_.elemDel(subnet);
+        rtable_static_.elemDel(key);
         break;
     }
 
@@ -151,23 +157,23 @@ RoutingTable::entryDel(Entry::Ptr entry) {
 }
 
 void
-RoutingTable::entryDel(const IPv4Addr& subnet) {
-  entryDel(entry(subnet));
+RoutingTable::entryDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
+  entryDel(entry(subnet, mask));
 }
 
 void
 RoutingTable::clearDynamicEntries() {
-  Fwk::Deque<IPv4Addr> del_entries;
+  Fwk::Deque<Subnet> del_entries;
 
   const_iterator it = rtable_dynamic_.begin();
   for (; it != rtable_dynamic_.end(); ++it) {
-    IPv4Addr key = it->first;
+    Subnet key = it->first;
     del_entries.pushBack(key);
   }
 
-  Fwk::Deque<IPv4Addr>::const_iterator del_it;
+  Fwk::Deque<Subnet>::const_iterator del_it;
   for (del_it = del_entries.begin(); del_it != del_entries.end(); ++del_it) {
-    IPv4Addr key = *del_it;
-    entryDel(key);
+    Subnet key = *del_it;
+    entryDel(key.first, key.second);
   }
 }
