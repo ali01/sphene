@@ -1,10 +1,16 @@
 #include "ospf_topology.h"
 
+#include <fwk/log.h>
+
 #include <cstdlib>
 #include <ctime>
 #include <limits>
 
 #include "ospf_constants.h"
+
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFTopology");
+
 
 OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
     : root_node_(root_node),
