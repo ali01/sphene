@@ -1,5 +1,9 @@
 #include "ospf_topology.h"
 
+#include <cstdlib>
+#include <ctime>
+#include <limits>
+
 #include "ospf_constants.h"
 
 OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
@@ -7,6 +11,9 @@ OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
       node_reactor_(NodeReactor::New(this)),
       dirty_(false) {
   root_node_->notifieeIs(node_reactor_);
+
+  /* Seeding random number generator. */
+  srand48(time(NULL));
 }
 
 OSPFNode::PtrConst
@@ -57,6 +64,19 @@ OSPFNode::PtrConst
 OSPFTopology::nextHop(const RouterID& router_id) const {
   OSPFTopology* self = const_cast<OSPFTopology*>(this);
   return self->nextHop(router_id);
+}
+
+RouterID
+OSPFTopology::routerIDNew() const {
+  RouterID rid;
+
+  do {
+    rid = (RouterID)(lrand48() % std::numeric_limits<RouterID>::max());
+  } while(rid == 0
+          || rid == OSPF::kInvalidRouterID
+          || this->node(rid) != NULL);
+
+  return rid;
 }
 
 void
