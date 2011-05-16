@@ -7,6 +7,7 @@
 
 #include "interface_map.h"
 #include "ipv4_addr.h"
+#include "ipv4_subnet.h"
 
 
 /* Forward declarations. */
@@ -22,7 +23,6 @@ class RoutingTable
   typedef Fwk::Ptr<const RoutingTable> PtrConst;
   typedef Fwk::Ptr<RoutingTable> Ptr;
   typedef RoutingTableNotifiee Notifiee;
-  typedef std::pair<IPv4Addr,IPv4Addr> Subnet;
 
   /* Nested routing table entry class */
   class Entry : public Fwk::PtrInterface<Entry> {
@@ -78,8 +78,8 @@ class RoutingTable
   };
 
   /* Iterator types. */
-  typedef Fwk::Map<Subnet,Entry>::const_iterator const_iterator;
-  typedef Fwk::Map<Subnet,Entry>::iterator iterator;
+  typedef Fwk::Map<IPv4Subnet,Entry>::const_iterator const_iterator;
+  typedef Fwk::Map<IPv4Subnet,Entry>::iterator iterator;
 
   static Ptr New(InterfaceMap::Ptr iface_map) {
     return new RoutingTable(iface_map);
@@ -139,9 +139,9 @@ class RoutingTable
   };
 
   /* Data members. */
-  Fwk::Map<Subnet,Entry> rtable_;
-  Fwk::Map<Subnet,Entry> rtable_dynamic_;
-  Fwk::Map<Subnet,Entry> rtable_static_;
+  Fwk::Map<IPv4Subnet,Entry> rtable_;
+  Fwk::Map<IPv4Subnet,Entry> rtable_dynamic_;
+  Fwk::Map<IPv4Subnet,Entry> rtable_static_;
 
   InterfaceMapReactor::Ptr iface_map_reactor_;
 

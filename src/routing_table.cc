@@ -71,7 +71,7 @@ RoutingTable::entryIs(Entry::Ptr entry) {
 
   Entry::Ptr prev_entry = this->entry(subnet, mask);
 
-  Subnet key = std::make_pair(subnet, mask);
+  IPv4Subnet key = std::make_pair(subnet, mask);
   rtable_[key] = entry;
 
   switch (entry->type()) {
@@ -103,7 +103,7 @@ RoutingTable::entryDel(Entry::Ptr entry) {
   // Only attempt perform deletion (and trigger notification),
   // if ENTRY is actually in the routing table.
   if (entry) {
-    Subnet key = std::make_pair(subnet, mask);
+    IPv4Subnet key = std::make_pair(subnet, mask);
     rtable_.elemDel(key);
 
     switch (entry->type()) {
@@ -128,17 +128,17 @@ RoutingTable::entryDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
 
 void
 RoutingTable::clearDynamicEntries() {
-  Fwk::Deque<Subnet> del_entries;
+  Fwk::Deque<IPv4Subnet> del_entries;
 
   const_iterator it = rtable_dynamic_.begin();
   for (; it != rtable_dynamic_.end(); ++it) {
-    Subnet key = it->first;
+    IPv4Subnet key = it->first;
     del_entries.pushBack(key);
   }
 
-  Fwk::Deque<Subnet>::const_iterator del_it;
+  Fwk::Deque<IPv4Subnet>::const_iterator del_it;
   for (del_it = del_entries.begin(); del_it != del_entries.end(); ++del_it) {
-    Subnet key = *del_it;
+    IPv4Subnet key = *del_it;
     entryDel(key.first, key.second);
   }
 }
