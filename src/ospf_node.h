@@ -20,7 +20,6 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   typedef Fwk::Map<RouterID,OSPFLink>::iterator link_iter;
   typedef Fwk::Map<RouterID,OSPFLink>::const_iterator const_link_iter;
 
-  static const OSPFNode::Ptr kZero;
   static const uint16_t kMaxDistance = 0xffff;
 
   static Ptr New(const RouterID& router_id) {
@@ -71,6 +70,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
+  virtual bool isEndpoint() const { return false; }
+
   /* Mutators. */
   void routerIDIs(const RouterID& id) { router_id_ = id; }
 
@@ -97,9 +98,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   size_t links() const { return links_.size(); }
 
- private:
+ protected:
   OSPFNode(const RouterID& router_id);
 
+ private:
   /* Helper member functions. */
   void oneWayLinkIs(OSPFLink::Ptr link, bool commit);
   void oneWayLinkDel(const RouterID& id, bool commit);

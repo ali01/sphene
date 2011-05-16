@@ -59,6 +59,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   size_t nodes() const { return nodes_.size() + 1; } /* +1 for root node. */
   bool dirty() const { return dirty_; }
 
+  /* Returns a random, unoccupied router ID. */
+  RouterID routerIDNew() const;
+
   /* Mutators. */
 
   void nodeIs(OSPFNode::Ptr node, bool commit=true);

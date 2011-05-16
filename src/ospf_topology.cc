@@ -1,14 +1,25 @@
 #include "ospf_topology.h"
 
-#include <queue>
+#include <fwk/log.h>
+
+#include <cstdlib>
+#include <ctime>
+#include <limits>
 
 #include "ospf_constants.h"
+
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFTopology");
+
 
 OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
     : root_node_(root_node),
       node_reactor_(NodeReactor::New(this)),
       dirty_(false) {
   root_node_->notifieeIs(node_reactor_);
+
+  /* Seeding random number generator. */
+  srand48(time(NULL));
 }
 
 OSPFNode::PtrConst
@@ -61,15 +72,36 @@ OSPFTopology::nextHop(const RouterID& router_id) const {
   return self->nextHop(router_id);
 }
 
+RouterID
+OSPFTopology::routerIDNew() const {
+  RouterID rid;
+
+  do {
+    rid = (RouterID)(lrand48() % std::numeric_limits<RouterID>::max());
+  } while(rid == 0
+          || rid == OSPF::kInvalidRouterID
+          || this->node(rid) != NULL);
+
+  return rid;
+}
+
 void
 OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
-  if (node == NULL
-      || node->routerID() == root_node_->routerID()
-      || node->routerID() == OSPF::kInvalidRouterID
-      || node->routerID() == 0)
+  if (node == NULL)
     return;
 
   RouterID nd_id = node->routerID();
+  if (nd_id == root_node_->routerID()) {
+    ELOG << "Attempt to insert the root node into its own topology.";
+    return;
+  }
+
+  if (nd_id == OSPF::kInvalidRouterID || nd_id == 0) {
+    ELOG << "Attempt to insert a node into topology with invalid ID of "
+         << nd_id;
+    return;
+  }
+
   OSPFNode::Ptr node_prev = nodes_.elem(nd_id);
   if (node_prev != node) {
     nodes_[nd_id] = node;

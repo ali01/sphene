@@ -32,7 +32,6 @@ ControlPlane::ControlPlane(const std::string& name)
       functor_(this),
       arp_cache_(ARPCache::New()),
       arp_queue_(ARPQueue::New()),
-      routing_table_(RoutingTable::New()),
       tunnel_map_(TunnelMap::New()) { }
 
 
@@ -163,6 +162,8 @@ void ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
     Interface::Ptr iface = it->second;
     rid = (RouterID)iface->ip().value();
   }
+
+  routing_table_ = RoutingTable::New(iface_map);
 
   /* Initializing OSPF router. */
   ospf_router_ = OSPFRouter::New(rid, OSPF::kDefaultAreaID,

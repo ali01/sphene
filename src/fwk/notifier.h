@@ -12,11 +12,11 @@ namespace Fwk {
 template <typename Notifier, typename Notifiee>
 class BaseNotifiee : public NamedInterface {
  public:
-  virtual void notifierIs(Ptr<Notifier> notifier) {
+  virtual void notifierIs(Ptr<const Notifier> notifier) {
     notifier->notifieeIs(static_cast<Notifiee*>(this));
   }
 
-  virtual void notifierDel(Ptr<Notifier> notifier) {
+  virtual void notifierDel(Ptr<const Notifier> notifier) {
     notifier->notifieeDel(static_cast<Notifiee*>(this));
   }
 
@@ -40,7 +40,7 @@ class BaseNotifier : public NamedInterface {
   BaseNotifier(const std::string& name) : NamedInterface(name) { }
 
   // Called by Notifiee::notifierIs().
-  virtual void notifieeIs(Ptr<Notifiee> notifiee) {
+  virtual void notifieeIs(Ptr<Notifiee> notifiee) const {
     for (unsigned int i = 0; i < notifiees_.size(); ++i) {
       if (notifiees_[i] == notifiee)
         return;  // notifiee already exists.
@@ -50,7 +50,7 @@ class BaseNotifier : public NamedInterface {
   }
 
   // Called by Notifiee::notifierDel().
-  virtual void notifieeDel(Ptr<Notifiee> notifiee) {
+  virtual void notifieeDel(Ptr<Notifiee> notifiee) const {
     for (unsigned int i = 0; i < notifiees_.size(); ++i) {
       if (notifiees_[i] == notifiee) {
         notifiees_.erase(notifiees_.begin() + i);
@@ -59,7 +59,7 @@ class BaseNotifier : public NamedInterface {
     }
   }
 
-  std::vector<Ptr<Notifiee> > notifiees_;
+  mutable std::vector<Ptr<Notifiee> > notifiees_;
 
   friend class BaseNotifiee<Notifier, Notifiee>;
 };

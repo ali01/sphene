@@ -21,6 +21,11 @@ OSPFInterface::interfaceIP() const {
 }
 
 IPv4Addr
+OSPFInterface::interfaceSubnet() const {
+  return iface_->subnet();
+}
+
+IPv4Addr
 OSPFInterface::interfaceSubnetMask() const {
   return iface_->subnetMask();
 }
