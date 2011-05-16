@@ -162,7 +162,7 @@ OSPFDaemon::broadcast_timed_hello() {
   OSPFInterfaceMap::const_if_iter if_it = iface_map->ifacesBegin();
   for (; if_it != iface_map->ifacesEnd(); ++if_it) {
     OSPFInterface::Ptr iface = if_it->second;
-    if (iface->timeSinceOutgoingHello() > iface->helloint()) {
+    if (iface->timeSinceOutgoingHello() >= iface->helloint()) {
       broadcast_hello_out_interface(iface);
     }
   }
@@ -213,7 +213,7 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
 
 void
 OSPFDaemon::flood_timed_lsu() {
-  if (timeSinceLSU() > OSPF::kDefaultLinkStateInterval) {
+  if (timeSinceLSU() >= OSPF::kDefaultLinkStateInterval) {
     ospf_router_->onLinkStateInterval();
 
     /* Resetting time since last LSU. */

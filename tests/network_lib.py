@@ -24,8 +24,7 @@ def send_cli_command(host, port, command, timeout=3):
   except socket.error, e:
     return False
 
-  s.send('\n')
-  command = '%s\n' % command
+  command = '%s\n\n\n' % command
   send_success = (s.send(command) == len(command))
   return send_success
 
