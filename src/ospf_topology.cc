@@ -87,13 +87,21 @@ OSPFTopology::routerIDNew() const {
 
 void
 OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
-  if (node == NULL
-      || node->routerID() == root_node_->routerID()
-      || node->routerID() == OSPF::kInvalidRouterID
-      || node->routerID() == 0)
+  if (node == NULL)
     return;
 
   RouterID nd_id = node->routerID();
+  if (nd_id == root_node_->routerID()) {
+    ELOG << "Attempt to insert the root node into its own topology.";
+    return;
+  }
+
+  if (nd_id == OSPF::kInvalidRouterID || nd_id == 0) {
+    ELOG << "Attempt to insert a node into topology with invalid ID of "
+         << nd_id;
+    return;
+  }
+
   OSPFNode::Ptr node_prev = nodes_.elem(nd_id);
   if (node_prev != node) {
     nodes_[nd_id] = node;
