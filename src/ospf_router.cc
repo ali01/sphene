@@ -510,9 +510,10 @@ OSPFRouter::flood_lsu() {
 
 void
 OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
-  OSPFInterface::const_nb_iter it;
-  for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
-    OSPFNode::Ptr nbr = it->second;
+  OSPFInterface::const_gw_iter it;
+  for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
+    OSPFGateway::Ptr gw_obj = it->second;
+    OSPFNode::Ptr nbr = gw_obj->node();
     if (nbr->isEndpoint()){
       /* Do not send link-state updates to non-OSPF endpoints. */
       continue;
@@ -534,13 +535,14 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
     return NULL;
   }
 
-  OSPFNode::Ptr nbr = iface->neighbor(nbr_id);
-  if (nbr == NULL) {
+  OSPFGateway::Ptr gw_obj = iface->gateway(nbr_id);
+  if (gw_obj == NULL) {
     ELOG << "send_new_lsu_to_neighbor: Node with specified NBR_ID is not "
          << "directly connected to IFACE.";
     return NULL;
   }
 
+  OSPFNode::Ptr nbr = gw_obj->node();
   if (nbr->isEndpoint()) {
     ELOG << "send_new_lsu_to_neighbor: Attempt to build link-state update to "
          << "non-OSPF endpoint";
@@ -579,7 +581,6 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
   ospf_pkt->checksumReset();
 
   /* IPPacket. */
-  OSPFGateway::Ptr gw_obj = iface->gateway(nbr_id);
   IPPacket::Ptr ip_pkt =
     IPPacket::NewDefault(buffer, ip_pkt_len, IPPacket::kOSPF,
                          iface->interfaceIP(), gw_obj->gateway());
@@ -599,9 +600,10 @@ OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
   OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
   for (; if_it != interfaces_->ifacesEnd(); ++if_it) {
     OSPFInterface::PtrConst iface = if_it->second;
-    OSPFInterface::const_nb_iter nbr_it = iface->neighborsBegin();
-    for (; nbr_it != iface->neighborsEnd(); ++nbr_it) {
-      OSPFNode::Ptr nbr = nbr_it->second;
+    OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
+    for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
+      OSPFGateway::Ptr gw_obj = gw_it->second;
+      OSPFNode::Ptr nbr = gw_obj->node();
       RouterID nbr_id = nbr->routerID();
 
       if (nbr->isEndpoint()) {
@@ -719,16 +721,15 @@ OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
     return;
   }
 
-  OSPFNode::PtrConst nbr = iface->neighbor(neighbor_id);
-  if (nbr->isEndpoint()) {
+  OSPFGateway::PtrConst gw_obj = iface->gateway(neighbor_id);
+  if (gw_obj->nodeIsEndpoint()) {
     ELOG << "forward_pkt_to_neighbor: Attempt to forward an OSPF packet to a "
          << "non-OSPF neighbor.";
     return;
   }
 
   IPv4Addr src_addr = iface->interfaceIP();
-  OSPFGateway::PtrConst nbr_gw = iface->gateway(neighbor_id);
-  IPv4Addr dst_addr = nbr_gw->gateway();
+  IPv4Addr dst_addr = gw_obj->gateway();
 
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
   ip_pkt->srcIs(src_addr);

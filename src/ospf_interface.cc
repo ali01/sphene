@@ -60,17 +60,6 @@ OSPFInterface::gateway(const IPv4Addr& gateway) const {
   return ip_gateways_.elem(gateway);
 }
 
-OSPFNode::Ptr
-OSPFInterface::neighbor(const RouterID& router_id) {
-  return neighbors_.elem(router_id);
-}
-
-OSPFNode::PtrConst
-OSPFInterface::neighbor(const RouterID& router_id) const {
-  OSPFInterface* self = const_cast<OSPFInterface*>(this);
-  return self->neighbor(router_id);
-}
-
 void
 OSPFInterface::timeSinceOutgoingHelloIs(Seconds delta) {
   last_outgoing_hello_ = time(NULL) - delta.value();
@@ -88,7 +77,6 @@ OSPFInterface::gatewayIs(OSPFGateway::Ptr gw_obj) {
   /* Adding to OSPFGateway pointer maps. */
   rid_gateways_[nd_id] = gw_obj;
   ip_gateways_[nd_id] = gw_obj;
-  neighbors_[nd_id] = node;
 
   /* Adding this interface to gw_obj. */
   gw_obj->interfaceIs(this);
@@ -104,7 +92,6 @@ OSPFInterface::gatewayDel(const RouterID& router_id) {
     /* Deleting from all three maps. */
     rid_gateways_.elemDel(router_id);
     ip_gateways_.elemDel(router_id);
-    neighbors_.elemDel(router_id);
 
     /* Signaling notifiee. */
     if (notifiee_)
