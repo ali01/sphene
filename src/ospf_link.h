@@ -27,6 +27,7 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   Fwk::Ptr<const OSPFNode> node() const;
   Fwk::Ptr<OSPFNode> node();
   const RouterID& nodeRouterID() const;
+  bool nodeIsEndpoint() const;
 
   const IPv4Addr& subnet() const { return subnet_; }
   const IPv4Addr& subnetMask() const { return subnet_mask_; }

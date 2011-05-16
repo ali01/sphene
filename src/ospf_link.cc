@@ -33,6 +33,11 @@ OSPFLink::nodeRouterID() const {
 }
 
 bool
+OSPFLink::nodeIsEndpoint() const {
+  return node_->isEndpoint();
+}
+
+bool
 OSPFLink::operator==(const OSPFLink& other) const {
   if (this->node() != other.node()) /* Node pointer equivalence */
     return false;

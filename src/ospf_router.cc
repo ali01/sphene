@@ -568,7 +568,7 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
 
     /* If gateway peer is a non-OSPF endpoint, the advertised
        router ID must be kPassiveEndpointID. */
-    RouterID adv_rid = gw->node()->isEndpoint() ? OSPF::kPassiveEndpointID
+    RouterID adv_rid = gw->nodeIsEndpoint() ? OSPF::kPassiveEndpointID
                                                 : gw->nodeRouterID();
 
     adv->routerIDIs(adv_rid);

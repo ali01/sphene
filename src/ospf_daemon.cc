@@ -136,7 +136,7 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
   OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
   for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
     OSPFGateway::Ptr gw = gw_it->second;
-    if (gw->node()->isEndpoint()){
+    if (gw->nodeIsEndpoint()){
       /* Do not remove gateways to non-OSPF endpoints. */
       continue;
     }
