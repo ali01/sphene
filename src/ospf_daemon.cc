@@ -65,6 +65,11 @@ OSPFDaemon::timeout_topology_entries() {
   OSPFTopology::const_iterator it;
   for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
     OSPFNode::Ptr node = it->second;
+    if (node->isEndpoint()){
+      /* Don't timeout nodes associated with a non-OSPF endpoint. */
+      continue;
+    }
+
     timeout_node_topology_entries(node);
   }
 
@@ -73,19 +78,27 @@ OSPFDaemon::timeout_topology_entries() {
 
 void
 OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
+  if (node->isEndpoint()) {
+    ELOG << "timeout_node_topology_entries: Attempt to timeout links "
+         << "associated with a non-OSPF endpoint";
+    return;
+  }
+
   Fwk::Deque<OSPFLink::Ptr> del_links;
 
   OSPFNode::const_link_iter it;
   for (it = node->linksBegin(); it != node->linksEnd(); ++it) {
     OSPFLink::Ptr link = it->second;
+    OSPFNode::Ptr peer_nd = link->node();
     RouterID nd_id = node->routerID();
-    RouterID end_point_id = link->nodeRouterID();
-    if (end_point_id == 0) {
+    RouterID peer_nd_id = peer_nd->routerID();
+
+    if (peer_nd->isEndpoint()) {
       /* Do not remove links to non-OSPF endpoints. */
       continue;
     }
 
-    if (ospf_router_->routerID() == end_point_id
+    if (ospf_router_->routerID() == peer_nd_id
         && ospf_router_->interfaceMap()->gateway(nd_id) != NULL) {
       /* Do not remove link if NODE is directly connected to this router.
          HELLO protocol takes precedence. */
@@ -123,8 +136,12 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
   OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
   for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
     OSPFGateway::Ptr gw = gw_it->second;
-    if (gw->nodeRouterID() != 0 &&
-        gw->timeSinceHello() > 3 * iface->helloint()) {
+    if (gw->node()->isEndpoint()){
+      /* Do not remove gateways to non-OSPF endpoints. */
+      continue;
+    }
+
+    if (gw->timeSinceHello() > 3 * iface->helloint()) {
       /* No HELLO packet has been received from this neighbor in more than
          three times its advertised HELLOINT. Remove from topology and
          trigger LSU flood. */

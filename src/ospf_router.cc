@@ -8,6 +8,7 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "ospf_constants.h"
+#include "ospf_endpoint.h"
 #include "ospf_gateway.h"
 #include "ospf_interface_map.h"
 #include "ospf_link.h"
@@ -316,7 +317,9 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
   if (iface) {
-    OSPFGateway::Ptr gw_obj = OSPFGateway::New(OSPFNode::kZero,
+    RouterID endpoint_id = ospf_router_->topology()->routerIDNew();
+    OSPFEndpoint::Ptr endpoint_nd = OSPFEndpoint::New(endpoint_id);
+    OSPFGateway::Ptr gw_obj = OSPFGateway::New(endpoint_nd,
                                                entry->gateway(),
                                                entry->subnet(),
                                                entry->subnetMask());
@@ -442,9 +445,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     adv = pkt->advertisement(adv_index);
 
     NeighborRelationship::Ptr nb_rel;
-    if (adv->routerID() != 0) {
-      /* Non-zero router ID indicates an endpoint that is also running OSPF. */
-
+    if (adv->routerID() != OSPF::kPassiveEndpointID) {
       /* Check if the advertised neighbor has also advertised connectivity to
          SENDER. If it has, then there will exist a NeighborRelationship object
          in the LINKS_STAGED multimap. */
@@ -482,10 +483,15 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     } else {
       /* Advertisement corresponds to an endpoint that is not running OSPF.
          Bypass two-phase commit logic. */
+      RouterID endpoint_id = topology()->routerIDNew();
+      OSPFEndpoint::Ptr endpoint_nd = OSPFEndpoint::New(endpoint_id);
       OSPFLink::Ptr link =
-        OSPFLink::New(OSPFNode::kZero, adv->subnet(), adv->subnetMask());
+        OSPFLink::New(endpoint_nd, adv->subnet(), adv->subnetMask());
       sender->linkIs(link, false);
-      topology_->nodeIs(sender, false); /* In case it's not already there. */
+
+      /* Add both endpoints to the topology in case they aren't already there */
+      topology_->nodeIs(sender, false);
+      topology_->nodeIs(link->node(), false);
     }
   }
 }
@@ -507,7 +513,7 @@ OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
   OSPFInterface::const_nb_iter it;
   for (it = iface->neighborsBegin(); it != iface->neighborsEnd(); ++it) {
     OSPFNode::Ptr nbr = it->second;
-    if (nbr->routerID() == 0 || nbr->routerID() == OSPF::kInvalidRouterID){
+    if (nbr->isEndpoint()){
       /* Do not send link-state updates to non-OSPF endpoints. */
       continue;
     }
@@ -523,13 +529,21 @@ OSPFLSUPacket::Ptr
 OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
                                   const RouterID& nbr_id) const {
   if (nbr_id == 0 || nbr_id == OSPF::kInvalidRouterID) {
-    /* Do not build link-state updates to non-OSPF neighbors. */
+    ELOG << "send_new_lsu_to_neighbor: Attempt to build link-state update to "
+            "a node with an invalid router ID";
     return NULL;
   }
 
-  if (iface->neighbor(nbr_id) == NULL) {
+  OSPFNode::Ptr nbr = iface->neighbor(nbr_id);
+  if (nbr == NULL) {
     ELOG << "send_new_lsu_to_neighbor: Node with specified NBR_ID is not "
          << "directly connected to IFACE.";
+    return NULL;
+  }
+
+  if (nbr->isEndpoint()) {
+    ELOG << "send_new_lsu_to_neighbor: Attempt to build link-state update to "
+         << "non-OSPF endpoint";
     return NULL;
   }
 
@@ -551,7 +565,13 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
   for (uint32_t ix = 0; gw_it != interfaces_->gatewaysEnd(); ++gw_it, ++ix) {
     OSPFGateway::Ptr gw = gw_it->second;
     OSPFLSUAdvertisement::Ptr adv = ospf_pkt->advertisement(ix);
-    adv->routerIDIs(gw->node()->routerID());
+
+    /* If gateway peer is a non-OSPF endpoint, the advertised
+       router ID must be kPassiveEndpointID. */
+    RouterID adv_rid = gw->node()->isEndpoint() ? OSPF::kPassiveEndpointID
+                                                : gw->nodeRouterID();
+
+    adv->routerIDIs(adv_rid);
     adv->subnetIs(gw->subnet());
     adv->subnetMaskIs(gw->subnetMask());
   }
@@ -584,7 +604,7 @@ OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
       OSPFNode::Ptr nbr = nbr_it->second;
       RouterID nbr_id = nbr->routerID();
 
-      if (nbr_id == 0 || nbr_id == OSPF::kInvalidRouterID) {
+      if (nbr->isEndpoint()) {
         /* Do not forward link-state update floods to non-OSPF neighbors. */
         continue;
       }
@@ -687,7 +707,8 @@ void
 OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
                                     OSPFPacket::Ptr pkt) const {
   if (neighbor_id == 0 || neighbor_id == OSPF::kInvalidRouterID) {
-    /* Do not forward OSPF packets to non-OSPF neighbors. */
+    ELOG << "forward_pkt_to_neighbor: Attempt to forward an OSPF packet to a "
+            "neighbor with an invalid router ID.";
     return;
   }
 
@@ -695,6 +716,13 @@ OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
   if (iface == NULL) {
     ELOG << "send_pkt_to_node: Node with NEIGHBOR_ID is not directly connected "
          << "to this router";
+    return;
+  }
+
+  OSPFNode::PtrConst nbr = iface->neighbor(neighbor_id);
+  if (nbr->isEndpoint()) {
+    ELOG << "forward_pkt_to_neighbor: Attempt to forward an OSPF packet to a "
+         << "non-OSPF neighbor.";
     return;
   }
 
