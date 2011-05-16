@@ -584,13 +584,13 @@ void cli_show_ospf_neighbors() {
   char line_buf[256];
 
   // Line format.
-  const char* const header_format = "  %-11s %-16s %-16s %-16s %-16s\n";
-  const char* const line_format = "  %-11s %-16u %-16s %-16s %-16s\n";
+  const char* const header_format = "  %-11s %-16s %-16s %-16s %-16s %-11s\n";
+  const char* const line_format = "  %-11s %-16u %-16s %-16s %-16s %-11s\n";
 
   // Output header.
   cli_send_str("OSPF Neighbors:\n");
   snprintf(line_buf, sizeof(line_buf), header_format,
-          "Interface", "Router ID", "Gateway", "Subnet", "Mask");
+          "Interface", "Router ID", "Gateway", "Subnet", "Mask", "Endpoint");
   cli_send_str(line_buf);
 
   OSPFInterfaceMap::const_gw_iter it;
@@ -603,10 +603,11 @@ void cli_show_ospf_neighbors() {
     const string& gw_str = gw_obj->gateway();
     const string& subnet_str = gw_obj->gateway();
     const string& mask_str = gw_obj->subnetMask();
+    const string& endpoint = gw_obj->nodeIsEndpoint() ? "true" : "false";
 
     snprintf(line_buf, sizeof(line_buf), line_format,
              iface_str.c_str(), nd_id, gw_str.c_str(),
-             subnet_str.c_str(), mask_str.c_str());
+             subnet_str.c_str(), mask_str.c_str(), endpoint.c_str());
     cli_send_str(line_buf);
   }
 
@@ -634,17 +635,19 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
   // Buffers for proper formatting.
   char line_buf[256];
 
-  string format = "  Router ID: %u\n"
-                  "  Prev. ID:  %u\n"
-                  "  Distance:  %u\n"
-                  "  Links:     %u\n"
+  string format = "  Passive Endpoint: %s\n"
+                  "  Router ID:        %u\n"
+                  "  Prev. ID:         %u\n"
+                  "  Distance:         %u\n"
+                  "  Links:            %u\n"
                   "  Neighbors:\n";
 
+  string endpoint = node->isEndpoint() ? "true" : "false";
   RouterID prev = node->prev() ? node->prev()->routerID() : 0;
 
   snprintf(line_buf, sizeof(line_buf), format.c_str(),
-           node->routerID(), prev, node->distance(),
-           node->links());
+           endpoint.c_str(), node->routerID(), prev,
+           node->distance(), node->links());
 
   cli_send_str(line_buf);
 
