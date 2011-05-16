@@ -1,7 +1,5 @@
 #include "ospf_topology.h"
 
-#include <queue>
-
 #include "ospf_constants.h"
 
 OSPFTopology::OSPFTopology(OSPFNode::Ptr root_node)
