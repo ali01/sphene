@@ -4,6 +4,7 @@
 #include <ctime>
 #include <limits>
 
+#include "fwk/deque.h"
 #include "fwk/log.h"
 
 #include "ospf_constants.h"
@@ -131,11 +132,19 @@ OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
     /* Unsubscribing from notifications. */
     node->notifieeIs(NULL);
 
-    /* Removing the node from the neighbor lists of all neighbors. */
-    OSPFNode::nb_iter it;
-    for (it = node->neighborsBegin(); it != node->neighborsEnd(); ++it) {
+    /* Removing the node from the neighbor lists of all neighbors. Neighbors
+       vector prevents indirect deletion during iteration. */
+    Fwk::Deque<OSPFNode::Ptr> neighbors;
+    for (OSPFNode::nb_iter it = node->neighborsBegin();
+         it != node->neighborsEnd(); ++it) {
       OSPFNode::Ptr neighbor = it->second;
-      neighbor->linkDel(node->routerID());
+      neighbors.pushBack(neighbor);
+    }
+
+    for (Fwk::Deque<OSPFNode::Ptr>::const_iterator it = neighbors.begin();
+         it != neighbors.end(); ++it) {
+      OSPFNode::Ptr neighbor = *it;
+      neighbor->linkDel(router_id);
     }
 
     /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
