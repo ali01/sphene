@@ -24,7 +24,6 @@
 #include "interface_map.h"
 #include "nf2.h"
 #include "nf2util.h"
-#include "ospf_constants.h"
 #include "ospf_gateway.h"
 #include "ospf_interface_map.h"
 #include "ospf_router.h"
@@ -597,16 +596,8 @@ void cli_show_ospf_neighbors() {
   OSPFInterfaceMap::const_gw_iter it;
   for (it = iface_map->gatewaysBegin(); it != iface_map->gatewaysEnd(); ++it) {
     OSPFGateway::PtrConst gw_obj = it->second;
-
-    /* Looking up interface by the gateway node's internal router ID. */
     RouterID nd_id = gw_obj->nodeRouterID();
     OSPFInterface::PtrConst iface = iface_map->interface(nd_id);
-
-    if (gw_obj->node()->isEndpoint()) {
-      /* Node router ID to be displayed should be kPassiveEndpointID if
-         the node is a non-OSPF endpoint. */
-      nd_id = OSPF::kPassiveEndpointID;
-    }
 
     const string& iface_str = iface->interfaceName();
     const string& gw_str = gw_obj->gateway();
@@ -650,11 +641,10 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
                   "  Neighbors:\n";
 
   RouterID prev = node->prev() ? node->prev()->routerID() : 0;
-  RouterID nd_id = node->isEndpoint() ? OSPF::kPassiveEndpointID
-                                      : node->routerID();
 
-  snprintf(line_buf, sizeof(line_buf), format.c_str(), nd_id, prev,
-           node->distance(), node->links());
+  snprintf(line_buf, sizeof(line_buf), format.c_str(),
+           node->routerID(), prev, node->distance(),
+           node->links());
 
   cli_send_str(line_buf);
 
@@ -665,11 +655,8 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
     OSPFLink::Ptr link = it->second;
     const string& subnet_str = link->subnet();
     const string& mask_str = link->subnetMask();
-    nd_id = link->node()->isEndpoint() ? OSPF::kPassiveEndpointID
-                                       : link->nodeRouterID();
-
-    snprintf(line_buf, sizeof(line_buf), nbr_format, nd_id,
-             subnet_str.c_str(), mask_str.c_str());
+    snprintf(line_buf, sizeof(line_buf), nbr_format,
+             link->nodeRouterID(), subnet_str.c_str(), mask_str.c_str());
     cli_send_str(line_buf);
   }
 
