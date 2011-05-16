@@ -103,6 +103,16 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* pkt,
     return;
   }
 
+  DLOG << "  iface: " << iface->name();
+  DLOG << "  src: " << pkt->src();
+  DLOG << "  dst: " << pkt->dst();
+
+  if (pkt->dst() != iface->mac() &&
+      pkt->dst() != "FF:FF:FF:FF:FF:FF") {
+    DLOG << "    packet is not for us; ignoring";
+    return;
+  }
+
   Packet::Ptr payload_pkt = pkt->payload();
 
   // Ethernet packets must be at least 64 bytes long including the CRC. Shorter
@@ -135,9 +145,6 @@ void DataPlane::PacketFunctor::operator()(EthernetPacket* pkt,
     payload_pkt = new_pkt->payload();
   }
 
-  DLOG << "  iface: " << iface->name();
-  DLOG << "  src: " << pkt->src();
-  DLOG << "  dst: " << pkt->dst();
   DLOG << "  type: " << pkt->typeName();
   DLOG << "  length: " << pkt->len()
        << " (" << wire_length << " bytes on wire)";
