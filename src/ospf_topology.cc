@@ -1,10 +1,10 @@
 #include "ospf_topology.h"
 
-#include <fwk/log.h>
-
 #include <cstdlib>
 #include <ctime>
 #include <limits>
+
+#include "fwk/log.h"
 
 #include "ospf_constants.h"
 
