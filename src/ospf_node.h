@@ -97,9 +97,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   size_t links() const { return links_.size(); }
 
- private:
+ protected:
   OSPFNode(const RouterID& router_id);
 
+ private:
   /* Helper member functions. */
   void oneWayLinkIs(OSPFLink::Ptr link, bool commit);
   void oneWayLinkDel(const RouterID& id, bool commit);

@@ -140,6 +140,7 @@ libsr_base_a_SOURCES = \
                        src/ospf_constants.cc \
                        src/ospf_daemon.cc \
                        src/ospf_daemon.h \
+                       src/ospf_endpoint.cc \
                        src/ospf_gateway.cc \
                        src/ospf_interface.cc \
                        src/ospf_interface_map.cc \
