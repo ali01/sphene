@@ -310,7 +310,8 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
   if (entry->type() == RoutingTable::Entry::kDynamic)
     return;
 
-  DLOG << "Processing static routing table entry.";
+  DLOG << "Processing static routing table entry with subnet "
+       << entry->subnet();
 
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
