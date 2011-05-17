@@ -577,7 +577,7 @@ void cli_show_ospf() {
 
 void cli_show_ospf_gateway(OSPFGateway::PtrConst gw_obj) {
   char line_buf[256];
-  const char* const line_format = "  %-11s %-16u %-16s %-16s %-16s\n";
+  const char* const line_format = "    %-11s %-16u %-16s %-16s %-16s\n";
 
   RouterID nd_id = gw_obj->nodeRouterID();
   OSPFInterface::PtrConst iface = gw_obj->interface();
