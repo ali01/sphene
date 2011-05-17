@@ -471,7 +471,7 @@ int sr_read_from_server_expect(struct sr_instance* sr /* borrowed */, int expect
             /* -------------        VNSBANNER      -------------------- */
 
         case VNSBANNER:
-            DLOG << "received banner";
+            DLOG << "Welcome Message received";
             break;
 
             /* -------------     VNSHWINFO     -------------------- */
