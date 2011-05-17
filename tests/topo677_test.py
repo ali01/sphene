@@ -213,7 +213,8 @@ class Test_Topo677:
     '''Cut router 0 eth1 and eth2, access S1'''
     self._disable_interface(instance0, 'eth1')
     self._disable_interface(instance0, 'eth2')
-    time.sleep(3 * helloint)
+    conv_time = (3 * (0 + 1) + 1) * helloint
+    time.sleep(conv_time)
     self._basic_connectivity_tests()
     assert_equal(
         network_lib.traceroute(self._app1)[-3:],
@@ -221,14 +222,139 @@ class Test_Topo677:
 
     self._enable_interface(instance0, 'eth1')
     self._enable_interface(instance0, 'eth2')
-    time.sleep(3 * helloint)
+    time.sleep(helloint)
     self._basic_connectivity_tests()
     assert_equal(
         network_lib.traceroute(self._app1)[-3:],
         [self._rtr0.eth0, self._rtr1.eth1, self._app1])
 
+  def test_disable_1_internal_link_cut(self):
+    '''Cut router 0 eth1 and eth2 + 1 internal link, access S1'''
+    self._disable_interface(instance0, 'eth1')
+    self._disable_interface(instance0, 'eth2')
+    self._disable_interface(instance1, 'eth3')
+    conv_time = (3 * (1 + 1) + 1) * helloint
+    time.sleep(conv_time)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-4:],
+        [self._rtr0.eth0, self._rtr2.eth3, self._rtr1.eth2, self._app1])
 
-def kill_all_instances():
+    self._enable_interface(instance0, 'eth1')
+    self._enable_interface(instance0, 'eth2')
+    self._enable_interface(instance1, 'eth3')
+    time.sleep(helloint)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-3:],
+        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+
+  def test_disable_2_internal_links_cut(self):
+    '''Cut router 0 eth1 and eth2 + 2 internal links, access S1'''
+    self._disable_interface(instance0, 'eth1')
+    self._disable_interface(instance0, 'eth2')
+    self._disable_interface(instance1, 'eth3')
+    self._disable_interface(instance2, 'eth3')
+    conv_time = (3 * (2 + 1) + 1) * helloint
+    time.sleep(conv_time)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-5:],
+        [self._rtr0.eth0, self._rtr3.eth3, self._rtr2.eth2, self._rtr1.eth2,
+         self._app1])
+
+    self._enable_interface(instance0, 'eth1')
+    self._enable_interface(instance0, 'eth2')
+    self._enable_interface(instance1, 'eth3')
+    self._enable_interface(instance2, 'eth3')
+    time.sleep(helloint)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-3:],
+        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+
+  def test_disable_3_internal_links_cut(self):
+    '''Cut router 0 eth1 and eth2 + 3 internal links, access S1'''
+    self._disable_interface(instance0, 'eth1')
+    self._disable_interface(instance0, 'eth2')
+    self._disable_interface(instance1, 'eth3')
+    self._disable_interface(instance2, 'eth3')
+    self._disable_interface(instance3, 'eth3')
+    conv_time = (3 * (3 + 1) + 1) * helloint
+    time.sleep(conv_time)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-6:],
+        [self._rtr0.eth0, self._rtr4.eth3, self._rtr3.eth2, self._rtr2.eth2,
+         self._rtr1.eth2, self._app1])
+
+    self._enable_interface(instance0, 'eth1')
+    self._enable_interface(instance0, 'eth2')
+    self._enable_interface(instance1, 'eth3')
+    self._enable_interface(instance2, 'eth3')
+    self._enable_interface(instance3, 'eth3')
+    time.sleep(helloint)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-3:],
+        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+
+  def test_disable_4_internal_links_cut(self):
+    '''Cut router 0 eth1 and eth2 + 4 internal links, access S1'''
+    self._disable_interface(instance0, 'eth1')
+    self._disable_interface(instance0, 'eth2')
+    self._disable_interface(instance1, 'eth3')
+    self._disable_interface(instance2, 'eth3')
+    self._disable_interface(instance3, 'eth3')
+    self._disable_interface(instance4, 'eth3')
+    conv_time = (3 * (4 + 1) + 1) * helloint
+    time.sleep(conv_time)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-7:],
+        [self._rtr0.eth0, self._rtr5.eth3, self._rtr4.eth2, self._rtr3.eth2,
+         self._rtr2.eth2, self._rtr1.eth2, self._app1])
+
+    self._enable_interface(instance0, 'eth1')
+    self._enable_interface(instance0, 'eth2')
+    self._enable_interface(instance1, 'eth3')
+    self._enable_interface(instance2, 'eth3')
+    self._enable_interface(instance3, 'eth3')
+    self._enable_interface(instance4, 'eth3')
+    time.sleep(helloint)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-3:],
+        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+
+
+  def test_disable_5_internal_links_cut(self):
+    '''Cut router 0 eth1 and eth2 + 5 internal links, access S1'''
+    self._disable_interface(instance0, 'eth1')
+    self._disable_interface(instance0, 'eth2')
+    self._disable_interface(instance1, 'eth3')
+    self._disable_interface(instance2, 'eth3')
+    self._disable_interface(instance3, 'eth3')
+    self._disable_interface(instance4, 'eth3')
+    self._disable_interface(instance5, 'eth3')
+    time.sleep(4 * helloint)
+    assert_false(network_lib.ping(self._app1))
+
+    self._enable_interface(instance0, 'eth1')
+    self._enable_interface(instance0, 'eth2')
+    self._enable_interface(instance1, 'eth3')
+    self._enable_interface(instance2, 'eth3')
+    self._enable_interface(instance3, 'eth3')
+    self._enable_interface(instance4, 'eth3')
+    self._enable_interface(instance5, 'eth3')
+    time.sleep(helloint)
+    self.test_ping_app_servers()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-3:],
+        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+
+
+def teardown():
   if instance0:
     instance0.stop()
   if instance1:
