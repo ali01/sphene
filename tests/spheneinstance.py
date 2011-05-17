@@ -22,14 +22,13 @@ class SpheneInstance(object):
            '-t', str(topo_id),
            '-s', 'vns-1.stanford.edu',
            '-u', getpass.getuser(),
-           '-c', str(cli_port)]
+           '-c', str(cli_port),
+           '-d']
 
     if rtable_file:
       cmd.extend(('-r', rtable_file))
     if vhost:
       cmd.extend(('-v', vhost))
-    if os.getenv('DEBUG', 0):
-      cmd.append('-d')
 
     self._binary = binary
     self._cli_port = cli_port
@@ -38,6 +37,7 @@ class SpheneInstance(object):
     self._quit = False
     self._thread_stdout = None
     self._thread_stderr = None
+    self._vns_ready_sema = threading.Semaphore(0)
 
   def __del__(self):
     self.stop()
@@ -50,6 +50,8 @@ class SpheneInstance(object):
     p = select.poll()
     p.register(fd, select.POLLIN)
 
+    all_buf = ''
+    welcome_received = False
     while not self._quit:
       events = p.poll(1000)
       if not events:
@@ -57,6 +59,14 @@ class SpheneInstance(object):
       buf = in_stream.read()
       if not buf:  # EOF
         return
+
+      # Build up full contents until we receive a welcome message from VNS.
+      if not welcome_received:
+        all_buf += buf
+        if 'Welcome Message' in all_buf:
+          welcome_received = True
+          self._vns_ready_sema.release()
+
       if buf and os.getenv('DEBUG', 0):
         out_stream.write(buf)
 
@@ -78,6 +88,9 @@ class SpheneInstance(object):
                                                  sys.stdout))
     self._thread_stderr.daemon = True
     self._thread_stderr.start()
+
+    # Block until VNS is ready.
+    self._vns_ready_sema.acquire()
 
   def stop(self):
     self._quit = True

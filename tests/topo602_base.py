@@ -105,6 +105,7 @@ class Topo602:
     instance3 = self._bootstrap(self._binary3, cli_port + 2, 'vhost3',
                                 pass_rtable=False)
     instance3.start()
+    print 'bootstrapping complete.'
 
     # Wait for convergence.
     time.sleep(10 + 2 * helloint)  # including VNS startup time
