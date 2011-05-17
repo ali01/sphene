@@ -514,7 +514,7 @@ OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
   for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
     OSPFGateway::Ptr gw_obj = it->second;
     OSPFNode::Ptr nbr = gw_obj->node();
-    if (nbr->isEndpoint()){
+    if (nbr->isPassiveEndpoint()){
       /* Do not send link-state updates to non-OSPF endpoints. */
       continue;
     }
@@ -543,7 +543,7 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
   }
 
   OSPFNode::Ptr nbr = gw_obj->node();
-  if (nbr->isEndpoint()) {
+  if (nbr->isPassiveEndpoint()) {
     ELOG << "send_new_lsu_to_neighbor: Attempt to build link-state update to "
          << "non-OSPF endpoint";
     return NULL;
@@ -570,8 +570,8 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
 
     /* If gateway peer is a non-OSPF endpoint, the advertised
        router ID must be kPassiveEndpointID. */
-    RouterID adv_rid = gw->nodeIsEndpoint() ? OSPF::kPassiveEndpointID
-                                                : gw->nodeRouterID();
+    RouterID adv_rid = gw->nodeIsPassiveEndpoint() ? OSPF::kPassiveEndpointID
+                                                   : gw->nodeRouterID();
 
     adv->routerIDIs(adv_rid);
     adv->subnetIs(gw->subnet());
@@ -606,7 +606,7 @@ OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
       OSPFNode::Ptr nbr = gw_obj->node();
       RouterID nbr_id = nbr->routerID();
 
-      if (nbr->isEndpoint()) {
+      if (nbr->isPassiveEndpoint()) {
         /* Do not forward link-state update floods to non-OSPF neighbors. */
         continue;
       }
@@ -722,7 +722,7 @@ OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
   }
 
   OSPFGateway::PtrConst gw_obj = iface->gateway(neighbor_id);
-  if (gw_obj->nodeIsEndpoint()) {
+  if (gw_obj->nodeIsPassiveEndpoint()) {
     ELOG << "forward_pkt_to_neighbor: Attempt to forward an OSPF packet to a "
          << "non-OSPF neighbor.";
     return;

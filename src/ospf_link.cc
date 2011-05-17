@@ -33,8 +33,8 @@ OSPFLink::nodeRouterID() const {
 }
 
 bool
-OSPFLink::nodeIsEndpoint() const {
-  return node_->isEndpoint();
+OSPFLink::nodeIsPassiveEndpoint() const {
+  return node_->isPassiveEndpoint();
 }
 
 bool

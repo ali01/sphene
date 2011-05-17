@@ -65,7 +65,7 @@ OSPFDaemon::timeout_topology_entries() {
   OSPFTopology::const_iterator it;
   for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
     OSPFNode::Ptr node = it->second;
-    if (node->isEndpoint()){
+    if (node->isPassiveEndpoint()){
       /* Don't timeout nodes associated with a non-OSPF endpoint. */
       continue;
     }
@@ -78,7 +78,7 @@ OSPFDaemon::timeout_topology_entries() {
 
 void
 OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
-  if (node->isEndpoint()) {
+  if (node->isPassiveEndpoint()) {
     ELOG << "timeout_node_topology_entries: Attempt to timeout links "
          << "associated with a non-OSPF endpoint";
     return;
@@ -93,7 +93,7 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
     RouterID nd_id = node->routerID();
     RouterID peer_nd_id = peer_nd->routerID();
 
-    if (peer_nd->isEndpoint()) {
+    if (peer_nd->isPassiveEndpoint()) {
       /* Do not remove links to non-OSPF endpoints. */
       continue;
     }
@@ -136,7 +136,7 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
   OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
   for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
     OSPFGateway::Ptr gw = gw_it->second;
-    if (gw->nodeIsEndpoint()){
+    if (gw->nodeIsPassiveEndpoint()){
       /* Do not remove gateways to non-OSPF endpoints. */
       continue;
     }

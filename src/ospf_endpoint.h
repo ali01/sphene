@@ -15,7 +15,7 @@ class OSPFEndpoint : public OSPFNode {
   static Ptr New(const RouterID& rid);
 
   /* Override. */
-  bool isEndpoint() const { return true; }
+  bool isPassiveEndpoint() const { return true; }
 
  private:
   OSPFEndpoint(const RouterID& rid);

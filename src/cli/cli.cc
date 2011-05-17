@@ -603,7 +603,7 @@ void cli_show_ospf_neighbors() {
     const string& gw_str = gw_obj->gateway();
     const string& subnet_str = gw_obj->gateway();
     const string& mask_str = gw_obj->subnetMask();
-    const string& endpoint = gw_obj->nodeIsEndpoint() ? "true" : "false";
+    const string& endpoint = gw_obj->nodeIsPassiveEndpoint() ? "true" : "false";
 
     snprintf(line_buf, sizeof(line_buf), line_format,
              iface_str.c_str(), nd_id, gw_str.c_str(),
@@ -642,7 +642,7 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
                   "  Links:            %u\n"
                   "  Neighbors:\n";
 
-  string endpoint = node->isEndpoint() ? "true" : "false";
+  string endpoint = node->isPassiveEndpoint() ? "true" : "false";
   RouterID prev = node->prev() ? node->prev()->routerID() : 0;
 
   snprintf(line_buf, sizeof(line_buf), format.c_str(),

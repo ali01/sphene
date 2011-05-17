@@ -71,7 +71,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
-  virtual bool isEndpoint() const { return false; }
+  virtual bool isPassiveEndpoint() const { return false; }
 
   /* Mutators. */
   void routerIDIs(const RouterID& id) { router_id_ = id; }

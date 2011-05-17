@@ -22,12 +22,16 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
                  const IPv4Addr& subnet,
                  const IPv4Addr& subnet_mask);
 
+  /* Link to a passive, non-OSPF subnet/endpoint. */
+  static Ptr NewPassive(const IPv4Addr& subnet,
+                        const IPv4Addr& subnet_mask);
+
   /* Accessors. */
 
   Fwk::Ptr<const OSPFNode> node() const;
   Fwk::Ptr<OSPFNode> node();
   const RouterID& nodeRouterID() const;
-  bool nodeIsEndpoint() const;
+  bool nodeIsPassiveEndpoint() const;
 
   const IPv4Addr& subnet() const { return subnet_; }
   const IPv4Addr& subnetMask() const { return subnet_mask_; }
@@ -43,6 +47,9 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   OSPFLink(Fwk::Ptr<OSPFNode> neighbor,
            const IPv4Addr& subnet,
            const IPv4Addr& subnet_mask);
+
+  OSPFLink(const IPv4Addr& subnet, const IPv4Addr& subnet_mask);
+
  private:
   /* Data members. */
   Fwk::Ptr<OSPFNode> node_;
