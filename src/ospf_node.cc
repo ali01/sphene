@@ -31,6 +31,11 @@ OSPFNode::neighbor(const RouterID& id) const {
   return self->neighbor(id);
 }
 
+bool
+OSPFNode::isPassiveEndpoint() const {
+  return routerID() == OSPF::kPassiveEndpointID;
+}
+
 void
 OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
   if (link->nodeRouterID() == routerID()) {

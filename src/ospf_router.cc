@@ -8,7 +8,6 @@
 #include "interface_map.h"
 #include "ip_packet.h"
 #include "ospf_constants.h"
-#include "ospf_endpoint.h"
 #include "ospf_gateway.h"
 #include "ospf_interface_map.h"
 #include "ospf_link.h"
@@ -317,12 +316,9 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
   if (iface) {
-    RouterID endpoint_id = ospf_router_->topology()->routerIDNew();
-    OSPFEndpoint::Ptr endpoint_nd = OSPFEndpoint::New(endpoint_id);
-    OSPFGateway::Ptr gw_obj = OSPFGateway::New(endpoint_nd,
-                                               entry->gateway(),
-                                               entry->subnet(),
-                                               entry->subnetMask());
+    OSPFGateway::Ptr gw_obj = OSPFGateway::NewPassive(entry->gateway(),
+                                                      entry->subnet(),
+                                                      entry->subnetMask());
     iface->gatewayIs(gw_obj);
   }
 }
@@ -483,10 +479,8 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     } else {
       /* Advertisement corresponds to an endpoint that is not running OSPF.
          Bypass two-phase commit logic. */
-      RouterID endpoint_id = topology()->routerIDNew();
-      OSPFEndpoint::Ptr endpoint_nd = OSPFEndpoint::New(endpoint_id);
-      OSPFLink::Ptr link =
-        OSPFLink::New(endpoint_nd, adv->subnet(), adv->subnetMask());
+      OSPFLink::Ptr link = OSPFLink::NewPassive(adv->subnet(),
+                                                adv->subnetMask());
       sender->linkIs(link, false);
 
       /* Add both endpoints to the topology in case they aren't already there */
@@ -567,13 +561,7 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
   for (uint32_t ix = 0; gw_it != interfaces_->gatewaysEnd(); ++gw_it, ++ix) {
     OSPFGateway::Ptr gw = gw_it->second;
     OSPFLSUAdvertisement::Ptr adv = ospf_pkt->advertisement(ix);
-
-    /* If gateway peer is a non-OSPF endpoint, the advertised
-       router ID must be kPassiveEndpointID. */
-    RouterID adv_rid = gw->nodeIsPassiveEndpoint() ? OSPF::kPassiveEndpointID
-                                                   : gw->nodeRouterID();
-
-    adv->routerIDIs(adv_rid);
+    adv->routerIDIs(gw->nodeRouterID());
     adv->subnetIs(gw->subnet());
     adv->subnetMaskIs(gw->subnetMask());
   }

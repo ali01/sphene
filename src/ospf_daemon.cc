@@ -65,11 +65,6 @@ OSPFDaemon::timeout_topology_entries() {
   OSPFTopology::const_iterator it;
   for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
     OSPFNode::Ptr node = it->second;
-    if (node->isPassiveEndpoint()){
-      /* Don't timeout nodes associated with a non-OSPF endpoint. */
-      continue;
-    }
-
     timeout_node_topology_entries(node);
   }
 
