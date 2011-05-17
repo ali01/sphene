@@ -56,6 +56,11 @@ void DataPlane::outputPacketNew(EthernetPacket::PtrConst pkt,
   DLOG << "  length: " << pkt->len();
   DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
 
+  if (!iface->enabled()) {
+    WLOG << "  output interface is disabled; ignoring";
+    return;
+  }
+
   if (pkt->type() == EthernetPacket::kIP) {
     EthernetPacket* _pkt = const_cast<EthernetPacket*>(pkt.ptr());
     IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(_pkt->payload());
