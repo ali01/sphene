@@ -14,9 +14,6 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   typedef Fwk::Ptr<const OSPFNode> PtrConst;
   typedef Fwk::Ptr<OSPFNode> Ptr;
 
-  typedef Fwk::Map<RouterID,OSPFNode>::iterator nb_iter;
-  typedef Fwk::Map<RouterID,OSPFNode>::const_iterator const_nb_iter;
-
   typedef Fwk::Map<RouterID,OSPFLink>::iterator link_iter;
   typedef Fwk::Map<RouterID,OSPFLink>::const_iterator const_link_iter;
 
@@ -58,9 +55,6 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFLink::Ptr link(const RouterID& id);
   OSPFLink::PtrConst link(const RouterID& id) const;
 
-  OSPFNode::Ptr neighbor(const RouterID& id);
-  OSPFNode::PtrConst neighbor(const RouterID& id) const;
-
   /* Previous node in the shortest path from the root node to this node. */
   OSPFNode::Ptr prev() { return prev_; }
   OSPFNode::PtrConst prev() const { return prev_; }
@@ -87,11 +81,6 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Iterators. */
 
-  nb_iter neighborsBegin() { return neighbors_.begin(); }
-  nb_iter neighborsEnd() { return neighbors_.end(); }
-  const_nb_iter neighborsBegin() const { return neighbors_.begin(); }
-  const_nb_iter neighborsEnd() const { return neighbors_.end(); }
-
   link_iter linksBegin() { return links_.begin(); }
   link_iter linksEnd() { return links_.end(); }
   const_link_iter linksBegin() const { return links_.begin(); }
@@ -117,12 +106,6 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   /* Map of all neighbors directly attached to this node. */
   Fwk::Map<RouterID,OSPFLink> links_;
-
-  /* Mirror map with direct pointers to neighboring OSPFNodes (rather than
-     OSPFLink objects). Used to provide iterators. If space constraints
-     become a problem, this can be optimized away by defining custom
-     iterators. */
-  Fwk::Map<RouterID,OSPFNode> neighbors_;
 
   /* Singleton notifiee. */
   Notifiee::Ptr notifiee_;

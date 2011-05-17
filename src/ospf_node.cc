@@ -20,17 +20,6 @@ OSPFNode::link(const RouterID& id) const {
   return links_.elem(id);
 }
 
-OSPFNode::Ptr
-OSPFNode::neighbor(const RouterID& id) {
-  return neighbors_.elem(id);
-}
-
-OSPFNode::PtrConst
-OSPFNode::neighbor(const RouterID& id) const {
-  OSPFNode* self = const_cast<OSPFNode*>(this);
-  return self->neighbor(id);
-}
-
 bool
 OSPFNode::isPassiveEndpoint() const {
   return routerID() == OSPF::kPassiveEndpointID;
@@ -59,7 +48,8 @@ OSPFNode::linkDel(const RouterID& id, bool commit) {
     return;
 
   /* Deletion is bi-directional. */
-  OSPFNode::Ptr node = neighbor(id);
+  OSPFLink::Ptr link = this->link(id);
+  OSPFNode::Ptr node = link->node();
   if (node)
     node->oneWayLinkDel(this->routerID(), commit);
 
@@ -80,9 +70,6 @@ OSPFNode::oneWayLinkIs(OSPFLink::Ptr link, bool commit) {
   /* Adding to OSPFLink pointer map. */
   links_[nd_id] = link;
 
-  /* Adding to direct OSPFNode pointer map. */
-  neighbors_[nd_id] = node;
-
   /* Refresh time since last LSU. */
   link->timeSinceLSUIs(0);
 
@@ -93,11 +80,11 @@ OSPFNode::oneWayLinkIs(OSPFLink::Ptr link, bool commit) {
 
 void
 OSPFNode::oneWayLinkDel(const RouterID& id, bool commit) {
-  OSPFNode::Ptr node = neighbor(id);
+  OSPFLink::Ptr link = this->link(id);
+  OSPFNode::Ptr node = link->node();
   if (node) {
     /* Deleting from both maps. */
     links_.elemDel(id);
-    neighbors_.elemDel(id);
 
     /* Signal notifiee. */
     if (notifiee_)

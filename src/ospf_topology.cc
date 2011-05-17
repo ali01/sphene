@@ -119,9 +119,10 @@ OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
     /* Removing the node from the neighbor lists of all neighbors. Neighbors
        vector prevents indirect deletion during iteration. */
     Fwk::Deque<OSPFNode::Ptr> neighbors;
-    for (OSPFNode::nb_iter it = node->neighborsBegin();
-         it != node->neighborsEnd(); ++it) {
-      OSPFNode::Ptr neighbor = it->second;
+    for (OSPFNode::link_iter it = node->linksBegin();
+         it != node->linksEnd(); ++it) {
+      OSPFLink::Ptr link = it->second;
+      OSPFNode::Ptr neighbor = link->node();
       neighbors.pushBack(neighbor);
     }
 
@@ -168,9 +169,10 @@ OSPFTopology::compute_optimal_spanning_tree() {
 
     node_set.elemDel(cur_nd->routerID());
 
-    OSPFNode::nb_iter it = cur_nd->neighborsBegin();
-    for (; it != cur_nd->neighborsEnd(); ++it) {
-      OSPFNode::Ptr neighbor = it->second;
+    for (OSPFNode::link_iter it = cur_nd->linksBegin();
+         it != cur_nd->linksEnd(); ++it) {
+      OSPFLink::Ptr link = it->second;
+      OSPFNode::Ptr neighbor = link->node();
       neighbor = node_set.elem(neighbor->routerID());
       if (neighbor) {
         /* Neighboring node, NEIGHBOR, has not been visited yet.
