@@ -62,7 +62,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   OSPFGateway::Ptr gateway(const RouterID& id);
 
   size_t interfaces() const { return ip_ifaces_.size(); }
-  size_t gateways() const { return gateways_.size(); }
+  size_t gateways() const;
 
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }

@@ -42,6 +42,17 @@ OSPFInterfaceMap::gateway(const RouterID& id) {
   return gateways_.elem(id);
 }
 
+size_t
+OSPFInterfaceMap::gateways() const {
+  size_t gateways = 0;
+  for (const_if_iter if_it = ifacesBegin(); if_it != ifacesEnd(); ++if_it) {
+    OSPFInterface::Ptr iface = if_it->second;
+    gateways += iface->gateways();
+  }
+
+  return gateways;
+}
+
 void
 OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
   if (iface == NULL)
