@@ -22,12 +22,11 @@ using std::string;
 
 DataPlane::DataPlane(const std::string& name,
                      struct sr_instance *sr,
-                     RoutingTable::Ptr routing_table,
                      ARPCache::Ptr arp_cache)
     : Fwk::NamedInterface(name),
       log_(Fwk::Log::LogNew(name)),
       iface_map_(InterfaceMap::InterfaceMapNew()),
-      routing_table_(routing_table),
+      routing_table_(NULL),
       arp_cache_(arp_cache),
       cp_(NULL),
       sr_(sr),

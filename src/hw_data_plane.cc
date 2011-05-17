@@ -38,9 +38,8 @@ static const size_t kMaxHWRoutingTableEntries = 32;
 
 
 HWDataPlane::HWDataPlane(struct sr_instance* sr,
-                         RoutingTable::Ptr routing_table,
                          ARPCache::Ptr arp_cache)
-    : DataPlane("HWDataPlane", sr, routing_table, arp_cache),
+    : DataPlane("HWDataPlane", sr, arp_cache),
       arp_cache_reactor_(this),
       interface_reactor_(this),
       interface_map_reactor_(this),
@@ -48,7 +47,6 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
       log_(Fwk::Log::LogNew("HWDataPlane")) {
   arp_cache_reactor_.notifierIs(arp_cache);
   interface_map_reactor_.notifierIs(iface_map_);
-  routing_table_reactor_.notifierIs(routing_table);
 
   // Reset the hardware.
   struct nf2device nf2;
@@ -61,6 +59,13 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
   writeReg(&nf2, CPCI_REG_CTRL, 0x00010100);
   closeDescriptor(&nf2);
   usleep(2000);
+}
+
+
+void HWDataPlane::routingTableIs(RoutingTable::Ptr rtable) {
+  routing_table_ = rtable;
+
+  routing_table_reactor_.notifierIs(routing_table_);
 }
 
 
