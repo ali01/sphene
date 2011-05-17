@@ -1,5 +1,6 @@
 #include "ospf_link.h"
 
+#include "ospf_constants.h"
 #include "ospf_node.h"
 
 OSPFLink::Ptr
@@ -9,12 +10,26 @@ OSPFLink::New(OSPFNode::Ptr neighbor,
   return new OSPFLink(neighbor, subnet, subnet_mask);
 }
 
+/* Link to a passive, non-OSPF subnet/endpoint. */
+OSPFLink::Ptr
+OSPFLink::NewPassive(const IPv4Addr& subnet,
+                     const IPv4Addr& subnet_mask) {
+  return new OSPFLink(subnet, subnet_mask);
+}
+
+
 OSPFLink::OSPFLink(OSPFNode::Ptr neighbor,
                    const IPv4Addr& subnet,
                    const IPv4Addr& subnet_mask)
     : node_(neighbor),
       subnet_(subnet & subnet_mask),
       subnet_mask_(subnet_mask),
+      last_lsu_(time(NULL)) {}
+
+OSPFLink::OSPFLink(const IPv4Addr& subnet, const IPv4Addr& mask)
+    : node_(OSPFNode::kPassiveEndpoint),
+      subnet_(subnet & mask),
+      subnet_mask_(mask),
       last_lsu_(time(NULL)) {}
 
 OSPFNode::PtrConst
