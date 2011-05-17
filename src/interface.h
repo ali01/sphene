@@ -61,7 +61,7 @@ class Interface
   bool enabled() const { return (enabled_.value() > 0); }
 
   // Sets the enabled flag.
-  void enabledIs(bool enabled) { enabled_ = (enabled > 0); }
+  void enabledIs(bool enabled);
 
   // Returns the type of interface.
   Type type() const { return type_; }
@@ -105,6 +105,7 @@ class InterfaceNotifiee
  public:
   virtual void onIP(Interface::Ptr iface) { }
   virtual void onMAC(Interface::Ptr iface) { }
+  virtual void onEnabled(Interface::Ptr iface) { }
 };
 
 #endif
