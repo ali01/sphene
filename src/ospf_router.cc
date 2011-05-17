@@ -129,8 +129,13 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
     return;
   }
 
-  if (iface->subnetMask() != pkt->subnetMask()) {
-    DLOG << "Ignoring packet: Subnet mask does not match "
+  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
+  IPv4Addr gateway = ip_pkt->src();
+  IPv4Addr subnet_mask = pkt->subnetMask();
+  IPv4Addr subnet = gateway & subnet_mask;
+
+  if (iface->subnet() != subnet || iface->subnetMask() != pkt->subnetMask()) {
+    DLOG << "Ignoring packet: Subnet does not match "
          << "that of receiving interface";
     return;
   }
@@ -159,11 +164,6 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   if (gw_obj == NULL) {
     /* Packet was sent by a new neighbor.
      * Creating neighbor object and adding it to the interface description */
-    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-    IPv4Addr gateway = ip_pkt->src();
-    IPv4Addr subnet_mask = pkt->subnetMask();
-    IPv4Addr subnet = gateway & subnet_mask;
-
     OSPFNode::Ptr neighbor = OSPFNode::New(neighbor_id);
     gw_obj = OSPFGateway::New(neighbor, gateway, subnet, subnet_mask);
     ifd->gatewayIs(gw_obj);
