@@ -108,7 +108,8 @@ class Topo602:
     print 'bootstrapping complete.'
 
     # Wait for convergence.
-    time.sleep(10 + 2 * helloint)  # including VNS startup time
+    time.sleep(2 * helloint)  # including VNS startup time
+    print 'convergence time passed.'
 
   def _bootstrap(self, binary, cli_port, vhost, pass_rtable=False):
     '''Initialize a sphene instance for tests.'''
