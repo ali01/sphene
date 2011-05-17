@@ -20,6 +20,10 @@ class OSPFGateway : public OSPFLink {
                  const IPv4Addr& subnet,
                  const IPv4Addr& subnet_mask);
 
+  static Ptr NewPassive(const IPv4Addr& gateway,
+                        const IPv4Addr& subnet,
+                        const IPv4Addr& mask);
+
   const IPv4Addr& gateway() const { return gateway_; }
 
   time_t timeSinceHello() const { return time(NULL) - last_hello_; }
@@ -38,6 +42,10 @@ class OSPFGateway : public OSPFLink {
               const IPv4Addr& gateway,
               const IPv4Addr& subnet,
               const IPv4Addr& subnet_mask);
+
+  OSPFGateway(const IPv4Addr& gateway,
+              const IPv4Addr& subnet,
+              const IPv4Addr& mask);
 
   /* Data members. */
   IPv4Addr gateway_;

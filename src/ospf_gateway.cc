@@ -11,11 +11,25 @@ OSPFGateway::New(OSPFNode::Ptr neighbor,
   return new OSPFGateway(neighbor, gateway, subnet, subnet_mask);
 }
 
+OSPFGateway::Ptr
+OSPFGateway::NewPassive(const IPv4Addr& gateway,
+                        const IPv4Addr& subnet,
+                        const IPv4Addr& mask) {
+  return new OSPFGateway(gateway, subnet, mask);
+}
+
 OSPFGateway::OSPFGateway(Fwk::Ptr<OSPFNode> neighbor,
                          const IPv4Addr& gateway,
                          const IPv4Addr& subnet,
                          const IPv4Addr& subnet_mask)
     : OSPFLink::OSPFLink(neighbor, subnet, subnet_mask),
+      gateway_(gateway),
+      last_hello_(time(NULL)) {}
+
+OSPFGateway::OSPFGateway(const IPv4Addr& gateway,
+                         const IPv4Addr& subnet,
+                         const IPv4Addr& mask)
+    : OSPFLink::OSPFLink(subnet, mask),
       gateway_(gateway),
       last_hello_(time(NULL)) {}
 
