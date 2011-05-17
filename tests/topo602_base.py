@@ -146,7 +146,7 @@ class Topo602:
     assert_true(network_lib.ping(self._app2))
 
   def _disable_interface(self, instance, iface_name):
-    '''Disable an interface on a router and do a series of basic tests.'''
+    '''Disable an interface on a router.'''
     host = 'localhost'
     port = instance.cli_port()
 
@@ -155,7 +155,7 @@ class Topo602:
     assert_true(network_lib.send_cli_command(host, port, cmd))
 
   def _enable_interface(self, instance, iface_name):
-    '''Enable an interface on a router and do a series of basic tests.'''
+    '''Enable an interface on a router.'''
     host = 'localhost'
     port = instance.cli_port()
 
