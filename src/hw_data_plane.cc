@@ -102,6 +102,12 @@ void HWDataPlane::InterfaceReactor::onMAC(Interface::Ptr iface) {
 }
 
 
+void HWDataPlane::InterfaceReactor::onEnabled(Interface::Ptr iface) {
+  dp_->writeHWIPFilterTable();
+  dp_->writeHWRoutingTable();
+}
+
+
 HWDataPlane::InterfaceMapReactor::InterfaceMapReactor(HWDataPlane* dp)
     : dp_(dp),
       log_(Fwk::Log::LogNew("HWDataPlane::InterfaceMapReactor")) { }
@@ -210,9 +216,10 @@ void HWDataPlane::writeHWIPFilterTable() {
   // notification. We assume the InterfaceMap was already locked.
   InterfaceMap::iterator it;
   unsigned int index = 0;
-  for (it = iface_map_->begin(); it != iface_map_->end(); ++it, ++index) {
+  for (it = iface_map_->begin(); it != iface_map_->end(); ++it) {
     Interface::Ptr iface = it->second;
-    writeHWIPFilterTableEntry(&nf2, iface->ip(), index);
+    if (iface->enabled())
+      writeHWIPFilterTableEntry(&nf2, iface->ip(), index++);
   }
 
   // Zero-out remaining entries.
@@ -271,14 +278,15 @@ void HWDataPlane::writeHWRoutingTable() {
   }
 
   // Write the routing table entries, LPM first.
-  unsigned int index;
-  for (index = 0; index < entries.size(); ++index) {
+  unsigned int index = 0;
+  vector<RoutingTable::Entry::Ptr>::iterator it;
+  for (it = entries.begin(); it != entries.end(); ++it) {
     if (index >= kMaxHWRoutingTableEntries) {
       WLOG << "Routing table is too large to fit entirely in hardware";
       break;
     }
 
-    RoutingTable::Entry::Ptr entry = entries[index];
+    RoutingTable::Entry::Ptr entry = *it;
     Interface::PtrConst iface = entry->interface();
 
     // The port number is calculated in "one-hot-encoded format":
@@ -290,12 +298,14 @@ void HWDataPlane::writeHWRoutingTable() {
     // For iface num i, this is 4**i.
     unsigned int encoded_port = (1 << (iface->index() * 2));
 
-    writeHWRoutingTableEntry(&nf2,
-                             entry->subnet(),
-                             entry->subnetMask(),
-                             entry->gateway(),
-                             encoded_port,
-                             index);
+    if (iface->enabled()) {
+      writeHWRoutingTableEntry(&nf2,
+                               entry->subnet(),
+                               entry->subnetMask(),
+                               entry->gateway(),
+                               encoded_port,
+                               index++);
+    }
   }
 
   // Zero-out remaining entries.

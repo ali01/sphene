@@ -49,6 +49,7 @@ class HWDataPlane : public DataPlane {
     InterfaceReactor(HWDataPlane* dp);
     virtual void onIP(Interface::Ptr iface);
     virtual void onMAC(Interface::Ptr iface);
+    virtual void onEnabled(Interface::Ptr iface);
 
    protected:
     HWDataPlane* dp_;
