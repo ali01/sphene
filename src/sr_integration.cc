@@ -80,10 +80,10 @@ void sr_integ_init(struct sr_instance* sr)
 
   // Create DataPlane.
 #ifdef _CPUMODE_
-  DataPlane::Ptr dp = HWDataPlane::New(sr, cp->routingTable(), cp->arpCache());
+  DataPlane::Ptr dp = HWDataPlane::New(sr, cp->arpCache());
 #else
   DataPlane::Ptr dp =
-      SWDataPlane::SWDataPlaneNew(sr, cp->routingTable(), cp->arpCache());
+      SWDataPlane::SWDataPlaneNew(sr, cp->arpCache());
 #endif
 
   // Initialize task manager.

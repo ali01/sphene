@@ -224,11 +224,12 @@ void ControlPlane::PacketFunctor::operator()(ARPPacket* const pkt,
   {
     InterfaceMap::Ptr if_map = cp_->dataPlane()->interfaceMap();
     Fwk::ScopedLock<InterfaceMap> if_map_lock(if_map);
-    if (!if_map->interfaceAddr(target_ip))
+    Interface::Ptr target_iface = if_map->interfaceAddr(target_ip);
+    if (!target_iface || target_iface->ip() != target_ip) {
+      DLOG << "  ARP packet is not for us; ignoring";
       return;
+    }
   }
-
-  DLOG << "We are the target of this ARP packet.";
 
   // Add <sender IP, sender MAC> to ARP cache.
   if (!merge_flag) {

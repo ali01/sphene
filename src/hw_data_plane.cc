@@ -38,9 +38,8 @@ static const size_t kMaxHWRoutingTableEntries = 32;
 
 
 HWDataPlane::HWDataPlane(struct sr_instance* sr,
-                         RoutingTable::Ptr routing_table,
                          ARPCache::Ptr arp_cache)
-    : DataPlane("HWDataPlane", sr, routing_table, arp_cache),
+    : DataPlane("HWDataPlane", sr, arp_cache),
       arp_cache_reactor_(this),
       interface_reactor_(this),
       interface_map_reactor_(this),
@@ -48,7 +47,6 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
       log_(Fwk::Log::LogNew("HWDataPlane")) {
   arp_cache_reactor_.notifierIs(arp_cache);
   interface_map_reactor_.notifierIs(iface_map_);
-  routing_table_reactor_.notifierIs(routing_table);
 
   // Reset the hardware.
   struct nf2device nf2;
@@ -61,6 +59,13 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
   writeReg(&nf2, CPCI_REG_CTRL, 0x00010100);
   closeDescriptor(&nf2);
   usleep(2000);
+}
+
+
+void HWDataPlane::routingTableIs(RoutingTable::Ptr rtable) {
+  routing_table_ = rtable;
+
+  routing_table_reactor_.notifierIs(routing_table_);
 }
 
 
@@ -94,6 +99,12 @@ void HWDataPlane::InterfaceReactor::onIP(Interface::Ptr iface) {
 
 void HWDataPlane::InterfaceReactor::onMAC(Interface::Ptr iface) {
   // TODO(ms): Implement.
+}
+
+
+void HWDataPlane::InterfaceReactor::onEnabled(Interface::Ptr iface) {
+  dp_->writeHWIPFilterTable();
+  dp_->writeHWRoutingTable();
 }
 
 
@@ -205,9 +216,10 @@ void HWDataPlane::writeHWIPFilterTable() {
   // notification. We assume the InterfaceMap was already locked.
   InterfaceMap::iterator it;
   unsigned int index = 0;
-  for (it = iface_map_->begin(); it != iface_map_->end(); ++it, ++index) {
+  for (it = iface_map_->begin(); it != iface_map_->end(); ++it) {
     Interface::Ptr iface = it->second;
-    writeHWIPFilterTableEntry(&nf2, iface->ip(), index);
+    if (iface->enabled())
+      writeHWIPFilterTableEntry(&nf2, iface->ip(), index++);
   }
 
   // Zero-out remaining entries.
@@ -266,14 +278,15 @@ void HWDataPlane::writeHWRoutingTable() {
   }
 
   // Write the routing table entries, LPM first.
-  unsigned int index;
-  for (index = 0; index < entries.size(); ++index) {
+  unsigned int index = 0;
+  vector<RoutingTable::Entry::Ptr>::iterator it;
+  for (it = entries.begin(); it != entries.end(); ++it) {
     if (index >= kMaxHWRoutingTableEntries) {
       WLOG << "Routing table is too large to fit entirely in hardware";
       break;
     }
 
-    RoutingTable::Entry::Ptr entry = entries[index];
+    RoutingTable::Entry::Ptr entry = *it;
     Interface::PtrConst iface = entry->interface();
 
     // The port number is calculated in "one-hot-encoded format":
@@ -285,12 +298,14 @@ void HWDataPlane::writeHWRoutingTable() {
     // For iface num i, this is 4**i.
     unsigned int encoded_port = (1 << (iface->index() * 2));
 
-    writeHWRoutingTableEntry(&nf2,
-                             entry->subnet(),
-                             entry->subnetMask(),
-                             entry->gateway(),
-                             encoded_port,
-                             index);
+    if (iface->enabled()) {
+      writeHWRoutingTableEntry(&nf2,
+                               entry->subnet(),
+                               entry->subnetMask(),
+                               entry->gateway(),
+                               encoded_port,
+                               index++);
+    }
   }
 
   // Zero-out remaining entries.

@@ -21,14 +21,12 @@ class SWDataPlane : public DataPlane {
   typedef Fwk::Ptr<SWDataPlane> Ptr;
 
   static Ptr SWDataPlaneNew(struct sr_instance* sr,
-                            RoutingTable::Ptr routing_table,
                             ARPCache::Ptr arp_cache) {
-    return new SWDataPlane(sr, routing_table, arp_cache);
+    return new SWDataPlane(sr, arp_cache);
   }
 
  protected:
   SWDataPlane(struct sr_instance* sr,
-              RoutingTable::Ptr routing_table,
               ARPCache::Ptr arp_cache);
 
   /* Operations disallowed. */

@@ -25,10 +25,12 @@ class HWDataPlane : public DataPlane {
   typedef Fwk::Ptr<HWDataPlane> Ptr;
 
   static Ptr New(struct sr_instance* sr,
-                 Fwk::Ptr<RoutingTable> routing_table,
                  Fwk::Ptr<ARPCache> arp_cache) {
-    return new HWDataPlane(sr, routing_table, arp_cache);
+    return new HWDataPlane(sr, arp_cache);
   }
+
+  // Sets the RoutingTable.
+  virtual void routingTableIs(RoutingTable::Ptr rtable);
 
  protected:
   class ARPCacheReactor : public ARPCache::Notifiee {
@@ -47,6 +49,7 @@ class HWDataPlane : public DataPlane {
     InterfaceReactor(HWDataPlane* dp);
     virtual void onIP(Interface::Ptr iface);
     virtual void onMAC(Interface::Ptr iface);
+    virtual void onEnabled(Interface::Ptr iface);
 
    protected:
     HWDataPlane* dp_;
@@ -80,7 +83,6 @@ class HWDataPlane : public DataPlane {
   };
 
   HWDataPlane(struct sr_instance* sr,
-              Fwk::Ptr<RoutingTable> routing_table,
               Fwk::Ptr<ARPCache> arp_cache);
 
   HWDataPlane(const HWDataPlane&);

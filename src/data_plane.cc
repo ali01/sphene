@@ -22,12 +22,11 @@ using std::string;
 
 DataPlane::DataPlane(const std::string& name,
                      struct sr_instance *sr,
-                     RoutingTable::Ptr routing_table,
                      ARPCache::Ptr arp_cache)
     : Fwk::NamedInterface(name),
       log_(Fwk::Log::LogNew(name)),
       iface_map_(InterfaceMap::InterfaceMapNew()),
-      routing_table_(routing_table),
+      routing_table_(NULL),
       arp_cache_(arp_cache),
       cp_(NULL),
       sr_(sr),
@@ -55,6 +54,11 @@ void DataPlane::outputPacketNew(EthernetPacket::PtrConst pkt,
   DLOG << "  dst: " << pkt->dst();
   DLOG << "  length: " << pkt->len();
   DLOG << "  type: " << pkt->type() << " (" << pkt->typeName() << ")";
+
+  if (!iface->enabled()) {
+    WLOG << "  output interface is disabled; ignoring";
+    return;
+  }
 
   if (pkt->type() == EthernetPacket::kIP) {
     EthernetPacket* _pkt = const_cast<EthernetPacket*>(pkt.ptr());
@@ -186,6 +190,11 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   DLOG << "  iface: " << iface->name();
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
+
+  if (pkt->dst() == "255.255.255.255") {
+    DLOG << "  ignoring IP broadcast packet";
+    return;
+  }
 
   // Look up IP Packet's destination.
   IPv4Addr dest_ip = pkt->dst();

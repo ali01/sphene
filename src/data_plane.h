@@ -43,13 +43,17 @@ class DataPlane : public Fwk::NamedInterface {
   // Sets the ControlPlane.
   void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
 
+  // Sets the RoutingTable.
+  virtual void routingTableIs(RoutingTable::Ptr rtable) {
+    routing_table_ = rtable;
+  }
+
   // Returns the router instance.
   struct sr_instance* instance() const { return sr_; }
 
  protected:
   DataPlane(const std::string& name,
             struct sr_instance* sr,
-            RoutingTable::Ptr routing_table,
             ARPCache::Ptr arp_cache);
   virtual ~DataPlane() {}
 

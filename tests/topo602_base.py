@@ -1,5 +1,5 @@
 '''
-Run a live test against a Sphene router running in VNS with topology 594.
+Run a live test against a Sphene router running in VNS with topology 602.
 
                                   eth0:10.3.0.115
                                   +======================+
@@ -52,6 +52,8 @@ def base_dir():
 BINARY = os.getenv('BINARY', os.path.join(base_dir(), 'build', 'sr'))
 REF_BINARY = os.getenv('REF_BINARY', os.path.join(base_dir(), 'sr_ref'))
 
+helloint = 5
+
 
 class Topo602:
   def __init__(self, binary1, binary2, binary3):
@@ -103,9 +105,11 @@ class Topo602:
     instance3 = self._bootstrap(self._binary3, cli_port + 2, 'vhost3',
                                 pass_rtable=False)
     instance3.start()
+    print 'bootstrapping complete.'
 
     # Wait for convergence.
-    time.sleep(13)  # a few seconds after a full helloint of 10 seconds
+    time.sleep(2 * helloint)  # including VNS startup time
+    print 'convergence time passed.'
 
   def _bootstrap(self, binary, cli_port, vhost, pass_rtable=False):
     '''Initialize a sphene instance for tests.'''
@@ -135,6 +139,51 @@ class Topo602:
     assert_true(network_lib.ping(self._rtr3_eth0))
     assert_true(network_lib.ping(self._rtr3_eth1))
     assert_true(network_lib.ping(self._rtr3_eth2))
+
+  def test_ping_app_servers(self):
+    '''Ping app servers'''
+    assert_true(network_lib.ping(self._app1))
+    assert_true(network_lib.ping(self._app2))
+
+  def _disable_interface(self, instance, iface_name):
+    '''Disable an interface on a router.'''
+    host = 'localhost'
+    port = instance.cli_port()
+
+    # Turn off interface.
+    cmd = 'ip intf %s down' % iface_name
+    assert_true(network_lib.send_cli_command(host, port, cmd))
+
+  def _enable_interface(self, instance, iface_name):
+    '''Enable an interface on a router.'''
+    host = 'localhost'
+    port = instance.cli_port()
+
+    # Turn on interface.
+    cmd = 'ip intf %s up' % iface_name
+    assert_true(network_lib.send_cli_command(host, port, cmd))
+
+  def _basic_connectivity_tests(self):
+    self.test_ping_router1_interfaces()
+    self.test_ping_router2_interfaces()
+    self.test_ping_router3_interfaces()
+    self.test_ping_app_servers()
+
+  def test_disable_rtr1_eth1(self):
+    '''Disable router 1 eth1'''
+    self._disable_interface(instance1, 'eth1')
+    time.sleep(3 * helloint)
+    self._basic_connectivity_tests()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-4:],
+        [self._rtr1_eth0, self._rtr3_eth0, self._rtr2_eth2, self._app1])
+
+    self._enable_interface(instance1, 'eth1')
+    time.sleep(3 * helloint)
+    self._basic_connectivity_tests()
+    assert_equal(
+        network_lib.traceroute(self._app1)[-3:],
+        [self._rtr1_eth0, self._rtr2_eth0, self._app1])
 
 
 def kill_all_instances():

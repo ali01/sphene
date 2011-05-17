@@ -91,6 +91,7 @@ class Test_Topo594:
                                          rtable_file=rtable_file,
                                          binary=BINARY)
     inst.start()
+    print 'bootstrapping complete.'
 
     # Wait for interface to come up.
     time.sleep(1)
