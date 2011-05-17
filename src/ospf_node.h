@@ -20,6 +20,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   typedef Fwk::Map<RouterID,OSPFLink>::iterator link_iter;
   typedef Fwk::Map<RouterID,OSPFLink>::const_iterator const_link_iter;
 
+  static const OSPFNode::Ptr kPassiveEndpoint;
   static const uint16_t kMaxDistance = 0xffff;
 
   static Ptr New(const RouterID& router_id) {

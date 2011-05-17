@@ -1,5 +1,10 @@
 #include "ospf_node.h"
 
+#include "ospf_constants.h"
+
+const OSPFNode::Ptr OSPFNode::kPassiveEndpoint =
+  OSPFNode::New(OSPF::kPassiveEndpointID);
+
 OSPFNode::OSPFNode(const RouterID& router_id)
     : router_id_(router_id),
       latest_seqno_(0),
