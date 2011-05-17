@@ -58,9 +58,6 @@ RoutingTable::lpm(const IPv4Addr& dest_ip) const {
   return self->lpm(dest_ip);
 }
 
-// TODO(ali): possible optimization - ignore ENTRY if it has the same
-//   gateway as an existing entry but has a more specific subnet (i.e. a
-//   greater subnet mask).
 void
 RoutingTable::entryIs(Entry::Ptr entry) {
   if (entry == NULL)
