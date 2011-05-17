@@ -65,8 +65,13 @@ RoutingTable::entryIs(Entry::Ptr entry) {
 
   IPv4Addr subnet = entry->subnet();
   IPv4Addr mask = entry->subnetMask();
-
   Entry::Ptr prev_entry = this->entry(subnet, mask);
+  if (entry->type() == Entry::kDynamic
+      && prev_entry->type() == Entry::kStatic) {
+    // Static entries take precedence.
+    // Do not replace existing static entry with dynamic one.
+    return;
+  }
 
   IPv4Subnet key = std::make_pair(subnet, mask);
   rtable_[key] = entry;
