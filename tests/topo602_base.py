@@ -1,5 +1,5 @@
 '''
-Run a live test against a Sphene router running in VNS with topology 594.
+Run a live test against a Sphene router running in VNS with topology 602.
 
                                   eth0:10.3.0.115
                                   +======================+
