@@ -13,33 +13,31 @@ OSPFInterfaceMap::OSPFInterfaceMap(InterfaceMap::Ptr iface_map)
 
 OSPFInterface::PtrConst
 OSPFInterfaceMap::interface(const IPv4Addr& addr) const {
-  OSPFInterfaceMap* self = const_cast<OSPFInterfaceMap*>(this);
-  return self->interface(addr);
+  return ifaces_.elem(addr);
 }
 
 OSPFInterface::Ptr
 OSPFInterfaceMap::interface(const IPv4Addr& addr) {
-  return ip_ifaces_.elem(addr);
-}
-
-OSPFInterface::PtrConst
-OSPFInterfaceMap::interface(const RouterID& nb_id) const {
-  return nbr_ifaces_.elem(nb_id);
-}
-
-OSPFInterface::Ptr
-OSPFInterfaceMap::interface(const RouterID& nb_id) {
-  return nbr_ifaces_.elem(nb_id);
+  return ifaces_.elem(addr);
 }
 
 OSPFGateway::PtrConst
-OSPFInterfaceMap::gateway(const RouterID& id) const {
-  return gateways_.elem(id);
+OSPFInterfaceMap::activeGateway(const RouterID& rid) const {
+  OSPFInterfaceMap* self = const_cast<OSPFInterfaceMap*>(this);
+  return self->activeGateway(rid);
 }
 
 OSPFGateway::Ptr
-OSPFInterfaceMap::gateway(const RouterID& id) {
-  return gateways_.elem(id);
+OSPFInterfaceMap::activeGateway(const RouterID& rid) {
+  OSPFGateway::Ptr gw_obj = NULL;
+  for (const_if_iter if_it = ifacesBegin(); if_it != ifacesEnd(); ++if_it) {
+    OSPFInterface::Ptr iface = if_it->second;
+    gw_obj = iface->activeGateway(rid);
+    if (gw_obj)
+      break;
+  }
+
+  return gw_obj;
 }
 
 size_t
@@ -61,29 +59,32 @@ OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
   IPv4Addr key = iface->interfaceIP();
   OSPFInterface::Ptr iface_prev = interface(key);
   if (iface_prev == iface) {
-    /* Early return if IFACE interface already
-       exists in this interface map. */
+    /* Test for pointer equivalence.
+       Early return if IFACE interface already exists in this interface map. */
     return;
   }
+
+  ifaces_[key] = iface;
 
   /* Set this interface map as IFACE's notifiee. */
   iface->notifieeIs(ospf_iface_reactor_);
 
-  ip_ifaces_[key] = iface;
-
+  /* Signal our own notifiee. */
   if (notifiee_)
-    notifiee_->onInterface(this, key);
+    notifiee_->onInterface(this, iface);
 
-  OSPFInterface::const_gw_iter it;
-  for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
-    OSPFGateway::Ptr gateway = it->second;
-    RouterID nd_id = gateway->node()->routerID();
-
-    nbr_ifaces_[nd_id] = iface;
-    gateways_[nd_id] = gateway;
-
+  for (OSPFInterface::const_gwa_iter it = iface->activeGatewaysBegin();
+       it != iface->activeGatewaysEnd(); ++it) {
+    OSPFGateway::Ptr gw_obj = it->second;
     if (notifiee_)
-      notifiee_->onGateway(this, iface, nd_id);
+      notifiee_->onGateway(this, iface, gw_obj);
+  }
+
+  for (OSPFInterface::const_gwp_iter it = iface->passiveGatewaysBegin();
+       it != iface->passiveGatewaysEnd(); ++it) {
+    OSPFGateway::Ptr gw_obj = it->second;
+    if (notifiee_)
+      notifiee_->onGateway(this, iface, gw_obj);
   }
 }
 
@@ -92,9 +93,6 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   if (iface == NULL)
     return;
 
-  /* Remove this interface map as IFACE's notifiee. */
-  iface->notifieeIs(NULL);
-
   IPv4Addr key = iface->interfaceIP();
   iface = this->interface(key);
   if (iface == NULL) {
@@ -102,22 +100,28 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
     return;
   }
 
-  ip_ifaces_.elemDel(key);
+  ifaces_.elemDel(key);
 
-  OSPFInterface::const_gw_iter it;
-  for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
-    OSPFGateway::Ptr gateway = it->second;
-    RouterID nd_id = gateway->node()->routerID();
+  /* Remove this interface map as IFACE's notifiee. */
+  iface->notifieeIs(NULL);
 
-    nbr_ifaces_.elemDel(nd_id);
-    gateways_.elemDel(nd_id);
-
+  /* Signal our own notifiee. */
+  for (OSPFInterface::const_gwa_iter it = iface->activeGatewaysBegin();
+       it != iface->activeGatewaysEnd(); ++it) {
+    OSPFGateway::Ptr gw_obj = it->second;
     if (notifiee_)
-      notifiee_->onGatewayDel(this, iface, nd_id);
+      notifiee_->onGatewayDel(this, iface, gw_obj);
+  }
+
+  for (OSPFInterface::const_gwp_iter it = iface->passiveGatewaysBegin();
+       it != iface->passiveGatewaysEnd(); ++it) {
+    OSPFGateway::Ptr gw_obj = it->second;
+    if (notifiee_)
+      notifiee_->onGatewayDel(this, iface, gw_obj);
   }
 
   if (notifiee_)
-    notifiee_->onInterfaceDel(this, key);
+    notifiee_->onInterfaceDel(this, iface);
 }
 
 void
@@ -130,22 +134,16 @@ OSPFInterfaceMap::interfaceDel(const IPv4Addr& addr) {
 
 void
 OSPFInterfaceMap::OSPFInterfaceReactor::onGateway(OSPFInterface::Ptr iface,
-                                                  const RouterID& id) {
-  iface_map_->nbr_ifaces_[id] = iface;
-  iface_map_->gateways_[id] = iface->gateway(id);
-
+                                                  OSPFGateway::Ptr gw_obj) {
   if (iface_map_->notifiee_)
-    iface_map_->notifiee_->onGateway(iface_map_, iface, id);
+    iface_map_->notifiee_->onGateway(iface_map_, iface, gw_obj);
 }
 
 void
 OSPFInterfaceMap::OSPFInterfaceReactor::onGatewayDel(OSPFInterface::Ptr iface,
-                                                     const RouterID& id) {
-  iface_map_->nbr_ifaces_.elemDel(id);
-  iface_map_->gateways_.elemDel(id);
-
+                                                     OSPFGateway::Ptr gw_obj) {
   if (iface_map_->notifiee_)
-    iface_map_->notifiee_->onGatewayDel(iface_map_, iface, id);
+    iface_map_->notifiee_->onGatewayDel(iface_map_, iface, gw_obj);
 }
 
 void

@@ -40,29 +40,35 @@ OSPFInterface::timeSinceOutgoingHello() const {
   return time(NULL) - last_outgoing_hello_;
 }
 
-OSPFGateway::Ptr
-OSPFInterface::gateway(const RouterID& router_id) {
-  return rid_gateways_.elem(router_id);
-}
-
-OSPFGateway::PtrConst
-OSPFInterface::gateway(const RouterID& router_id) const {
-  return rid_gateways_.elem(router_id);
-}
-
-OSPFGateway::Ptr
-OSPFInterface::gateway(const IPv4Addr& gateway) {
-  return ip_gateways_.elem(gateway);
-}
-
-OSPFGateway::PtrConst
-OSPFInterface::gateway(const IPv4Addr& gateway) const {
-  return ip_gateways_.elem(gateway);
-}
-
 void
 OSPFInterface::timeSinceOutgoingHelloIs(Seconds delta) {
   last_outgoing_hello_ = time(NULL) - delta.value();
+}
+
+OSPFGateway::Ptr
+OSPFInterface::activeGateway(const RouterID& router_id) {
+  return active_gateways_.elem(router_id);
+}
+
+OSPFGateway::PtrConst
+OSPFInterface::activeGateway(const RouterID& router_id) const {
+  return active_gateways_.elem(router_id);
+}
+
+OSPFGateway::Ptr
+OSPFInterface::passiveGateway(const IPv4Addr& subnet, const IPv4Addr& mask) {
+  return passive_gateways_.elem(std::make_pair(subnet, mask));
+}
+
+OSPFGateway::PtrConst
+OSPFInterface::passiveGateway(const IPv4Addr& subnet,
+                              const IPv4Addr& mask) const {
+  return passive_gateways_.elem(std::make_pair(subnet, mask));
+}
+
+size_t
+OSPFInterface::gateways() const {
+  return activeGateways() + passiveGateways();
 }
 
 void
@@ -70,38 +76,46 @@ OSPFInterface::gatewayIs(OSPFGateway::Ptr gw_obj) {
   if (gw_obj == NULL)
     return;
 
-  OSPFNode::Ptr node = gw_obj->node();
-  RouterID nd_id = node->routerID();
-  OSPFGateway::Ptr gw_prev = rid_gateways_.elem(nd_id);
+  OSPFGateway::Ptr gw_prev;
+  if (gw_obj->nodeIsPassiveEndpoint()) {
+    IPv4Subnet subnet = std::make_pair(gw_obj->subnet(), gw_obj->subnetMask());
+    gw_prev = passiveGateway(gw_obj->subnet(), gw_obj->subnetMask());
+    passive_gateways_[subnet] = gw_obj;
 
-  /* Adding to OSPFGateway pointer maps. */
-  rid_gateways_[nd_id] = gw_obj;
-  ip_gateways_[nd_id] = gw_obj;
+  } else {
+    RouterID nd_id = gw_obj->nodeRouterID();
+    gw_prev = activeGateway(nd_id);
+    active_gateways_[nd_id] = gw_obj;
+  }
 
   /* Adding this interface to gw_obj. */
   gw_obj->interfaceIs(this);
 
   if (notifiee_ && (gw_prev == NULL || *gw_obj != *gw_prev))
-    notifiee_->onGateway(this, nd_id);
+    notifiee_->onGateway(this, gw_obj);
 }
 
 void
-OSPFInterface::gatewayDel(const RouterID& router_id) {
-  OSPFGateway::Ptr gw_obj = gateway(router_id);
+OSPFInterface::activeGatewayDel(const RouterID& router_id) {
+  OSPFGateway::Ptr gw_obj = activeGateway(router_id);
   if (gw_obj) {
-    /* Deleting from all three maps. */
-    rid_gateways_.elemDel(router_id);
-    ip_gateways_.elemDel(router_id);
+    active_gateways_.elemDel(router_id);
 
     /* Signaling notifiee. */
     if (notifiee_)
-      notifiee_->onGatewayDel(this, router_id);
+      notifiee_->onGatewayDel(this, gw_obj);
   }
 }
 
 void
-OSPFInterface::gatewayDel(const IPv4Addr& addr) {
-  OSPFGateway::Ptr gw_obj = ip_gateways_[addr];
-  if (gw_obj)
-    gatewayDel(gw_obj->nodeRouterID());
+OSPFInterface::passiveGatewayDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
+  OSPFGateway::Ptr gw_obj = passiveGateway(subnet, mask);
+  if (gw_obj) {
+    IPv4Subnet subnet_key = std::make_pair(subnet, mask);
+    passive_gateways_.elemDel(subnet_key);
+
+    /* Signaling notifiee. */
+    if (notifiee_)
+      notifiee_->onGatewayDel(this, gw_obj);
+  }
 }

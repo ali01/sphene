@@ -1,12 +1,12 @@
 #ifndef OSPF_NEIGHBOR_MAP_H_596RSZ34
 #define OSPF_NEIGHBOR_MAP_H_596RSZ34
 
-#include "fwk/linked_list.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
 #include "interface_map.h"
 #include "ipv4_addr.h"
+#include "ipv4_subnet.h"
 #include "ospf_interface.h"
 #include "ospf_types.h"
 
@@ -19,9 +19,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   typedef Fwk::Map<IPv4Addr,OSPFInterface>::iterator if_iter;
   typedef Fwk::Map<IPv4Addr,OSPFInterface>::const_iterator const_if_iter;
 
-  typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iter;
-  typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iter;
-
+  /* Factory constructor. */
   static Ptr New(InterfaceMap::Ptr iface_map) {
     return new OSPFInterfaceMap(iface_map);
   }
@@ -33,12 +31,12 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
     typedef Fwk::Ptr<Notifiee> Ptr;
 
     /* Notifications supported */
-    virtual void onInterface(OSPFInterfaceMap::Ptr, const IPv4Addr&) {}
-    virtual void onInterfaceDel(OSPFInterfaceMap::Ptr, const IPv4Addr&) {}
-    virtual void onGateway(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr iface,
-                           const RouterID&) {}
-    virtual void onGatewayDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr iface,
-                              const RouterID&) {}
+    virtual void onInterface(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr) {}
+    virtual void onInterfaceDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr) {}
+    virtual void onGateway(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr,
+                           OSPFGateway::Ptr) {}
+    virtual void onGatewayDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr,
+                              OSPFGateway::Ptr) {}
 
    protected:
     Notifiee() {}
@@ -55,13 +53,10 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   OSPFInterface::PtrConst interface(const IPv4Addr& iface_ip) const;
   OSPFInterface::Ptr interface(const IPv4Addr& iface_ip);
 
-  OSPFInterface::PtrConst interface(const RouterID& neighbor_id) const;
-  OSPFInterface::Ptr interface(const RouterID& neighbor_id);
+  OSPFGateway::PtrConst activeGateway(const RouterID& rid) const;
+  OSPFGateway::Ptr activeGateway(const RouterID& rid);
 
-  OSPFGateway::PtrConst gateway(const RouterID& id) const;
-  OSPFGateway::Ptr gateway(const RouterID& id);
-
-  size_t interfaces() const { return ip_ifaces_.size(); }
+  size_t interfaces() const { return ifaces_.size(); }
   size_t gateways() const;
 
   Notifiee::PtrConst notifiee() const { return notifiee_; }
@@ -77,15 +72,10 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
   /* Iterators. */
 
-  if_iter ifacesBegin() { return ip_ifaces_.begin(); }
-  if_iter ifacesEnd() { return ip_ifaces_.end(); }
-  const_if_iter ifacesBegin() const { return ip_ifaces_.begin(); }
-  const_if_iter ifacesEnd() const { return ip_ifaces_.end(); }
-
-  gw_iter gatewaysBegin() { return gateways_.begin(); }
-  gw_iter gatewaysEnd() { return gateways_.end(); }
-  const_gw_iter gatewaysBegin() const { return gateways_.begin(); }
-  const_gw_iter gatewaysEnd() const { return gateways_.end(); }
+  if_iter ifacesBegin() { return ifaces_.begin(); }
+  if_iter ifacesEnd() { return ifaces_.end(); }
+  const_if_iter ifacesBegin() const { return ifaces_.begin(); }
+  const_if_iter ifacesEnd() const { return ifaces_.end(); }
 
  protected:
   OSPFInterfaceMap(InterfaceMap::Ptr iface_map);
@@ -100,8 +90,8 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
       return new OSPFInterfaceReactor(_im);
     }
 
-    void onGateway(OSPFInterface::Ptr iface, const RouterID& id);
-    void onGatewayDel(OSPFInterface::Ptr iface, const RouterID& id);
+    void onGateway(OSPFInterface::Ptr iface, OSPFGateway::Ptr gw);
+    void onGatewayDel(OSPFInterface::Ptr iface, OSPFGateway::Ptr gw);
 
    private:
     OSPFInterfaceReactor(OSPFInterfaceMap* _im) : iface_map_(_im) {}
@@ -140,13 +130,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
   /* Data members. */
 
   /* Map: Interface IP address => interface object. */
-  Fwk::Map<IPv4Addr,OSPFInterface> ip_ifaces_;
-
-  /* Map: RouterID => Interface object. */
-  Fwk::Map<RouterID,OSPFInterface> nbr_ifaces_;
-
-  /* Map: RouterID => Gateway object. */
-  Fwk::Map<RouterID,OSPFGateway> gateways_;
+  Fwk::Map<IPv4Addr,OSPFInterface> ifaces_;
 
   /* Reactors to Interface notifications. */
   OSPFInterfaceReactor::Ptr ospf_iface_reactor_;

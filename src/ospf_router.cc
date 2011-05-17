@@ -159,7 +159,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   }
 
   RouterID neighbor_id = pkt->routerID();
-  OSPFGateway::Ptr gw_obj = ifd->gateway(neighbor_id);
+  OSPFGateway::Ptr gw_obj = ifd->activeGateway(neighbor_id);
 
   if (gw_obj == NULL) {
     /* Packet was sent by a new neighbor.
@@ -272,7 +272,8 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
   RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
                                                  iface->interfaceSubnetMask());
   if (entry) {
-    OSPFGateway::Ptr gw_obj = iface->gateway(entry->gateway());
+    OSPFGateway::Ptr gw_obj = iface->passiveGateway(entry->subnet(),
+                                                    entry->subnetMask());
     if (gw_obj == NULL)
       ospf_router_->rtable_reactor_->onEntry(rtable, entry);
   }
@@ -281,25 +282,20 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
 void
 OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                OSPFInterface::Ptr iface,
-                                               const RouterID& nd_id) {
-  OSPFGateway::Ptr gw = _im->gateway(nd_id);
-
-  /* Add node to the topology if it wasn't already there. */
-  ospf_router_->topology_->nodeIs(gw->node(), false);
-
-  ospf_router_->router_node_->linkIs(gw);
+                                               OSPFGateway::Ptr gw_obj) {
+  ospf_router_->topology_->nodeIs(gw_obj->node(), false);
+  ospf_router_->router_node_->linkIs(gw_obj);
   ospf_router_->lsu_dirty_ = true;
 }
 
 void
 OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
                                                   OSPFInterface::Ptr iface,
-                                                  const RouterID& nd_id) {
+                                                  OSPFGateway::Ptr gw_obj) {
+  RouterID nd_id = gw_obj->nodeRouterID();
   ospf_router_->router_node_->linkDel(nd_id);
-  ospf_router_->lsu_dirty_ = true;
-
-  /* Remove node from topology. */
   ospf_router_->topology_->nodeDel(nd_id);
+  ospf_router_->lsu_dirty_ = true;
 }
 
 /* OSPFRouter::RoutingTableReactor. */
@@ -330,7 +326,7 @@ OSPFRouter::RoutingTableReactor::onEntryDel(RoutingTable::Ptr rtable,
 
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
-  iface->gatewayDel(entry->gateway());
+  iface->passiveGatewayDel(entry->subnet(), entry->subnetMask());
 }
 
 /* OSPFRouter private member functions */
@@ -372,25 +368,29 @@ OSPFRouter::rtable_update() {
 void
 OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
                             OSPFNode::PtrConst dest) {
+  if (next_hop->isPassiveEndpoint() || dest->isPassiveEndpoint()) {
+    ELOG << "rtable_add_dest: next_hop or dest are passive endpoints.";
+    return;
+  }
+
   RouterID next_hop_id = next_hop->routerID();
   RouterID dest_id = dest->routerID();
 
-  OSPFGateway::Ptr gw_obj = interfaces_->gateway(next_hop_id);
+  OSPFGateway::Ptr gw_obj = interfaces_->activeGateway(next_hop_id);
   if (gw_obj == NULL) {
     ELOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
     return;
   }
 
-  OSPFNode::const_nb_iter it;
-  for (it = dest->neighborsBegin(); it != dest->neighborsEnd(); ++it) {
-    OSPFNode::Ptr neighbor = it->second;
-    if (dest->prev() == neighbor && dest_id != next_hop_id) {
+  OSPFNode::const_link_iter it;
+  for (it = dest->linksBegin(); it != dest->linksEnd(); ++it) {
+    OSPFLink::Ptr link = it->second;
+    if (dest->prev() == link->node() && dest_id != next_hop_id) {
       /* Don't add the subnet through which we are connected to DEST unless
          the next hop to DEST is DEST itself. */
       continue;
     }
 
-    OSPFLink::PtrConst link = dest->link(neighbor->routerID());
     rtable_add_gateway(link->subnet(),
                        link->subnetMask(),
                        gw_obj->gateway(),
@@ -503,42 +503,29 @@ OSPFRouter::flood_lsu() {
 
 void
 OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
-  OSPFInterface::const_gw_iter it;
-  for (it = iface->gatewaysBegin(); it != iface->gatewaysEnd(); ++it) {
+  OSPFInterface::const_gwa_iter it;
+  for (it = iface->activeGatewaysBegin();
+       it != iface->activeGatewaysEnd(); ++it) {
     OSPFGateway::Ptr gw_obj = it->second;
-    OSPFNode::Ptr nbr = gw_obj->node();
-    if (nbr->isPassiveEndpoint()){
-      /* Do not send link-state updates to non-OSPF endpoints. */
-      continue;
-    }
+    OSPFLSUPacket::Ptr ospf_pkt = build_lsu_to_gateway(iface, gw_obj);
 
-    OSPFLSUPacket::Ptr ospf_pkt = build_lsu_to_neighbor(iface, nbr->routerID());
-
-    DLOG << "Sending link-state update to " << nbr->routerID();
+    DLOG << "Sending link-state update to " << gw_obj->nodeRouterID();
     outputPacketNew(ospf_pkt);
   }
 }
 
 OSPFLSUPacket::Ptr
-OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
-                                  const RouterID& nbr_id) const {
-  if (nbr_id == 0 || nbr_id == OSPF::kInvalidRouterID) {
+OSPFRouter::build_lsu_to_gateway(OSPFInterface::Ptr iface,
+                                 OSPFGateway::Ptr gw_obj) const {
+  if (gw_obj->nodeIsPassiveEndpoint()) {
     ELOG << "send_new_lsu_to_neighbor: Attempt to build link-state update to "
-            "a node with an invalid router ID";
+            "a passive endpoint.";
     return NULL;
   }
 
-  OSPFGateway::Ptr gw_obj = iface->gateway(nbr_id);
-  if (gw_obj == NULL) {
-    ELOG << "send_new_lsu_to_neighbor: Node with specified NBR_ID is not "
-         << "directly connected to IFACE.";
-    return NULL;
-  }
-
-  OSPFNode::Ptr nbr = gw_obj->node();
-  if (nbr->isPassiveEndpoint()) {
-    ELOG << "send_new_lsu_to_neighbor: Attempt to build link-state update to "
-         << "non-OSPF endpoint";
+  if (gw_obj->nodeRouterID() == OSPF::kInvalidRouterID) {
+    ELOG << "send_new_lsu_to_neighbor: Attempt to build a link-state update to "
+         << "a node with an invalid router ID.";
     return NULL;
   }
 
@@ -556,13 +543,12 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
     OSPFLSUPacket::NewDefault(buffer, routerID(), areaID(),
                               adv_count, lsu_seqno_);
 
-  OSPFInterface::const_gw_iter gw_it = interfaces_->gatewaysBegin();
-  for (uint32_t ix = 0; gw_it != interfaces_->gatewaysEnd(); ++gw_it, ++ix) {
-    OSPFGateway::Ptr gw = gw_it->second;
-    OSPFLSUAdvertisement::Ptr adv = ospf_pkt->advertisement(ix);
-    adv->routerIDIs(gw->nodeRouterID());
-    adv->subnetIs(gw->subnet());
-    adv->subnetMaskIs(gw->subnetMask());
+  /* Setting packet's LSU advertisements. */
+  uint32_t ix = 0;
+  for (OSPFInterfaceMap::const_if_iter it = interfaces_->ifacesBegin();
+       it != interfaces_->ifacesEnd(); ++it) {
+    OSPFInterface::Ptr iface = it->second;
+    set_lsu_adv_from_interface(ospf_pkt, iface, ix);
   }
 
   ospf_pkt->checksumReset();
@@ -581,29 +567,44 @@ OSPFRouter::build_lsu_to_neighbor(OSPFInterface::Ptr iface,
 }
 
 void
+OSPFRouter::set_lsu_adv_from_interface(OSPFLSUPacket::Ptr pkt,
+                                       OSPFInterface::Ptr iface,
+                                       uint32_t& starting_ix) {
+  for (OSPFInterface::const_gwp_iter gw_it = iface->passiveGatewaysBegin();
+       gw_it != iface->passiveGatewaysEnd(); ++gw_it, ++starting_ix) {
+    OSPFGateway::Ptr gw = gw_it->second;
+    OSPFLSUAdvertisement::Ptr adv = pkt->advertisement(starting_ix);
+    adv->routerIDIs(gw->nodeRouterID());
+    adv->subnetIs(gw->subnet());
+    adv->subnetMaskIs(gw->subnetMask());
+  }
+
+  for (OSPFInterface::const_gwa_iter gw_it = iface->activeGatewaysBegin();
+       gw_it != iface->activeGatewaysEnd(); ++gw_it, ++starting_ix) {
+    OSPFGateway::Ptr gw = gw_it->second;
+    OSPFLSUAdvertisement::Ptr adv = pkt->advertisement(starting_ix);
+    adv->routerIDIs(gw->nodeRouterID());
+    adv->subnetIs(gw->subnet());
+    adv->subnetMaskIs(gw->subnetMask());
+  }
+}
+
+void
 OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
   RouterID sender_id = pkt->routerID();
 
   OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
   for (; if_it != interfaces_->ifacesEnd(); ++if_it) {
     OSPFInterface::PtrConst iface = if_it->second;
-    OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
-    for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
+    OSPFInterface::const_gwa_iter gw_it = iface->activeGatewaysBegin();
+    for (; gw_it != iface->activeGatewaysEnd(); ++gw_it) {
       OSPFGateway::Ptr gw_obj = gw_it->second;
-      OSPFNode::Ptr nbr = gw_obj->node();
-      RouterID nbr_id = nbr->routerID();
-
-      if (nbr->isPassiveEndpoint()) {
-        /* Do not forward link-state update floods to non-OSPF neighbors. */
-        continue;
-      }
-
-      if (nbr_id == sender_id) {
+      if (gw_obj->nodeRouterID() == sender_id) {
         /* Do not forward link-state update flood to its original sender. */
         continue;
       }
 
-      forward_pkt_to_neighbor(nbr_id, pkt);
+      forward_packet_to_gateway(pkt, gw_obj);
     }
   }
 }
@@ -693,28 +694,21 @@ OSPFRouter::unstage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 }
 
 void
-OSPFRouter::forward_pkt_to_neighbor(const RouterID& neighbor_id,
-                                    OSPFPacket::Ptr pkt) const {
-  if (neighbor_id == 0 || neighbor_id == OSPF::kInvalidRouterID) {
-    ELOG << "forward_pkt_to_neighbor: Attempt to forward an OSPF packet to a "
-            "neighbor with an invalid router ID.";
-    return;
-  }
-
-  OSPFInterface::PtrConst iface = interfaces_->interface(neighbor_id);
-  if (iface == NULL) {
-    ELOG << "send_pkt_to_node: Node with NEIGHBOR_ID is not directly connected "
-         << "to this router";
-    return;
-  }
-
-  OSPFGateway::PtrConst gw_obj = iface->gateway(neighbor_id);
+OSPFRouter::forward_packet_to_gateway(OSPFPacket::Ptr pkt,
+                                      OSPFGateway::Ptr gw_obj) const {
   if (gw_obj->nodeIsPassiveEndpoint()) {
-    ELOG << "forward_pkt_to_neighbor: Attempt to forward an OSPF packet to a "
-         << "non-OSPF neighbor.";
+    ELOG << "forward_packet_to_gateway: Attempt to forward OSPF packet to "
+         << "passive endpoint.";
     return;
   }
 
+  if (gw_obj->nodeRouterID() == OSPF::kInvalidRouterID) {
+    ELOG << "forward_packet_to_gateway: Attempt to forward an OSPF packet to "
+            "an endpoint with an invalid router ID.";
+    return;
+  }
+
+  OSPFInterface::Ptr iface = gw_obj->interface();
   IPv4Addr src_addr = iface->interfaceIP();
   IPv4Addr dst_addr = gw_obj->gateway();
 

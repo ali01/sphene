@@ -575,42 +575,77 @@ void cli_show_ospf() {
     cli_show_ospf_topo();
 }
 
+void cli_show_ospf_gateway(OSPFGateway::PtrConst gw_obj) {
+  char line_buf[256];
+  const char* const line_format = "  %-11s %-16u %-16s %-16s %-16s\n";
+
+  RouterID nd_id = gw_obj->nodeRouterID();
+  OSPFInterface::PtrConst iface = gw_obj->interface();
+
+  const string& iface_str = iface->interfaceName();
+  const string& gw_str = gw_obj->gateway();
+  const string& subnet_str = gw_obj->subnet();
+  const string& mask_str = gw_obj->subnetMask();
+
+  snprintf(line_buf, sizeof(line_buf), line_format,
+           iface_str.c_str(), nd_id, gw_str.c_str(),
+           subnet_str.c_str(), mask_str.c_str());
+  cli_send_str(line_buf);
+}
+
+void cli_show_ospf_interface(OSPFInterface::PtrConst iface) {
+  char line_buf[1024];
+
+  // Interface format.
+  const char* const iface_format = "Interface %s:\n";
+
+  // Line format.
+  const char* const header_format = "    %-11s %-16s %-16s %-16s %-16s\n";
+
+  // Interface header.
+  snprintf(line_buf, sizeof(line_buf), iface_format,
+           iface->interface()->name().c_str());
+  cli_send_str(line_buf);
+
+  // Active OSPF neighbors.
+  cli_send_str("  Active OSPF Neighbors:\n");
+  snprintf(line_buf, sizeof(line_buf), header_format,
+          "Interface", "Router ID", "Gateway", "Subnet", "Mask");
+  cli_send_str(line_buf);
+
+  for (OSPFInterface::const_gwa_iter it = iface->activeGatewaysBegin();
+       it != iface->activeGatewaysEnd(); ++it) {
+    OSPFGateway::PtrConst gw_obj = it->second;
+    cli_show_ospf_gateway(gw_obj);
+  }
+
+  cli_send_str("\n");
+
+  // Passive endpoints.
+  cli_send_str("  Passive Endpoints:\n");
+  snprintf(line_buf, sizeof(line_buf), header_format,
+          "Interface", "Router ID", "Gateway", "Subnet", "Mask");
+  cli_send_str(line_buf);
+
+  for (OSPFInterface::const_gwp_iter it = iface->passiveGatewaysBegin();
+       it != iface->passiveGatewaysEnd(); ++it) {
+    OSPFGateway::PtrConst gw_obj = it->second;
+    cli_show_ospf_gateway(gw_obj);
+  }
+
+  cli_send_str("\n");
+}
+
 void cli_show_ospf_neighbors() {
   struct sr_instance* sr = get_sr();
   OSPFRouter::PtrConst ospf_router = sr->router->controlPlane()->ospfRouter();
   OSPFInterfaceMap::PtrConst iface_map = ospf_router->interfaceMap();
 
-  // Buffers for proper formatting
-  char line_buf[256];
-
-  // Line format.
-  const char* const header_format = "  %-11s %-16s %-16s %-16s %-16s\n";
-  const char* const line_format = "  %-11s %-16u %-16s %-16s %-16s\n";
-
-  // Output header.
-  cli_send_str("OSPF Neighbors:\n");
-  snprintf(line_buf, sizeof(line_buf), header_format,
-          "Interface", "Router ID", "Gateway", "Subnet", "Mask");
-  cli_send_str(line_buf);
-
-  OSPFInterfaceMap::const_gw_iter it;
-  for (it = iface_map->gatewaysBegin(); it != iface_map->gatewaysEnd(); ++it) {
-    OSPFGateway::PtrConst gw_obj = it->second;
-    RouterID nd_id = gw_obj->nodeRouterID();
-    OSPFInterface::PtrConst iface = iface_map->interface(nd_id);
-
-    const string& iface_str = iface->interfaceName();
-    const string& gw_str = gw_obj->gateway();
-    const string& subnet_str = gw_obj->gateway();
-    const string& mask_str = gw_obj->subnetMask();
-
-    snprintf(line_buf, sizeof(line_buf), line_format,
-             iface_str.c_str(), nd_id, gw_str.c_str(),
-             subnet_str.c_str(), mask_str.c_str());
-    cli_send_str(line_buf);
+  for (OSPFInterfaceMap::const_if_iter it = iface_map->ifacesBegin();
+       it != iface_map->ifacesEnd(); ++it) {
+    OSPFInterface::PtrConst iface = it->second;
+    cli_show_ospf_interface(iface);
   }
-
-  cli_send_str("\n");
 }
 
 void cli_show_ospf_topo() {

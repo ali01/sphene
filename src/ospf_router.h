@@ -170,10 +170,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     }
 
     void onInterface(OSPFInterfaceMap::Ptr _im, const IPv4Addr& addr);
-    void onGateway(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr iface,
-                   const RouterID&);
-    void onGatewayDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr iface,
-                      const RouterID&);
+    void onGateway(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr, OSPFGateway::Ptr);
+    void onGatewayDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr,
+                      OSPFGateway::Ptr);
 
    private:
     OSPFInterfaceMapReactor(OSPFRouter* _r) : ospf_router_(_r) {}
@@ -250,9 +249,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
 
-  /* Forwards PKT to the node in the topology with DEST_ID. */
-  void forward_pkt_to_neighbor(const RouterID& neighbor_id,
-                               Fwk::Ptr<OSPFPacket> pkt) const;
+  /* Forwards OSPF PKT to the node in the topology with DEST_ID. */
+  void forward_packet_to_gateway(Fwk::Ptr<OSPFPacket> pkt,
+                                 Fwk::Ptr<OSPFGateway> gw_obj) const;
 
   /* Sends the given LSU packet to all neighbors except the packet's original
      sender. */
@@ -266,8 +265,12 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* Constructs a full link-state update packet destined to neighbor with id
      NBR_ID connected at interface IFACE. */
-  Fwk::Ptr<OSPFLSUPacket> build_lsu_to_neighbor(Fwk::Ptr<OSPFInterface> iface,
-                                                const RouterID& nbr_id) const;
+  Fwk::Ptr<OSPFLSUPacket> build_lsu_to_gateway(Fwk::Ptr<OSPFInterface>,
+                                               Fwk::Ptr<OSPFGateway>) const;
+
+  static void set_lsu_adv_from_interface(Fwk::Ptr<OSPFLSUPacket>,
+                                         Fwk::Ptr<OSPFInterface>,
+                                         uint32_t& starting_ix);
 
   /* Obtains the staged NeighborRelationship object with the specified
      LSU_SENDER_ID and ADVERTISED_NEIGHBOR_ID from the LINKS_STAGED

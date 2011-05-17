@@ -8,6 +8,7 @@
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
+#include "ipv4_subnet.h"
 #include "ospf_gateway.h"
 #include "ospf_node.h"
 #include "ospf_types.h"
@@ -22,9 +23,15 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   typedef Fwk::Ptr<const OSPFInterface> PtrConst;
   typedef Fwk::Ptr<OSPFInterface> Ptr;
 
-  typedef Fwk::Map<RouterID,OSPFGateway>::iterator gw_iter;
-  typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gw_iter;
+  /* Active gateway iterators. */
+  typedef Fwk::Map<RouterID,OSPFGateway>::iterator gwa_iter;
+  typedef Fwk::Map<RouterID,OSPFGateway>::const_iterator const_gwa_iter;
 
+  /* Passive gateway iterators. */
+  typedef Fwk::Map<IPv4Subnet,OSPFGateway>::iterator gwp_iter;
+  typedef Fwk::Map<IPv4Subnet,OSPFGateway>::const_iterator const_gwp_iter;
+
+  /* Factory constructor. */
   static Ptr New(Fwk::Ptr<const Interface> iface, uint16_t helloint);
 
   /* Notification support. */
@@ -34,8 +41,8 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
     typedef Fwk::Ptr<Notifiee> Ptr;
 
     /* Notifications supported. */
-    virtual void onGateway(OSPFInterface::Ptr iface, const RouterID& id) {}
-    virtual void onGatewayDel(OSPFInterface::Ptr iface, const RouterID& id) {}
+    virtual void onGateway(OSPFInterface::Ptr iface, OSPFGateway::Ptr gw) {}
+    virtual void onGatewayDel(OSPFInterface::Ptr iface, OSPFGateway::Ptr gw) {}
 
    protected:
     Notifiee() {}
@@ -58,32 +65,44 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   uint16_t helloint() const { return helloint_; }
   Seconds timeSinceOutgoingHello() const;
 
-  OSPFGateway::Ptr gateway(const RouterID& router_id);
-  OSPFGateway::PtrConst gateway(const RouterID& router_id) const;
+  OSPFGateway::Ptr activeGateway(const RouterID& router_id);
+  OSPFGateway::PtrConst activeGateway(const RouterID& router_id) const;
 
-  OSPFGateway::Ptr gateway(const IPv4Addr& gateway);
-  OSPFGateway::PtrConst gateway(const IPv4Addr& gateway) const;
+  OSPFGateway::Ptr passiveGateway(const IPv4Addr& subnet, const IPv4Addr& mask);
+  OSPFGateway::PtrConst passiveGateway(const IPv4Addr& subnet,
+                                       const IPv4Addr& mask) const;
 
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
-  size_t gateways() const { return rid_gateways_.size(); }
+  size_t gateways() const;
+  size_t activeGateways() const { return active_gateways_.size(); }
+  size_t passiveGateways() const { return passive_gateways_.size(); }
 
   /* Mutators. */
 
   void timeSinceOutgoingHelloIs(Seconds delta);
 
   void gatewayIs(OSPFGateway::Ptr gateway);
-  void gatewayDel(const RouterID& router_id);
-  void gatewayDel(const IPv4Addr& addr);
+  void activeGatewayDel(const RouterID& router_id);
+  void passiveGatewayDel(const IPv4Addr& subnet, const IPv4Addr& mask);
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
   /* Iterators. */
 
-  gw_iter gatewaysBegin() { return rid_gateways_.begin(); }
-  gw_iter gatewaysEnd() { return rid_gateways_.end(); }
-  const_gw_iter gatewaysBegin() const { return rid_gateways_.begin(); }
-  const_gw_iter gatewaysEnd() const { return rid_gateways_.end(); }
+  gwa_iter activeGatewaysBegin() { return active_gateways_.begin(); }
+  gwa_iter activeGatewaysEnd() { return active_gateways_.end(); }
+  const_gwa_iter activeGatewaysEnd() const { return active_gateways_.end(); }
+  const_gwa_iter activeGatewaysBegin() const {
+    return active_gateways_.begin();
+  }
+
+  gwp_iter passiveGatewaysBegin() { return passive_gateways_.begin(); }
+  gwp_iter passiveGatewaysEnd() { return passive_gateways_.end(); }
+  const_gwp_iter passiveGatewaysEnd() const { return passive_gateways_.end(); }
+  const_gwp_iter passiveGatewaysBegin() const {
+    return passive_gateways_.begin();
+  }
 
  private:
   OSPFInterface(Fwk::Ptr<const Interface> iface, uint16_t helloint);
@@ -94,8 +113,8 @@ class OSPFInterface : public Fwk::PtrInterface<OSPFInterface> {
   time_t last_outgoing_hello_;
 
   /* Map of all neighbors directly attached to this router. */
-  Fwk::Map<RouterID,OSPFGateway> rid_gateways_;
-  Fwk::Map<IPv4Addr,OSPFGateway> ip_gateways_;
+  Fwk::Map<RouterID,OSPFGateway> active_gateways_;
+  Fwk::Map<IPv4Subnet,OSPFGateway> passive_gateways_;
 
   /* Singleton notifiee. */
   Notifiee::Ptr notifiee_;

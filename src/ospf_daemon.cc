@@ -94,7 +94,7 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
     }
 
     if (ospf_router_->routerID() == peer_nd_id
-        && ospf_router_->interfaceMap()->gateway(nd_id) != NULL) {
+        && ospf_router_->interfaceMap()->activeGateway(nd_id) != NULL) {
       /* Do not remove link if NODE is directly connected to this router.
          HELLO protocol takes precedence. */
       continue;
@@ -128,14 +128,9 @@ void
 OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
   Fwk::Deque<OSPFGateway::Ptr> del_gw;
 
-  OSPFInterface::const_gw_iter gw_it = iface->gatewaysBegin();
-  for (; gw_it != iface->gatewaysEnd(); ++gw_it) {
+  OSPFInterface::const_gwa_iter gw_it = iface->activeGatewaysBegin();
+  for (; gw_it != iface->activeGatewaysEnd(); ++gw_it) {
     OSPFGateway::Ptr gw = gw_it->second;
-    if (gw->nodeIsPassiveEndpoint()){
-      /* Do not remove gateways to non-OSPF endpoints. */
-      continue;
-    }
-
     if (gw->timeSinceHello() > 3 * iface->helloint()) {
       /* No HELLO packet has been received from this neighbor in more than
          three times its advertised HELLOINT. Remove from topology and
@@ -147,7 +142,7 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
   Fwk::Deque<OSPFGateway::Ptr>::const_iterator del_it;
   for (del_it = del_gw.begin(); del_it != del_gw.end(); ++del_it) {
     OSPFGateway::Ptr gw = *del_it;
-    iface->gatewayDel(gw->nodeRouterID());
+    iface->activeGatewayDel(gw->nodeRouterID());
   }
 }
 
