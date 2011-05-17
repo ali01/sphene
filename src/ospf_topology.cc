@@ -71,19 +71,19 @@ OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
   if (node == NULL)
     return;
 
+  RouterID nd_id = node->routerID();
+  if (nd_id == OSPF::kInvalidRouterID) {
+    ELOG << "Attempt to insert a node with invalid ID into topology.";
+    return;
+  }
+
   if (node->isPassiveEndpoint()) {
     /* Do not insert passive endpoints into the topology. */
     return;
   }
 
-  RouterID nd_id = node->routerID();
   if (nd_id == root_node_->routerID()) {
     ELOG << "Attempt to insert the root node into its own topology.";
-    return;
-  }
-
-  if (nd_id == OSPF::kInvalidRouterID) {
-    ELOG << "Attempt to insert a node with invalid ID into topology.";
     return;
   }
 

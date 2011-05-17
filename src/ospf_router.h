@@ -169,7 +169,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
       return new OSPFInterfaceMapReactor(_r);
     }
 
-    void onInterface(OSPFInterfaceMap::Ptr _im, const IPv4Addr& addr);
+    void onInterface(OSPFInterfaceMap::Ptr _im, OSPFInterface::Ptr iface);
     void onGateway(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr, OSPFGateway::Ptr);
     void onGatewayDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr,
                       OSPFGateway::Ptr);

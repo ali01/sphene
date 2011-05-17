@@ -66,7 +66,8 @@ RoutingTable::entryIs(Entry::Ptr entry) {
   IPv4Addr subnet = entry->subnet();
   IPv4Addr mask = entry->subnetMask();
   Entry::Ptr prev_entry = this->entry(subnet, mask);
-  if (entry->type() == Entry::kDynamic
+  if (prev_entry
+      && entry->type() == Entry::kDynamic
       && prev_entry->type() == Entry::kStatic) {
     // Static entries take precedence.
     // Do not replace existing static entry with dynamic one.

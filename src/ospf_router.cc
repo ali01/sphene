@@ -258,16 +258,15 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 
 void
 OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
-                                                 const IPv4Addr& addr) {
+                                                 OSPFInterface::Ptr iface) {
   /* router ID should always be equal to the IP addr of the first interface. */
   if (ospf_router_->routerID() == OSPF::kInvalidRouterID
       || _im->interfaces() <= 1) {
-    ospf_router_->routerIDIs((RouterID)addr.value());
+    ospf_router_->routerIDIs((RouterID)iface->interfaceIP().value());
   }
 
   /* Process any unprocessed static routes that correspond to
      the added interface. */
-  OSPFInterface::Ptr iface = _im->interface(addr);
   RoutingTable::Ptr rtable = ospf_router_->routingTable();
   RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
                                                  iface->interfaceSubnetMask());
