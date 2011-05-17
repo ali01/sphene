@@ -35,3 +35,14 @@ void Interface::ipIs(const IPv4Addr& ip) {
   for (unsigned int i = 0; i < notifiees_.size(); ++i)
     notifiees_[i]->onIP(this);
 }
+
+
+void Interface::enabledIs(const bool enabled) {
+  if (enabled_ == enabled)
+    return;
+
+  enabled_ = (enabled > 0);
+
+  for (unsigned int i = 0; i < notifiees_.size(); ++i)
+    notifiees_[i]->onEnabled(this);
+}
