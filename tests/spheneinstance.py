@@ -9,9 +9,11 @@ import threading
 
 class SpheneInstance(object):
   def __init__(self, topo_id, cli_port, auth_key_file,
-               rtable_file=None, vhost=None, binary=None):
+               rtable_file=None, vhost=None, binary=None, username=None):
     tests_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.normpath(os.path.join(tests_dir, '..'))
+    if username is None:
+      username = getpass.getuser()
 
     if binary is None:
       binary_name = 'sr'
@@ -21,7 +23,7 @@ class SpheneInstance(object):
            '-a', auth_key_file,
            '-t', str(topo_id),
            '-s', 'vns-1.stanford.edu',
-           '-u', getpass.getuser(),
+           '-u', username,
            '-c', str(cli_port),
            '-d']
 
