@@ -52,7 +52,7 @@ def base_dir():
 BINARY = os.getenv('BINARY', os.path.join(base_dir(), 'build', 'sr'))
 REF_BINARY = os.getenv('REF_BINARY', os.path.join(base_dir(), 'sr_ref'))
 
-helloint = 13
+helloint = 5
 
 
 class Topo602:
