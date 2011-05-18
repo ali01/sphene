@@ -40,11 +40,6 @@ OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
   if (link == NULL)
     return;
 
-  if (this->isPassiveEndpoint()) {
-    /* Don't add links to passive endpoints. */
-    return;
-  }
-
   /* Relationship is bi-directional. */
   OSPFLink::Ptr reverse_link =
     OSPFLink::New(this, link->subnet(), link->subnetMask());
@@ -103,6 +98,11 @@ bool
 OSPFNode::oneWayLinkIs(OSPFLink::Ptr link) {
   if (link == NULL)
     return false;
+
+  if (this->isPassiveEndpoint()) {
+    /* Don't add links to passive endpoints. */
+    return false;
+  }
 
   if (!link->nodeIsPassiveEndpoint() && link->nodeRouterID() == routerID()) {
     /* Do not add links to oneself. */
