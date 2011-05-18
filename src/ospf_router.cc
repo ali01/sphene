@@ -451,6 +451,12 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     OSPFLSUAdvertisement::PtrConst adv = pkt->advertisement(adv_index);
 
+    if (adv->routerID() == this->routerID()) {
+      /* SENDER is advertising this router as a direct neighbor. */
+      /* Hello protocol takes precedence. */
+      continue;
+    }
+
     NeighborRelationship::Ptr nb_rel;
     if (adv->routerID() != OSPF::kPassiveEndpointID) {
       /* Check if the advertised neighbor has also advertised connectivity to
