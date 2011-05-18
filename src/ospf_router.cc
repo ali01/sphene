@@ -352,9 +352,6 @@ OSPFRouter::RoutingTableReactor::onEntryDel(RoutingTable::Ptr rtable,
 
 void
 OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
-  if (ospf_pkt->type() == OSPFPacket::kLSU)
-    ++lsu_seqno_;
-
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(ospf_pkt->enclosingPacket());
   control_plane_->outputPacketNew(ip_pkt);
 }
@@ -522,6 +519,9 @@ OSPFRouter::flood_lsu() {
     OSPFInterface::Ptr iface = if_it->second;
     flood_lsu_out_interface(iface);
   }
+
+  if (interfaces_->interfaces())
+    ++lsu_seqno_;
 
   if (notifiee_)
     notifiee_->onLinkStateFlood(this);
