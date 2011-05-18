@@ -27,7 +27,7 @@ class OSPFTopologyTest : public ::testing::Test {
       links_[i] = OSPFLink::New(nodes_[i], (uint32_t)0, (uint32_t)0);
     }
 
-    root_node_id_ = 0xffffffff;
+    root_node_id_ = 0x00badcafe;
     root_node_ = OSPFNode::New(root_node_id_);
     root_link_ = OSPFLink::New(root_node_, (uint32_t)0, (uint32_t)0);
     topology_ = OSPFTopology::New(root_node_);
