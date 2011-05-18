@@ -325,7 +325,6 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
   } else {
     RouterID nd_id = gw_obj->nodeRouterID();
     ospf_router_->router_node_->activeLinkDel(nd_id, false);
-    ospf_router_->topology()->nodeDel(nd_id, false);
 
     ILOG << "Removed active gateway with subnet " << gw_obj->subnet()
          << " to nbr " << nd_id << " from " << iface->interfaceName();
