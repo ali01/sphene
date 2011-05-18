@@ -115,6 +115,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
     void onInterface(InterfaceMap::Ptr map, Interface::Ptr iface);
     void onInterfaceDel(InterfaceMap::Ptr map, Interface::Ptr iface);
+    void onInterfaceEnabled(InterfaceMap::Ptr, Interface::Ptr iface);
 
    private:
     InterfaceMapReactor(OSPFInterfaceMap* _im) : iface_map_(_im) {}

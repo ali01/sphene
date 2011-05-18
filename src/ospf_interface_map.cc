@@ -146,6 +146,8 @@ OSPFInterfaceMap::OSPFInterfaceReactor::onGatewayDel(OSPFInterface::Ptr iface,
     iface_map_->notifiee_->onGatewayDel(iface_map_, iface, gw_obj);
 }
 
+/* OSPFInterfaceMap::InterfaceMapReactor */
+
 void
 OSPFInterfaceMap::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
                                                    Interface::Ptr iface) {
@@ -159,4 +161,13 @@ void
 OSPFInterfaceMap::InterfaceMapReactor::onInterfaceDel(InterfaceMap::Ptr map,
                                                       Interface::Ptr iface) {
   iface_map_->interfaceDel(iface->ip());
+}
+
+void
+OSPFInterfaceMap::InterfaceMapReactor::onInterfaceEnabled(InterfaceMap::Ptr map,
+                                                          Interface::Ptr _if) {
+  if (_if->enabled())
+    this->onInterface(map, _if);
+  else
+    this->onInterfaceDel(map, _if);
 }
