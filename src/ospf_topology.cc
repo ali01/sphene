@@ -134,7 +134,7 @@ OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
     for (Fwk::Deque<OSPFNode::Ptr>::const_iterator it = neighbors.begin();
          it != neighbors.end(); ++it) {
       OSPFNode::Ptr neighbor = *it;
-      neighbor->activeLinkDel(router_id);
+      neighbor->activeLinkDel(router_id, false);
     }
 
     /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
@@ -232,6 +232,7 @@ OSPFTopology::process_update(bool commit) {
 void
 OSPFTopology::NodeReactor::onLink(OSPFNode::Ptr node, OSPFLink::Ptr link,
                                   bool commit) {
+  topology_->nodeIs(link->node(), false);
   topology_->process_update(commit);
 }
 

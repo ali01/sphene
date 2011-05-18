@@ -61,9 +61,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Mutators. */
 
-  void nodeIs(OSPFNode::Ptr node, bool commit=true);
-  void nodeDel(OSPFNode::Ptr node, bool commit=true);
-  void nodeDel(const RouterID& router_id, bool commit=true);
+  void nodeIs(OSPFNode::Ptr node, bool commit);
+  void nodeDel(OSPFNode::Ptr node, bool commit);
+  void nodeDel(const RouterID& router_id, bool commit);
 
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 

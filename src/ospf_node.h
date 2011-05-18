@@ -81,10 +81,10 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   /* Mutators. */
   void routerIDIs(const RouterID& id) { router_id_ = id; }
 
-  void linkIs(OSPFLink::Ptr link, bool commit=true);
-  void activeLinkDel(const RouterID& id, bool commit=true);
+  void linkIs(OSPFLink::Ptr link, bool commit);
+  void activeLinkDel(const RouterID& id, bool commit);
   void passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
-                      bool commit=true);
+                      bool commit);
 
   void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
@@ -109,10 +109,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
  private:
   /* Helper member functions. */
-  void oneWayLinkIs(OSPFLink::Ptr link, bool commit);
-  void oneWayActiveLinkDel(const RouterID& id, bool commit);
-  void oneWayPassiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
-                            bool commit);
+  bool oneWayLinkIs(OSPFLink::Ptr link);
+  bool oneWayActiveLinkDel(const RouterID& id);
+  bool oneWayPassiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask);
 
   /* Data members. */
   RouterID router_id_;

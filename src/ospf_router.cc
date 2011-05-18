@@ -203,7 +203,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   } else {
     /* Creating new node and inserting it into the topology database */
     node = OSPFNode::New(node_id);
-    topology_->nodeIs(node);
+    topology_->nodeIs(node, false);
 
     DLOG << "Inserted node " << node_id << " to topology database.";
   }
@@ -296,7 +296,9 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                OSPFInterface::Ptr iface,
                                                OSPFGateway::Ptr gw_obj) {
   ospf_router_->topology_->nodeIs(gw_obj->node(), false);
-  ospf_router_->router_node_->linkIs(gw_obj, true);
+  ospf_router_->router_node_->linkIs(gw_obj, false);
+
+  ospf_router_->topology()->onPossibleUpdate();
   ospf_router_->lsu_dirty_ = true;
 }
 
@@ -307,14 +309,15 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
   if (gw_obj->nodeIsPassiveEndpoint()) {
     IPv4Addr subnet = gw_obj->subnet();
     IPv4Addr mask = gw_obj->subnetMask();
-    ospf_router_->router_node_->passiveLinkDel(subnet, mask, true);
+    ospf_router_->router_node_->passiveLinkDel(subnet, mask, false);
 
   } else {
     RouterID nd_id = gw_obj->nodeRouterID();
-    ospf_router_->router_node_->activeLinkDel(nd_id, true);
-    ospf_router_->topology()->nodeDel(nd_id);
+    ospf_router_->router_node_->activeLinkDel(nd_id, false);
+    ospf_router_->topology()->nodeDel(nd_id, false);
   }
 
+  ospf_router_->topology()->onPossibleUpdate();
   ospf_router_->lsu_dirty_ = true;
 }
 

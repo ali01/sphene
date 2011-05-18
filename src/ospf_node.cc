@@ -40,16 +40,21 @@ OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
   if (link == NULL)
     return;
 
-  oneWayLinkIs(link, commit);
+  if (this->isPassiveEndpoint()) {
+    /* Don't add links to passive endpoints. */
+    return;
+  }
 
   /* Relationship is bi-directional. */
-  OSPFLink::Ptr reverse_link;
-  if (isPassiveEndpoint())
-    reverse_link = OSPFLink::NewPassive(link->subnet(), link->subnetMask());
-  else
-    reverse_link = OSPFLink::New(this, link->subnet(), link->subnetMask());
+  OSPFLink::Ptr reverse_link =
+    OSPFLink::New(this, link->subnet(), link->subnetMask());
 
-  link->node()->oneWayLinkIs(reverse_link, commit);
+  bool notify_cond_one = link->node()->oneWayLinkIs(reverse_link);
+  bool notify_cond_two = oneWayLinkIs(link);
+
+  /* Signal notifiee. */
+  if (notifiee_ && (notify_cond_one || notify_cond_two))
+    notifiee_->onLink(this, link, commit);
 }
 
 void
@@ -57,39 +62,51 @@ OSPFNode::activeLinkDel(const RouterID& id, bool commit) {
   if (id == routerID())
     return;
 
+  bool notify_cond_one = false;
+  bool notify_cond_two = false;
+
   /* Deletion is bi-directional. */
   OSPFLink::Ptr link = activeLink(id);
   if (link) {
     OSPFNode::Ptr node = link->node();
-    node->oneWayActiveLinkDel(this->routerID(), commit);
+    notify_cond_one = node->oneWayActiveLinkDel(this->routerID());
   }
 
-  oneWayActiveLinkDel(id, commit);
+  notify_cond_two = oneWayActiveLinkDel(id);
+
+  if (notifiee_ && (notify_cond_one || notify_cond_two))
+    notifiee_->onLinkDel(this, link, commit);
 }
 
 void
 OSPFNode::passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
                          bool commit) {
+  bool notify_cond_one = false;
+  bool notify_cond_two = false;
+
   /* Deletion is bi-directional. */
   OSPFLink::Ptr link = passiveLink(subnet, mask);
   if (link) {
     OSPFNode::Ptr node = link->node();
-    node->oneWayPassiveLinkDel(subnet, mask, commit);
+    notify_cond_one = node->oneWayPassiveLinkDel(subnet, mask);
   }
 
-  oneWayPassiveLinkDel(subnet, mask, commit);
+  notify_cond_two = oneWayPassiveLinkDel(subnet, mask);
+
+  if (notifiee_ && (notify_cond_one || notify_cond_two))
+    notifiee_->onLinkDel(this, link, commit);
 }
 
 /* OSPFNode private member functions. */
 
-void
-OSPFNode::oneWayLinkIs(OSPFLink::Ptr link, bool commit) {
+bool
+OSPFNode::oneWayLinkIs(OSPFLink::Ptr link) {
   if (link == NULL)
-    return;
+    return false;
 
   if (!link->nodeIsPassiveEndpoint() && link->nodeRouterID() == routerID()) {
     /* Do not add links to oneself. */
-    return;
+    return false;
   }
 
   OSPFLink::Ptr prev_link;
@@ -107,33 +124,28 @@ OSPFNode::oneWayLinkIs(OSPFLink::Ptr link, bool commit) {
   /* Refresh time since last LSU. */
   link->timeSinceLSUIs(0);
 
-  /* Signal notifiee. */
-  if (notifiee_ && (prev_link == NULL || *link != *prev_link))
-    notifiee_->onLink(this, link, commit);
+  return (prev_link == NULL || *link != *prev_link);
 }
 
-void
-OSPFNode::oneWayActiveLinkDel(const RouterID& id, bool commit) {
+bool
+OSPFNode::oneWayActiveLinkDel(const RouterID& id) {
   OSPFLink::Ptr link = activeLink(id);
   if (link) {
     active_links_.elemDel(id);
-
-    /* Signal notifiee. */
-    if (notifiee_)
-      notifiee_->onLinkDel(this, link, commit);
+    return true;
   }
+
+  return false;
 }
 
-void
-OSPFNode::oneWayPassiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
-                               bool commit) {
+bool
+OSPFNode::oneWayPassiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
   OSPFLink::Ptr link = passiveLink(subnet, mask);
   if (link) {
     IPv4Subnet subnet_key = std::make_pair(subnet, mask);
     passive_links_.elemDel(subnet_key);
-
-    /* Signaling notifiee. */
-    if (notifiee_)
-      notifiee_->onLinkDel(this, link, commit);
+    return true;
   }
+
+  return false;
 }
