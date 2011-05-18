@@ -119,17 +119,22 @@ OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
     /* Removing the node from the neighbor lists of all neighbors. Neighbors
        vector prevents indirect deletion during iteration. */
     Fwk::Deque<OSPFNode::Ptr> neighbors;
-    for (OSPFNode::link_iter it = node->linksBegin();
-         it != node->linksEnd(); ++it) {
+    for (OSPFNode::lna_iter it = node->activeLinksBegin();
+         it != node->activeLinksEnd(); ++it) {
       OSPFLink::Ptr link = it->second;
-      OSPFNode::Ptr neighbor = link->node();
-      neighbors.pushBack(neighbor);
+      neighbors.pushBack(link->node());
+    }
+
+    for (OSPFNode::lnp_iter it = node->passiveLinksBegin();
+         it != node->passiveLinksEnd(); ++it) {
+      OSPFLink::Ptr link = it->second;
+      neighbors.pushBack(link->node());
     }
 
     for (Fwk::Deque<OSPFNode::Ptr>::const_iterator it = neighbors.begin();
          it != neighbors.end(); ++it) {
       OSPFNode::Ptr neighbor = *it;
-      neighbor->linkDel(router_id);
+      neighbor->activeLinkDel(router_id);
     }
 
     /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
@@ -169,8 +174,8 @@ OSPFTopology::compute_optimal_spanning_tree() {
 
     node_set.elemDel(cur_nd->routerID());
 
-    for (OSPFNode::link_iter it = cur_nd->linksBegin();
-         it != cur_nd->linksEnd(); ++it) {
+    for (OSPFNode::lna_iter it = cur_nd->activeLinksBegin();
+         it != cur_nd->activeLinksEnd(); ++it) {
       OSPFLink::Ptr link = it->second;
       OSPFNode::Ptr neighbor = link->node();
       neighbor = node_set.elem(neighbor->routerID());
@@ -223,16 +228,15 @@ OSPFTopology::process_update(bool commit) {
 }
 
 /* OSPFTopology::NodeReactor */
+
 void
-OSPFTopology::NodeReactor::onLink(OSPFNode::Ptr node,
-                                  OSPFLink::Ptr link,
+OSPFTopology::NodeReactor::onLink(OSPFNode::Ptr node, OSPFLink::Ptr link,
                                   bool commit) {
   topology_->process_update(commit);
 }
 
 void
-OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node,
-                                     const RouterID& rid,
+OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link,
                                      bool commit) {
   topology_->process_update(commit);
 }

@@ -283,7 +283,7 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                OSPFInterface::Ptr iface,
                                                OSPFGateway::Ptr gw_obj) {
   ospf_router_->topology_->nodeIs(gw_obj->node(), false);
-  ospf_router_->router_node_->linkIs(gw_obj);
+  ospf_router_->router_node_->linkIs(gw_obj, true);
   ospf_router_->lsu_dirty_ = true;
 }
 
@@ -291,9 +291,17 @@ void
 OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
                                                   OSPFInterface::Ptr iface,
                                                   OSPFGateway::Ptr gw_obj) {
-  RouterID nd_id = gw_obj->nodeRouterID();
-  ospf_router_->router_node_->linkDel(nd_id);
-  ospf_router_->topology_->nodeDel(nd_id);
+  if (gw_obj->nodeIsPassiveEndpoint()) {
+    IPv4Addr subnet = gw_obj->subnet();
+    IPv4Addr mask = gw_obj->subnetMask();
+    ospf_router_->router_node_->passiveLinkDel(subnet, mask, true);
+
+  } else {
+    RouterID nd_id = gw_obj->nodeRouterID();
+    ospf_router_->router_node_->activeLinkDel(nd_id, true);
+    ospf_router_->topology()->nodeDel(nd_id);
+  }
+
   ospf_router_->lsu_dirty_ = true;
 }
 
@@ -381,8 +389,9 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
     return;
   }
 
-  OSPFNode::const_link_iter it;
-  for (it = dest->linksBegin(); it != dest->linksEnd(); ++it) {
+  /* Adding links to other OSFP nodes to the routing table. */
+  for (OSPFNode::const_lna_iter it = dest->activeLinksBegin();
+       it != dest->activeLinksEnd(); ++it) {
     OSPFLink::Ptr link = it->second;
     if (dest->prev() == link->node() && dest_id != next_hop_id) {
       /* Don't add the subnet through which we are connected to DEST unless
@@ -390,10 +399,16 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
       continue;
     }
 
-    rtable_add_gateway(link->subnet(),
-                       link->subnetMask(),
-                       gw_obj->gateway(),
-                       gw_obj->interface());
+    rtable_add_gateway(link->subnet(), link->subnetMask(),
+                       gw_obj->gateway(), gw_obj->interface());
+  }
+
+  /* Adding links to passive endpoints to the routing table. */
+  for (OSPFNode::const_lnp_iter it = dest->passiveLinksBegin();
+       it != dest->passiveLinksEnd(); ++it) {
+    OSPFLink::Ptr link = it->second;
+    rtable_add_gateway(link->subnet(), link->subnetMask(),
+                       gw_obj->gateway(), gw_obj->interface());
   }
 }
 

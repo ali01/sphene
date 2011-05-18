@@ -122,8 +122,8 @@ TEST_F(OSPFTopologyTest, six_node_2) {
   setup_six_node_topology();
   EXPECT_EQ(topology_->nodes(), (size_t)6);
 
-  root_node_->linkDel(ids_[1]);
-  root_node_->linkDel(ids_[2]);
+  root_node_->activeLinkDel(ids_[1]);
+  root_node_->activeLinkDel(ids_[2]);
 
   /* Topology:
               0        4
@@ -157,19 +157,19 @@ TEST_F(OSPFTopologyTest, link_delete) {
   EXPECT_EQ(nodes_[1]->links(), (size_t)1);
 
   for (int i = 0, j = 1; i < 2; ++i, j = (i + 1) % 2) {
-    OSPFLink::Ptr link = nodes_[i]->link(nodes_[j]->routerID());
+    OSPFLink::Ptr link = nodes_[i]->activeLink(nodes_[j]->routerID());
     ASSERT_TRUE(link != NULL);
     EXPECT_EQ(link->node(), nodes_[j]);
   }
 
-  nodes_[0]->linkDel(nodes_[1]->routerID());
+  nodes_[0]->activeLinkDel(nodes_[1]->routerID());
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
   EXPECT_EQ(nodes_[1]->links(), (size_t)0);
 }
 
 TEST_F(OSPFTopologyTest, link_delete_reverse) {
   nodes_[0]->linkIs(links_[1]);
-  nodes_[0]->linkDel(nodes_[1]->routerID());
+  nodes_[0]->activeLinkDel(nodes_[1]->routerID());
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
   EXPECT_EQ(nodes_[1]->links(), (size_t)0);
 }

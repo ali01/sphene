@@ -81,17 +81,12 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
 
   Fwk::Deque<OSPFLink::Ptr> del_links;
 
-  OSPFNode::const_link_iter it;
-  for (it = node->linksBegin(); it != node->linksEnd(); ++it) {
+  OSPFNode::const_lna_iter it;
+  for (it = node->activeLinksBegin(); it != node->activeLinksEnd(); ++it) {
     OSPFLink::Ptr link = it->second;
     OSPFNode::Ptr peer_nd = link->node();
     RouterID nd_id = node->routerID();
     RouterID peer_nd_id = peer_nd->routerID();
-
-    if (peer_nd->isPassiveEndpoint()) {
-      /* Do not remove links to non-OSPF endpoints. */
-      continue;
-    }
 
     if (ospf_router_->routerID() == peer_nd_id
         && ospf_router_->interfaceMap()->activeGateway(nd_id) != NULL) {
@@ -107,7 +102,7 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
   Fwk::Deque<OSPFLink::Ptr>::const_iterator del_it;
   for (del_it = del_links.begin(); del_it != del_links.end(); ++del_it) {
     OSPFLink::Ptr link = *del_it;
-    node->linkDel(link->nodeRouterID(), false);
+    node->activeLinkDel(link->nodeRouterID(), false);
   }
 }
 

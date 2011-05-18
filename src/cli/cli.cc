@@ -608,7 +608,7 @@ void cli_show_ospf_interface(OSPFInterface::PtrConst iface) {
   cli_send_str(line_buf);
 
   // Active OSPF neighbors.
-  cli_send_str("  Active OSPF Neighbors:\n");
+  cli_send_str("  Active Neighbors:\n");
   snprintf(line_buf, sizeof(line_buf), header_format,
           "Interface", "Router ID", "Gateway", "Subnet", "Mask");
   cli_send_str(line_buf);
@@ -665,15 +665,25 @@ void cli_show_ospf_topo() {
   }
 }
 
+void cli_show_link_summary(OSPFLink::PtrConst link) {
+  char line_buf[256];
+  const char* const link_format = "    %-16u %-16s %-16s\n";
+  const string& subnet_str = link->subnet();
+  const string& mask_str = link->subnetMask();
+  snprintf(line_buf, sizeof(line_buf), link_format,
+           link->nodeRouterID(), subnet_str.c_str(), mask_str.c_str());
+  cli_send_str(line_buf);
+}
+
 void cli_show_ospf_node(OSPFNode::PtrConst node) {
   // Buffers for proper formatting.
-  char line_buf[256];
+  char line_buf[512];
 
   string format = "  Router ID: %u\n"
                   "  Prev. ID:  %u\n"
                   "  Distance:  %u\n"
                   "  Links:     %u\n"
-                  "  Neighbors:\n";
+                  "  Active Neighbors:\n";
 
   RouterID prev = node->prev() ? node->prev()->routerID() : 0;
 
@@ -683,16 +693,18 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
 
   cli_send_str(line_buf);
 
-  const char* const nbr_format = "    %-16u %-16s %-16s\n";
+  for (OSPFNode::const_lna_iter it = node->activeLinksBegin();
+       it != node->activeLinksEnd(); ++it) {
+    OSPFLink::PtrConst link = it->second;
+    cli_show_link_summary(link);
+  }
 
-  OSPFNode::const_link_iter it;
-  for (it = node->linksBegin(); it != node->linksEnd(); ++it) {
-    OSPFLink::Ptr link = it->second;
-    const string& subnet_str = link->subnet();
-    const string& mask_str = link->subnetMask();
-    snprintf(line_buf, sizeof(line_buf), nbr_format,
-             link->nodeRouterID(), subnet_str.c_str(), mask_str.c_str());
-    cli_send_str(line_buf);
+  cli_send_str("  Passive Endpoints:\n");
+
+  for (OSPFNode::const_lnp_iter it = node->passiveLinksBegin();
+       it != node->passiveLinksEnd(); ++it) {
+    OSPFLink::PtrConst link = it->second;
+    cli_show_link_summary(link);
   }
 
   cli_send_str("\n");

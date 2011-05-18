@@ -93,7 +93,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
     }
 
     void onLink(OSPFNode::Ptr node, OSPFLink::Ptr link, bool commit);
-    void onLinkDel(OSPFNode::Ptr node, const RouterID& rid, bool commit);
+    void onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link, bool commit);
 
    private:
     NodeReactor(OSPFTopology* _t) : topology_(_t) {}
