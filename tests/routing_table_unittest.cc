@@ -4,6 +4,7 @@
 #include <string>
 
 #include "interface.h"
+#include "interface_map.h"
 #include "routing_table.h"
 
 using std::string;
@@ -26,7 +27,8 @@ static std::ostream& operator<<(std::ostream& os,
 class RoutingTableTest : public ::testing::Test {
  protected:
   void SetUp() {
-    routing_table_ = RoutingTable::New(NULL);
+    InterfaceMap::Ptr iface_map = InterfaceMap::InterfaceMapNew();
+    routing_table_ = RoutingTable::New(iface_map);
     eth0_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
     eth1_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);
     eth2_ = RoutingTable::Entry::New(RoutingTable::Entry::kStatic);

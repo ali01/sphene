@@ -8,16 +8,13 @@
 
 RoutingTable::RoutingTable(InterfaceMap::Ptr iface_map)
     : iface_map_reactor_(InterfaceMapReactor::New(this)) {
+  iface_map_reactor_->notifierIs(iface_map);
 
-  if (iface_map) {
-    iface_map_reactor_->notifierIs(iface_map);
-
-    // Process existing interfaces in IFACE_MAP.
-    InterfaceMap::const_iterator it;
-    for (it = iface_map->begin(); it != iface_map->end(); ++it) {
-      Interface::Ptr iface = it->second;
-      iface_map_reactor_->onInterface(iface_map, iface);
-    }
+  // Process existing interfaces in IFACE_MAP.
+  InterfaceMap::const_iterator it;
+  for (it = iface_map->begin(); it != iface_map->end(); ++it) {
+    Interface::Ptr iface = it->second;
+    iface_map_reactor_->onInterface(iface_map, iface);
   }
 }
 
