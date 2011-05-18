@@ -670,7 +670,7 @@ void cli_show_ospf_topo() {
 
 void cli_show_link_summary(OSPFLink::PtrConst link) {
   char line_buf[256];
-  const char* const link_format = "    %-16s %-16s %-16s\n";
+  const char* const link_format = "      %-16s %-16s %-16s\n";
   const string& subnet_str = link->subnet();
   const string& mask_str = link->subnetMask();
 
@@ -690,7 +690,7 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
                   "  Prev. ID:  %s\n"
                   "  Distance:  %u\n"
                   "  Links:     %u\n"
-                  "  Active Neighbors:\n";
+                  "    Active Neighbors:\n";
 
   RouterID prev = node->prev() ? node->prev()->routerID() : 0;
 
@@ -710,7 +710,7 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
     cli_show_link_summary(link);
   }
 
-  cli_send_str("  Passive Endpoints:\n");
+  cli_send_str("    Passive Endpoints:\n");
 
   for (OSPFNode::const_lnp_iter it = node->passiveLinksBegin();
        it != node->passiveLinksEnd(); ++it) {
