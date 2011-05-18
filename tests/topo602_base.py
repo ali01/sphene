@@ -172,14 +172,14 @@ class Topo602:
   def test_disable_rtr1_eth1(self):
     '''Disable router 1 eth1'''
     self._disable_interface(instance1, 'eth1')
-    time.sleep(3 * helloint)
+    time.sleep(6 * helloint)
     self._basic_connectivity_tests()
     assert_equal(
         network_lib.traceroute(self._app1)[-4:],
         [self._rtr1_eth0, self._rtr3_eth0, self._rtr2_eth2, self._app1])
 
     self._enable_interface(instance1, 'eth1')
-    time.sleep(3 * helloint)
+    time.sleep(6 * helloint)
     self._basic_connectivity_tests()
     assert_equal(
         network_lib.traceroute(self._app1)[-3:],
