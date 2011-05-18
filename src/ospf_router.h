@@ -315,7 +315,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   OSPFInterfaceMapReactor::Ptr im_reactor_;
   RoutingTableReactor::Ptr rtable_reactor_;
 
-  uint8_t lsu_seqno_;
+  uint32_t lsu_seqno_;
   bool lsu_dirty_; /* Links to neighbors have changed since last LSU flood */
 
   /* Singleton notifiee. */
