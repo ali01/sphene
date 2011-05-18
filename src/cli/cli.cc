@@ -577,7 +577,7 @@ void cli_show_ospf() {
 
 void cli_show_ospf_gateway(OSPFGateway::PtrConst gw_obj) {
   char line_buf[256];
-  const char* const line_format = "    %-11s %-16u %-16s %-16s %-16s\n";
+  const char* const line_format = "    %-11s %-16s %-16s %-16s %-16s\n";
 
   RouterID nd_id = gw_obj->nodeRouterID();
   OSPFInterface::PtrConst iface = gw_obj->interface();
@@ -587,8 +587,11 @@ void cli_show_ospf_gateway(OSPFGateway::PtrConst gw_obj) {
   const string& subnet_str = gw_obj->subnet();
   const string& mask_str = gw_obj->subnetMask();
 
+  std::stringstream ss;
+  ss << nd_id;
+
   snprintf(line_buf, sizeof(line_buf), line_format,
-           iface_str.c_str(), nd_id, gw_str.c_str(),
+           iface_str.c_str(), ss.str().c_str(), gw_str.c_str(),
            subnet_str.c_str(), mask_str.c_str());
   cli_send_str(line_buf);
 }
@@ -667,11 +670,15 @@ void cli_show_ospf_topo() {
 
 void cli_show_link_summary(OSPFLink::PtrConst link) {
   char line_buf[256];
-  const char* const link_format = "    %-16u %-16s %-16s\n";
+  const char* const link_format = "    %-16s %-16s %-16s\n";
   const string& subnet_str = link->subnet();
   const string& mask_str = link->subnetMask();
+
+  std::stringstream ss;
+  ss << link->nodeRouterID();
+
   snprintf(line_buf, sizeof(line_buf), link_format,
-           link->nodeRouterID(), subnet_str.c_str(), mask_str.c_str());
+           ss.str().c_str(), subnet_str.c_str(), mask_str.c_str());
   cli_send_str(line_buf);
 }
 
@@ -679,17 +686,21 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
   // Buffers for proper formatting.
   char line_buf[512];
 
-  string format = "  Router ID: %u\n"
-                  "  Prev. ID:  %u\n"
+  string format = "  Router ID: %s\n"
+                  "  Prev. ID:  %s\n"
                   "  Distance:  %u\n"
                   "  Links:     %u\n"
                   "  Active Neighbors:\n";
 
   RouterID prev = node->prev() ? node->prev()->routerID() : 0;
 
+  std::stringstream ss_rid, ss_prev_id;
+  ss_rid << node->routerID();
+  ss_prev_id << prev;
+
   snprintf(line_buf, sizeof(line_buf), format.c_str(),
-           node->routerID(), prev, node->distance(),
-           node->links());
+           ss_rid.str().c_str(), ss_prev_id.str().c_str(),
+           node->distance(), node->links());
 
   cli_send_str(line_buf);
 

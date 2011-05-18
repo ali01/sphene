@@ -6,8 +6,10 @@
 #define OSPF_TYPES_H_MUFO34T3
 
 #include <inttypes.h>
+#include <ostream>
 
-typedef uint32_t RouterID;
+#include "ospf_router_id.h"
+
 typedef uint32_t AreaID;
 
 #endif

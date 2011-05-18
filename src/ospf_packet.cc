@@ -123,7 +123,7 @@ OSPFPacket::routerID() const {
 
 void
 OSPFPacket::routerIDIs(const RouterID& id) {
-  ospf_pkt_->router_id = htonl(id);
+  ospf_pkt_->router_id = htonl(id.value());
 }
 
 AreaID
@@ -456,7 +456,7 @@ OSPFLSUAdvertisement::routerID() const {
 
 void
 OSPFLSUAdvertisement::routerIDIs(const RouterID& id) {
-  ospf_lsu_adv_->router_id = htonl(id);
+  ospf_lsu_adv_->router_id = htonl(id.value());
 }
 
 void
