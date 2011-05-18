@@ -302,6 +302,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      multimap, true otherwise. */
   bool unstage_nbr(NeighborRelationship::Ptr nbr);
 
+  /* If one doesn't already exist, this function creates an OSPF gateway from
+     the given routing table entry. */
+  void update_iface_from_rtable_entry_new(OSPFInterface::Ptr,
+                                          RoutingTable::Entry::PtrConst);
+
   /* -- OSPFRouter data members. -- */
 
   const AreaID area_id_;

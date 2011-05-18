@@ -267,14 +267,8 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
   RoutingTable::Ptr rtable = ospf_router_->routingTable();
   RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
                                                  iface->interfaceSubnetMask());
-  if (entry) {
-    OSPFGateway::Ptr gw_obj = iface->passiveGateway(entry->subnet(),
-                                                    entry->subnetMask());
-    if (gw_obj)
-      gw_obj->gatewayIs(entry->gateway());
-    else
-      ospf_router_->rtable_reactor_->onEntry(rtable, entry);
-  }
+  if (entry)
+    ospf_router_->update_iface_from_rtable_entry_new(iface, entry);
 }
 
 void
@@ -326,17 +320,10 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
 void
 OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
                                          RoutingTable::Entry::Ptr entry) {
-  if (entry->type() == RoutingTable::Entry::kDynamic)
-    return;
-
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
-  if (iface) {
-    OSPFGateway::Ptr gw_obj = OSPFGateway::NewPassive(entry->gateway(),
-                                                      entry->subnet(),
-                                                      entry->subnetMask());
-    iface->gatewayIs(gw_obj);
-  }
+  if (iface)
+    ospf_router_->update_iface_from_rtable_entry_new(iface, entry);
 }
 
 void
@@ -748,4 +735,23 @@ OSPFRouter::forward_packet_to_gateway(OSPFPacket::Ptr pkt,
   ip_pkt->checksumReset();
 
   control_plane_->outputPacketNew(ip_pkt);
+}
+
+void
+OSPFRouter::update_iface_from_rtable_entry_new(
+    OSPFInterface::Ptr iface, RoutingTable::Entry::PtrConst entry) {
+  if (entry->type() == RoutingTable::Entry::kDynamic)
+    return;
+
+  /* Lookup existing passive gateway with entry's subnet. */
+  OSPFGateway::Ptr gw_obj = iface->passiveGateway(entry->subnet(),
+                                                  entry->subnetMask());
+  if (gw_obj == NULL) {
+    gw_obj = OSPFGateway::NewPassive(entry->gateway(),
+                                     entry->subnet(),
+                                     entry->subnetMask());
+    iface->gatewayIs(gw_obj);
+  } else {
+    gw_obj->gatewayIs(entry->gateway());
+  }
 }
