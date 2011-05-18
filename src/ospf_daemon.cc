@@ -79,24 +79,36 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
     return;
   }
 
+  RouterID nd_id = node->routerID();
   Fwk::Deque<OSPFLink::Ptr> del_links;
 
   OSPFNode::const_lna_iter it;
   for (it = node->activeLinksBegin(); it != node->activeLinksEnd(); ++it) {
     OSPFLink::Ptr link = it->second;
-    OSPFNode::Ptr peer_nd = link->node();
-    RouterID nd_id = node->routerID();
-    RouterID peer_nd_id = peer_nd->routerID();
+    RouterID peer_id = link->node()->routerID();
 
-    if (ospf_router_->routerID() == peer_nd_id
+    if (ospf_router_->routerID() == peer_id
         && ospf_router_->interfaceMap()->activeGateway(nd_id) != NULL) {
       /* Do not remove link if NODE is directly connected to this router.
          HELLO protocol takes precedence. */
       continue;
     }
 
-    if (link->timeSinceLSU() > OSPF::kDefaultLinkStateUpdateTimeout)
+    if (link->timeSinceLSU() > OSPF::kDefaultLinkStateUpdateTimeout) {
+      ILOG << "Timeout: Active link between " << nd_id << " and "
+           << peer_id;
       del_links.pushFront(link);
+    }
+  }
+
+  for (OSPFNode::const_lnp_iter it = node->passiveLinksBegin();
+       it != node->passiveLinksEnd(); ++it) {
+    OSPFLink::Ptr link = it->second;
+    if (link->timeSinceLSU() > OSPF::kDefaultLinkStateUpdateTimeout){
+      ILOG << "Timeout: Passive link between " << nd_id << " and subnet "
+           << link->subnet();
+      del_links.pushFront(link);
+    }
   }
 
   Fwk::Deque<OSPFLink::Ptr>::const_iterator del_it;
@@ -137,7 +149,12 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
   Fwk::Deque<OSPFGateway::Ptr>::const_iterator del_it;
   for (del_it = del_gw.begin(); del_it != del_gw.end(); ++del_it) {
     OSPFGateway::Ptr gw = *del_it;
-    iface->activeGatewayDel(gw->nodeRouterID());
+
+    RouterID nbr_id = gw->nodeRouterID();
+    ILOG << "Timeout: Active gateway with subnet " << gw->subnet() << " to nbr "
+         << nbr_id;
+
+    iface->activeGatewayDel(nbr_id);
   }
 }
 
@@ -145,9 +162,16 @@ void
 OSPFDaemon::broadcast_timed_hello() {
   OSPFInterfaceMap::PtrConst iface_map = ospf_router_->interfaceMap();
   OSPFInterfaceMap::const_if_iter if_it = iface_map->ifacesBegin();
+
+  bool hello_logged = false;
   for (; if_it != iface_map->ifacesEnd(); ++if_it) {
     OSPFInterface::Ptr iface = if_it->second;
     if (iface->timeSinceOutgoingHello() >= iface->helloint()) {
+      if (!hello_logged) {
+        ILOG << "Sending HELLO";
+        hello_logged = true;
+      }
+
       broadcast_hello_out_interface(iface);
     }
   }
