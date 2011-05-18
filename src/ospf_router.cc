@@ -427,10 +427,8 @@ void
 OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                        OSPFLSUPacket::PtrConst pkt) {
   /* Processing each LSU advertisement enclosed in the LSU packet. */
-  OSPFLSUAdvertisement::PtrConst adv;
-  OSPFNode::Ptr neighbor_nd;
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
-    adv = pkt->advertisement(adv_index);
+    OSPFLSUAdvertisement::PtrConst adv = pkt->advertisement(adv_index);
 
     NeighborRelationship::Ptr nb_rel;
     if (adv->routerID() != OSPF::kPassiveEndpointID) {
@@ -456,7 +454,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
            staged for now. It is committed when NEIGHBOR confirms connectivity
            to SENDER with an LSU of its own. */
 
-        neighbor_nd = topology_->node(adv->routerID());
+        OSPFNode::Ptr neighbor_nd = topology_->node(adv->routerID());
         if (neighbor_nd == NULL) {
           neighbor_nd = OSPFNode::New(adv->routerID());
           topology_->nodeIs(neighbor_nd, false);
