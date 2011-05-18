@@ -231,11 +231,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
                           const IPv4Addr& gateway,
                           OSPFInterface::PtrConst iface);
 
-  /* Removes the given gateway's entry from the routing table.
-     Assumes that routing_table_ is already locked. */
-  void rtable_remove_gateway(OSPFGateway::Ptr gateway,
-                             OSPFInterface::Ptr iface);
-
   /* Processes the LSU advertisements enclosed in PKT, an OSPFLSUPacket
      received from SENDER. This function establishes a bi-directional link in
      the router's network topology to each advertised neighbor, N_i, only if N_i
