@@ -57,7 +57,6 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   Notifiee::Ptr notifiee() { return notifiee_; }
 
   size_t nodes() const { return nodes_.size() + 1; } /* +1 for root node. */
-  bool dirty() const { return dirty_; }
 
   /* Mutators. */
 
@@ -107,6 +106,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   };
 
   /* Private member functions. */
+
+  bool dirty() const { return dirty_; }
 
   void compute_optimal_spanning_tree();
   void dirtyIs(bool status);
