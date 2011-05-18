@@ -278,6 +278,20 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
 }
 
 void
+OSPFRouter::OSPFInterfaceMapReactor::onInterfaceDel(OSPFInterfaceMap::Ptr _im,
+                                                    OSPFInterface::Ptr iface) {
+  RoutingTable::Ptr rtable = ospf_router_->routingTable();
+  RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
+                                                 iface->interfaceSubnetMask());
+  if (entry) {
+    OSPFGateway::Ptr gw_obj = iface->passiveGateway(entry->subnet(),
+                                                    entry->subnetMask());
+    if (gw_obj)
+      ospf_router_->rtable_reactor_->onEntryDel(rtable, entry);
+  }
+}
+
+void
 OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                OSPFInterface::Ptr iface,
                                                OSPFGateway::Ptr gw_obj) {
@@ -330,7 +344,8 @@ OSPFRouter::RoutingTableReactor::onEntryDel(RoutingTable::Ptr rtable,
 
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
-  iface->passiveGatewayDel(entry->subnet(), entry->subnetMask());
+  if (iface)
+    iface->passiveGatewayDel(entry->subnet(), entry->subnetMask());
 }
 
 /* OSPFRouter private member functions */

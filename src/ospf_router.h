@@ -170,6 +170,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     }
 
     void onInterface(OSPFInterfaceMap::Ptr _im, OSPFInterface::Ptr iface);
+    void onInterfaceDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr);
     void onGateway(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr, OSPFGateway::Ptr);
     void onGatewayDel(OSPFInterfaceMap::Ptr, OSPFInterface::Ptr,
                       OSPFGateway::Ptr);
