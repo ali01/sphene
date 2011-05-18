@@ -269,6 +269,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Fwk::Ptr<OSPFLSUPacket> build_lsu_to_gateway(Fwk::Ptr<OSPFInterface>,
                                                Fwk::Ptr<OSPFGateway>) const;
 
+  /* Sets link state advertisements in the provided OSPF packet from the
+     given interface starting with the advertisement with index STARTING_IX. */
   static void set_lsu_adv_from_interface(Fwk::Ptr<OSPFLSUPacket>,
                                          Fwk::Ptr<OSPFInterface>,
                                          uint32_t& starting_ix);
