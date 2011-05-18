@@ -46,8 +46,7 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
   /* Process existing routes in RTABLE. */
   RoutingTable::const_iterator it;
   for (it = routing_table_->entriesBegin();
-       it != routing_table_->entriesEnd();
-       ++it) {
+       it != routing_table_->entriesEnd(); ++it) {
     RoutingTable::Entry::Ptr entry = it->second;
     rtable_reactor_->onEntry(routing_table_, entry);
   }
