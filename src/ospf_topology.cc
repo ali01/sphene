@@ -151,6 +151,8 @@ OSPFTopology::onPossibleUpdate() {
 /* Implementation of Dijkstra's algorithm. */
 void
 OSPFTopology::compute_optimal_spanning_tree() {
+  ILOG << "Computing optimal spanning tree";
+
   /* Set of all nodes: shallow copy of nodes_. */
   Fwk::Map<RouterID,OSPFNode> node_set(nodes_);
   node_set[root_node_->routerID()] = root_node_;
