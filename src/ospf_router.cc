@@ -158,6 +158,8 @@ OSPFRouter::PacketFunctor::operator()(OSPFHelloPacket* pkt,
   }
 
   RouterID neighbor_id = pkt->routerID();
+  ILOG << "Received HELLO packet from neighbor " << neighbor_id;
+
   OSPFGateway::Ptr gw_obj = ifd->activeGateway(neighbor_id);
 
   if (gw_obj == NULL) {
@@ -203,9 +205,10 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
     /* Creating new node and inserting it into the topology database */
     node = OSPFNode::New(node_id);
     topology_->nodeIs(node, false);
-
-    DLOG << "Inserted node " << node_id << " to topology database.";
   }
+
+  ILOG << "Received LSU (seqno=" << pkt->seqno() << ") from neighbor "
+       << node_id;
 
   /* Updating seqno in topology database */
   node->latestSeqnoIs(pkt->seqno());
@@ -258,6 +261,9 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 void
 OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
                                                  OSPFInterface::Ptr iface) {
+  ILOG << "Added interface with address " << iface->interfaceIP()
+       << " on " << iface->interfaceName();
+
   /* router ID should be equal to the IP addr of the first interface. */
   if (ospf_router_->routerID() == OSPF::kInvalidRouterID)
     ospf_router_->routerIDIs((RouterID)iface->interfaceIP().value());
@@ -273,6 +279,9 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
 void
 OSPFRouter::OSPFInterfaceMapReactor::onInterfaceDel(OSPFInterfaceMap::Ptr _im,
                                                     OSPFInterface::Ptr iface) {
+  ILOG << "Removed interface with address " << iface->interfaceIP()
+       << " from " << iface->interfaceName();
+
   RoutingTable::Ptr rtable = ospf_router_->routingTable();
   RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
                                                  iface->interfaceSubnetMask());
@@ -284,6 +293,16 @@ void
 OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
                                                OSPFInterface::Ptr iface,
                                                OSPFGateway::Ptr gw_obj) {
+  /* Info logging. */
+  if (gw_obj->nodeIsPassiveEndpoint()) {
+    ILOG << "Added passive gateway with subnet " << gw_obj->subnet()
+         << " on " << iface->interfaceName();
+  } else {
+    ILOG << "Added active gateway with subnet " << gw_obj->subnet()
+         << " to nbr " << gw_obj->nodeRouterID() << " on "
+         << iface->interfaceName();
+  }
+
   ospf_router_->topology_->nodeIs(gw_obj->node(), false);
   ospf_router_->router_node_->linkIs(gw_obj, false);
 
@@ -300,10 +319,16 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
     IPv4Addr mask = gw_obj->subnetMask();
     ospf_router_->router_node_->passiveLinkDel(subnet, mask, false);
 
+    ILOG << "Removed passive gateway with subnet " << subnet << " from "
+         << iface->interfaceName();
+
   } else {
     RouterID nd_id = gw_obj->nodeRouterID();
     ospf_router_->router_node_->activeLinkDel(nd_id, false);
     ospf_router_->topology()->nodeDel(nd_id, false);
+
+    ILOG << "Removed active gateway with subnet " << gw_obj->subnet()
+         << " to nbr " << nd_id << " from " << iface->interfaceName();
   }
 
   ospf_router_->topology()->onPossibleUpdate();
@@ -340,7 +365,7 @@ OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
 
 void
 OSPFRouter::rtable_update() {
-  DLOG << "Full routing table update.";
+  ILOG << "Routing table updated";
 
   Fwk::ScopedLock<RoutingTable> lock(routing_table_);
 
@@ -416,11 +441,7 @@ OSPFRouter::rtable_add_gateway(const IPv4Addr& subnet,
 
   routing_table_->entryIs(entry);
 
-  DLOG << "Routing table entry added:";
-  DLOG << "Subnet:      " << subnet;
-  DLOG << "Subnet mask: " << mask;
-  DLOG << "Gateway:     " << gateway;
-  DLOG << "Interface:   " << iface->interface()->name();
+  ILOG << "  + " << subnet << " ==> " << iface->interfaceName();
 }
 
 void
@@ -469,19 +490,24 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     } else {
       /* Advertisement corresponds to an endpoint that is not running OSPF.
          Bypass two-phase commit logic. */
+
+      /* Add sender to the topology in case it's not already there */
+      topology_->nodeIs(sender, false);
+
       OSPFLink::Ptr link = OSPFLink::NewPassive(adv->subnet(),
                                                 adv->subnetMask());
       sender->linkIs(link, false);
 
-      /* Add both endpoints to the topology in case they aren't already there */
-      topology_->nodeIs(sender, false);
-      topology_->nodeIs(link->node(), false);
+      ILOG << "  adv-commit(p) " << sender->routerID() << " ==> "
+           << adv->subnet();
     }
   }
 }
 
 void
 OSPFRouter::flood_lsu() {
+  ILOG << "Sending LSU (seqno=" << lsu_seqno_ << ")";
+
   OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
   for (; if_it != interfaces_->ifacesEnd(); ++if_it) {
     OSPFInterface::Ptr iface = if_it->second;
@@ -502,8 +528,6 @@ OSPFRouter::flood_lsu_out_interface(Fwk::Ptr<OSPFInterface> iface) {
        it != iface->activeGatewaysEnd(); ++it) {
     OSPFGateway::Ptr gw_obj = it->second;
     OSPFLSUPacket::Ptr ospf_pkt = build_lsu_to_gateway(iface, gw_obj);
-
-    DLOG << "Sending link-state update to " << gw_obj->nodeRouterID();
     outputPacketNew(ospf_pkt);
   }
 }
@@ -649,6 +673,8 @@ OSPFRouter::stage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   nb_list->pushBack(nbr);
 
+  ILOG << "  adv-stage     " << lsu_sender_id << " ==> " << adv_nb_id;
+
   return true;
 }
 
@@ -670,6 +696,9 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);
+
+  ILOG << "  adv-commit(a) " << lsu_sender->routerID() << " ==> "
+       << adv_nb->nodeRouterID();
 }
 
 bool
