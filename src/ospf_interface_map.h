@@ -58,6 +58,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
   size_t interfaces() const { return ifaces_.size(); }
   size_t gateways() const;
+  size_t activeGateways() const;
 
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }

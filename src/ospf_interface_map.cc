@@ -51,6 +51,17 @@ OSPFInterfaceMap::gateways() const {
   return gateways;
 }
 
+size_t
+OSPFInterfaceMap::activeGateways() const {
+  size_t active_gateways = 0;
+  for (const_if_iter if_it = ifacesBegin(); if_it != ifacesEnd(); ++if_it) {
+    OSPFInterface::Ptr iface = if_it->second;
+    active_gateways += iface->activeGateways();
+  }
+
+  return active_gateways;
+}
+
 void
 OSPFInterfaceMap::interfaceIs(OSPFInterface::Ptr iface) {
   if (iface == NULL)
