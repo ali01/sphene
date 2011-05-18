@@ -67,8 +67,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   size_t passiveLinks() const { return passive_links_.size(); }
 
   /* Previous node in the shortest path from the root node to this node. */
-  OSPFNode::Ptr prev() { return prev_; }
-  OSPFNode::PtrConst prev() const { return prev_; }
+  OSPFNode::Ptr upstreamNode() { return prev_; }
+  OSPFNode::PtrConst upstreamNode() const { return prev_; }
 
   uint16_t latestSeqno() const { return latest_seqno_; }
   uint16_t distance() const { return distance_; }
@@ -86,7 +86,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   void passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
                       bool commit);
 
-  void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
+  void upstreamNodeIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
   void latestSeqnoIs(uint16_t seqno) { latest_seqno_ = seqno; }
   void distanceIs(uint16_t dist) { distance_ = dist; }

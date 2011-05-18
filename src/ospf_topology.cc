@@ -49,12 +49,12 @@ OSPFTopology::nextHop(const RouterID& router_id) {
     if (nd == NULL)
       break;
 
-    if (nd->prev() == root_node_) {
+    if (nd->upstreamNode() == root_node_) {
       next_hop = nd;
       break;
     }
 
-    nd = nd->prev();
+    nd = nd->upstreamNode();
   }
 
   return next_hop;
@@ -161,7 +161,7 @@ OSPFTopology::compute_optimal_spanning_tree() {
   for (iterator it = node_set.begin(); it != node_set.end(); ++it) {
     OSPFNode::Ptr node = it->second;
     node->distanceIs(OSPFNode::kMaxDistance);
-    node->prevIs(NULL);
+    node->upstreamNodeIs(NULL);
   }
 
   /* Initializing distance to self to 0 */
@@ -187,7 +187,7 @@ OSPFTopology::compute_optimal_spanning_tree() {
         uint16_t alt_dist = cur_nd->distance() + 1;
         if (alt_dist < neighbor->distance()) {
           neighbor->distanceIs(alt_dist);
-          neighbor->prevIs(cur_nd);
+          neighbor->upstreamNodeIs(cur_nd);
         }
       }
     }

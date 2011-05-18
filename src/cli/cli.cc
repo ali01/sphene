@@ -692,7 +692,7 @@ void cli_show_ospf_node(OSPFNode::PtrConst node) {
                   "  Links:     %u\n"
                   "    Active Neighbors:\n";
 
-  RouterID prev = node->prev() ? node->prev()->routerID() : 0;
+  RouterID prev = node->upstreamNode() ? node->upstreamNode()->routerID() : 0;
 
   std::stringstream ss_rid, ss_prev_id;
   ss_rid << node->routerID();

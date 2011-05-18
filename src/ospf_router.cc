@@ -412,7 +412,7 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
   for (OSPFNode::const_lna_iter it = dest->activeLinksBegin();
        it != dest->activeLinksEnd(); ++it) {
     OSPFLink::Ptr link = it->second;
-    if (dest->prev() == link->node() && dest_id != next_hop_id) {
+    if (dest->upstreamNode() == link->node() && dest_id != next_hop_id) {
       /* Don't add the subnet through which we are connected to DEST unless
          the next hop to DEST is DEST itself. */
       continue;
