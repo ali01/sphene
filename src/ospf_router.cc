@@ -259,11 +259,9 @@ OSPFRouter::NeighborRelationship::advertisedNeighbor() {
 void
 OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
                                                  OSPFInterface::Ptr iface) {
-  /* router ID should always be equal to the IP addr of the first interface. */
-  if (ospf_router_->routerID() == OSPF::kInvalidRouterID
-      || _im->interfaces() <= 1) {
+  /* router ID should be equal to the IP addr of the first interface. */
+  if (ospf_router_->routerID() == OSPF::kInvalidRouterID)
     ospf_router_->routerIDIs((RouterID)iface->interfaceIP().value());
-  }
 
   /* Process any unprocessed static routes that correspond to
      the added interface. */
