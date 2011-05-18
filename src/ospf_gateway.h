@@ -25,6 +25,7 @@ class OSPFGateway : public OSPFLink {
                         const IPv4Addr& mask);
 
   const IPv4Addr& gateway() const { return gateway_; }
+  void gatewayIs(const IPv4Addr& gw) { gateway_ = gw; }
 
   time_t timeSinceHello() const { return time(NULL) - last_hello_; }
   void timeSinceHelloIs(time_t _t) { last_hello_ = time(NULL) - _t; }
