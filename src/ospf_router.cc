@@ -263,15 +263,16 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterface(OSPFInterfaceMap::Ptr _im,
   if (ospf_router_->routerID() == OSPF::kInvalidRouterID)
     ospf_router_->routerIDIs((RouterID)iface->interfaceIP().value());
 
-  /* Process any unprocessed static routes that correspond to
-     the added interface. */
+  /* Create passive gateway for added interface. */
   RoutingTable::Ptr rtable = ospf_router_->routingTable();
   RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
                                                  iface->interfaceSubnetMask());
   if (entry) {
     OSPFGateway::Ptr gw_obj = iface->passiveGateway(entry->subnet(),
                                                     entry->subnetMask());
-    if (gw_obj == NULL)
+    if (gw_obj)
+      gw_obj->gatewayIs(entry->gateway());
+    else
       ospf_router_->rtable_reactor_->onEntry(rtable, entry);
   }
 }
@@ -318,8 +319,6 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
                                                       entry->subnet(),
                                                       entry->subnetMask());
     iface->gatewayIs(gw_obj);
-    DLOG << "Processed static routing table entry with subnet "
-         << entry->subnet();
   }
 }
 
