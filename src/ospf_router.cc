@@ -443,8 +443,6 @@ OSPFRouter::rtable_add_gateway(const IPv4Addr& subnet,
   entry->interfaceIs(iface->interface());
 
   routing_table_->entryIs(entry);
-
-  ILOG << "  + " << subnet << " ==> " << iface->interfaceName();
 }
 
 void
