@@ -15,7 +15,8 @@ const size_t InterfaceMap::kMaxInterfaces = 32;
 
 InterfaceMap::InterfaceMap()
     : Fwk::BaseNotifier<InterfaceMap, InterfaceMapNotifiee>("InterfaceMap"),
-      next_index_(0) { }
+      next_index_(0),
+      iface_reactor_(InterfaceReactor::New(this)) { }
 
 
 void InterfaceMap::interfaceIs(Interface::Ptr iface) {
@@ -24,6 +25,8 @@ void InterfaceMap::interfaceIs(Interface::Ptr iface) {
                                  "Interface is NULL");
   if (name_if_map_.find(iface->name()) != name_if_map_.end())
     return;
+
+  iface_reactor_->notifierIs(iface);
 
   // Set the index and increase the next available index.
   iface->indexIs(next_index_++);
@@ -49,6 +52,8 @@ void InterfaceMap::interfaceDel(const Interface::Ptr iface) {
     return;
   if (name_if_map_.find(iface->name()) == name_if_map_.end())
     return;
+
+  iface_reactor_->notifierDel(iface);
 
   name_if_map_.erase(iface->name());
   ip_if_map_.erase(iface->ip());
@@ -84,4 +89,25 @@ Interface::Ptr InterfaceMap::interface(const string& name) {
 Interface::Ptr InterfaceMap::interfaceAddr(const IPv4Addr& addr) {
   IPInterfaceMap::iterator it = ip_if_map_.find(addr);
   return (it != ip_if_map_.end()) ? it->second : NULL;
+}
+
+
+// Forward interface notifications.
+
+void
+InterfaceMap::InterfaceReactor::onIP(Interface::Ptr iface) {
+  for (unsigned int i = 0; i < iface_map_->notifiees_.size(); ++i)
+    iface_map_->notifiees_[i]->onInterfaceIP(iface_map_, iface);
+}
+
+void
+InterfaceMap::InterfaceReactor::onMAC(Interface::Ptr iface) {
+  for (unsigned int i = 0; i < iface_map_->notifiees_.size(); ++i)
+    iface_map_->notifiees_[i]->onInterfaceMAC(iface_map_, iface);
+}
+
+void
+InterfaceMap::InterfaceReactor::onEnabled(Interface::Ptr iface) {
+  for (unsigned int i = 0; i < iface_map_->notifiees_.size(); ++i)
+    iface_map_->notifiees_[i]->onInterfaceEnabled(iface_map_, iface);
 }

@@ -61,9 +61,35 @@ class InterfaceMap
   InterfaceMap();
 
  private:
+  class InterfaceReactor : public Interface::Notifiee {
+   public:
+    typedef Fwk::Ptr<const InterfaceReactor> PtrConst;
+    typedef Fwk::Ptr<InterfaceReactor> Ptr;
+
+    static Ptr New(InterfaceMap* _im) {
+      return new InterfaceReactor(_im);
+    }
+
+    void onIP(Interface::Ptr iface);
+    void onMAC(Interface::Ptr iface);
+    void onEnabled(Interface::Ptr iface);
+
+   private:
+    InterfaceReactor(InterfaceMap* _im) : iface_map_(_im) {}
+
+    /* Data members. */
+    InterfaceMap* iface_map_;
+
+    /* Operations disallowed. */
+    InterfaceReactor(const InterfaceReactor&);
+    void operator=(const InterfaceReactor&);
+  };
+
   NameInterfaceMap name_if_map_;
   IPInterfaceMap ip_if_map_;
   unsigned int next_index_;
+
+  InterfaceReactor::Ptr iface_reactor_;
 
   InterfaceMap(const InterfaceMap&);
   void operator=(const InterfaceMap&);
@@ -75,6 +101,9 @@ class InterfaceMapNotifiee
  public:
   virtual void onInterface(InterfaceMap::Ptr map, Interface::Ptr iface) { }
   virtual void onInterfaceDel(InterfaceMap::Ptr map, Interface::Ptr iface) { }
+  virtual void onInterfaceIP(InterfaceMap::Ptr, Interface::Ptr iface) { }
+  virtual void onInterfaceMAC(InterfaceMap::Ptr, Interface::Ptr iface) { }
+  virtual void onInterfaceEnabled(InterfaceMap::Ptr, Interface::Ptr iface) { }
 };
 
 #endif
