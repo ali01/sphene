@@ -1,8 +1,13 @@
 #include "routing_table.h"
 
 #include "fwk/deque.h"
+#include "fwk/log.h"
 
 #include "interface.h"
+
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("RoutingTable");
+
 
 // RoutingTable
 
