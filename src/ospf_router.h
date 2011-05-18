@@ -307,6 +307,9 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   void update_iface_from_rtable_entry_new(OSPFInterface::Ptr,
                                           RoutingTable::Entry::PtrConst);
 
+  void update_iface_from_rtable_entry_delete(OSPFInterface::Ptr,
+                                             RoutingTable::Entry::PtrConst);
+
   /* -- OSPFRouter data members. -- */
 
   const AreaID area_id_;

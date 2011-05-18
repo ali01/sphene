@@ -277,12 +277,8 @@ OSPFRouter::OSPFInterfaceMapReactor::onInterfaceDel(OSPFInterfaceMap::Ptr _im,
   RoutingTable::Ptr rtable = ospf_router_->routingTable();
   RoutingTable::Entry::Ptr entry = rtable->entry(iface->interfaceSubnet(),
                                                  iface->interfaceSubnetMask());
-  if (entry) {
-    OSPFGateway::Ptr gw_obj = iface->passiveGateway(entry->subnet(),
-                                                    entry->subnetMask());
-    if (gw_obj)
-      ospf_router_->rtable_reactor_->onEntryDel(rtable, entry);
-  }
+  if (entry)
+   ospf_router_->update_iface_from_rtable_entry_delete(iface, entry);
 }
 
 void
@@ -329,13 +325,10 @@ OSPFRouter::RoutingTableReactor::onEntry(RoutingTable::Ptr rtable,
 void
 OSPFRouter::RoutingTableReactor::onEntryDel(RoutingTable::Ptr rtable,
                                             RoutingTable::Entry::Ptr entry) {
-  if (entry->type() == RoutingTable::Entry::kDynamic)
-    return;
-
   OSPFInterfaceMap::Ptr iface_map = ospf_router_->interfaceMap();
   OSPFInterface::Ptr iface = iface_map->interface(entry->interface()->ip());
   if (iface)
-    iface->passiveGatewayDel(entry->subnet(), entry->subnetMask());
+    ospf_router_->update_iface_from_rtable_entry_delete(iface, entry);
 }
 
 /* OSPFRouter private member functions */
@@ -754,4 +747,13 @@ OSPFRouter::update_iface_from_rtable_entry_new(
   } else {
     gw_obj->gatewayIs(entry->gateway());
   }
+}
+
+void
+OSPFRouter::update_iface_from_rtable_entry_delete(
+    OSPFInterface::Ptr iface, RoutingTable::Entry::PtrConst entry) {
+  if (entry->type() == RoutingTable::Entry::kDynamic)
+    return;
+
+  iface->passiveGatewayDel(entry->subnet(), entry->subnetMask());
 }
