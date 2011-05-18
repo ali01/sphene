@@ -126,6 +126,7 @@ class RoutingTable
 
     void onInterface(InterfaceMap::Ptr map, Interface::Ptr iface);
     void onInterfaceDel(InterfaceMap::Ptr map, Interface::Ptr iface);
+    void onInterfaceEnabled(InterfaceMap::Ptr, Interface::Ptr iface);
 
    private:
     InterfaceMapReactor(RoutingTable* _rt) : rtable_(_rt) {}

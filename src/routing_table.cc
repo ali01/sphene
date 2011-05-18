@@ -213,3 +213,12 @@ RoutingTable::InterfaceMapReactor::onInterfaceDel(InterfaceMap::Ptr map,
                                                   Interface::Ptr iface) {
   rtable_->entryDel(iface->subnet(), iface->subnetMask());
 }
+
+void
+RoutingTable::InterfaceMapReactor::onInterfaceEnabled(InterfaceMap::Ptr map,
+                                                      Interface::Ptr iface) {
+  if (iface->enabled())
+    this->onInterface(map, iface);
+  else
+    this->onInterfaceDel(map, iface);
+}
