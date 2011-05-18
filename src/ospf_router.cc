@@ -506,7 +506,10 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
 
 void
 OSPFRouter::flood_lsu() {
-  ILOG << "Sending LSU (seqno=" << lsu_seqno_ << ")";
+  size_t active_gateways = interfaces_->activeGateways();
+
+  if (active_gateways > 0)
+    ILOG << "Sending LSU (seqno=" << lsu_seqno_ << ")";
 
   OSPFInterfaceMap::const_if_iter if_it = interfaces_->ifacesBegin();
   for (; if_it != interfaces_->ifacesEnd(); ++if_it) {
@@ -514,7 +517,7 @@ OSPFRouter::flood_lsu() {
     flood_lsu_out_interface(iface);
   }
 
-  if (interfaces_->interfaces())
+  if (active_gateways > 0)
     ++lsu_seqno_;
 
   if (notifiee_)
