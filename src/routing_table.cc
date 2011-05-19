@@ -106,7 +106,7 @@ RoutingTable::entryDel(Entry::Ptr entry) {
 
   entry = this->entry(subnet, mask);
 
-  // Only attempt perform deletion (and trigger notification),
+  // Only perform deletion (and trigger notification),
   // if ENTRY is actually in the routing table.
   if (entry) {
     IPv4Subnet key = std::make_pair(subnet, mask);
