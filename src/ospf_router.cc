@@ -395,7 +395,7 @@ void
 OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
                             OSPFNode::PtrConst dest) {
   if (next_hop->isPassiveEndpoint() || dest->isPassiveEndpoint()) {
-    ELOG << "rtable_add_dest: next_hop or dest are passive endpoints.";
+    ELOG << "rtable_add_dest: either NEXT_HOP or DEST is a passive endpoint.";
     return;
   }
 
@@ -405,6 +405,8 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
   OSPFGateway::Ptr gw_obj = interfaces_->activeGateway(next_hop_id);
   if (gw_obj == NULL) {
     ELOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
+    ELOG << "  next_hop_id: " << next_hop_id;
+    ELOG << "  dest_id:     " << dest_id;
     return;
   }
 
