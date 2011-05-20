@@ -193,3 +193,4 @@ def kill_all_instances():
     instance2.stop()
   if instance3:
     instance3.stop()
+  time.sleep(3)
