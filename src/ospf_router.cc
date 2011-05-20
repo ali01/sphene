@@ -317,21 +317,24 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
   if (gw_obj->nodeIsPassiveEndpoint()) {
     IPv4Addr subnet = gw_obj->subnet();
     IPv4Addr mask = gw_obj->subnetMask();
-    ospf_router_->router_node_->passiveLinkDel(subnet, mask, false);
 
     ILOG << "Removed passive gateway with subnet " << subnet << " from "
          << iface->interfaceName();
 
+    ospf_router_->router_node_->passiveLinkDel(subnet, mask, false);
+
   } else {
     RouterID nd_id = gw_obj->nodeRouterID();
-    if (_im->activeGateway(nd_id) == NULL) {
-      /* If there are no other gateways connecting this router to ND_ID,
-         delete link to node from topology. */
-      ospf_router_->router_node_->activeLinkDel(nd_id, false);
-    }
 
     ILOG << "Removed active gateway with subnet " << gw_obj->subnet()
          << " to nbr " << nd_id << " from " << iface->interfaceName();
+
+    if (_im->activeGateway(nd_id) == NULL) {
+      /* If there are no other gateways connecting this router to ND_ID,
+         delete link to node from topology. */
+      ILOG << "Removed active link to " << nd_id;
+      ospf_router_->router_node_->activeLinkDel(nd_id, false);
+    }
   }
 
   ospf_router_->topology()->onPossibleUpdate();
