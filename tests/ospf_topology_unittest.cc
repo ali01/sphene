@@ -50,7 +50,7 @@ TEST_F(OSPFTopologyTest, basic) {
   OSPFNode::Ptr node = nodes_[0];
 
   topology_->nodeIs(node);
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
   EXPECT_EQ(topology_->nodes(), (size_t)2);
 
   temp = topology_->node(node->routerID());
@@ -63,7 +63,7 @@ TEST_F(OSPFTopologyTest, basic) {
 TEST_F(OSPFTopologyTest, two_node) {
   topology_->nodeIs(nodes_[0]);
   root_node_->linkIs(links_[0]);
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
 
   EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
@@ -72,7 +72,7 @@ TEST_F(OSPFTopologyTest, two_node) {
 TEST_F(OSPFTopologyTest, two_node_reverse) {
   nodes_[0]->linkIs(root_link_);
   topology_->nodeIs(nodes_[0]);
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
 
   EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
@@ -102,7 +102,7 @@ OSPFTopologyTest::setup_six_node_topology() {
   nodes_[1]->linkIs(links_[3]);
   nodes_[1]->linkIs(links_[4]);
 
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
 }
 
 TEST_F(OSPFTopologyTest, six_node_1) {
@@ -127,7 +127,7 @@ TEST_F(OSPFTopologyTest, six_node_2) {
 
   root_node_->activeLinkDel(ids_[1]);
   root_node_->activeLinkDel(ids_[2]);
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
 
   /* Topology:
               0        4
@@ -152,13 +152,13 @@ TEST_F(OSPFTopologyTest, six_node_2) {
 
 TEST_F(OSPFTopologyTest, self_link) {
   nodes_[0]->linkIs(links_[0]);
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
 }
 
 TEST_F(OSPFTopologyTest, link_delete) {
   nodes_[0]->linkIs(links_[1]);
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)1);
   EXPECT_EQ(nodes_[1]->links(), (size_t)1);
 
@@ -169,7 +169,7 @@ TEST_F(OSPFTopologyTest, link_delete) {
   }
 
   nodes_[0]->activeLinkDel(nodes_[1]->routerID());
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
   EXPECT_EQ(nodes_[1]->links(), (size_t)0);
 }
@@ -177,7 +177,7 @@ TEST_F(OSPFTopologyTest, link_delete) {
 TEST_F(OSPFTopologyTest, link_delete_reverse) {
   nodes_[0]->linkIs(links_[1]);
   nodes_[0]->activeLinkDel(nodes_[1]->routerID());
-  topology_->onPossibleUpdate();
+  topology_->onUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
   EXPECT_EQ(nodes_[1]->links(), (size_t)0);
 }

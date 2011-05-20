@@ -47,7 +47,7 @@ OSPFDaemon::run() {
   timeout_topology_entries();
 
   /* Signal topology about possible seconds every second. */
-  ospf_router_->topology()->onPossibleUpdate();
+  ospf_router_->topology()->onUpdate();
 
   /* Sending HELLO packets to all connected neighbors
      every iface.HELLOINT seconds. */

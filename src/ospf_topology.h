@@ -84,8 +84,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   const_iterator nodesEnd() const { return nodes_.end(); }
 
   /* Signals. */
-  /* onPossibleUpdate signal: Recomputes shortest-path spanning tree if dirty.*/
-  void onPossibleUpdate();
+  /* onUpdate signal: Recomputes shortest-path spanning tree if dirty.*/
+  void onUpdate();
 
  private:
   explicit OSPFTopology(OSPFNode::Ptr root_node);

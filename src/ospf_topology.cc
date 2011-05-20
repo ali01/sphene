@@ -144,7 +144,7 @@ OSPFTopology::nodeDel(const RouterID& router_id) {
 }
 
 void
-OSPFTopology::onPossibleUpdate() {
+OSPFTopology::onUpdate() {
   if (dirty())
     compute_optimal_spanning_tree();
 }
