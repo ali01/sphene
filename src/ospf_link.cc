@@ -1,5 +1,9 @@
 #include "ospf_link.h"
 
+#include <cstdio>
+#include <sstream>
+using std::stringstream;
+
 #include "ospf_constants.h"
 #include "ospf_node.h"
 
@@ -50,6 +54,23 @@ OSPFLink::nodeRouterID() const {
 bool
 OSPFLink::nodeIsPassiveEndpoint() const {
   return node_->isPassiveEndpoint();
+}
+
+string
+OSPFLink::str() const {
+  stringstream ss;
+  
+  char line_buf[256];
+  const char* const format = "      %-16s %-16s %-16s\n";
+  const string& subnet_str = subnet();
+  const string& mask_str = subnetMask();
+
+  ss << nodeRouterID();
+
+  snprintf(line_buf, sizeof(line_buf), format,
+           ss.str().c_str(), subnet_str.c_str(), mask_str.c_str());
+
+  return line_buf;
 }
 
 bool

@@ -2,6 +2,8 @@
 #define OSPF_LINK_H_QJXYEZKS
 
 #include <ctime>
+#include <string>
+using std::string;
 
 #include "fwk/ptr_interface.h"
 
@@ -38,6 +40,9 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
 
   time_t timeSinceLSU() const { return time(NULL) - last_lsu_; }
   void timeSinceLSUIs(time_t _t) { last_lsu_ = time(NULL) - _t; }
+
+  /* String representation. */
+  string str() const;
 
   /* Comparison operator. */
   bool operator==(const OSPFLink&) const;
