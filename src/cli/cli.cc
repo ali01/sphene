@@ -673,42 +673,7 @@ void cli_show_link_summary(OSPFLink::PtrConst link) {
 }
 
 void cli_show_ospf_node(OSPFNode::PtrConst node) {
-  // Buffers for proper formatting.
-  char line_buf[512];
-
-  string format = "  Router ID: %s\n"
-                  "  Prev. ID:  %s\n"
-                  "  Distance:  %u\n"
-                  "  Links:     %u\n"
-                  "    Active Neighbors:\n";
-
-  RouterID prev = node->upstreamNode() ? node->upstreamNode()->routerID() : 0;
-
-  std::stringstream ss_rid, ss_prev_id;
-  ss_rid << node->routerID();
-  ss_prev_id << prev;
-
-  snprintf(line_buf, sizeof(line_buf), format.c_str(),
-           ss_rid.str().c_str(), ss_prev_id.str().c_str(),
-           node->distance(), node->links());
-
-  cli_send_str(line_buf);
-
-  for (OSPFNode::const_lna_iter it = node->activeLinksBegin();
-       it != node->activeLinksEnd(); ++it) {
-    OSPFLink::PtrConst link = it->second;
-    cli_show_link_summary(link);
-  }
-
-  cli_send_str("    Passive Endpoints:\n");
-
-  for (OSPFNode::const_lnp_iter it = node->passiveLinksBegin();
-       it != node->passiveLinksEnd(); ++it) {
-    OSPFLink::PtrConst link = it->second;
-    cli_show_link_summary(link);
-  }
-
-  cli_send_str("\n");
+  cli_send_str(node->str().c_str());
 }
 
 #ifndef _VNS_MODE_
