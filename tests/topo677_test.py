@@ -215,7 +215,6 @@ class Test_Topo677:
     self._disable_interface(instance0, 'eth2')
     conv_time = (3 * (0 + 1) + 1) * helloint
     time.sleep(conv_time)
-    time.sleep(30)
     self._basic_connectivity_tests()
     assert_equal(
         network_lib.traceroute(self._app1)[-3:],
@@ -224,7 +223,6 @@ class Test_Topo677:
     self._enable_interface(instance0, 'eth1')
     self._enable_interface(instance0, 'eth2')
     time.sleep(helloint)
-    time.sleep(10)
     self._basic_connectivity_tests()
 
   def test_disable_1_internal_link_cut(self):
