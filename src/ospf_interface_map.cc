@@ -135,11 +135,6 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
     notifiee_->onInterfaceDel(this, iface);
 }
 
-void
-OSPFInterfaceMap::interfaceDel(const IPv4Addr& addr) {
-  interfaceDel(interface(addr));
-}
-
 
 /* OSPFInterfaceMap::OSPFInterfaceReactor */
 

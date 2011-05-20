@@ -67,7 +67,7 @@ class OSPFInterfaceMap : public Fwk::PtrInterface<OSPFInterfaceMap> {
 
   void interfaceIs(OSPFInterface::Ptr iface_desc);
   void interfaceDel(OSPFInterface::Ptr iface_desc);
-  void interfaceDel(const IPv4Addr& addr);
+  void interfaceDel(const IPv4Addr& addr) { interfaceDel(interface(addr)); }
 
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
