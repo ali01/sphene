@@ -207,7 +207,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
     topology_->nodeIs(node, false);
   }
 
-  ILOG << "Received LSU (seqno=" << pkt->seqno() << ") from neighbor "
+  ILOG << "Received LSU (seqno=" << pkt->seqno() << ") from "
        << node_id << " with adv_count " << pkt->advCount();
 
   /* Updating seqno in topology database */
