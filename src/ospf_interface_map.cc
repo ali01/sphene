@@ -128,11 +128,12 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
      been notified about the removal of each gateway. */
   ifaces_.elemDel(key);
 
-  /* Remove this interface map as IFACE's notifiee. */
-  iface->notifieeIs(NULL);
-
   if (notifiee_)
     notifiee_->onInterfaceDel(this, iface);
+
+  /* Remove this interface map as IFACE's notifiee. Because notifiee_ may
+     modify IFACE, this must happen after notifiee is signaled above. */
+  iface->notifieeIs(NULL);
 }
 
 
