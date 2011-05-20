@@ -1,6 +1,9 @@
 #ifndef OSPF_NODE_H_VKYMXJVI
 #define OSPF_NODE_H_VKYMXJVI
 
+#include <string>
+using std::string;
+
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -77,6 +80,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   Notifiee::Ptr notifiee() { return notifiee_; }
 
   bool isPassiveEndpoint() const;
+
+  /* String representation. */
+  string str() const;
 
   /* Mutators. */
   void routerIDIs(const RouterID& id) { router_id_ = id; }
