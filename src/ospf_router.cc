@@ -713,8 +713,8 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);
 
-  ILOG << "  adv-commit(a) " << lsu_sender->routerID() << " ==> "
-       << adv_nb->nodeRouterID();
+  ILOG << "  adv-commit(a) " << adv_nb->nodeRouterID() << " ==> "
+       << lsu_sender->routerID();
 }
 
 bool
