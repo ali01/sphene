@@ -224,9 +224,6 @@ class Test_Topo677:
     self._enable_interface(instance0, 'eth2')
     time.sleep(helloint)
     self._basic_connectivity_tests()
-    assert_equal(
-        network_lib.traceroute(self._app1)[-3:],
-        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
 
   def test_disable_1_internal_link_cut(self):
     '''Cut router 0 eth1 and eth2 + 1 internal link, access S1'''
@@ -244,10 +241,7 @@ class Test_Topo677:
     self._enable_interface(instance0, 'eth2')
     self._enable_interface(instance1, 'eth3')
     time.sleep(helloint)
-    self.test_ping_app_servers()
-    assert_equal(
-        network_lib.traceroute(self._app1)[-3:],
-        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+    self._basic_connectivity_tests()
 
   def test_disable_2_internal_links_cut(self):
     '''Cut router 0 eth1 and eth2 + 2 internal links, access S1'''
@@ -268,10 +262,7 @@ class Test_Topo677:
     self._enable_interface(instance1, 'eth3')
     self._enable_interface(instance2, 'eth3')
     time.sleep(helloint)
-    self.test_ping_app_servers()
-    assert_equal(
-        network_lib.traceroute(self._app1)[-3:],
-        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+    self._basic_connectivity_tests()
 
   def test_disable_3_internal_links_cut(self):
     '''Cut router 0 eth1 and eth2 + 3 internal links, access S1'''
@@ -294,10 +285,7 @@ class Test_Topo677:
     self._enable_interface(instance2, 'eth3')
     self._enable_interface(instance3, 'eth3')
     time.sleep(helloint)
-    self.test_ping_app_servers()
-    assert_equal(
-        network_lib.traceroute(self._app1)[-3:],
-        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+    self._basic_connectivity_tests()
 
   def test_disable_4_internal_links_cut(self):
     '''Cut router 0 eth1 and eth2 + 4 internal links, access S1'''
@@ -322,11 +310,7 @@ class Test_Topo677:
     self._enable_interface(instance3, 'eth3')
     self._enable_interface(instance4, 'eth3')
     time.sleep(helloint)
-    self.test_ping_app_servers()
-    assert_equal(
-        network_lib.traceroute(self._app1)[-3:],
-        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
-
+    self._basic_connectivity_tests()
 
   def test_disable_5_internal_links_cut(self):
     '''Cut router 0 eth1 and eth2 + 5 internal links, access S1'''
@@ -348,10 +332,7 @@ class Test_Topo677:
     self._enable_interface(instance4, 'eth3')
     self._enable_interface(instance5, 'eth3')
     time.sleep(helloint)
-    self.test_ping_app_servers()
-    assert_equal(
-        network_lib.traceroute(self._app1)[-3:],
-        [self._rtr0.eth0, self._rtr1.eth1, self._app1])
+    self._basic_connectivity_tests()
 
 
 def teardown():
