@@ -4,6 +4,7 @@ build
 auth_key
 vns_run.sh
 run_vns.sh
+run_vns_gdb
 run_vns
 vns_*.sh
 rtable*
