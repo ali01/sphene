@@ -212,9 +212,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   /* Updating seqno in topology database */
   node->latestSeqnoIs(pkt->seqno());
-
   ospf_router_->process_lsu_advertisements(node, pkt);
-  topology_->onPossibleUpdate();
 
   if (pkt->ttl() > 1) {
     pkt->ttlDec(1);
@@ -306,7 +304,6 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
   ospf_router_->topology_->nodeIs(gw_obj->node(), false);
   ospf_router_->router_node_->linkIs(gw_obj, false);
 
-  ospf_router_->topology()->onPossibleUpdate();
   ospf_router_->lsu_dirty_ = true;
 }
 
@@ -337,7 +334,6 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
     }
   }
 
-  ospf_router_->topology()->onPossibleUpdate();
   ospf_router_->lsu_dirty_ = true;
 }
 

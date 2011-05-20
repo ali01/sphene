@@ -46,6 +46,9 @@ OSPFDaemon::run() {
   /* Removing nodes for whom no LSU has been received */
   timeout_topology_entries();
 
+  /* Signal topology about possible seconds every second. */
+  ospf_router_->topology()->onPossibleUpdate();
+
   /* Sending HELLO packets to all connected neighbors
      every iface.HELLOINT seconds. */
   broadcast_timed_hello();
@@ -69,8 +72,6 @@ OSPFDaemon::timeout_topology_entries() {
     OSPFNode::Ptr node = it->second;
     timeout_node_topology_entries(node);
   }
-
-  topology->onPossibleUpdate();
 }
 
 void
