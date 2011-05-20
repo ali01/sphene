@@ -1,8 +1,10 @@
 #ifndef OSPF_TOPOLOGY_H_I3MK5NYZ
 #define OSPF_TOPOLOGY_H_I3MK5NYZ
 
+#include <ostream>
 #include <string>
 using std::string;
+using std::ostream;
 
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
@@ -140,5 +142,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   OSPFTopology(const OSPFTopology&);
   void operator=(const OSPFTopology&);
 };
+
+ostream& operator<<(ostream& out, const OSPFTopology& topology);
 
 #endif

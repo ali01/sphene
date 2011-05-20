@@ -262,3 +262,8 @@ OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link,
                                      bool commit) {
   topology_->process_update(commit);
 }
+
+ostream&
+operator<<(ostream& out, const OSPFTopology& topology) {
+  return out << topology.str();
+}
