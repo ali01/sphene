@@ -1,5 +1,6 @@
 #include "ospf_node.h"
 
+#include <ostream>
 #include <sstream>
 using std::stringstream;
 
@@ -177,4 +178,9 @@ OSPFNode::oneWayPassiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
   }
 
   return false;
+}
+
+ostream&
+operator<<(ostream& out, const OSPFNode& node) {
+  return out << node.str();
 }

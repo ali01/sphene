@@ -2,6 +2,8 @@
 #define OSPF_NODE_H_VKYMXJVI
 
 #include <string>
+#include <ostream>
+using std::ostream;
 using std::string;
 
 #include "fwk/map.h"
@@ -138,5 +140,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode(const OSPFNode&);
   void operator=(const OSPFNode&);
 };
+
+ostream& operator<<(ostream& out, const OSPFNode& node);
 
 #endif
