@@ -70,10 +70,10 @@ public:
   };
 
   static Log::Ptr LogNew(const std::string& loggerName="root") {
-    if (rootLog == NULL)
-      rootLog = new Log("root");
+    rootLogger();
+
     if (loggerName == "root")
-      return rootLog;
+      return rootLogger();
 
     return new Log(loggerName);
   }
@@ -91,7 +91,7 @@ public:
     if (name() == "root")
       logLevel_ = level;
     else
-      rootLog->levelIs(level);
+      rootLogger()->levelIs(level);
   }
 
   inline std::string name() const { return loggerName_; }
@@ -106,7 +106,7 @@ public:
 
   virtual void entryNew(Level level, Fwk::NamedInterface *entity,
                         std::string funcName, std::string cond) {
-    if (level < rootLog->level())
+    if (level < rootLogger()->level())
       return;
 
     std::cout << timestamp() << " [" << levelName(level) << "] ";
@@ -146,6 +146,13 @@ public:
 
   virtual void entryNew(Exception& e) {
     entryNew(critical_, e);
+  }
+
+  static Log::Ptr rootLogger() {
+    if (rootLog == NULL)
+      rootLog = new Log("root");
+
+    return rootLog;
   }
 
 protected:
