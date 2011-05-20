@@ -1,6 +1,9 @@
 #ifndef OSPF_TOPOLOGY_H_I3MK5NYZ
 #define OSPF_TOPOLOGY_H_I3MK5NYZ
 
+#include <string>
+using std::string;
+
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -57,6 +60,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   Notifiee::Ptr notifiee() { return notifiee_; }
 
   size_t nodes() const { return nodes_.size() + 1; } /* +1 for root node. */
+
+  /* String representation. */
+  string str() const;
 
   /* Mutators. */
 

@@ -1,5 +1,8 @@
 #include "ospf_topology.h"
 
+#include <sstream>
+using std::stringstream;
+
 #include "fwk/deque.h"
 #include "fwk/log.h"
 
@@ -146,6 +149,22 @@ void
 OSPFTopology::onPossibleUpdate() {
   if (dirty())
     compute_optimal_spanning_tree();
+}
+
+string
+OSPFTopology::str() const {
+  stringstream ss;
+  ss << "OSPF Topology\n";
+  ss << "  Root Node:\n";
+  ss << *root_node_;
+
+  const_iterator it;
+  for (it = nodesBegin(); it != nodesEnd(); ++it) {
+    OSPFNode::Ptr node = it->second;
+    ss << *node;
+  }
+
+  return ss.str();
 }
 
 /* Implementation of Dijkstra's algorithm. */
