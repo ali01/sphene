@@ -6,6 +6,7 @@
 using std::string;
 using std::ostream;
 
+#include "fwk/log.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -87,7 +88,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   void onPossibleUpdate();
 
  private:
-  OSPFTopology(OSPFNode::Ptr root_node);
+  explicit OSPFTopology(OSPFNode::Ptr root_node);
 
   /* Reactor to OSPFNode notifications. */
   class NodeReactor : public OSPFNode::Notifiee {
@@ -144,5 +145,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 };
 
 ostream& operator<<(ostream& out, const OSPFTopology& topology);
+Fwk::Log::LogStream::Ptr operator<<(Fwk::Log::LogStream::Ptr ls,
+                                    const OSPFTopology& topology);
 
 #endif

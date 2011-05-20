@@ -267,3 +267,8 @@ ostream&
 operator<<(ostream& out, const OSPFTopology& topology) {
   return out << topology.str();
 }
+
+Fwk::Log::LogStream::Ptr
+operator<<(Fwk::Log::LogStream::Ptr ls, const OSPFTopology& topology) {
+  return ls << topology.str();
+}
