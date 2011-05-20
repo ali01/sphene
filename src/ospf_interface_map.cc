@@ -111,25 +111,25 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
     return;
   }
 
-  ifaces_.elemDel(key);
-
-  /* Remove this interface map as IFACE's notifiee. */
-  iface->notifieeIs(NULL);
-
-  /* Signal our own notifiee. */
+  /* Remove gateways. This will trigger notifications to notifiee_. */
   for (OSPFInterface::const_gwa_iter it = iface->activeGatewaysBegin();
        it != iface->activeGatewaysEnd(); ++it) {
     OSPFGateway::Ptr gw_obj = it->second;
-    if (notifiee_)
-      notifiee_->onGatewayDel(this, iface, gw_obj);
+    iface->activeGatewayDel(gw_obj->nodeRouterID());
   }
 
   for (OSPFInterface::const_gwp_iter it = iface->passiveGatewaysBegin();
        it != iface->passiveGatewaysEnd(); ++it) {
     OSPFGateway::Ptr gw_obj = it->second;
-    if (notifiee_)
-      notifiee_->onGatewayDel(this, iface, gw_obj);
+    iface->passiveGatewayDel(gw_obj->subnet(), gw_obj->subnetMask());
   }
+
+  /* Remove interface only after notifiees have
+     been notified about the removal of each gateway. */
+  ifaces_.elemDel(key);
+
+  /* Remove this interface map as IFACE's notifiee. */
+  iface->notifieeIs(NULL);
 
   if (notifiee_)
     notifiee_->onInterfaceDel(this, iface);
