@@ -96,3 +96,8 @@ ostream&
 operator<<(ostream& out, const OSPFLink& link) {
   return out << link.str();
 }
+
+Fwk::Log::LogStream::Ptr
+operator<<(Fwk::Log::LogStream::Ptr ls, const OSPFLink& link) {
+  return ls << link.str();
+}

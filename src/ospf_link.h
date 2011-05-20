@@ -7,6 +7,7 @@
 using std::ostream;
 using std::string;
 
+#include "fwk/log.h"
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
@@ -71,6 +72,10 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   void operator=(const OSPFLink&);
 };
 
+/* Stream operators. */
 ostream& operator<<(ostream& out, const OSPFLink& link);
+Fwk::Log::LogStream::Ptr operator<<(Fwk::Log::LogStream::Ptr ls,
+                                    const OSPFLink& link);
+
 
 #endif
