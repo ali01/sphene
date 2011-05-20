@@ -475,7 +475,8 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
            committed to the router's network topology. */
 
         OSPFLink::Ptr sender_staged = nb_rel->advertisedNeighbor();
-        if (adv->subnet() == sender_staged->subnet()) {
+        if (adv->subnet() == sender_staged->subnet()
+            && adv->subnetMask() == sender_staged->subnetMask()) {
           /* Subnets match. The advertised neighbor relationship is valid. */
           commit_nbr(nb_rel);
         }
