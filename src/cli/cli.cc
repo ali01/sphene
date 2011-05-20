@@ -655,17 +655,7 @@ void cli_show_ospf_topo() {
   struct sr_instance* sr = get_sr();
   OSPFRouter::PtrConst ospf_router = sr->router->controlPlane()->ospfRouter();
   OSPFTopology::PtrConst topology = ospf_router->topology();
-  OSPFNode::PtrConst root_node = topology->rootNode();
-
-  cli_send_str("OSPF Topology:\n");
-  cli_send_str("  Root Node:\n");
-  cli_show_ospf_node(root_node);
-
-  OSPFTopology::const_iterator it;
-  for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
-    OSPFNode::Ptr node = it->second;
-    cli_show_ospf_node(node);
-  }
+  cli_send_str(topology->str().c_str());
 }
 
 void cli_show_link_summary(OSPFLink::PtrConst link) {
