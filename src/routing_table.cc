@@ -122,7 +122,6 @@ RoutingTable::entryDel(Entry::Ptr entry) {
         break;
     }
 
-    ILOG << "  - " << subnet << " ==> " << entry->interface()->name();
     for (unsigned int i = 0; i < notifiees_.size(); ++i)
       notifiees_[i]->onEntryDel(this, entry);
   }
