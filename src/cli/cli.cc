@@ -669,17 +669,7 @@ void cli_show_ospf_topo() {
 }
 
 void cli_show_link_summary(OSPFLink::PtrConst link) {
-  char line_buf[256];
-  const char* const link_format = "      %-16s %-16s %-16s\n";
-  const string& subnet_str = link->subnet();
-  const string& mask_str = link->subnetMask();
-
-  std::stringstream ss;
-  ss << link->nodeRouterID();
-
-  snprintf(line_buf, sizeof(line_buf), link_format,
-           ss.str().c_str(), subnet_str.c_str(), mask_str.c_str());
-  cli_send_str(line_buf);
+  cli_send_str(link->str().c_str());
 }
 
 void cli_show_ospf_node(OSPFNode::PtrConst node) {
