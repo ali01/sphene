@@ -208,7 +208,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   }
 
   ILOG << "Received LSU (seqno=" << pkt->seqno() << ") from neighbor "
-       << node_id;
+       << node_id << " with adv_count " << pkt->advCount();
 
   /* Updating seqno in topology database */
   node->latestSeqnoIs(pkt->seqno());
@@ -460,6 +460,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     if (adv->routerID() == this->routerID()) {
       /* SENDER is advertising this router as a direct neighbor. */
       /* Hello protocol takes precedence. */
+      ILOG << "  ignore        " << adv->routerID() << " -- this router";
       continue;
     }
 
@@ -511,8 +512,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                                 adv->subnetMask());
       sender->linkIs(link, false);
 
-      ILOG << "  adv-commit(p) " << sender->routerID() << " ==> "
-           << adv->subnet();
+      ILOG << "  adv-commit(p) " << adv->subnet();
     }
   }
 }
@@ -677,6 +677,7 @@ OSPFRouter::stage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   RouterID adv_nb_id = nbr->advertisedNeighbor()->node()->routerID();
   if (staged_nbr(lsu_sender_id, adv_nb_id) != NULL) {
     /* NeighborRelationship is already staged. */
+    ILOG << "  ignore        " << adv_nb_id << " -- already staged";
     return false;
   }
 
@@ -689,7 +690,7 @@ OSPFRouter::stage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   nb_list->pushBack(nbr);
 
-  ILOG << "  adv-stage     " << lsu_sender_id << " ==> " << adv_nb_id;
+  ILOG << "  adv-stage     " << adv_nb_id;
 
   return true;
 }
@@ -713,8 +714,7 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);
 
-  ILOG << "  adv-commit(a) " << adv_nb->nodeRouterID() << " ==> "
-       << lsu_sender->routerID();
+  ILOG << "  adv-commit(a) " << lsu_sender->routerID();
 }
 
 bool
