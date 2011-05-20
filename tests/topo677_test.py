@@ -348,3 +348,4 @@ def teardown():
     instance4.stop()
   if instance5:
     instance5.stop()
+  time.sleep(3)

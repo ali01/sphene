@@ -153,3 +153,4 @@ class Test_Topo594:
 def teardown():
   if instance:
     instance.stop()
+  time.sleep(3)
