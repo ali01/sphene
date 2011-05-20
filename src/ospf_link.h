@@ -2,7 +2,9 @@
 #define OSPF_LINK_H_QJXYEZKS
 
 #include <ctime>
+#include <ostream>
 #include <string>
+using std::ostream;
 using std::string;
 
 #include "fwk/ptr_interface.h"
@@ -68,5 +70,7 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   OSPFLink(const OSPFLink&);
   void operator=(const OSPFLink&);
 };
+
+ostream& operator<<(ostream& out, const OSPFLink& link);
 
 #endif

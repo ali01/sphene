@@ -91,3 +91,8 @@ bool
 OSPFLink::operator!=(const OSPFLink& other) const {
   return !(other == *this);
 }
+
+ostream&
+operator<<(ostream& out, const OSPFLink& link) {
+  return out << link.str();
+}
