@@ -70,7 +70,7 @@ OSPFTopology::nextHop(const RouterID& router_id) const {
 }
 
 void
-OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
+OSPFTopology::nodeIs(OSPFNode::Ptr node) {
   if (node == NULL)
     return;
 
@@ -97,21 +97,20 @@ OSPFTopology::nodeIs(OSPFNode::Ptr node, bool commit) {
     /* Subscribing from notifications. */
     node->notifieeIs(node_reactor_);
 
-    /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
-    process_update(commit);
+    dirtyIs(true);
   }
 }
 
 void
-OSPFTopology::nodeDel(OSPFNode::Ptr node, bool commit) {
+OSPFTopology::nodeDel(OSPFNode::Ptr node) {
   if (node == NULL)
     return;
 
-  nodeDel(node->routerID(), commit);
+  nodeDel(node->routerID());
 }
 
 void
-OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
+OSPFTopology::nodeDel(const RouterID& router_id) {
   OSPFNode::Ptr node = nodes_.elem(router_id);
   if (node) {
     nodes_.elemDel(router_id);
@@ -137,11 +136,10 @@ OSPFTopology::nodeDel(const RouterID& router_id, bool commit) {
     for (Fwk::Deque<OSPFNode::Ptr>::const_iterator it = neighbors.begin();
          it != neighbors.end(); ++it) {
       OSPFNode::Ptr neighbor = *it;
-      neighbor->activeLinkDel(router_id, false);
+      neighbor->activeLinkDel(router_id);
     }
 
-    /* Depending on COMMIT, recompute spanning tree or just set dirty bit. */
-    process_update(commit);
+    dirtyIs(true);
   }
 }
 
@@ -240,27 +238,17 @@ OSPFTopology::dirtyIs(bool status) {
     notifiee_->onDirtyCleared();
 }
 
-void
-OSPFTopology::process_update(bool commit) {
-  dirtyIs(true);
-
-  if (commit)
-    compute_optimal_spanning_tree();
-}
-
 /* OSPFTopology::NodeReactor */
 
 void
-OSPFTopology::NodeReactor::onLink(OSPFNode::Ptr node, OSPFLink::Ptr link,
-                                  bool commit) {
-  topology_->nodeIs(link->node(), false);
-  topology_->process_update(commit);
+OSPFTopology::NodeReactor::onLink(OSPFNode::Ptr node, OSPFLink::Ptr link) {
+  topology_->nodeIs(link->node());
+  topology_->dirtyIs(true);
 }
 
 void
-OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link,
-                                     bool commit) {
-  topology_->process_update(commit);
+OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link) {
+  topology_->dirtyIs(true);
 }
 
 ostream&

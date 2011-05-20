@@ -66,7 +66,7 @@ OSPFNode::str() const {
 }
 
 void
-OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
+OSPFNode::linkIs(OSPFLink::Ptr link) {
   if (link == NULL)
     return;
 
@@ -79,11 +79,11 @@ OSPFNode::linkIs(OSPFLink::Ptr link, bool commit) {
 
   /* Signal notifiee. */
   if (notifiee_ && (notify_cond_one || notify_cond_two))
-    notifiee_->onLink(this, link, commit);
+    notifiee_->onLink(this, link);
 }
 
 void
-OSPFNode::activeLinkDel(const RouterID& id, bool commit) {
+OSPFNode::activeLinkDel(const RouterID& id) {
   if (id == routerID())
     return;
 
@@ -100,12 +100,11 @@ OSPFNode::activeLinkDel(const RouterID& id, bool commit) {
   notify_cond_two = oneWayActiveLinkDel(id);
 
   if (notifiee_ && (notify_cond_one || notify_cond_two))
-    notifiee_->onLinkDel(this, link, commit);
+    notifiee_->onLinkDel(this, link);
 }
 
 void
-OSPFNode::passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
-                         bool commit) {
+OSPFNode::passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
   bool notify_cond_one = false;
   bool notify_cond_two = false;
 
@@ -119,7 +118,7 @@ OSPFNode::passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
   notify_cond_two = oneWayPassiveLinkDel(subnet, mask);
 
   if (notifiee_ && (notify_cond_one || notify_cond_two))
-    notifiee_->onLinkDel(this, link, commit);
+    notifiee_->onLinkDel(this, link);
 }
 
 /* OSPFNode private member functions. */

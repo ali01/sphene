@@ -125,9 +125,9 @@ OSPFDaemon::timeout_node_topology_entries(OSPFNode::Ptr node) {
   for (del_it = del_links.begin(); del_it != del_links.end(); ++del_it) {
     OSPFLink::Ptr link = *del_it;
     if (link->nodeIsPassiveEndpoint())
-      node->passiveLinkDel(link->subnet(), link->subnetMask(), false);
+      node->passiveLinkDel(link->subnet(), link->subnetMask());
     else
-      node->activeLinkDel(link->nodeRouterID(), false);
+      node->activeLinkDel(link->nodeRouterID());
   }
 }
 

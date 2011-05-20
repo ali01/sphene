@@ -204,7 +204,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   } else {
     /* Creating new node and inserting it into the topology database */
     node = OSPFNode::New(node_id);
-    topology_->nodeIs(node, false);
+    topology_->nodeIs(node);
   }
 
   ILOG << "Received LSU (seqno=" << pkt->seqno() << ") from "
@@ -301,8 +301,8 @@ OSPFRouter::OSPFInterfaceMapReactor::onGateway(OSPFInterfaceMap::Ptr _im,
          << iface->interfaceName();
   }
 
-  ospf_router_->topology_->nodeIs(gw_obj->node(), false);
-  ospf_router_->router_node_->linkIs(gw_obj, false);
+  ospf_router_->topology_->nodeIs(gw_obj->node());
+  ospf_router_->router_node_->linkIs(gw_obj);
 
   ospf_router_->lsu_dirty_ = true;
 }
@@ -318,7 +318,7 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
     ILOG << "Removed passive gateway with subnet " << subnet << " from "
          << iface->interfaceName();
 
-    ospf_router_->router_node_->passiveLinkDel(subnet, mask, false);
+    ospf_router_->router_node_->passiveLinkDel(subnet, mask);
 
   } else {
     RouterID nd_id = gw_obj->nodeRouterID();
@@ -330,7 +330,7 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
       /* If there are no other gateways connecting this router to ND_ID,
          delete link to node from topology. */
       ILOG << "Removed active link to " << nd_id;
-      ospf_router_->router_node_->activeLinkDel(nd_id, false);
+      ospf_router_->router_node_->activeLinkDel(nd_id);
     }
   }
 
@@ -481,7 +481,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
         OSPFNode::Ptr neighbor_nd = topology_->node(adv->routerID());
         if (neighbor_nd == NULL) {
           neighbor_nd = OSPFNode::New(adv->routerID());
-          topology_->nodeIs(neighbor_nd, false);
+          topology_->nodeIs(neighbor_nd);
         }
 
         OSPFLink::Ptr neighbor =
@@ -495,11 +495,11 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
          Bypass two-phase commit logic. */
 
       /* Add sender to the topology in case it's not already there */
-      topology_->nodeIs(sender, false);
+      topology_->nodeIs(sender);
 
       OSPFLink::Ptr link = OSPFLink::NewPassive(adv->subnet(),
                                                 adv->subnetMask());
-      sender->linkIs(link, false);
+      sender->linkIs(link);
 
       ILOG << "  adv-commit(p) " << adv->subnet();
     }
@@ -705,11 +705,11 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   /* Establish bi-directional link.
      This also refreshes the link's time since last LSU. */
-  lsu_sender->linkIs(adv_nb, false);
+  lsu_sender->linkIs(adv_nb);
 
   /* Add both nodes to the topology if they weren't already there. */
-  topology_->nodeIs(lsu_sender, false);
-  topology_->nodeIs(adv_nb->node(), false);
+  topology_->nodeIs(lsu_sender);
+  topology_->nodeIs(adv_nb->node());
 
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);

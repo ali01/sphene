@@ -49,7 +49,8 @@ TEST_F(OSPFTopologyTest, basic) {
   OSPFNode::Ptr temp;
   OSPFNode::Ptr node = nodes_[0];
 
-  topology_->nodeIs(node, true);
+  topology_->nodeIs(node);
+  topology_->onPossibleUpdate();
   EXPECT_EQ(topology_->nodes(), (size_t)2);
 
   temp = topology_->node(node->routerID());
@@ -60,16 +61,18 @@ TEST_F(OSPFTopologyTest, basic) {
 }
 
 TEST_F(OSPFTopologyTest, two_node) {
-  topology_->nodeIs(nodes_[0], false);
-  root_node_->linkIs(links_[0], true);
+  topology_->nodeIs(nodes_[0]);
+  root_node_->linkIs(links_[0]);
+  topology_->onPossibleUpdate();
 
   EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
 }
 
 TEST_F(OSPFTopologyTest, two_node_reverse) {
-  nodes_[0]->linkIs(root_link_, false);
-  topology_->nodeIs(nodes_[0], true);
+  nodes_[0]->linkIs(root_link_);
+  topology_->nodeIs(nodes_[0]);
+  topology_->onPossibleUpdate();
 
   EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
@@ -88,16 +91,16 @@ OSPFTopologyTest::setup_six_node_topology() {
   */
 
   for (int i = 0; i < 5; ++i)
-    topology_->nodeIs(nodes_[i], false);
+    topology_->nodeIs(nodes_[i]);
 
-  root_node_->linkIs(links_[0], false);
-  root_node_->linkIs(links_[1], false);
-  root_node_->linkIs(links_[2], false);
+  root_node_->linkIs(links_[0]);
+  root_node_->linkIs(links_[1]);
+  root_node_->linkIs(links_[2]);
 
-  nodes_[0]->linkIs(links_[1], false);
-  nodes_[1]->linkIs(links_[2], false);
-  nodes_[1]->linkIs(links_[3], false);
-  nodes_[1]->linkIs(links_[4], false);
+  nodes_[0]->linkIs(links_[1]);
+  nodes_[1]->linkIs(links_[2]);
+  nodes_[1]->linkIs(links_[3]);
+  nodes_[1]->linkIs(links_[4]);
 
   topology_->onPossibleUpdate();
 }
@@ -122,8 +125,9 @@ TEST_F(OSPFTopologyTest, six_node_2) {
   setup_six_node_topology();
   EXPECT_EQ(topology_->nodes(), (size_t)6);
 
-  root_node_->activeLinkDel(ids_[1], false);
-  root_node_->activeLinkDel(ids_[2], true);
+  root_node_->activeLinkDel(ids_[1]);
+  root_node_->activeLinkDel(ids_[2]);
+  topology_->onPossibleUpdate();
 
   /* Topology:
               0        4
@@ -147,12 +151,14 @@ TEST_F(OSPFTopologyTest, six_node_2) {
 }
 
 TEST_F(OSPFTopologyTest, self_link) {
-  nodes_[0]->linkIs(links_[0], true);
+  nodes_[0]->linkIs(links_[0]);
+  topology_->onPossibleUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
 }
 
 TEST_F(OSPFTopologyTest, link_delete) {
-  nodes_[0]->linkIs(links_[1], true);
+  nodes_[0]->linkIs(links_[1]);
+  topology_->onPossibleUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)1);
   EXPECT_EQ(nodes_[1]->links(), (size_t)1);
 
@@ -162,14 +168,16 @@ TEST_F(OSPFTopologyTest, link_delete) {
     EXPECT_EQ(link->node(), nodes_[j]);
   }
 
-  nodes_[0]->activeLinkDel(nodes_[1]->routerID(), true);
+  nodes_[0]->activeLinkDel(nodes_[1]->routerID());
+  topology_->onPossibleUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
   EXPECT_EQ(nodes_[1]->links(), (size_t)0);
 }
 
 TEST_F(OSPFTopologyTest, link_delete_reverse) {
-  nodes_[0]->linkIs(links_[1], false);
-  nodes_[0]->activeLinkDel(nodes_[1]->routerID(), true);
+  nodes_[0]->linkIs(links_[1]);
+  nodes_[0]->activeLinkDel(nodes_[1]->routerID());
+  topology_->onPossibleUpdate();
   EXPECT_EQ(nodes_[0]->links(), (size_t)0);
   EXPECT_EQ(nodes_[1]->links(), (size_t)0);
 }

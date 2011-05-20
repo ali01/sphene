@@ -44,8 +44,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
     typedef Fwk::Ptr<Notifiee> Ptr;
 
     /* Notifications supported. */
-    virtual void onLink(OSPFNode::Ptr node, OSPFLink::Ptr link, bool commit) {}
-    virtual void onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link, bool) {}
+    virtual void onLink(OSPFNode::Ptr node, OSPFLink::Ptr link) {}
+    virtual void onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link) {}
 
    protected:
     Notifiee() {}
@@ -90,10 +90,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   /* Mutators. */
   void routerIDIs(const RouterID& id) { router_id_ = id; }
 
-  void linkIs(OSPFLink::Ptr link, bool commit);
-  void activeLinkDel(const RouterID& id, bool commit);
-  void passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
-                      bool commit);
+  void linkIs(OSPFLink::Ptr link);
+  void activeLinkDel(const RouterID& id);
+  void passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask);
 
   void upstreamNodeIs(OSPFNode::Ptr prev) { prev_ = prev; }
 

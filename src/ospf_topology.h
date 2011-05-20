@@ -69,9 +69,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Mutators. */
 
-  void nodeIs(OSPFNode::Ptr node, bool commit);
-  void nodeDel(OSPFNode::Ptr node, bool commit);
-  void nodeDel(const RouterID& router_id, bool commit);
+  void nodeIs(OSPFNode::Ptr node);
+  void nodeDel(OSPFNode::Ptr node);
+  void nodeDel(const RouterID& router_id);
 
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
 
@@ -100,8 +100,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
       return new NodeReactor(_t);
     }
 
-    void onLink(OSPFNode::Ptr node, OSPFLink::Ptr link, bool commit);
-    void onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link, bool commit);
+    void onLink(OSPFNode::Ptr node, OSPFLink::Ptr link);
+    void onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link);
 
    private:
     NodeReactor(OSPFTopology* _t) : topology_(_t) {}
@@ -117,13 +117,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   /* Private member functions. */
 
   bool dirty() const { return dirty_; }
-
-  void compute_optimal_spanning_tree();
   void dirtyIs(bool status);
 
-  /* Depending on COMMIT, recomputes the
-     spanning tree or just sets the dirty bit. */
-  void process_update(bool commit);
+  void compute_optimal_spanning_tree();
 
   static OSPFNode::Ptr min_dist_node(const Fwk::Map<RouterID,OSPFNode>& map);
 
