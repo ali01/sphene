@@ -1,6 +1,12 @@
 #ifndef OSPF_TOPOLOGY_H_I3MK5NYZ
 #define OSPF_TOPOLOGY_H_I3MK5NYZ
 
+#include <ostream>
+#include <string>
+using std::string;
+using std::ostream;
+
+#include "fwk/log.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -57,7 +63,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   Notifiee::Ptr notifiee() { return notifiee_; }
 
   size_t nodes() const { return nodes_.size() + 1; } /* +1 for root node. */
-  bool dirty() const { return dirty_; }
+
+  /* String representation. */
+  string str() const;
 
   /* Mutators. */
 
@@ -80,7 +88,7 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   void onPossibleUpdate();
 
  private:
-  OSPFTopology(OSPFNode::Ptr root_node);
+  explicit OSPFTopology(OSPFNode::Ptr root_node);
 
   /* Reactor to OSPFNode notifications. */
   class NodeReactor : public OSPFNode::Notifiee {
@@ -108,6 +116,8 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
 
   /* Private member functions. */
 
+  bool dirty() const { return dirty_; }
+
   void compute_optimal_spanning_tree();
   void dirtyIs(bool status);
 
@@ -133,5 +143,9 @@ class OSPFTopology : public Fwk::PtrInterface<OSPFTopology> {
   OSPFTopology(const OSPFTopology&);
   void operator=(const OSPFTopology&);
 };
+
+ostream& operator<<(ostream& out, const OSPFTopology& topology);
+Fwk::Log::LogStream::Ptr operator<<(Fwk::Log::LogStream::Ptr ls,
+                                    const OSPFTopology& topology);
 
 #endif

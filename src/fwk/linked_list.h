@@ -24,10 +24,10 @@ class LinkedList : public PtrInterface<LinkedList<NodeType> > {
     }
 
     Fwk::Ptr<const NodeType> next() const { return next_; }
-    Fwk::Ptr<const NodeType> prev() const { return prev_; }
+    Fwk::Ptr<const NodeType> upstreamNode() const { return prev_; }
 
     Fwk::Ptr<NodeType> next() { return next_; }
-    Fwk::Ptr<NodeType> prev() { return prev_; }
+    Fwk::Ptr<NodeType> upstreamNode() { return prev_; }
 
    protected:
     Node() : next_(NULL), prev_(NULL) {}

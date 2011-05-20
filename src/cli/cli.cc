@@ -655,70 +655,15 @@ void cli_show_ospf_topo() {
   struct sr_instance* sr = get_sr();
   OSPFRouter::PtrConst ospf_router = sr->router->controlPlane()->ospfRouter();
   OSPFTopology::PtrConst topology = ospf_router->topology();
-  OSPFNode::PtrConst root_node = topology->rootNode();
-
-  cli_send_str("OSPF Topology:\n");
-  cli_send_str("  Root Node:\n");
-  cli_show_ospf_node(root_node);
-
-  OSPFTopology::const_iterator it;
-  for (it = topology->nodesBegin(); it != topology->nodesEnd(); ++it) {
-    OSPFNode::Ptr node = it->second;
-    cli_show_ospf_node(node);
-  }
+  cli_send_str(topology->str().c_str());
 }
 
 void cli_show_link_summary(OSPFLink::PtrConst link) {
-  char line_buf[256];
-  const char* const link_format = "      %-16s %-16s %-16s\n";
-  const string& subnet_str = link->subnet();
-  const string& mask_str = link->subnetMask();
-
-  std::stringstream ss;
-  ss << link->nodeRouterID();
-
-  snprintf(line_buf, sizeof(line_buf), link_format,
-           ss.str().c_str(), subnet_str.c_str(), mask_str.c_str());
-  cli_send_str(line_buf);
+  cli_send_str(link->str().c_str());
 }
 
 void cli_show_ospf_node(OSPFNode::PtrConst node) {
-  // Buffers for proper formatting.
-  char line_buf[512];
-
-  string format = "  Router ID: %s\n"
-                  "  Prev. ID:  %s\n"
-                  "  Distance:  %u\n"
-                  "  Links:     %u\n"
-                  "    Active Neighbors:\n";
-
-  RouterID prev = node->prev() ? node->prev()->routerID() : 0;
-
-  std::stringstream ss_rid, ss_prev_id;
-  ss_rid << node->routerID();
-  ss_prev_id << prev;
-
-  snprintf(line_buf, sizeof(line_buf), format.c_str(),
-           ss_rid.str().c_str(), ss_prev_id.str().c_str(),
-           node->distance(), node->links());
-
-  cli_send_str(line_buf);
-
-  for (OSPFNode::const_lna_iter it = node->activeLinksBegin();
-       it != node->activeLinksEnd(); ++it) {
-    OSPFLink::PtrConst link = it->second;
-    cli_show_link_summary(link);
-  }
-
-  cli_send_str("    Passive Endpoints:\n");
-
-  for (OSPFNode::const_lnp_iter it = node->passiveLinksBegin();
-       it != node->passiveLinksEnd(); ++it) {
-    OSPFLink::PtrConst link = it->second;
-    cli_show_link_summary(link);
-  }
-
-  cli_send_str("\n");
+  cli_send_str(node->str().c_str());
 }
 
 #ifndef _VNS_MODE_

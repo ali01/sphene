@@ -1,5 +1,9 @@
 #include "ospf_node.h"
 
+#include <ostream>
+#include <sstream>
+using std::stringstream;
+
 #include "ospf_constants.h"
 
 const OSPFNode::Ptr OSPFNode::kPassiveEndpoint =
@@ -33,6 +37,32 @@ OSPFNode::passiveLink(const IPv4Addr& subnet, const IPv4Addr mask) const {
 bool
 OSPFNode::isPassiveEndpoint() const {
   return routerID() == OSPF::kPassiveEndpointID;
+}
+
+string
+OSPFNode::str() const {
+  RouterID upstream_id = upstreamNode() ? upstreamNode()->routerID() : 0;
+
+  stringstream ss;
+  ss << "  Router ID:   " << routerID() << "\n";
+  ss << "  Upstream ID: " << upstream_id << "\n";
+  ss << "  Distance:    " << distance() << "\n";
+  ss << "  Links:       " << links() << "\n";
+  ss << "    Active Neighbors:\n";
+  for (const_lna_iter it = activeLinksBegin(); it != activeLinksEnd(); ++it) {
+    OSPFLink::PtrConst link = it->second;
+    ss << *link;
+  }
+
+  ss << "    Passive Neighbors:\n";
+  for (const_lnp_iter it = passiveLinksBegin(); it != passiveLinksEnd(); ++it) {
+    OSPFLink::PtrConst link = it->second;
+    ss << *link;
+  }
+
+  ss << "\n";
+
+  return ss.str();
 }
 
 void
@@ -148,4 +178,14 @@ OSPFNode::oneWayPassiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask) {
   }
 
   return false;
+}
+
+ostream&
+operator<<(ostream& out, const OSPFNode& node) {
+  return out << node.str();
+}
+
+Fwk::Log::LogStream::Ptr
+operator<<(Fwk::Log::LogStream::Ptr ls, const OSPFNode& node) {
+  return ls << node.str();
 }

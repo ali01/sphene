@@ -278,9 +278,13 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      NeighborRelationship object exists in the multimap, this function returns
      NULL. */
   NeighborRelationship::PtrConst staged_nbr(const RouterID& lsu_sender_id,
-                                            const RouterID& adv_nb_id) const;
+                                            const RouterID& adv_nb_id,
+                                            const IPv4Addr& subnet,
+                                            const IPv4Addr& mask) const;
   NeighborRelationship::Ptr staged_nbr(const RouterID& lsu_sender_id,
-                                       const RouterID& adv_nb_id);
+                                       const RouterID& adv_nb_id,
+                                       const IPv4Addr& subnet,
+                                       const IPv4Addr& mask);
 
   /* Adds the specified NeighborRelationship object to the LINKS_STAGED
      multimap. Returns false if NBR is NULL or if it already exists in

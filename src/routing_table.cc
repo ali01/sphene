@@ -1,8 +1,13 @@
 #include "routing_table.h"
 
 #include "fwk/deque.h"
+#include "fwk/log.h"
 
 #include "interface.h"
+
+/* Static global log instance */
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("RoutingTable");
+
 
 // RoutingTable
 
@@ -85,6 +90,7 @@ RoutingTable::entryIs(Entry::Ptr entry) {
   }
 
   if (prev_entry == NULL || *entry != *prev_entry) {
+    ILOG << "  + " << subnet << " ==> " << entry->interface()->name();
     for (unsigned int i = 0; i < notifiees_.size(); ++i)
       notifiees_[i]->onEntry(this, entry);
   }
@@ -100,7 +106,7 @@ RoutingTable::entryDel(Entry::Ptr entry) {
 
   entry = this->entry(subnet, mask);
 
-  // Only attempt perform deletion (and trigger notification),
+  // Only perform deletion (and trigger notification),
   // if ENTRY is actually in the routing table.
   if (entry) {
     IPv4Subnet key = std::make_pair(subnet, mask);

@@ -63,7 +63,7 @@ TEST_F(OSPFTopologyTest, two_node) {
   topology_->nodeIs(nodes_[0], false);
   root_node_->linkIs(links_[0], true);
 
-  EXPECT_EQ(nodes_[0]->prev(), root_node_);
+  EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
 }
 
@@ -71,7 +71,7 @@ TEST_F(OSPFTopologyTest, two_node_reverse) {
   nodes_[0]->linkIs(root_link_, false);
   topology_->nodeIs(nodes_[0], true);
 
-  EXPECT_EQ(nodes_[0]->prev(), root_node_);
+  EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
 }
 
@@ -105,11 +105,11 @@ OSPFTopologyTest::setup_six_node_topology() {
 TEST_F(OSPFTopologyTest, six_node_1) {
   setup_six_node_topology();
 
-  EXPECT_EQ(nodes_[0]->prev(), root_node_);
-  EXPECT_EQ(nodes_[1]->prev(), root_node_);
-  EXPECT_EQ(nodes_[2]->prev(), root_node_);
-  EXPECT_EQ(nodes_[3]->prev(), nodes_[1]);
-  EXPECT_EQ(nodes_[4]->prev(), nodes_[1]);
+  EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
+  EXPECT_EQ(nodes_[1]->upstreamNode(), root_node_);
+  EXPECT_EQ(nodes_[2]->upstreamNode(), root_node_);
+  EXPECT_EQ(nodes_[3]->upstreamNode(), nodes_[1]);
+  EXPECT_EQ(nodes_[4]->upstreamNode(), nodes_[1]);
 
   EXPECT_EQ(topology_->nextHop(ids_[0]), nodes_[0]);
   EXPECT_EQ(topology_->nextHop(ids_[1]), nodes_[1]);
@@ -135,12 +135,12 @@ TEST_F(OSPFTopologyTest, six_node_2) {
         2           3
   */
 
-  EXPECT_TRUE(root_node_->prev() == NULL);
-  EXPECT_EQ(nodes_[0]->prev(), root_node_);
-  EXPECT_EQ(nodes_[1]->prev(), nodes_[0]);
-  EXPECT_EQ(nodes_[2]->prev(), nodes_[1]);
-  EXPECT_EQ(nodes_[3]->prev(), nodes_[1]);
-  EXPECT_EQ(nodes_[4]->prev(), nodes_[1]);
+  EXPECT_TRUE(root_node_->upstreamNode() == NULL);
+  EXPECT_EQ(nodes_[0]->upstreamNode(), root_node_);
+  EXPECT_EQ(nodes_[1]->upstreamNode(), nodes_[0]);
+  EXPECT_EQ(nodes_[2]->upstreamNode(), nodes_[1]);
+  EXPECT_EQ(nodes_[3]->upstreamNode(), nodes_[1]);
+  EXPECT_EQ(nodes_[4]->upstreamNode(), nodes_[1]);
 
   for (int i = 0; i < 5; ++i)
     EXPECT_EQ(topology_->nextHop(ids_[i]), nodes_[0]);

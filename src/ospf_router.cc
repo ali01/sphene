@@ -208,7 +208,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
   }
 
   ILOG << "Received LSU (seqno=" << pkt->seqno() << ") from neighbor "
-       << node_id;
+       << node_id << " with adv_count " << pkt->advCount();
 
   /* Updating seqno in topology database */
   node->latestSeqnoIs(pkt->seqno());
@@ -317,18 +317,24 @@ OSPFRouter::OSPFInterfaceMapReactor::onGatewayDel(OSPFInterfaceMap::Ptr _im,
   if (gw_obj->nodeIsPassiveEndpoint()) {
     IPv4Addr subnet = gw_obj->subnet();
     IPv4Addr mask = gw_obj->subnetMask();
-    ospf_router_->router_node_->passiveLinkDel(subnet, mask, false);
 
     ILOG << "Removed passive gateway with subnet " << subnet << " from "
          << iface->interfaceName();
 
+    ospf_router_->router_node_->passiveLinkDel(subnet, mask, false);
+
   } else {
     RouterID nd_id = gw_obj->nodeRouterID();
-    ospf_router_->router_node_->activeLinkDel(nd_id, false);
-    ospf_router_->topology()->nodeDel(nd_id, false);
 
     ILOG << "Removed active gateway with subnet " << gw_obj->subnet()
          << " to nbr " << nd_id << " from " << iface->interfaceName();
+
+    if (_im->activeGateway(nd_id) == NULL) {
+      /* If there are no other gateways connecting this router to ND_ID,
+         delete link to node from topology. */
+      ILOG << "Removed active link to " << nd_id;
+      ospf_router_->router_node_->activeLinkDel(nd_id, false);
+    }
   }
 
   ospf_router_->topology()->onPossibleUpdate();
@@ -392,7 +398,7 @@ void
 OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
                             OSPFNode::PtrConst dest) {
   if (next_hop->isPassiveEndpoint() || dest->isPassiveEndpoint()) {
-    ELOG << "rtable_add_dest: next_hop or dest are passive endpoints.";
+    ELOG << "rtable_add_dest: either NEXT_HOP or DEST is a passive endpoint.";
     return;
   }
 
@@ -402,6 +408,8 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
   OSPFGateway::Ptr gw_obj = interfaces_->activeGateway(next_hop_id);
   if (gw_obj == NULL) {
     ELOG << "rtable_add_dest: NEXT_HOP is not connected to any interface.";
+    ELOG << "  next_hop_id: " << next_hop_id;
+    ELOG << "  dest_id:     " << dest_id;
     return;
   }
 
@@ -409,7 +417,7 @@ OSPFRouter::rtable_add_dest(OSPFNode::PtrConst next_hop,
   for (OSPFNode::const_lna_iter it = dest->activeLinksBegin();
        it != dest->activeLinksEnd(); ++it) {
     OSPFLink::Ptr link = it->second;
-    if (dest->prev() == link->node() && dest_id != next_hop_id) {
+    if (dest->upstreamNode() == link->node() && dest_id != next_hop_id) {
       /* Don't add the subnet through which we are connected to DEST unless
          the next hop to DEST is DEST itself. */
       continue;
@@ -440,8 +448,6 @@ OSPFRouter::rtable_add_gateway(const IPv4Addr& subnet,
   entry->interfaceIs(iface->interface());
 
   routing_table_->entryIs(entry);
-
-  ILOG << "  + " << subnet << " ==> " << iface->interfaceName();
 }
 
 void
@@ -454,6 +460,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     if (adv->routerID() == this->routerID()) {
       /* SENDER is advertising this router as a direct neighbor. */
       /* Hello protocol takes precedence. */
+      ILOG << "  ignore        " << adv->routerID() << " -- this router";
       continue;
     }
 
@@ -462,17 +469,11 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
       /* Check if the advertised neighbor has also advertised connectivity to
          SENDER. If it has, then there will exist a NeighborRelationship object
          in the LINKS_STAGED multimap. */
-      nb_rel = staged_nbr(adv->routerID(), sender->routerID());
+      nb_rel = staged_nbr(adv->routerID(), sender->routerID(),
+                          adv->subnet(), adv->subnetMask());
       if (nb_rel) {
-        /* Staged NeighborRelationship object exists. If the subnets advertised
-           for both endpoints of the link, then the neighbor relationship can be
-           committed to the router's network topology. */
-
-        OSPFLink::Ptr sender_staged = nb_rel->advertisedNeighbor();
-        if (adv->subnet() == sender_staged->subnet()) {
-          /* Subnets match. The advertised neighbor relationship is valid. */
-          commit_nbr(nb_rel);
-        }
+        /* Staged NeighborRelationship object exists. */
+        commit_nbr(nb_rel);
 
       } else {
 
@@ -504,8 +505,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                                 adv->subnetMask());
       sender->linkIs(link, false);
 
-      ILOG << "  adv-commit(p) " << sender->routerID() << " ==> "
-           << adv->subnet();
+      ILOG << "  adv-commit(p) " << adv->subnet();
     }
   }
 }
@@ -638,15 +638,19 @@ OSPFRouter::forward_lsu_flood(OSPFLSUPacket::Ptr pkt) const {
 
 OSPFRouter::NeighborRelationship::Ptr
 OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
-                       const RouterID& adv_nb_id) {
+                       const RouterID& adv_nb_id,
+                       const IPv4Addr& subnet,
+                       const IPv4Addr& mask) {
   LinkedList<NeighborRelationship>::Ptr nb_list =
     links_staged_.elem(lsu_sender_id);
 
   if (nb_list) {
     NeighborRelationship::Ptr nbr;
     for (nbr = nb_list->front(); nbr != NULL; nbr = nbr->next()) {
-      OSPFNode::PtrConst adv_nb = nbr->advertisedNeighbor()->node();
-      if (adv_nb->routerID() == adv_nb_id)
+      OSPFLink::PtrConst adv_nb = nbr->advertisedNeighbor();
+      if (adv_nb->nodeRouterID() == adv_nb_id
+          && adv_nb->subnet() == subnet
+          && adv_nb->subnetMask() == mask)
         return nbr;
     }
   }
@@ -656,9 +660,11 @@ OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
 
 OSPFRouter::NeighborRelationship::PtrConst
 OSPFRouter::staged_nbr(const RouterID& lsu_sender_id,
-                       const RouterID& adv_nb_id) const {
+                       const RouterID& adv_nb_id,
+                       const IPv4Addr& subnet,
+                       const IPv4Addr& mask) const {
   OSPFRouter* self = const_cast<OSPFRouter*>(this);
-  return self->staged_nbr(lsu_sender_id, adv_nb_id);
+  return self->staged_nbr(lsu_sender_id, adv_nb_id, subnet, mask);
 }
 
 bool
@@ -667,9 +673,15 @@ OSPFRouter::stage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
     return false;
 
   RouterID lsu_sender_id = nbr->lsuSender()->routerID();
-  RouterID adv_nb_id = nbr->advertisedNeighbor()->node()->routerID();
-  if (staged_nbr(lsu_sender_id, adv_nb_id) != NULL) {
+  OSPFLink::PtrConst adv_nb = nbr->advertisedNeighbor();
+  NeighborRelationship::Ptr prev = staged_nbr(lsu_sender_id,
+                                              adv_nb->nodeRouterID(),
+                                              adv_nb->subnet(),
+                                              adv_nb->subnetMask());
+  if (prev != NULL) {
     /* NeighborRelationship is already staged. */
+    ILOG << "  ignore        " << adv_nb->nodeRouterID()
+         << " -- already staged";
     return false;
   }
 
@@ -682,7 +694,7 @@ OSPFRouter::stage_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
 
   nb_list->pushBack(nbr);
 
-  ILOG << "  adv-stage     " << lsu_sender_id << " ==> " << adv_nb_id;
+  ILOG << "  adv-stage     " << adv_nb->nodeRouterID();
 
   return true;
 }
@@ -706,8 +718,7 @@ OSPFRouter::commit_nbr(OSPFRouter::NeighborRelationship::Ptr nbr) {
   /* Unstage neighbor relationship. */
   unstage_nbr(nbr);
 
-  ILOG << "  adv-commit(a) " << lsu_sender->routerID() << " ==> "
-       << adv_nb->nodeRouterID();
+  ILOG << "  adv-commit(a) " << lsu_sender->routerID();
 }
 
 bool

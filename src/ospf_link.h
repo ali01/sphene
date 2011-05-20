@@ -2,7 +2,12 @@
 #define OSPF_LINK_H_QJXYEZKS
 
 #include <ctime>
+#include <ostream>
+#include <string>
+using std::ostream;
+using std::string;
 
+#include "fwk/log.h"
 #include "fwk/ptr_interface.h"
 
 #include "ipv4_addr.h"
@@ -39,6 +44,9 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   time_t timeSinceLSU() const { return time(NULL) - last_lsu_; }
   void timeSinceLSUIs(time_t _t) { last_lsu_ = time(NULL) - _t; }
 
+  /* String representation. */
+  string str() const;
+
   /* Comparison operator. */
   bool operator==(const OSPFLink&) const;
   bool operator!=(const OSPFLink&) const;
@@ -63,5 +71,11 @@ class OSPFLink : public Fwk::PtrInterface<OSPFLink> {
   OSPFLink(const OSPFLink&);
   void operator=(const OSPFLink&);
 };
+
+/* Stream operators. */
+ostream& operator<<(ostream& out, const OSPFLink& link);
+Fwk::Log::LogStream::Ptr operator<<(Fwk::Log::LogStream::Ptr ls,
+                                    const OSPFLink& link);
+
 
 #endif

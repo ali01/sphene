@@ -1,6 +1,12 @@
 #ifndef OSPF_NODE_H_VKYMXJVI
 #define OSPF_NODE_H_VKYMXJVI
 
+#include <string>
+#include <ostream>
+using std::ostream;
+using std::string;
+
+#include "fwk/log.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -67,8 +73,8 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   size_t passiveLinks() const { return passive_links_.size(); }
 
   /* Previous node in the shortest path from the root node to this node. */
-  OSPFNode::Ptr prev() { return prev_; }
-  OSPFNode::PtrConst prev() const { return prev_; }
+  OSPFNode::Ptr upstreamNode() { return prev_; }
+  OSPFNode::PtrConst upstreamNode() const { return prev_; }
 
   uint16_t latestSeqno() const { return latest_seqno_; }
   uint16_t distance() const { return distance_; }
@@ -78,6 +84,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 
   bool isPassiveEndpoint() const;
 
+  /* String representation. */
+  string str() const;
+
   /* Mutators. */
   void routerIDIs(const RouterID& id) { router_id_ = id; }
 
@@ -86,7 +95,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   void passiveLinkDel(const IPv4Addr& subnet, const IPv4Addr& mask,
                       bool commit);
 
-  void prevIs(OSPFNode::Ptr prev) { prev_ = prev; }
+  void upstreamNodeIs(OSPFNode::Ptr prev) { prev_ = prev; }
 
   void latestSeqnoIs(uint16_t seqno) { latest_seqno_ = seqno; }
   void distanceIs(uint16_t dist) { distance_ = dist; }
@@ -105,7 +114,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   const_lnp_iter passiveLinksEnd() const { return passive_links_.end(); }
 
  protected:
-  OSPFNode(const RouterID& router_id);
+  explicit OSPFNode(const RouterID& router_id);
 
  private:
   /* Helper member functions. */
@@ -132,5 +141,9 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   OSPFNode(const OSPFNode&);
   void operator=(const OSPFNode&);
 };
+
+ostream& operator<<(ostream& out, const OSPFNode& node);
+Fwk::Log::LogStream::Ptr operator<<(Fwk::Log::LogStream::Ptr ls,
+                                    const OSPFNode& node);
 
 #endif

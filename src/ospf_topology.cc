@@ -1,5 +1,8 @@
 #include "ospf_topology.h"
 
+#include <sstream>
+using std::stringstream;
+
 #include "fwk/deque.h"
 #include "fwk/log.h"
 
@@ -49,12 +52,12 @@ OSPFTopology::nextHop(const RouterID& router_id) {
     if (nd == NULL)
       break;
 
-    if (nd->prev() == root_node_) {
+    if (nd->upstreamNode() == root_node_) {
       next_hop = nd;
       break;
     }
 
-    nd = nd->prev();
+    nd = nd->upstreamNode();
   }
 
   return next_hop;
@@ -148,6 +151,22 @@ OSPFTopology::onPossibleUpdate() {
     compute_optimal_spanning_tree();
 }
 
+string
+OSPFTopology::str() const {
+  stringstream ss;
+  ss << "OSPF Topology\n";
+  ss << "  Root Node:\n";
+  ss << *root_node_;
+
+  const_iterator it;
+  for (it = nodesBegin(); it != nodesEnd(); ++it) {
+    OSPFNode::Ptr node = it->second;
+    ss << *node;
+  }
+
+  return ss.str();
+}
+
 /* Implementation of Dijkstra's algorithm. */
 void
 OSPFTopology::compute_optimal_spanning_tree() {
@@ -161,7 +180,7 @@ OSPFTopology::compute_optimal_spanning_tree() {
   for (iterator it = node_set.begin(); it != node_set.end(); ++it) {
     OSPFNode::Ptr node = it->second;
     node->distanceIs(OSPFNode::kMaxDistance);
-    node->prevIs(NULL);
+    node->upstreamNodeIs(NULL);
   }
 
   /* Initializing distance to self to 0 */
@@ -187,7 +206,7 @@ OSPFTopology::compute_optimal_spanning_tree() {
         uint16_t alt_dist = cur_nd->distance() + 1;
         if (alt_dist < neighbor->distance()) {
           neighbor->distanceIs(alt_dist);
-          neighbor->prevIs(cur_nd);
+          neighbor->upstreamNodeIs(cur_nd);
         }
       }
     }
@@ -242,4 +261,14 @@ void
 OSPFTopology::NodeReactor::onLinkDel(OSPFNode::Ptr node, OSPFLink::Ptr link,
                                      bool commit) {
   topology_->process_update(commit);
+}
+
+ostream&
+operator<<(ostream& out, const OSPFTopology& topology) {
+  return out << topology.str();
+}
+
+Fwk::Log::LogStream::Ptr
+operator<<(Fwk::Log::LogStream::Ptr ls, const OSPFTopology& topology) {
+  return ls << topology.str();
 }
