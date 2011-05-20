@@ -6,6 +6,7 @@
 using std::ostream;
 using std::string;
 
+#include "fwk/log.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
 
@@ -113,7 +114,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
   const_lnp_iter passiveLinksEnd() const { return passive_links_.end(); }
 
  protected:
-  OSPFNode(const RouterID& router_id);
+  explicit OSPFNode(const RouterID& router_id);
 
  private:
   /* Helper member functions. */
@@ -142,5 +143,7 @@ class OSPFNode : public Fwk::PtrInterface<OSPFNode> {
 };
 
 ostream& operator<<(ostream& out, const OSPFNode& node);
+Fwk::Log::LogStream::Ptr operator<<(Fwk::Log::LogStream::Ptr ls,
+                                    const OSPFNode& node);
 
 #endif

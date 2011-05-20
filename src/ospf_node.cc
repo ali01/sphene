@@ -184,3 +184,8 @@ ostream&
 operator<<(ostream& out, const OSPFNode& node) {
   return out << node.str();
 }
+
+Fwk::Log::LogStream::Ptr
+operator<<(Fwk::Log::LogStream::Ptr ls, const OSPFNode& node) {
+  return ls << node.str();
+}
