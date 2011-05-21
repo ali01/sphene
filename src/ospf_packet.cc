@@ -53,7 +53,7 @@ const size_t OSPFHelloPacket::kPacketSize = sizeof(struct ospf_hello_pkt);
 const uint8_t OSPFLSUPacket::kDefaultTTL;
 const size_t OSPFLSUPacket::kHeaderSize = sizeof(struct ospf_lsu_hdr);
 
-const size_t OSPFLSUAdvertisement::kSize = sizeof(struct ospf_lsu_adv);
+const size_t OSPFLSUAdvPacket::kSize = sizeof(struct ospf_lsu_adv);
 
 
 /* OSPFPacket */
@@ -344,7 +344,7 @@ OSPFLSUPacket::OSPFLSUPacket(PacketBuffer::Ptr buffer,
                              uint16_t lsu_seqno)
     : OSPFPacket(buffer, router_id, area_id, OSPFPacket::kLSU,
                  OSPFLSUPacket::kHeaderSize +
-                 adv_count * OSPFLSUAdvertisement::kSize),
+                 adv_count * OSPFLSUAdvPacket::kSize),
       ospf_lsu_hdr_((struct ospf_lsu_hdr*)offsetAddress(0)) {
   seqnoIs(lsu_seqno);
   ttlIs(OSPFLSUPacket::kDefaultTTL);
@@ -386,15 +386,15 @@ OSPFLSUPacket::advCountIs(uint32_t count) {
   ospf_lsu_hdr_->adv_count = htonl(count);
 }
 
-OSPFLSUAdvertisement::Ptr
+OSPFLSUAdvPacket::Ptr
 OSPFLSUPacket::advertisement(uint32_t index) {
   unsigned int off = bufferOffset() +
                      OSPFLSUPacket::kHeaderSize +
-                     index * OSPFLSUAdvertisement::kSize;
-  return OSPFLSUAdvertisement::New(buffer(), off);
+                     index * OSPFLSUAdvPacket::kSize;
+  return OSPFLSUAdvPacket::New(buffer(), off);
 }
 
-OSPFLSUAdvertisement::PtrConst
+OSPFLSUAdvPacket::PtrConst
 OSPFLSUPacket::advertisement(uint32_t index) const {
   OSPFLSUPacket* self = const_cast<OSPFLSUPacket*>(this);
   return self->advertisement(index);
@@ -422,45 +422,45 @@ OSPFLSUPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 }
 
 
-/* OSPFLSUAdvertisement */
+/* OSPFLSUAdvPacket */
 
-OSPFLSUAdvertisement::OSPFLSUAdvertisement(PacketBuffer::Ptr buffer,
+OSPFLSUAdvPacket::OSPFLSUAdvPacket(PacketBuffer::Ptr buffer,
                                            unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ospf_lsu_adv_((struct ospf_lsu_adv*)offsetAddress(0)) {}
 
 IPv4Addr
-OSPFLSUAdvertisement::subnet() const {
+OSPFLSUAdvPacket::subnet() const {
   return ntohl(ospf_lsu_adv_->subnet);
 }
 
 void
-OSPFLSUAdvertisement::subnetIs(const IPv4Addr& subnet) {
+OSPFLSUAdvPacket::subnetIs(const IPv4Addr& subnet) {
   ospf_lsu_adv_->subnet = subnet.nbo();
 }
 
 IPv4Addr
-OSPFLSUAdvertisement::subnetMask() const {
+OSPFLSUAdvPacket::subnetMask() const {
   return ntohl(ospf_lsu_adv_->mask);
 }
 
 void
-OSPFLSUAdvertisement::subnetMaskIs(const IPv4Addr& mask) {
+OSPFLSUAdvPacket::subnetMaskIs(const IPv4Addr& mask) {
   ospf_lsu_adv_->mask = mask.nbo();
 }
 
 RouterID
-OSPFLSUAdvertisement::routerID() const {
+OSPFLSUAdvPacket::routerID() const {
   return ntohl(ospf_lsu_adv_->router_id);
 }
 
 void
-OSPFLSUAdvertisement::routerIDIs(const RouterID& id) {
+OSPFLSUAdvPacket::routerIDIs(const RouterID& id) {
   ospf_lsu_adv_->router_id = htonl(id.value());
 }
 
 void
-OSPFLSUAdvertisement::operator()(Functor* const f,
+OSPFLSUAdvPacket::operator()(Functor* const f,
                                  const Interface::PtrConst iface) {
   (*f)(this, iface);
 }

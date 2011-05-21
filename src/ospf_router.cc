@@ -451,7 +451,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                        OSPFLSUPacket::PtrConst pkt) {
   /* Processing each LSU advertisement enclosed in the LSU packet. */
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
-    OSPFLSUAdvertisement::PtrConst adv = pkt->advertisement(adv_index);
+    OSPFLSUAdvPacket::PtrConst adv = pkt->advertisement(adv_index);
 
     if (adv->routerID() == this->routerID()) {
       /* SENDER is advertising this router as a direct neighbor. */
@@ -555,7 +555,7 @@ OSPFRouter::build_lsu_to_gateway(OSPFInterface::Ptr iface,
   size_t adv_count = interfaces_->gateways();
 
   size_t ospf_pkt_len = OSPFLSUPacket::kHeaderSize +
-                        adv_count * OSPFLSUAdvertisement::kSize;
+                        adv_count * OSPFLSUAdvPacket::kSize;
   size_t ip_pkt_len = IPPacket::kHeaderSize + ospf_pkt_len;
   size_t eth_pkt_len = EthernetPacket::kHeaderSize + ip_pkt_len;
 
@@ -596,7 +596,7 @@ OSPFRouter::set_lsu_adv_from_interface(OSPFLSUPacket::Ptr pkt,
   for (OSPFInterface::const_gwp_iter gw_it = iface->passiveGatewaysBegin();
        gw_it != iface->passiveGatewaysEnd(); ++gw_it, ++starting_ix) {
     OSPFGateway::Ptr gw = gw_it->second;
-    OSPFLSUAdvertisement::Ptr adv = pkt->advertisement(starting_ix);
+    OSPFLSUAdvPacket::Ptr adv = pkt->advertisement(starting_ix);
     adv->routerIDIs(gw->nodeRouterID());
     adv->subnetIs(gw->subnet());
     adv->subnetMaskIs(gw->subnetMask());
@@ -605,7 +605,7 @@ OSPFRouter::set_lsu_adv_from_interface(OSPFLSUPacket::Ptr pkt,
   for (OSPFInterface::const_gwa_iter gw_it = iface->activeGatewaysBegin();
        gw_it != iface->activeGatewaysEnd(); ++gw_it, ++starting_ix) {
     OSPFGateway::Ptr gw = gw_it->second;
-    OSPFLSUAdvertisement::Ptr adv = pkt->advertisement(starting_ix);
+    OSPFLSUAdvPacket::Ptr adv = pkt->advertisement(starting_ix);
     adv->routerIDIs(gw->nodeRouterID());
     adv->subnetIs(gw->subnet());
     adv->subnetMaskIs(gw->subnetMask());

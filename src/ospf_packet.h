@@ -174,8 +174,8 @@ class OSPFLSUPacket : public OSPFPacket {
   uint32_t advCount() const;
   void advCountIs(uint32_t count);
 
-  Fwk::Ptr<OSPFLSUAdvertisement> advertisement(uint32_t index);
-  Fwk::Ptr<const OSPFLSUAdvertisement> advertisement(uint32_t index) const;
+  Fwk::Ptr<OSPFLSUAdvPacket> advertisement(uint32_t index);
+  Fwk::Ptr<const OSPFLSUAdvPacket> advertisement(uint32_t index) const;
 
   /* Override. */
   virtual OSPFPacket::Ptr derivedInstance() { return this; }
@@ -205,15 +205,15 @@ class OSPFLSUPacket : public OSPFPacket {
 };
 
 
-class OSPFLSUAdvertisement : public Packet {
+class OSPFLSUAdvPacket : public Packet {
  public:
-  typedef Fwk::Ptr<const OSPFLSUAdvertisement> PtrConst;
-  typedef Fwk::Ptr<OSPFLSUAdvertisement> Ptr;
+  typedef Fwk::Ptr<const OSPFLSUAdvPacket> PtrConst;
+  typedef Fwk::Ptr<OSPFLSUAdvPacket> Ptr;
 
   static const size_t kSize;
 
   static Ptr New(PacketBuffer::Ptr buffer, unsigned int buffer_offset) {
-    return new OSPFLSUAdvertisement(buffer, buffer_offset);
+    return new OSPFLSUAdvPacket(buffer, buffer_offset);
   }
 
   IPv4Addr subnet() const;
@@ -232,13 +232,13 @@ class OSPFLSUAdvertisement : public Packet {
   virtual void operator()(Functor* f, Fwk::Ptr<const Interface> iface);
 
  private:
-  OSPFLSUAdvertisement(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
+  OSPFLSUAdvPacket(PacketBuffer::Ptr buffer, unsigned int buffer_offset);
 
   struct ospf_lsu_adv* ospf_lsu_adv_;
 
   /* Operations disallowed. */
-  OSPFLSUAdvertisement(const OSPFLSUAdvertisement&);
-  void operator=(const OSPFLSUAdvertisement&);
+  OSPFLSUAdvPacket(const OSPFLSUAdvPacket&);
+  void operator=(const OSPFLSUAdvPacket&);
 };
 
 #endif
