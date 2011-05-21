@@ -752,7 +752,6 @@ OSPFRouter::forward_packet_to_gateway(OSPFPacket::Ptr pkt,
   IPv4Addr dst_addr = gw_obj->gateway();
 
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
-  ip_pkt->srcIs(src_addr);
   ip_pkt->dstIs(dst_addr);
   ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
