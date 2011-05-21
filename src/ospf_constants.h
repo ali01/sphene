@@ -11,6 +11,7 @@ namespace OSPF {
 extern const uint8_t kDefaultLinkStateInterval;
 extern const uint8_t kDefaultHelloInterval;
 extern const uint8_t kDefaultLinkStateUpdateTimeout;
+extern const uint32_t kLinkStateWindow;
 extern const AreaID kDefaultAreaID;
 extern const RouterID kPassiveEndpointID;
 extern const RouterID kInvalidRouterID;

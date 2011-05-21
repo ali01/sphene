@@ -196,8 +196,11 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   OSPFNode::Ptr node = topology_->node(node_id);
   if (node) {
-    if (node->latestSeqno() >= pkt->seqno()) {
-      /* Drop packets with old sequence numbers. */
+    uint32_t lower_bound = node->latestSeqno() > OSPF::kLinkStateWindow ?
+                           node->latestSeqno() - OSPF::kLinkStateWindow : 0;
+    if (pkt->seqno() >= lower_bound && pkt->seqno() <= node->latestSeqno()) {
+      DLOG << "Ignoring old LSU (seqno=" << pkt->seqno() << ") from "
+           << node_id;
       return;
     }
 
