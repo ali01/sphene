@@ -504,7 +504,6 @@ OSPFRouter::remove_unconfirmed_links(OSPFNode::Ptr sender,
          << "from the root node itself.";
     return;
   }
-  
 
   Fwk::Deque<OSPFLink::Ptr> del_links;
 
