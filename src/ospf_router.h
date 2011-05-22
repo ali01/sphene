@@ -1,11 +1,10 @@
 #ifndef OSPF_ROUTER_H_LFORNADU
 #define OSPF_ROUTER_H_LFORNADU
 
-#include "fwk/linked_list.h"
 #include "fwk/map.h"
 #include "fwk/ptr_interface.h"
-using Fwk::LinkedList;
 
+#include "ospf_adv_map.h"
 #include "ospf_interface_map.h"
 #include "ospf_topology.h"
 #include "ospf_types.h"
@@ -108,33 +107,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
     OSPFNode* router_node_;
     OSPFInterfaceMap* interfaces_;
     OSPFTopology* topology_;
-  };
-
-  class NeighborRelationship : public LinkedList<NeighborRelationship>::Node {
-   public:
-    typedef Fwk::Ptr<const NeighborRelationship> PtrConst;
-    typedef Fwk::Ptr<NeighborRelationship> Ptr;
-
-    static Ptr New(Fwk::Ptr<OSPFNode> lsu_sender,
-                   Fwk::Ptr<OSPFLink> advertised_neighbor);
-
-    Fwk::Ptr<const OSPFNode> lsuSender() const;
-    Fwk::Ptr<OSPFNode> lsuSender();
-
-    Fwk::Ptr<const OSPFLink> advertisedNeighbor() const;
-    Fwk::Ptr<OSPFLink> advertisedNeighbor();
-
-   private:
-    NeighborRelationship(Fwk::Ptr<OSPFNode> lsu_sender,
-                         Fwk::Ptr<OSPFLink> advertised_neighbor);
-
-    /* Data members. */
-    Fwk::Ptr<OSPFNode> lsu_sender_;
-    Fwk::Ptr<OSPFLink> advertised_neighbor_;
-
-    /* Operations disallowed. */
-    NeighborRelationship(const NeighborRelationship&);
-    void operator=(const NeighborRelationship&);
   };
 
   /* Reactor to Topology notifications. */
@@ -270,37 +242,6 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
                                          Fwk::Ptr<OSPFInterface>,
                                          uint32_t& starting_ix);
 
-  /* Obtains the staged NeighborRelationship object with the specified
-     LSU_SENDER_ID and ADVERTISED_NEIGHBOR_ID from the LINKS_STAGED
-     multimap if it exists. A NeighborRelationship object will exist if the
-     node with ID of LSU_SENDER_ID has previously advertised that it is
-     connected to the node with ID ADVERTISED_NEIGHBOR_ID. If no such
-     NeighborRelationship object exists in the multimap, this function returns
-     NULL. */
-  NeighborRelationship::PtrConst staged_nbr(const RouterID& lsu_sender_id,
-                                            const RouterID& adv_nb_id,
-                                            const IPv4Addr& subnet,
-                                            const IPv4Addr& mask) const;
-  NeighborRelationship::Ptr staged_nbr(const RouterID& lsu_sender_id,
-                                       const RouterID& adv_nb_id,
-                                       const IPv4Addr& subnet,
-                                       const IPv4Addr& mask);
-
-  /* Adds the specified NeighborRelationship object to the LINKS_STAGED
-     multimap. Returns false if NBR is NULL or if it already exists in
-     the multimap, true otherwise. */
-  bool stage_nbr(NeighborRelationship::Ptr nbr);
-
-  /* Commits the specified NeighborRelationship object to the router's
-     network topology and removes it from the LINKS_STAGED multimap.
-     This function makes use of unstage_nbr(). */
-  void commit_nbr(NeighborRelationship::Ptr nbr);
-
-  /* Removes the specified NeighborRelationship object from the LINKS_STAGED
-     multimap. Returns false if NBR is NULL or if it doesn't exist in the
-     multimap, true otherwise. */
-  bool unstage_nbr(NeighborRelationship::Ptr nbr);
-
   /* If one doesn't already exist, this function creates an OSPF gateway from
      the given routing table entry. */
   void update_iface_from_rtable_entry_new(OSPFInterface::Ptr,
@@ -333,12 +274,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      several data members above through the this ptr of OSPFRouter. */
   PacketFunctor functor_;
 
-  /* Logical Multimap<LSUSenderRouterID,NeighborRelationshipList>: Keeps track
-     of neighbor relationships that have not yet been commited to the topology.
-     This is necessary to avoid corrupting the topology in response to
-     contradicting link-state advertisements. Refer to the PWOSPF specification
-     for more details. */
-  Fwk::Map<RouterID,LinkedList<NeighborRelationship> > links_staged_;
+  /* Keeps track of neighbor relationships that have not yet been commited to
+     the topology. This is necessary to avoid corrupting the topology in
+     response to contradicting link-state advertisements. Refer to the PWOSPF
+     specification for more details. */
+  OSPFAdvertisementMap advs_staged_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);
