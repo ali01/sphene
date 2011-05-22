@@ -531,6 +531,12 @@ OSPFRouter::remove_unconfirmed_links(OSPFNode::Ptr sender,
     OSPFLink::Ptr link = *it;
     ILOG << "Removing unconfirmed link to " << link->nodeRouterID();
     sender->activeLinkDel(link->nodeRouterID());
+
+    /* Unstaging advertisement if staged. */
+    advs_staged_.advertisementDel(sender->routerID(),
+                                  link->nodeRouterID(),
+                                  link->subnet(),
+                                  link->subnetMask());
   }
 }
 
