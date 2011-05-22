@@ -15,6 +15,7 @@
 class ControlPlane;
 class Interface;
 class InterfaceMap;
+class OSPFAdvertisementSet;
 class OSPFInterface;
 class OSPFLSUPacket;
 class OSPFLink;
@@ -216,6 +217,11 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   */
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
                                   Fwk::Ptr<const OSPFLSUPacket> pkt);
+
+  /* Removes active links connected to SENDER if they are not confirmed in
+     the given OSPF LSU packet. */
+  void remove_unconfirmed_links(OSPFNode::Ptr sender,
+                                Fwk::Ptr<OSPFAdvertisementSet> confirmed_advs);
 
   /* Forwards OSPF PKT to the node in the topology with DEST_ID. */
   void forward_packet_to_gateway(Fwk::Ptr<OSPFPacket> pkt,

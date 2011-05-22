@@ -1,5 +1,6 @@
 #include "ospf_router.h"
 
+#include "fwk/deque.h"
 #include "fwk/log.h"
 #include "fwk/scoped_lock.h"
 
@@ -7,6 +8,7 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "ip_packet.h"
+#include "ospf_adv_set.h"
 #include "ospf_constants.h"
 #include "ospf_gateway.h"
 #include "ospf_interface_map.h"
@@ -419,6 +421,8 @@ OSPFRouter::rtable_add_gateway(const IPv4Addr& subnet,
 void
 OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
                                        OSPFLSUPacket::PtrConst pkt) {
+  OSPFAdvertisementSet::Ptr adv_set = OSPFAdvertisementSet::New();
+
   /* Processing each LSU advertisement enclosed in the LSU packet. */
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
     OSPFLSUAdvPacket::PtrConst adv_pkt = pkt->advertisement(adv_index);
@@ -429,6 +433,10 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
       ILOG << "  ignore        " << adv_pkt->routerID() << " -- this router";
       continue;
     }
+
+    /* Add advertisement to set of confirmed links. */
+    adv_set->advertisementIs(sender->routerID(), adv_pkt->routerID(),
+                             adv_pkt->subnet(), adv_pkt->subnetMask());
 
     OSPFAdvertisement::Ptr adv_obj;
     if (adv_pkt->routerID() != OSPF::kPassiveEndpointID) {
@@ -483,6 +491,47 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
 
       ILOG << "  adv-commit(p) " << adv_pkt->subnet();
     }
+  }
+
+  remove_unconfirmed_links(sender, adv_set);
+}
+
+void
+OSPFRouter::remove_unconfirmed_links(OSPFNode::Ptr sender,
+                                     OSPFAdvertisementSet::Ptr confirmed_advs) {
+  if (sender == router_node_ || sender->routerID() == this->routerID()) {
+    ELOG << "remove_unconfirmed_links: Attempt to remove unconfirmed links "
+         << "from the root node itself.";
+    return;
+  }
+  
+
+  Fwk::Deque<OSPFLink::Ptr> del_links;
+
+  for (OSPFNode::const_lna_iter it = sender->activeLinksBegin();
+       it != sender->activeLinksEnd(); ++it) {
+    OSPFLink::Ptr link = it->second;
+
+    if (link->nodeRouterID() == this->routerID()) {
+      /* Link in question is directly connected to this router.
+         Do not remove. Hello protocol takes precedence. */
+      continue;
+    }
+
+    if (confirmed_advs->contains(sender->routerID(), link->nodeRouterID(),
+                                 link->subnet(), link->subnetMask())) {
+      /* Link is confirmed. Do not remove. */
+      continue;
+    }
+
+    del_links.pushBack(link);
+  }
+
+  for (Fwk::Deque<OSPFLink::Ptr>::const_iterator it = del_links.begin();
+       it != del_links.end(); ++it) {
+    OSPFLink::Ptr link = *it;
+    ILOG << "Removing unconfirmed link to " << link->nodeRouterID();
+    sender->activeLinkDel(link->nodeRouterID());
   }
 }
 
