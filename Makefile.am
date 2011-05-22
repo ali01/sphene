@@ -138,6 +138,7 @@ libsr_base_a_SOURCES = \
                        src/nf2util.cc \
                        src/nf2util.h \
                        src/ospf_adv_map.cc \
+                       src/ospf_adv_set.cc \
                        src/ospf_constants.cc \
                        src/ospf_daemon.cc \
                        src/ospf_daemon.h \
