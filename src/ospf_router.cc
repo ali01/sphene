@@ -477,9 +477,6 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
       /* Advertisement corresponds to an endpoint that is not running OSPF.
          Bypass two-phase commit logic. */
 
-      /* Add sender to the topology in case it's not already there */
-      topology_->nodeIs(sender);
-
       OSPFLink::Ptr link = OSPFLink::NewPassive(adv_pkt->subnet(),
                                                 adv_pkt->subnetMask());
       sender->linkIs(link);
