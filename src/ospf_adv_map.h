@@ -1,11 +1,9 @@
 #ifndef OSPF_ADV_MAP_H_17AYHYOJ
 #define OSPF_ADV_MAP_H_17AYHYOJ
 
-#include "fwk/ptr_interface.h"
 #include "fwk/map.h"
 
-#include "ospf_router_id.h"
-#include "ipv4_addr.h"
+#include "ospf_adv_collection.h"
 
 /* Forward declarations. */
 class OSPFLink;
@@ -40,7 +38,7 @@ class OSPFAdvertisement : public Fwk::PtrInterface<OSPFAdvertisement> {
 
 /* OSPFAdvertisementMap. */
 
-class OSPFAdvertisementMap : public Fwk::PtrInterface<OSPFAdvertisementMap> {
+class OSPFAdvertisementMap : public OSPFAdvertisementCollection {
  public:
   typedef Fwk::Ptr<const OSPFAdvertisementMap> PtrConst;
   typedef Fwk::Ptr<OSPFAdvertisementMap> Ptr;
@@ -68,21 +66,6 @@ class OSPFAdvertisementMap : public Fwk::PtrInterface<OSPFAdvertisementMap> {
   size_t advertisements() const { return advs_.size(); }
 
  private:
-  struct AdvKey {
-    AdvKey(const RouterID& sender,
-           const RouterID& adv_nbr,
-           const IPv4Addr& subnet,
-           const IPv4Addr& mask);
-
-    RouterID sender_;
-    RouterID adv_nbr_;
-    IPv4Addr subnet_;
-    IPv4Addr mask_;
-
-    bool operator<(const AdvKey&) const;
-    bool operator==(const AdvKey&) const;
-  };
-
   /* Data members. */
   Fwk::Map<AdvKey,OSPFAdvertisement> advs_;
 
