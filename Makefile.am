@@ -279,6 +279,7 @@ TESTS = \
         interface_map_unittest \
         ip_packet_unittest \
         ospf_adv_map_unittest \
+        ospf_adv_set_unittest \
         ospf_topology_unittest \
         packet_unittest \
         packet_buffer_unittest \
@@ -333,6 +334,10 @@ ip_packet_unittest_LDADD = libgtest.a $(USER_LIBS)
 ospf_adv_map_unittest_SOURCES = tests/ospf_adv_map_unittest.cc $(FWK_SRCS)
 ospf_adv_map_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
 ospf_adv_map_unittest_LDADD = libgtest.a $(USER_LIBS)
+
+ospf_adv_set_unittest_SOURCES = tests/ospf_adv_set_unittest.cc $(FWK_SRCS)
+ospf_adv_set_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
+ospf_adv_set_unittest_LDADD = libgtest.a $(USER_LIBS)
 
 ospf_topology_unittest_SOURCES = tests/ospf_topology_unittest.cc $(FWK_SRCS)
 ospf_topology_unittest_CPPFLAGS = $(AM_CPPFLAGS) -I $(GTEST_DIR)/include
