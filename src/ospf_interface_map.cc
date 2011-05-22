@@ -1,5 +1,7 @@
 #include "ospf_interface_map.h"
 
+#include "fwk/deque.h"
+
 #include "interface.h"
 #include "ospf_constants.h"
 
@@ -112,15 +114,32 @@ OSPFInterfaceMap::interfaceDel(OSPFInterface::Ptr iface) {
   }
 
   /* Remove gateways. This will trigger notifications to notifiee_. */
+
+  /* Removing active gateways. */
+  Fwk::Deque<OSPFGateway::Ptr> gw_del;
   for (OSPFInterface::const_gwa_iter it = iface->activeGatewaysBegin();
        it != iface->activeGatewaysEnd(); ++it) {
     OSPFGateway::Ptr gw_obj = it->second;
+    gw_del.pushBack(gw_obj);
+  }
+
+  for (Fwk::Deque<OSPFGateway::Ptr>::const_iterator it = gw_del.begin();
+       it != gw_del.end(); ++it) {
+    OSPFGateway::Ptr gw_obj = *it;
     iface->activeGatewayDel(gw_obj->nodeRouterID());
   }
 
+  /* Removing passive gateways. */
+  gw_del.clear();
   for (OSPFInterface::const_gwp_iter it = iface->passiveGatewaysBegin();
        it != iface->passiveGatewaysEnd(); ++it) {
     OSPFGateway::Ptr gw_obj = it->second;
+    gw_del.pushBack(gw_obj);
+  }
+
+  for (Fwk::Deque<OSPFGateway::Ptr>::const_iterator it = gw_del.begin();
+       it != gw_del.end(); ++it) {
+    OSPFGateway::Ptr gw_obj = *it;
     iface->passiveGatewayDel(gw_obj->subnet(), gw_obj->subnetMask());
   }
 
