@@ -222,7 +222,7 @@ class Test_Topo677:
 
     self._enable_interface(instance0, 'eth1')
     self._enable_interface(instance0, 'eth2')
-    time.sleep(helloint)
+    time.sleep(2 * helloint)
     self._basic_connectivity_tests()
 
   def test_disable_1_internal_link_cut(self):
@@ -240,7 +240,7 @@ class Test_Topo677:
     self._enable_interface(instance0, 'eth1')
     self._enable_interface(instance0, 'eth2')
     self._enable_interface(instance1, 'eth3')
-    time.sleep(helloint)
+    time.sleep(2 * helloint)
     self._basic_connectivity_tests()
 
   def test_disable_2_internal_links_cut(self):
@@ -261,7 +261,7 @@ class Test_Topo677:
     self._enable_interface(instance0, 'eth2')
     self._enable_interface(instance1, 'eth3')
     self._enable_interface(instance2, 'eth3')
-    time.sleep(helloint)
+    time.sleep(2 * helloint)
     self._basic_connectivity_tests()
 
   def test_disable_3_internal_links_cut(self):
@@ -284,7 +284,7 @@ class Test_Topo677:
     self._enable_interface(instance1, 'eth3')
     self._enable_interface(instance2, 'eth3')
     self._enable_interface(instance3, 'eth3')
-    time.sleep(helloint)
+    time.sleep(2 * helloint)
     self._basic_connectivity_tests()
 
   def test_disable_4_internal_links_cut(self):
@@ -309,7 +309,7 @@ class Test_Topo677:
     self._enable_interface(instance2, 'eth3')
     self._enable_interface(instance3, 'eth3')
     self._enable_interface(instance4, 'eth3')
-    time.sleep(helloint)
+    time.sleep(2 * helloint)
     self._basic_connectivity_tests()
 
   def test_disable_5_internal_links_cut(self):
@@ -331,7 +331,7 @@ class Test_Topo677:
     self._enable_interface(instance3, 'eth3')
     self._enable_interface(instance4, 'eth3')
     self._enable_interface(instance5, 'eth3')
-    time.sleep(helloint)
+    time.sleep(2 * helloint)
     self._basic_connectivity_tests()
 
 
