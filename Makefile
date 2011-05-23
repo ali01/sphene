@@ -9,7 +9,7 @@ BUILD = build
 
 
 .PHONY: default
-default:
+default: ck
 	make -C $(BUILD)
 
 # Create build directory.
