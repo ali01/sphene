@@ -204,6 +204,9 @@ RoutingTable::Entry::operator!=(const Entry& other) const {
 void
 RoutingTable::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
                                                Interface::Ptr iface) {
+  if (iface->subnet() == IPv4Addr::kZero)
+    return;
+
   Entry::Ptr entry = Entry::New(Entry::kStatic);
   entry->subnetIs(iface->subnet(), iface->subnetMask());
   entry->gatewayIs(IPv4Addr::kZero);
@@ -214,6 +217,9 @@ RoutingTable::InterfaceMapReactor::onInterface(InterfaceMap::Ptr map,
 void
 RoutingTable::InterfaceMapReactor::onInterfaceDel(InterfaceMap::Ptr map,
                                                   Interface::Ptr iface) {
+  if (iface->subnet() == IPv4Addr::kZero)
+    return;
+
   rtable_->entryDel(iface->subnet(), iface->subnetMask());
 }
 
