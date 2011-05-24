@@ -60,6 +60,11 @@ void DataPlane::outputPacketNew(EthernetPacket::PtrConst pkt,
     return;
   }
 
+  if (iface->type() != Interface::kHardware) {
+    ELOG << "  DataPlane output on non-hardware interface?";
+    return;
+  }
+
   if (pkt->type() == EthernetPacket::kIP) {
     EthernetPacket* _pkt = const_cast<EthernetPacket*>(pkt.ptr());
     IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(_pkt->payload());
