@@ -257,7 +257,13 @@
 
 // Name: dma (DMA)
 // Description: DMA transfer module
-// File: lib/verilog/dma/xml/dma.xml
+// File: lib/verilog/core/dma/xml/dma.xml
+#define DMA_CTRL_REG                0x0500000
+#define DMA_NUM_INGRESS_PKTS_REG    0x0500004
+#define DMA_NUM_INGRESS_BYTES_REG   0x0500008
+#define DMA_NUM_EGRESS_PKTS_REG     0x050000c
+#define DMA_NUM_EGRESS_BYTES_REG    0x0500010
+#define DMA_NUM_TIMEOUTS_REG        0x0500014
 
 // Name: nf2_mac_grp (MAC_GRP_0)
 // Description: Ethernet MAC group

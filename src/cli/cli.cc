@@ -261,6 +261,16 @@ void cli_show_hw_about() {
     cli_send_str(line_buf);
   }
 
+  cli_send_str("\n");
+
+  // DMA registers.
+  readReg(&nf2, DMA_NUM_INGRESS_PKTS_REG, &value);
+  snprintf(line_buf, sizeof(line_buf), format, "DMA ingress packets", value);
+  cli_send_str(line_buf);
+  readReg(&nf2, DMA_NUM_EGRESS_PKTS_REG, &value);
+  snprintf(line_buf, sizeof(line_buf), format, "DMA egress packets", value);
+  cli_send_str(line_buf);
+
   // Total packets.
   readReg(&nf2, IN_ARB_NUM_PKTS_SENT_REG, &value);
   snprintf(line_buf, sizeof(line_buf), format, "Total input packets", value);
