@@ -349,16 +349,16 @@
 // Name: router_op_lut (ROUTER_OP_LUT)
 // Description: Output port lookup for IPv4 router (CAM based)
 // File: lib/verilog/output_port_lookup/cam_router/xml/cam_router.xml
-#define ROUTER_OP_LUT_ARP_NUM_MISSES                  0x2000000
-#define ROUTER_OP_LUT_LPM_NUM_MISSES                  0x2000004
-#define ROUTER_OP_LUT_NUM_CPU_PKTS_SENT               0x2000008
-#define ROUTER_OP_LUT_NUM_BAD_OPTS_VER                0x200000c
-#define ROUTER_OP_LUT_NUM_BAD_CHKSUMS                 0x2000010
-#define ROUTER_OP_LUT_NUM_BAD_TTLS                    0x2000014
-#define ROUTER_OP_LUT_NUM_NON_IP_RCVD                 0x2000018
-#define ROUTER_OP_LUT_NUM_PKTS_FORWARDED              0x200001c
-#define ROUTER_OP_LUT_NUM_WRONG_DEST                  0x2000020
-#define ROUTER_OP_LUT_NUM_FILTERED_PKTS               0x2000024
+#define ROUTER_OP_LUT_ARP_NUM_MISSES_REG                  0x2000000
+#define ROUTER_OP_LUT_LPM_NUM_MISSES_REG                  0x2000004
+#define ROUTER_OP_LUT_NUM_CPU_PKTS_SENT_REG               0x2000008
+#define ROUTER_OP_LUT_NUM_BAD_OPTS_VER_REG                0x200000c
+#define ROUTER_OP_LUT_NUM_BAD_CHKSUMS_REG                 0x2000010
+#define ROUTER_OP_LUT_NUM_BAD_TTLS_REG                    0x2000014
+#define ROUTER_OP_LUT_NUM_NON_IP_RCVD_REG                 0x2000018
+#define ROUTER_OP_LUT_NUM_PKTS_FORWARDED_REG              0x200001c
+#define ROUTER_OP_LUT_NUM_WRONG_DEST_REG                  0x2000020
+#define ROUTER_OP_LUT_NUM_FILTERED_PKTS_REG               0x2000024
 #define ROUTER_OP_LUT_MAC_0_HI_REG                        0x2000028
 #define ROUTER_OP_LUT_MAC_0_LO_REG                        0x200002c
 #define ROUTER_OP_LUT_MAC_1_HI_REG                        0x2000030
