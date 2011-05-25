@@ -143,6 +143,17 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
   eth_pkt->dstIs(arp_entry->ethernetAddr());
   eth_pkt->typeIs(EthernetPacket::kIP);
 
+  if (pkt->protocol() == IPPacket::kTCP) {
+    ILOG << "TCP out " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  } else if (pkt->protocol() == IPPacket::kUDP) {
+    ILOG << "UDP out " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  } else if (pkt->protocol() == IPPacket::kICMP) {
+    ILOG << "ICMP out " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  }
+
   // Send packet.
   DLOG << "Forwarding IP packet to " << string(next_hop_ip);
   dp_->outputPacketNew(eth_pkt, out_iface);
@@ -300,6 +311,9 @@ void ControlPlane::PacketFunctor::operator()(GREPacket* const pkt,
 
   IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(pkt->enclosingPacket());
 
+  ILOG << "GRE in " << ip_pkt->dst() << " <- " << ip_pkt->src()
+       << " on " << iface->name();
+
   // Do we have a tunnel with this remote?
   Tunnel::Ptr tunnel;
   {
@@ -332,6 +346,9 @@ void ControlPlane::PacketFunctor::operator()(ICMPPacket* const pkt,
   DLOG << "  code: " << (uint32_t)pkt->code();
 
   IPPacket::Ptr ip_pkt = (IPPacket*)(pkt->enclosingPacket().ptr());
+
+  ILOG << "ICMP in " << ip_pkt->dst() << " <- " << ip_pkt->src()
+       << " on " << iface->name();
 
   // Handle ICMP Echo Requests.
   if (pkt->type() == ICMPPacket::kEchoRequest) {

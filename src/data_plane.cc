@@ -282,8 +282,20 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   eth_pkt->dstIs(arp_entry->ethernetAddr());
   eth_pkt->typeIs(EthernetPacket::kIP);
 
-  // Send packet.
   DLOG << "Forwarding IP packet to " << string(next_hop_ip);
+
+  if (pkt->protocol() == IPPacket::kTCP) {
+    ILOG << "TCP " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  } else if (pkt->protocol() == IPPacket::kUDP) {
+    ILOG << "UDP " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  } else if (pkt->protocol() == IPPacket::kICMP) {
+    ILOG << "ICMP " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  }
+
+  // Send packet.
   dp_->outputPacketNew(eth_pkt, out_iface);
 }
 
