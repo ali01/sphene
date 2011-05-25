@@ -389,7 +389,7 @@
 // Name: in_arb (IN_ARB)
 // Description: Round-robin input arbiter
 // File: lib/verilog/input_arbiter/rr_input_arbiter/xml/rr_input_arbiter.xml
-#define IN_ARB_NUM_PKTS_SENT        0x2000200
+#define IN_ARB_NUM_PKTS_SENT_REG        0x2000200
 #define IN_ARB_LAST_PKT_WORD_0_HI   0x2000204
 #define IN_ARB_LAST_PKT_WORD_0_LO   0x2000208
 #define IN_ARB_LAST_PKT_CTRL_0      0x200020c

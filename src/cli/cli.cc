@@ -217,8 +217,8 @@ void cli_send_no_hw_str() {
 #else
 void cli_show_hw() {
     cli_send_str("HW State:\n");
-    //cli_show_hw_about();
-    //cli_send_str("\n");
+    cli_show_hw_about();
+    cli_send_str("\n");
     cli_show_hw_arp();
     cli_send_str("\n");
     cli_show_hw_intf();
@@ -227,7 +227,46 @@ void cli_show_hw() {
 }
 
 void cli_show_hw_about() {
-    cli_send_str( "not yet implemented: cli_show_hw_about()\n" );
+  char line_buf[256];
+  const char* const format = "  %-20s  %-16d\n";
+
+  // Open the NetFPGA for reading registers.
+  struct nf2device nf2;
+  nf2.device_name = kDefaultIfaceName;
+  nf2.net_iface = 1;
+  if (openDescriptor(&nf2)) {
+    perror("openDescriptor()");
+    exit(1);
+  }
+
+  const char* reg_names[] = {"ARP cache misses",
+                             "LPM misses",
+                             "CPU packets sent",
+                             "Bad options/version",
+                             "Bad checksums",
+                             "Bad TTLs",
+                             "Non-IP received",
+                             "Packets forwarded",
+                             "Wrong destination",
+                             "Filtered packets"};
+  const unsigned int num_regs = sizeof(reg_names) / sizeof(const char*);
+  const unsigned int base_reg = ROUTER_OP_LUT_ARP_NUM_MISSES_REG;
+
+  cli_send_str("HW Counters:\n");
+  unsigned int value;
+  for (unsigned int i = 0; i < num_regs; ++i) {
+    unsigned int reg = base_reg + (i * 4);
+    readReg(&nf2, reg, &value);
+    snprintf(line_buf, sizeof(line_buf), format, reg_names[i], value);
+    cli_send_str(line_buf);
+  }
+
+  // Total packets.
+  readReg(&nf2, IN_ARB_NUM_PKTS_SENT_REG, &value);
+  snprintf(line_buf, sizeof(line_buf), format, "Total input packets", value);
+  cli_send_str(line_buf);
+
+  closeDescriptor(&nf2);
 }
 
 void cli_show_hw_arp() {
