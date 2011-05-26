@@ -425,7 +425,7 @@ OSPFLSUPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 /* OSPFLSUAdvPacket */
 
 OSPFLSUAdvPacket::OSPFLSUAdvPacket(PacketBuffer::Ptr buffer,
-                                           unsigned int buffer_offset)
+                                   unsigned int buffer_offset)
     : Packet(buffer, buffer_offset),
       ospf_lsu_adv_((struct ospf_lsu_adv*)offsetAddress(0)) {}
 
@@ -461,6 +461,6 @@ OSPFLSUAdvPacket::routerIDIs(const RouterID& id) {
 
 void
 OSPFLSUAdvPacket::operator()(Functor* const f,
-                                 const Interface::PtrConst iface) {
+                             const Interface::PtrConst iface) {
   (*f)(this, iface);
 }
