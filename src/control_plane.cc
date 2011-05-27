@@ -160,6 +160,79 @@ void ControlPlane::outputPacketNew(IPPacket::Ptr pkt) {
 }
 
 
+void ControlPlane::outputRawPacketNew(Fwk::Ptr<IPPacket> pkt,
+                                      Interface::PtrConst out_iface,
+                                      IPv4Addr next_hop_ip,
+                                      const EthernetAddr dst_mac_addr) {
+  DLOG << "outputRawPacketNew() in ControlPlane";
+
+  if (pkt->ttl() < 1) {
+    // Send ICMP Time Exceeded Message to source.
+    pkt->ttlIs(pkt->ttl() + 1);
+    sendICMPTTLExceeded(pkt);
+    return;
+  }
+
+  IPv4Addr dest_ip = pkt->dst();
+  Interface::Ptr target_iface;
+  {
+    InterfaceMap::Ptr iface_map = dp_->interfaceMap();
+    Fwk::ScopedLock<InterfaceMap> lock(iface_map);
+    target_iface = iface_map->interfaceAddr(dest_ip);
+  }
+
+  if (target_iface) {
+    DLOG << "outputRawPacketNew: ignoring outgoing packet destined "
+         << "to this router";
+    return;
+  }
+
+  DLOG << "  outgoing interface: " << out_iface->name();
+
+  if (out_iface->type() == Interface::kVirtual) {
+    // Interface is virtual. We need to do an encapsulation here.
+    encapsulateAndOutputPacket(pkt, out_iface);
+    return;
+  }
+
+  // Fragment large datagrams.
+  if (pkt->len() > EthernetPacket::kMTU) {
+    DLOG << "  len: " << pkt->len() << "; fragmenting";
+    fragmentAndSend(pkt);
+    return;
+  }
+
+  // Next hop IP address.
+  if (next_hop_ip == 0u)
+    next_hop_ip = pkt->dst();
+  DLOG << "  next hop: " << next_hop_ip;
+
+  // Add Ethernet header using ARP entry data.
+  pkt->buffer()->minimumSizeIs(pkt->len() + EthernetPacket::kHeaderSize);
+  EthernetPacket::Ptr eth_pkt =
+      EthernetPacket::New(pkt->buffer(),
+                          pkt->bufferOffset() - EthernetPacket::kHeaderSize);
+  eth_pkt->srcIs(out_iface->mac());
+  eth_pkt->dstIs(dst_mac_addr);
+  eth_pkt->typeIs(EthernetPacket::kIP);
+
+  if (pkt->protocol() == IPPacket::kTCP) {
+    ILOG << "TCP out " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  } else if (pkt->protocol() == IPPacket::kUDP) {
+    ILOG << "UDP out " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  } else if (pkt->protocol() == IPPacket::kICMP) {
+    ILOG << "ICMP out " << pkt->src() << " -> " << pkt->dst()
+         << " via " << out_iface->name();
+  }
+
+  // Send packet.
+  DLOG << "Forwarding IP packet to " << string(next_hop_ip);
+  dp_->outputPacketNew(eth_pkt, out_iface);
+}
+
+
 void ControlPlane::dataPlaneIs(DataPlane::Ptr dp) {
   if (dp_ == dp)
     return;
