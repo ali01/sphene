@@ -37,9 +37,15 @@ class ControlPlane : public Fwk::NamedInterface {
 
   void packetNew(Packet::Ptr pkt, Interface::PtrConst iface);
 
-  /* Sends out the given IP_PACKET.
-   * Makes ARP requests and updates the ARP cache if necessary. */
+  // Sends out the given 'ip_packet'. Makes ARP requests and updates the ARP
+  // cache if necessary.
   void outputPacketNew(Fwk::Ptr<IPPacket> ip_packet);
+
+  // Send an IP-in-Ethernet packet with the specified parameters.
+  void outputRawPacketNew(Fwk::Ptr<IPPacket> ip_packet,
+                          Interface::PtrConst out_iface,
+                          IPv4Addr next_hop_ip,
+                          EthernetAddr dst_mac_addr);
 
   // Returns the DataPlane.
   DataPlane::Ptr dataPlane() const { return dp_; }

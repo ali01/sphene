@@ -193,9 +193,7 @@ OSPFDaemon::broadcast_timed_hello() {
 void
 OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   size_t ip_pkt_len = OSPFHelloPacket::kPacketSize + IPPacket::kHeaderSize;
-  size_t eth_pkt_len = ip_pkt_len + EthernetPacket::kHeaderSize;
-
-  PacketBuffer::Ptr buffer = PacketBuffer::New(eth_pkt_len);
+  PacketBuffer::Ptr buffer = PacketBuffer::New(ip_pkt_len);
 
   OSPFHelloPacket::Ptr ospf_pkt =
     OSPFHelloPacket::NewDefault(buffer,
@@ -214,20 +212,14 @@ OSPFDaemon::broadcast_hello_out_interface(OSPFInterface::Ptr iface) {
   ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
 
-  EthernetPacket::Ptr eth_pkt =
-    EthernetPacket::New(buffer, buffer->size() - eth_pkt_len);
-
-  /* EthernetPacket fields: */
-  eth_pkt->srcIs(iface->interface()->mac());
-  eth_pkt->dstIs(EthernetAddr::kBroadcast);
-  eth_pkt->typeIs(EthernetPacket::kIP);
-
   /* Setting enclosing packet. */
   ospf_pkt->enclosingPacketIs(ip_pkt);
-  ip_pkt->enclosingPacketIs(eth_pkt);
 
-  /* Sending packet. */
-  data_plane_->outputPacketNew(eth_pkt, iface->interface());
+  /* Send broadcast Ethernet packet. */
+  control_plane_->outputRawPacketNew(ip_pkt,
+                                     iface->interface(),
+                                     IPv4Addr::kZero,
+                                     EthernetAddr::kBroadcast);
 
   /* Resetting time since last HELLO. */
   iface->timeSinceOutgoingHelloIs(0);
