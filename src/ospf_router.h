@@ -216,7 +216,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      topology.
   */
   void process_lsu_advertisements(Fwk::Ptr<OSPFNode> sender,
-                                  Fwk::Ptr<const OSPFLSUPacket> pkt);
+                                  Fwk::Ptr<const OSPFLSUPacket> pkt,
+                                  Interface::PtrConst iface);
 
   /* Removes active links connected to SENDER if they are not confirmed in
      the given OSPF LSU packet. */

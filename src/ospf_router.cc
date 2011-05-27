@@ -17,6 +17,8 @@
 #include "ospf_packet.h"
 #include "ospf_topology.h"
 #include "routing_table.h"
+#include "tunnel.h"
+#include "tunnel_map.h"
 
 /* Static global log instance */
 static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("OSPFRouter");
@@ -217,7 +219,7 @@ OSPFRouter::PacketFunctor::operator()(OSPFLSUPacket* pkt,
 
   /* Updating seqno in topology database */
   node->latestSeqnoIs(pkt->seqno());
-  ospf_router_->process_lsu_advertisements(node, pkt);
+  ospf_router_->process_lsu_advertisements(node, pkt, iface);
 
   if (pkt->ttl() > 1) {
     pkt->ttlDec(1);
@@ -420,8 +422,20 @@ OSPFRouter::rtable_add_gateway(const IPv4Addr& subnet,
 
 void
 OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
-                                       OSPFLSUPacket::PtrConst pkt) {
+                                       OSPFLSUPacket::PtrConst pkt,
+                                       Interface::PtrConst iface) {
   OSPFAdvertisementSet::Ptr adv_set = OSPFAdvertisementSet::New();
+
+  /* Obtain tunnel object if IFACE is a virtual interface. */
+  Tunnel::PtrConst tunnel = NULL;
+  if (iface->type() == Interface::kVirtual) {
+    TunnelMap::Ptr tunnel_map = control_plane_->tunnelMap();
+    tunnel = tunnel_map->tunnel(iface->name());
+    if (tunnel == NULL) {
+      ELOG << "process_lsu_advertisements: tunnel map does not contain inbound "
+           << "virtual interface";
+    }
+  }
 
   /* Processing each LSU advertisement enclosed in the LSU packet. */
   for (uint32_t adv_index = 0; adv_index < pkt->advCount(); ++adv_index) {
@@ -431,6 +445,13 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
       /* SENDER is advertising this router as a direct neighbor. */
       /* Hello protocol takes precedence. */
       ILOG << "  ignore        " << adv_pkt->routerID() << " -- this router";
+      continue;
+    }
+
+    if (tunnel &&
+        (tunnel->remote() & adv_pkt->subnetMask()) == adv_pkt->subnet()) {
+      ILOG << "  ignore        " << adv_pkt->routerID()
+           << " -- tunnel endpoint";
       continue;
     }
 
