@@ -778,18 +778,18 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   GREPacket::Ptr gre_pkt =
       GREPacket::GREPacketNew(pkt->buffer(),
                               pkt->bufferOffset() - GREPacket::kHeaderSize);
+  gre_pkt->checksumPresentIs(true);
   gre_pkt->reserved0Is(0);
   gre_pkt->reserved1Is(0);
   gre_pkt->versionIs(0);
   gre_pkt->protocolIs(EthernetPacket::kIP);
-  gre_pkt->checksumPresentIs(true);
   gre_pkt->checksumReset();
 
   // Add IP header.
   gre_pkt->buffer()->minimumSizeIs(gre_pkt->len() + IPPacket::kHeaderSize);
   IPPacket::Ptr ip_pkt =
       IPPacket::New(gre_pkt->buffer(),
-                            gre_pkt->bufferOffset() - IPPacket::kHeaderSize);
+                    gre_pkt->bufferOffset() - IPPacket::kHeaderSize);
   ip_pkt->versionIs(4);
   ip_pkt->headerLengthIs(IPPacket::kHeaderSize / 4);  // words, not bytes!
   ip_pkt->packetLengthIs(ip_pkt->len());
