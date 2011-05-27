@@ -444,7 +444,7 @@ OSPFRouter::process_lsu_advertisements(OSPFNode::Ptr sender,
     if (adv_pkt->routerID() == this->routerID()) {
       /* SENDER is advertising this router as a direct neighbor. */
       /* Hello protocol takes precedence. */
-      ILOG << "  ignore        " << adv_pkt->routerID() << " -- this router";
+      ILOG << "  ignore        " << adv_pkt->subnet() << " -- this router";
       continue;
     }
 
