@@ -40,7 +40,7 @@
 #include "fwk/ptr.h"
 
 
-#define SR_NAMELEN 32
+#define SR_NAMELEN 64
 
 #define CPU_HW_FILENAME "cpuhw"
 
@@ -99,13 +99,13 @@ struct sr_instance
 
     /* VNS specific */
     int  sockfd;    /* socket to server */
-    char user[32];  /* user name */
-    char vhost[32]; /* host name */
-    char lhost[32]; /* host name of machine running client */
+    char user[SR_NAMELEN];  /* user name */
+    char vhost[SR_NAMELEN]; /* host name */
+    char lhost[SR_NAMELEN]; /* host name of machine running client */
     char template_name[30]; /* template name if any */
-    char auth_key_fn[64]; /* auth key filename */
-    char rtable[64]; /* filename for routing table          */
-    char server[32];
+    char auth_key_fn[SR_NAMELEN]; /* auth key filename */
+    char rtable[SR_NAMELEN]; /* filename for routing table          */
+    char server[SR_NAMELEN];
     unsigned short topo_id; /* topology id */
     struct sockaddr_in sr_addr; /* address to server */
     FILE* logfile; /* file to log all received/sent packets to */
