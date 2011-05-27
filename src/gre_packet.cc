@@ -5,11 +5,12 @@
 #include "arp_packet.h"
 #include "ethernet_packet.h"
 #include "fwk/exception.h"
+#include "fwk/log.h"
 #include "interface.h"
 #include "packet_buffer.h"
 #include "unknown_packet.h"
 
-
+static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("GREPacket");
 const size_t GREPacket::kHeaderSize = sizeof(struct GREHeader);
 
 
@@ -28,14 +29,22 @@ void GREPacket::operator()(Functor* const f, const Interface::PtrConst iface) {
 bool GREPacket::valid() const {
   // Verify length.
   const size_t header_len = checksumPresent() ? 8 : 4;
-  if (len() < header_len)
+  if (len() < header_len) {
+    DLOG << "length is too short: " << len();
     return false;
+  }
 
-  if (reserved0() != 0 || reserved1() != 0)
+  if (reserved0() != 0 || reserved1() != 0) {
+    DLOG << "reserved field non-zero";
+    DLOG << "  reserved0: " << (uint32_t)reserved0();
+    DLOG << "  reserved1: " << (uint32_t)reserved1();
     return false;
+  }
 
-  if (!checksumValid())
+  if (!checksumValid()) {
+    DLOG << "invalid checksum";
     return false;
+  }
 
   return true;
 }
