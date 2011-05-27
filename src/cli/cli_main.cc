@@ -124,7 +124,7 @@ THREAD_RETURN_TYPE cli_client_handler_main( void* pclient ) {
 
     /* first read always pulls crap data from socket for some reason, so just
        get it now */
-    cli_client_handle_request( client );
+    //cli_client_handle_request( client );
     client->state.used = client->state.search_offset = client->state.needle_offset = 0;
 
     /* welcome the client */

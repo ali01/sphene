@@ -186,7 +186,7 @@ void cli_send_parse_error( int num_args, ... ) {
 }
 
 void cli_send_welcome() {
-    cli_send_str( "You are now logged into the router CLI.\n" );
+
 }
 
 void cli_send_prompt() {
