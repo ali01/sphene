@@ -52,6 +52,32 @@ IPv4Addr::operator&=(const IPv4Addr& other) {
   return *this;
 }
 
+IPv4Addr
+IPv4Addr::operator|(uint32_t other) const {
+  return addr_ | other;
+}
+
+IPv4Addr
+IPv4Addr::operator|(const IPv4Addr& other) const {
+  return addr_ | other.addr_;
+}
+
+IPv4Addr&
+IPv4Addr::operator|=(uint32_t other) {
+  addr_ |= other;
+  return *this;
+}
+
+IPv4Addr&
+IPv4Addr::operator|=(const IPv4Addr& other) {
+  addr_ |= other.addr_;
+  return *this;
+}
+
+IPv4Addr IPv4Addr::operator~() const {
+  return ~addr_;
+}
+
 bool
 IPv4Addr::operator==(const IPv4Addr& other) const {
   return (addr_ == other.addr_);

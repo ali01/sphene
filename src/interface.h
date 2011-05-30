@@ -50,6 +50,9 @@ class Interface
   // Sets the interface subnet mask.
   void subnetMaskIs(const IPv4Addr& mask) { mask_ = mask; }
 
+  // Returns the broadcast address for the subnet.
+  IPv4Addr broadcastAddr() const { return ip_ | ~mask_; }
+
   // Returns interface speed.
   // TODO(ms): better type for this?
   uint32_t speed() const { return speed_; }

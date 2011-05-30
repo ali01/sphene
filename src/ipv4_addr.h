@@ -31,6 +31,14 @@ class IPv4Addr {
   IPv4Addr& operator&=(uint32_t other);
   IPv4Addr& operator&=(const IPv4Addr& other);
 
+  IPv4Addr operator|(uint32_t other) const;
+  IPv4Addr operator|(const IPv4Addr& other) const;
+
+  IPv4Addr& operator|=(uint32_t other);
+  IPv4Addr& operator|=(const IPv4Addr& other);
+
+  IPv4Addr operator~() const;
+
   /* Comparison operators. */
   bool operator==(const IPv4Addr& other) const;
   bool operator!=(const IPv4Addr& other) const;

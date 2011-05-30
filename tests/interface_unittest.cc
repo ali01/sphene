@@ -40,6 +40,21 @@ TEST_F(InterfaceTest, SubnetMask) {
 }
 
 
+TEST_F(InterfaceTest, BroadcastAddr) {
+  iface_->ipIs("10.1.0.42");
+  iface_->subnetMaskIs("255.255.255.0");
+  EXPECT_EQ(IPv4Addr("10.1.0.255"), iface_->broadcastAddr());
+
+  iface_->ipIs("0.0.0.0");
+  iface_->subnetMaskIs("0.0.0.0");
+  EXPECT_EQ(IPv4Addr("255.255.255.255"), iface_->broadcastAddr());
+
+  iface_->ipIs("172.16.1.145");
+  iface_->subnetMaskIs("255.240.0.0");
+  EXPECT_EQ(IPv4Addr("172.31.255.255"), iface_->broadcastAddr());
+}
+
+
 TEST_F(InterfaceTest, Speed) {
   const uint32_t speed = 31337;
   iface_->speedIs(speed);
