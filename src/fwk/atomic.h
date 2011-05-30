@@ -72,6 +72,8 @@ class AtomicTypeInt32 : public AtomicType32<T> {
   bool operator> (const AtomicTypeInt32<T>& o) const {
     return (AtomicTypeInt32<T>::value() >  o.value()); }
 
+  T operator~() const { return ~AtomicType32<T>::value(); }
+
   T operator&(const T& o) const {
     return (AtomicType32<T>::value() & o); }
   T operator|(const T& o) const {
@@ -190,6 +192,8 @@ class AtomicTypeInt64 : public AtomicType64<T> {
     return (AtomicTypeInt64<T>::value() <  o.value()); }
   bool operator> (const AtomicTypeInt64<T>& o) const {
     return (AtomicTypeInt64<T>::value() >  o.value()); }
+
+  T operator~() const { return ~AtomicType64<T>::value(); }
 
   T operator&(const T& o) const {
     return (AtomicType64<T>::value() & o); }
