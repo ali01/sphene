@@ -889,19 +889,19 @@ void cli_manip_ip_intf_up( gross_intf_t* data ) {
 void cli_manip_ip_ospf_down() {
     if( router_is_ospf_enabled( SR ) ) {
         router_set_ospf_enabled( SR, 0 );
-        cli_send_str( "OSPF has been disabled" );
+        cli_send_str( "OSPF has been disabled\n" );
     }
     else
-        cli_send_str( "OSPF was already disabled" );
+        cli_send_str( "OSPF was already disabled\n" );
 }
 
 void cli_manip_ip_ospf_up() {
     if( !router_is_ospf_enabled( SR ) ) {
         router_set_ospf_enabled( SR, 1 );
-        cli_send_str( "OSPF has been enabled" );
+        cli_send_str( "OSPF has been enabled\n" );
     }
     else
-        cli_send_str( "OSPF was already enabled" );
+        cli_send_str( "OSPF was already enabled\n" );
 }
 
 void cli_manip_ip_route_add( gross_route_t* data ) {
