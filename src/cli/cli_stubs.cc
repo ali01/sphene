@@ -12,6 +12,7 @@
 #include "data_plane.h"
 #include "interface.h"
 #include "interface_map.h"
+#include "ospf_router.h"
 #include "router.h"
 #include "sr_base_internal.h"
 #include "routing_table.h"
@@ -131,13 +132,14 @@ int router_is_interface_enabled(struct sr_instance* const sr,
 
 
 int router_is_ospf_enabled(struct sr_instance* const sr) {
-    fprintf( stderr, "not yet implemented: router_is_ospf_enabled\n" );
-    return 0;
+  OSPFRouter::Ptr ospf_router = sr->router->controlPlane()->ospfRouter();
+  return ospf_router->enabled() ? 1 : 0;
 }
 
 
 void router_set_ospf_enabled(struct sr_instance* const sr, const int enabled) {
-    fprintf( stderr, "not yet implemented: router_set_ospf_enabled\n" );
+  OSPFRouter::Ptr ospf_router = sr->router->controlPlane()->ospfRouter();
+  ospf_router->enabledIs(enabled);
 }
 
 
