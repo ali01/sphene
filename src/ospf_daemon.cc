@@ -173,6 +173,9 @@ OSPFDaemon::timeout_interface_neighbor_links(OSPFInterface::Ptr iface) {
 
 void
 OSPFDaemon::broadcast_timed_hello() {
+  if (!ospf_router_->enabled())
+    return;
+
   OSPFInterfaceMap::PtrConst iface_map = ospf_router_->interfaceMap();
   OSPFInterfaceMap::const_if_iter if_it = iface_map->ifacesBegin();
 
