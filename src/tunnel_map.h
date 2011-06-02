@@ -6,16 +6,20 @@
 
 #include "ipv4_addr.h"
 #include "fwk/locked_interface.h"
+#include "fwk/notifier.h"
 #include "fwk/ptr.h"
 #include "fwk/ptr_interface.h"
 #include "tunnel.h"
 
 
-class TunnelMap : public Fwk::PtrInterface<TunnelMap>,
+class TunnelMapNotifiee;
+
+class TunnelMap : public Fwk::BaseNotifier<TunnelMap, TunnelMapNotifiee>,
                   public Fwk::LockedInterface {
  public:
   typedef Fwk::Ptr<const TunnelMap> PtrConst;
   typedef Fwk::Ptr<TunnelMap> Ptr;
+  typedef TunnelMapNotifiee Notifiee;
   typedef std::map<std::string, Tunnel::Ptr> NameTunnelMap;
   typedef std::map<IPv4Addr, Tunnel::Ptr> IPTunnelMap;
   typedef NameTunnelMap::iterator iterator;
@@ -58,6 +62,16 @@ class TunnelMap : public Fwk::PtrInterface<TunnelMap>,
 
   TunnelMap(const TunnelMap&);
   void operator=(const TunnelMap&);
+};
+
+
+class TunnelMapNotifiee
+    : public Fwk::BaseNotifiee<TunnelMap, TunnelMapNotifiee> {
+ public:
+  virtual void onTunnel(TunnelMap::Ptr tunnel_map,
+                        Tunnel::Ptr tunnel) { }
+  virtual void onTunnelDel(TunnelMap::Ptr rtable,
+                           Tunnel::Ptr tunnel) { }
 };
 
 #endif

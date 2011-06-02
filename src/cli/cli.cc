@@ -386,7 +386,7 @@ void cli_show_hw_intf() {
 
 void cli_show_hw_route() {
   char line_buf[256];
-  const char* const format = "  %-2d  %-16s %-16s %-16s %-2d\n";
+  const char* const format = "  %-2d  %-16s %-16s %-16s %-16s %-16s %-2d\n";
 
   // Open the NetFPGA for reading registers.
   struct nf2device nf2;
@@ -413,12 +413,19 @@ void cli_show_hw_route() {
     uint32_t ip_addr_reg;
     uint32_t mask_reg;
     uint32_t gw_reg;
+    uint32_t tr_reg = 0;
+    uint32_t tl_reg = 0;
     uint32_t port_reg;
 
     readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP_REG, &ip_addr_reg);
     readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK_REG, &mask_reg);
     readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, &gw_reg);
     readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT_REG, &port_reg);
+
+#ifndef REF_REG_DEFINES
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_TUNNEL_REMOTE_REG, &tr_reg);
+    readReg(&nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_TUNNEL_LOCAL_REG, &tl_reg);
+#endif
 
     // Decode interface number.
     unsigned int intf_num = 0;
@@ -433,11 +440,15 @@ void cli_show_hw_route() {
     IPv4Addr ip(ip_addr_reg);
     IPv4Addr mask(mask_reg);
     IPv4Addr gw(gw_reg);
+    IPv4Addr tunnel_remote(tr_reg);
+    IPv4Addr tunnel_local(tl_reg);
 
     if (ip != 0u || gw != 0u) {
       snprintf(line_buf, sizeof(line_buf), format,
                index, string(ip).c_str(), string(gw).c_str(),
-               string(mask).c_str(), intf_num);
+               string(mask).c_str(),
+               string(tunnel_remote).c_str(), string(tunnel_local).c_str(),
+               intf_num);
       cli_send_str(line_buf);
     }
   }

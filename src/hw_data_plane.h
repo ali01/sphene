@@ -11,6 +11,8 @@
 #include "interface.h"
 #include "interface_map.h"
 #include "routing_table.h"
+#include "tunnel.h"
+#include "tunnel_map.h"
 
 class ARPPacket;
 class EthernetPacket;
@@ -31,6 +33,9 @@ class HWDataPlane : public DataPlane {
 
   // Sets the RoutingTable.
   virtual void routingTableIs(RoutingTable::Ptr rtable);
+
+  // Sets the ControlPlane.
+  virtual void controlPlaneIs(ControlPlane* cp);
 
  protected:
   class ARPCacheReactor : public ARPCache::Notifiee {
@@ -82,6 +87,19 @@ class HWDataPlane : public DataPlane {
     Fwk::Log::Ptr log_;
   };
 
+  class TunnelMapReactor : public TunnelMap::Notifiee {
+   public:
+    TunnelMapReactor(HWDataPlane* dp);
+    virtual void onTunnel(TunnelMap::Ptr tunnel_map,
+                          Tunnel::Ptr tunnel);
+    virtual void onTunnelDel(TunnelMap::Ptr rtable,
+                             Tunnel::Ptr tunnel);
+
+   protected:
+    HWDataPlane* dp_;
+    Fwk::Log::Ptr log_;
+  };
+
   HWDataPlane(struct sr_instance* sr,
               Fwk::Ptr<ARPCache> arp_cache);
 
@@ -103,6 +121,8 @@ class HWDataPlane : public DataPlane {
                                 const IPv4Addr& ip,
                                 const IPv4Addr& mask,
                                 const IPv4Addr& gw,
+                                const IPv4Addr& tunnel_remote,
+                                const IPv4Addr& tunnel_local,
                                 unsigned int encoded_port,
                                 unsigned int index);
   void initializeInterface(Fwk::Ptr<Interface> iface);
@@ -112,6 +132,7 @@ class HWDataPlane : public DataPlane {
   InterfaceReactor interface_reactor_;
   InterfaceMapReactor interface_map_reactor_;
   RoutingTableReactor routing_table_reactor_;
+  TunnelMapReactor tunnel_map_reactor_;
   Fwk::Log::Ptr log_;
 };
 

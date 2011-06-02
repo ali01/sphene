@@ -41,7 +41,7 @@ class DataPlane : public Fwk::NamedInterface {
   ControlPlane* controlPlane() const { return cp_; }
 
   // Sets the ControlPlane.
-  void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
+  virtual void controlPlaneIs(ControlPlane* cp) { cp_ = cp; }
 
   // Sets the RoutingTable.
   virtual void routingTableIs(RoutingTable::Ptr rtable) {

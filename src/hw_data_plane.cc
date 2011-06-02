@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "arp_cache.h"
+#include "control_plane.h"
 #include "ethernet_packet.h"
 #include "fwk/log.h"
 #include "fwk/scoped_lock.h"
@@ -29,6 +30,8 @@
 #endif
 #include "routing_table.h"
 #include "sr_cpu_extension_nf2.h"
+#include "tunnel.h"
+#include "tunnel_map.h"
 
 using std::vector;
 
@@ -44,6 +47,7 @@ HWDataPlane::HWDataPlane(struct sr_instance* sr,
       interface_reactor_(this),
       interface_map_reactor_(this),
       routing_table_reactor_(this),
+      tunnel_map_reactor_(this),
       log_(Fwk::Log::LogNew("HWDataPlane")) {
   arp_cache_reactor_.notifierIs(arp_cache);
   interface_map_reactor_.notifierIs(iface_map_);
@@ -66,6 +70,13 @@ void HWDataPlane::routingTableIs(RoutingTable::Ptr rtable) {
   routing_table_ = rtable;
 
   routing_table_reactor_.notifierIs(routing_table_);
+}
+
+
+void HWDataPlane::controlPlaneIs(ControlPlane* cp) {
+  cp_ = cp;
+
+  tunnel_map_reactor_.notifierIs(cp->tunnelMap());
 }
 
 
@@ -142,6 +153,23 @@ void HWDataPlane::RoutingTableReactor::onEntry(
 
 void HWDataPlane::RoutingTableReactor::onEntryDel(
     RoutingTable::Ptr rtable, RoutingTable::Entry::Ptr entry) {
+  dp_->writeHWRoutingTable();
+}
+
+
+HWDataPlane::TunnelMapReactor::TunnelMapReactor(HWDataPlane* dp)
+    : dp_(dp),
+      log_(Fwk::Log::LogNew("HWDataPlane::TunnelMapReactor")) { }
+
+
+void HWDataPlane::TunnelMapReactor::onTunnel(TunnelMap::Ptr tunnel_map,
+                                             Tunnel::Ptr tunnel) {
+  dp_->writeHWRoutingTable();
+}
+
+
+void HWDataPlane::TunnelMapReactor::onTunnelDel(TunnelMap::Ptr rtable,
+                                                Tunnel::Ptr tunnel) {
   dp_->writeHWRoutingTable();
 }
 
@@ -258,10 +286,6 @@ void HWDataPlane::writeHWRoutingTable() {
   for (RoutingTable::iterator it = routing_table_->entriesBegin();
        it != routing_table_->entriesEnd();
        ++it) {
-    // TODO(ms): Figure out how to include routes over virtual interfaces.
-    if (it->second->interface()->type() == Interface::kVirtual)
-      continue;
-
     entries.push_back(it->second);
   }
 
@@ -289,29 +313,83 @@ void HWDataPlane::writeHWRoutingTable() {
     RoutingTable::Entry::Ptr entry = *it;
     Interface::PtrConst iface = entry->interface();
 
-    // The port number is calculated in "one-hot-encoded format":
-    //   iface num    port
-    //   0            1
-    //   1            4
-    //   2            16
-    //   3            64
-    // For iface num i, this is 4**i.
-    unsigned int encoded_port = (1 << (iface->index() * 2));
+    // Skips disabled interfaces, hardware or virtual.
+    if (!iface->enabled())
+      continue;
 
-    if (iface->enabled()) {
-      writeHWRoutingTableEntry(&nf2,
-                               entry->subnet(),
-                               entry->subnetMask(),
-                               entry->gateway(),
-                               encoded_port,
-                               index++);
+    // Parameters to set in hardware.
+    IPv4Addr subnet = entry->subnet();
+    IPv4Addr subnet_mask = entry->subnetMask();
+    IPv4Addr gateway;
+    IPv4Addr tunnel_local;   // zero by default
+    IPv4Addr tunnel_remote;  // zero by default
+    unsigned int encoded_port;
+
+#ifndef REF_REG_DEFINES
+    if (iface->type() == Interface::kVirtual) {
+      // This is a virtual route.
+
+      // Look up tunnel associated with this virtual interface.
+      TunnelMap::Ptr tunnel_map = cp_->tunnelMap();
+      Fwk::ScopedLock<TunnelMap> lock(tunnel_map);
+      Tunnel::Ptr tunnel = tunnel_map->tunnel(iface->name());
+      if (!tunnel) {
+        ELOG << "Virtual route but no associated tunnel";
+        continue;
+      }
+      tunnel_remote = tunnel->remote();
+
+      // Look up routing information for the tunnel endpoint.
+      RoutingTable::Entry::PtrConst tunnel_rentry =
+          routing_table_->lpm(tunnel_remote);
+      if (!tunnel_rentry) {
+        WLOG << "No routing entry for tunnel remote address";
+        continue;
+      }
+
+      Interface::PtrConst real_iface = tunnel_rentry->interface();
+
+      // Tunnel local is the IP address of the real interface to the tunnel
+      // endpoint.
+      tunnel_local = real_iface->ip();
+
+      // Next hop in hardware for virtual routes is the next hop on the
+      // route to the tunnel endpoint.
+      gateway = tunnel_rentry->gateway();
+      encoded_port = (1 << (real_iface->index() * 2));
+    } else {
+#endif
+      gateway = entry->gateway();
+
+      // The port number is calculated in "one-hot-encoded format":
+      //   iface num    port
+      //   0            1
+      //   1            4
+      //   2            16
+      //   3            64
+      // For iface num i, this is 4**i.
+      encoded_port = (1 << (iface->index() * 2));
+#ifndef REF_REG_DEFINES
     }
+#endif
+
+    writeHWRoutingTableEntry(&nf2,
+                             subnet,
+                             subnet_mask,
+                             gateway,
+                             tunnel_remote,
+                             tunnel_local,
+                             encoded_port,
+                             index++);
   }
 
   // Zero-out remaining entries.
   IPv4Addr zero_ip;
   for (; index < kMaxHWRoutingTableEntries; ++index)
-    writeHWRoutingTableEntry(&nf2, zero_ip, zero_ip, zero_ip, 0, index);
+    writeHWRoutingTableEntry(&nf2,
+                             zero_ip, zero_ip, zero_ip,
+                             zero_ip, zero_ip,  // tunnel remote, local
+                             0, index);
 
   closeDescriptor(&nf2);
 }
@@ -321,15 +399,26 @@ void HWDataPlane::writeHWRoutingTableEntry(struct nf2device* nf2,
                                            const IPv4Addr& subnet,
                                            const IPv4Addr& mask,
                                            const IPv4Addr& gw,
+                                           const IPv4Addr& tunnel_remote,
+                                           const IPv4Addr& tunnel_local,
                                            unsigned int encoded_port,
                                            unsigned int index) {
   uint32_t ip_addr_reg = ntohl(subnet.nbo());
   uint32_t mask_reg = ntohl(mask.nbo());
   uint32_t gw_reg = ntohl(gw.nbo());
 
+  uint32_t tr_reg = ntohl(tunnel_remote.nbo());
+  uint32_t tl_reg = ntohl(tunnel_local.nbo());
+
   writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_IP_REG, ip_addr_reg);
   writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_MASK_REG, mask_reg);
   writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_NEXT_HOP_IP_REG, gw_reg);
+
+#ifndef REF_REG_DEFINES
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_TUNNEL_REMOTE_REG, tr_reg);
+  writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_TUNNEL_LOCAL_REG, tl_reg);
+#endif
+
   writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_ENTRY_OUTPUT_PORT_REG, encoded_port);
   writeReg(nf2, ROUTER_OP_LUT_ROUTE_TABLE_WR_ADDR_REG, index);
 }
