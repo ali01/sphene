@@ -1,0 +1,101 @@
+Sphene
+
+  A sweet C++ hardware-accelerated router with GRE tunneling.
+
+========================================================================
+
+--------
+BUILDING
+--------
+
+We use autotools for our build system. Unfortunately, the toolchain version on
+myth is too old, so one of the ee108-*b machines is required to build sphene.
+
+
+To build in VNS mode:
+
+  % make clean
+  % make all
+
+To build in NetFPGA mode:
+
+  % make clean
+  % make all OPTS='--enable-cpumode'
+
+To build in NetFPGA mode for the reference bitfile (probably unnecessary):
+
+  % make clean
+  % make all OPTS='--enable-cpumode --enable-ref-reg-defines'
+
+
+-------
+TESTING
+-------
+
+To run the googletest unit test suite, run:
+
+  % make check
+
+If you're feeling ambitious, you can also run our live tests on VNS. Here's
+how:
+
+  1. Compile the code in VNS mode, as noted above.
+  2. Add an 'auth_key' file for your username in the top-level directory
+     (parent of src).
+  3. Run ./tests/run_nosetests.sh
+  4. Optionally, test the topology 677 stress tests: ./tests/run_677_tests.sh
+     NOTE: the run_nosetests.sh script also tests topo 677, but
+     run_677_tests.sh will spawn 3 instances of Sphene with three instances of
+     the reference router, in two different configurations, to test
+     interoperability.
+
+
+-------
+RUNNING
+-------
+
+Sphene takes the standard options (-a, -u, etc.) for running on VNS. It
+supports -r for reading rtable files.
+
+In addition, Sphene supports the following commandline options:
+
+  -c <port>    to change the CLI port
+  -d           to enable debug logging
+
+
+When running in hardware mode, a 'cpuhw' file must be present. If an 'rtable'
+file exists, it will be read in. Otherwise, a different rtable file can be
+specified with -r.
+
+
+-------------
+USING THE CLI
+-------------
+
+By default, Sphene runs a CLI on port 2300. Telnet to this port to access the
+CLI. Upon connecting, you should be greeted with a 'sphene%' prompt.
+
+
+GRE commands in the CLI
+-----------------------
+
+sphene% help ip tunnel
+ip tunnel {add | del | change} <name> [mode { gre }] [remote ADDR]: modify
+  tunnels
+ip tunnel add <name> mode { gre } remote <addr>: add a tunnel to <addr>
+ip tunnel del <name>: delete a tunnel
+ip tunnel change <name> mode { gre } remote <addr>: change attributes of an
+  existing tunnel
+show ip tunnel
+
+
+Example:
+  # Creates a virtual interface called 'feynman' on a GRE tunnel. The GRE
+  #   tunnel endpoint is 10.2.0.10. The tunnel subnet is 10.4.0.0/24, and the
+  #   local IP on the tunnel is 10.4.0.1.
+  ip tunnel add feynman mode gre remote 10.2.0.10
+  ip intf feynman 10.4.0.1 255.255.255.0
+
+
+GRE need not be explicitly disabled. If no tunnels exist, the GRE feature will
+not be active.
