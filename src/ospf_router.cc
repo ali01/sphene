@@ -42,7 +42,8 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
       lsu_dirty_(true),
       routing_table_(rtable),
       control_plane_(cp),
-      functor_(this) {
+      functor_(this),
+      enabled_(true) {
   topology_->notifieeIs(topology_reactor_);
   interfaces_->notifieeIs(im_reactor_);
   rtable_reactor_->notifierIs(routing_table_);
@@ -59,7 +60,8 @@ OSPFRouter::OSPFRouter(const RouterID& router_id,
 void
 OSPFRouter::packetNew(OSPFPacket::Ptr pkt, Interface::PtrConst iface) {
   /* double dispatch */
-  (*pkt)(&functor_, iface);
+  if (enabled_)
+    (*pkt)(&functor_, iface);
 }
 
 OSPFInterfaceMap::PtrConst
@@ -90,6 +92,23 @@ OSPFRouter::routingTable() const {
 RoutingTable::Ptr
 OSPFRouter::routingTable() {
   return routing_table_;
+}
+
+void
+OSPFRouter::enabledIs(bool status) {
+  if (enabled_ == status)
+    return;
+
+  if (status) {
+    rtable_update();
+
+  } else {
+    /* Clear all dynamic entries from the routing table. */
+    Fwk::ScopedLock<RoutingTable> lock(routing_table_);
+    routing_table_->clearDynamicEntries();
+  }
+
+  enabled_ = status;
 }
 
 void
@@ -334,13 +353,18 @@ OSPFRouter::RoutingTableReactor::onEntryDel(RoutingTable::Ptr rtable,
 /* OSPFRouter private member functions */
 
 void
-OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) {
-  IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(ospf_pkt->enclosingPacket());
-  control_plane_->outputPacketNew(ip_pkt);
+OSPFRouter::outputPacketNew(OSPFPacket::Ptr ospf_pkt) const {
+  if (enabled_) {
+    IPPacket::Ptr ip_pkt = Ptr::st_cast<IPPacket>(ospf_pkt->enclosingPacket());
+    control_plane_->outputPacketNew(ip_pkt);
+  }
 }
 
 void
 OSPFRouter::rtable_update() {
+  if (!enabled_)
+    return;
+
   ILOG << "Routing table updated";
 
   Fwk::ScopedLock<RoutingTable> lock(routing_table_);

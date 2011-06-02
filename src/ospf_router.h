@@ -73,10 +73,13 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
   Notifiee::PtrConst notifiee() const { return notifiee_; }
   Notifiee::Ptr notifiee() { return notifiee_; }
 
+  bool enabled() const { return enabled_; }
+
   /* Mutators. */
 
   void routerIDIs(const RouterID& id) { router_node_->routerIDIs(id); }
   void notifieeIs(Notifiee::Ptr _n) { notifiee_ = _n; }
+  void enabledIs(bool status);
 
   /* Signals. */
 
@@ -187,7 +190,7 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
 
   /* -- OSPFRouter private member functions. -- */
 
-  void outputPacketNew(Fwk::Ptr<OSPFPacket> ospf_pkt);
+  void outputPacketNew(Fwk::Ptr<OSPFPacket> ospf_pkt) const;
 
   /* Uses the optimal spanning tree computed by OSPFTopology to update all
      entries in the routing table. */
@@ -286,6 +289,8 @@ class OSPFRouter : public Fwk::PtrInterface<OSPFRouter> {
      response to contradicting link-state advertisements. Refer to the PWOSPF
      specification for more details. */
   OSPFAdvertisementMap advs_staged_;
+
+  bool enabled_;
 
   /* operations disallowed */
   OSPFRouter(const OSPFRouter&);
