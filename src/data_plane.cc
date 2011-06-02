@@ -196,7 +196,7 @@ void DataPlane::PacketFunctor::operator()(IPPacket* const pkt,
   DLOG << "  src: " << pkt->src();
   DLOG << "  dst: " << pkt->dst();
 
-  if (pkt->dst() == iface->broadcastAddr() || pkt->dst() == IPv4Addr::kMax) {
+  if (pkt->dst() == IPv4Addr::kMax) {
     DLOG << "  ignoring IP broadcast packet";
     return;
   }
