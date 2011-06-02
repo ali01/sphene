@@ -711,7 +711,7 @@ OSPFRouter::forward_packet_to_gateway(OSPFPacket::Ptr pkt,
   ip_pkt->ttlIs(1);
   ip_pkt->checksumReset();
 
-  control_plane_->outputPacketNew(ip_pkt);
+  outputPacketNew(pkt);
 }
 
 void
