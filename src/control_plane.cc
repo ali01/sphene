@@ -778,7 +778,12 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   GREPacket::Ptr gre_pkt =
       GREPacket::GREPacketNew(pkt->buffer(),
                               pkt->bufferOffset() - GREPacket::kHeaderSize);
-  gre_pkt->checksumPresentIs(true);
+
+  // Hardware does not support checksums on GRE, so don't bother setting them.
+  gre_pkt->checksumPresentIs(false);
+
+  // Set all other fields, regardless of checksum status. Setting fields that
+  // are not present are nil-potent operations.
   gre_pkt->reserved0Is(0);
   gre_pkt->reserved1Is(0);
   gre_pkt->versionIs(0);
