@@ -12,6 +12,7 @@
 
 static Fwk::Log::Ptr log_ = Fwk::Log::LogNew("GREPacket");
 const size_t GREPacket::kHeaderSize = sizeof(struct GREHeader);
+const size_t GREPacket::kHeaderSizeWithoutChecksum = 4;
 
 
 GREPacket::GREPacket(const PacketBuffer::Ptr buffer,

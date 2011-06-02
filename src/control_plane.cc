@@ -773,11 +773,12 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   }
 
   // Add GRE header.
-  // TODO(ms): kHeaderSize assumes we will have a checksum!
-  pkt->buffer()->minimumSizeIs(pkt->len() + GREPacket::kHeaderSize);
+  pkt->buffer()->minimumSizeIs(pkt->len() +
+                               GREPacket::kHeaderSizeWithoutChecksum);
   GREPacket::Ptr gre_pkt =
       GREPacket::GREPacketNew(pkt->buffer(),
-                              pkt->bufferOffset() - GREPacket::kHeaderSize);
+                              pkt->bufferOffset() -
+                              GREPacket::kHeaderSizeWithoutChecksum);
 
   // Hardware does not support checksums on GRE, so don't bother setting them.
   gre_pkt->checksumPresentIs(false);
@@ -785,10 +786,8 @@ void ControlPlane::encapsulateAndOutputPacket(IPPacket::Ptr pkt,
   // Set all other fields, regardless of checksum status. Setting fields that
   // are not present are nil-potent operations.
   gre_pkt->reserved0Is(0);
-  gre_pkt->reserved1Is(0);
   gre_pkt->versionIs(0);
   gre_pkt->protocolIs(EthernetPacket::kIP);
-  gre_pkt->checksumReset();
 
   // Add IP header.
   gre_pkt->buffer()->minimumSizeIs(gre_pkt->len() + IPPacket::kHeaderSize);

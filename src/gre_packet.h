@@ -16,6 +16,7 @@ class GREPacket : public Packet {
   typedef Fwk::Ptr<GREPacket> Ptr;
 
   static const size_t kHeaderSize;
+  static const size_t kHeaderSizeWithoutChecksum;
 
   static Ptr GREPacketNew(PacketBuffer::Ptr buffer,
                           unsigned int buffer_offset) {
